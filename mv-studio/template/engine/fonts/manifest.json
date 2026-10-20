@@ -313,5 +313,26 @@
   "src": "IBMPlexMono-Thin.ttf",
   "file": "IBMPlexMono-Thin.ttf",
   "size": 137900
+ },
+ {
+  "family": "Archivo",
+  "dir": "archivo",
+  "src": "Archivo[wdth,wght].ttf",
+  "file": "Archivo_wdth,wght_.ttf",
+  "size": 658596
+ },
+ {
+  "family": "Cormorant Garamond",
+  "dir": "cormorantgaramond",
+  "src": "CormorantGaramond-Italic[wght].ttf",
+  "file": "CormorantGaramond-Italic_wght_.ttf",
+  "size": 715644
+ },
+ {
+  "family": "Cormorant Garamond",
+  "dir": "cormorantgaramond",
+  "src": "CormorantGaramond[wght].ttf",
+  "file": "CormorantGaramond_wght_.ttf",
+  "size": 1195560
  }
 ]

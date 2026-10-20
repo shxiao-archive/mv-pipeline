@@ -36,7 +36,11 @@ FAMILIES = [
     # Latin faces for the interface / signal style packs (UI sans, code mono)
     ("Inter", "inter"),
     ("IBM Plex Mono", "ibmplexmono"),
+    # treatise style pack: a grotesk with a width axis (the lyric voice) and an italic serif (the prophetic register)
+    ("Archivo", "archivo"),
+    ("Cormorant Garamond", "cormorantgaramond"),
 ]
+ITALIC = {"Cormorant Garamond"}          # families whose italic files are fetched too (font-style italic in fonts.css)
 WEIGHTS = {"Thin": 100, "ExtraLight": 200, "Light": 300, "Regular": 400, "Medium": 500,
            "SemiBold": 600, "Bold": 700, "ExtraBold": 800, "Black": 900}
 UA = {"User-Agent": "vocaloid-style-mv-pipeline-font-fetch"}
@@ -99,8 +103,8 @@ def main():
             items = retry(api_list, d)
             for it in items:
                 n = it["name"]
-                if "Italic" in n:
-                    continue                      # upright faces only (fonts.css declares font-style normal)
+                if "Italic" in n and fam not in ITALIC:
+                    continue                      # upright faces only, except the ITALIC families
                 if n.endswith(".ttf") or n == "OFL.txt":
                     local = n if n.endswith(".ttf") else f"OFL_{d}.txt"
                     local = local.replace("[", "_").replace("]", "_")  # avoid [] in URLs
@@ -123,9 +127,11 @@ def main():
         else:
             mm = re.search(r"-(\w+)\.ttf$", m["src"])
             weight = str(WEIGHTS.get(mm.group(1), 400)) if mm else "400"
+        stretch = "font-stretch:62% 125%;" if "wdth" in m["src"] else ""      # variable width (Archivo)
+        style = "italic" if "Italic" in m["src"] else "normal"
         css.append(
-            "@font-face{font-family:'%s';src:url('./%s') format('truetype');font-weight:%s;"
-            "font-style:normal;font-display:block;}" % (m["family"], f, weight))
+            "@font-face{font-family:'%s';src:url('./%s') format('truetype');font-weight:%s;%s"
+            "font-style:%s;font-display:block;}" % (m["family"], f, weight, stretch, style))
     open(os.path.join(root, "fonts.css"), "w", encoding="utf-8").write("\n".join(css) + "\n")
     # JS list of families/weights so pages can pre-load exactly what they use
     fams = {}

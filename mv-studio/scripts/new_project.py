@@ -2,7 +2,7 @@
 """new_project.py -- scaffold an mv-studio (lyric-MV) project from the skill's template (base: vocaloid-style-mv).
 
   python scripts/new_project.py <target_dir> [--song song.wav] [--lyrics lyrics.lrc] [--title NAME] [--title-sub LATIN]
-                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style tegaki|interface|signal|stage]
+                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style tegaki|interface|signal|stage|treatise]
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
@@ -18,7 +18,7 @@ What it does
   * --title / --title-sub / --artist / --credit set Z.TITLE / Z.TITLE_SUB / Z.ARTIST / Z.CREDIT in engine/timeline.js
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
                 --credit alone also sets Z.ARTIST to the name after its last colon (： or :)
-  * --style  tegaki (default: the demo timeline 「蛍火」) | interface | signal | stage: engine/timeline.js starts from
+  * --style  tegaki (default: the demo timeline 「蛍火」) | interface | signal | stage | treatise: engine/timeline.js starts from
                 engine/starters/<style>.js (the demo is kept as engine/starters/tegaki_demo.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
@@ -165,7 +165,7 @@ def main() -> int:
     ap.add_argument("--title-sub", help="small Latin line under the title for Z.TITLE_SUB (default with --title: none)")
     ap.add_argument("--artist", help="artist name for Z.ARTIST (9:16 header; default: the name after --credit's colon)")
     ap.add_argument("--credit", help="credit line for Z.CREDIT, e.g. 'Music / Lyrics / Movie：Artist'")
-    ap.add_argument("--style", default="tegaki", choices=["tegaki", "interface", "signal", "stage"],
+    ap.add_argument("--style", default="tegaki", choices=["tegaki", "interface", "signal", "stage", "treatise"],
                     help="style pack the timeline starts from (see <skill>/styles/<style>/STYLE.md)")
     ap.add_argument("--mode", default="solo", choices=["solo", "team"],
                     help="solo: one agent builds the film; team: a lead + parallel builders (references/01)")

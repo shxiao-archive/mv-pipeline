@@ -65,9 +65,15 @@ their films. All tools listed above were written for this skill.
 watercolour stage-show MV painted with p5.brush; no licence published, so ideas only: no code, art or characters). Its
 mascot belongs to another company and is not drawn; the default puppet is an original design.
 
+## The treatise style
+
+`styles/treatise/` and `template/engine/styles/treatise/` follow **pdoom-video** by Giacomo Magnanini (MIT; licence in
+`licenses/LICENSE-pdoom-video.txt`): its palette, the spark and its deterministic particles, the plate idioms and the
+per-word karaoke rules, rewritten for this Canvas2D engine. Its song, lyrics, timing data and scene copy are not used.
+
 ## Fonts added by mv-studio (fetched at setup, not bundled)
 
-Inter and IBM Plex Mono (SIL Open Font License 1.1), from github.com/google/fonts, like the base kit's fonts.
+Inter, IBM Plex Mono, Archivo and Cormorant Garamond (SIL Open Font License 1.1), from github.com/google/fonts, like the base kit's fonts.
 
 ## Using the output
 
