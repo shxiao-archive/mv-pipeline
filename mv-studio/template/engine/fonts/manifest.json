@@ -334,5 +334,33 @@
   "src": "CormorantGaramond[wght].ttf",
   "file": "CormorantGaramond_wght_.ttf",
   "size": 1195560
+ },
+ {
+  "family": "ZCOOL QingKe HuangYou",
+  "dir": "zcoolqingkehuangyou",
+  "src": "ZCOOLQingKeHuangYou-Regular.ttf",
+  "file": "ZCOOLQingKeHuangYou-Regular.ttf",
+  "size": 8328684
+ },
+ {
+  "family": "ZCOOL KuaiLe",
+  "dir": "zcoolkuaile",
+  "src": "ZCOOLKuaiLe-Regular.ttf",
+  "file": "ZCOOLKuaiLe-Regular.ttf",
+  "size": 1514968
+ },
+ {
+  "family": "ZCOOL XiaoWei",
+  "dir": "zcoolxiaowei",
+  "src": "ZCOOLXiaoWei-Regular.ttf",
+  "file": "ZCOOLXiaoWei-Regular.ttf",
+  "size": 6313808
+ },
+ {
+  "family": "Fredoka",
+  "dir": "fredoka",
+  "src": "Fredoka[wdth,wght].ttf",
+  "file": "Fredoka_wdth,wght_.ttf",
+  "size": 159184
  }
 ]

@@ -1,18 +1,19 @@
 ---
 name: mv-studio
 description: >-
-  Make an original animated music video (MV / PV / lyric video) for a song from its audio and lyrics, rendered to MP4
-  by a deterministic Canvas2D/WebGL2 engine, in one of five styles or a mix: TEGAKI (J-pop 手書き illustration with an
+  Make an original music video (MV / PV / lyric video) for a song from its audio and lyrics, rendered by a
+  deterministic Canvas2D/WebGL2 engine, in one of six styles or a mix: TEGAKI (J-pop 手書き illustration with an
   original character, JIZURA kinetic lyrics, optional toon 3D; ボカロPV, 文字PV, V家手书); INTERFACE (the song as a chat
   on a screen, UI drawn in code); SIGNAL (a failing recorder: fast cuts, heat grade, analog tearing; glitch, 故障风,
   疾走感); STAGE (a watercolour picture-book stage show with an original puppet troupe; cute, 绘本风); TREATISE (plates
-  from a technical treatise: charts, forms, maps, per-word kinetic type, deadpan). Beat-locked editing, art from Codex /
+  from a technical treatise: charts, forms, maps, per-word kinetic type); PAPERCRAFT (a pop-up paper storybook as a
+  retro RPG). Beat-locked editing, art from Codex /
   Grok / NovelAI, flash / motion / no-lyrics-in-code checks, 9:16 version. Use whenever the user wants an MV, PV, lyric
   video or beat-synced animation for a song ("make an MV for my song", "给这首歌做个MV", "この曲のMVを作って", "a lyric
   video like a chat log"), even with only a .wav/.mp3. Not for editing existing footage.
 ---
 
-# mv-studio — lyric MVs in five styles
+# mv-studio — lyric MVs in six styles
 
 This skill turns **a song + its lyrics** into a finished lyric MV (16:9 master, 9:16 vertical, share encodes). It is
 built on **vocaloid-style-mv-pipeline** by **NikusonP** (MIT) — the engine, tools, scene library, JIZURA lyric layer,
@@ -30,15 +31,17 @@ characters or copy defeats the point (and some of their material is not ours to 
 | **tegaki** (default) | an illustrated story with an original character; light, colour script, signature set pieces | generated character + backgrounds (+ Blender toon 3D) | JIZURA plans (+ custom type scenes) | `styles/tegaki/STYLE.md` |
 | **interface** | the song as a conversation on a screen: "me" (the singer) talks to "you" (never shown), the client itself reacts | code (chat UI, plates, code); optional generated silhouettes / objects printed in flat ink | the conversation itself: lines are messages, keywords become plates | `styles/interface/STYLE.md` |
 | **signal** | a recording device failing: speed is editing, heat colours everything, the signal decays | generated neutral images (characters, places, objects) + code fillers | the device's own type: vertical mincho, beat-stamped lines, big WORD frames | `styles/signal/STYLE.md` |
+| **papercraft** | a pop-up paper storybook told as a retro RPG: a quest across cut-paper lands, a map with a red route, battles, LV UP | code (cut paper, multiplane camera, paper RPG interface); no generated art needed | the dialogue box: lines typed as sung | `styles/papercraft/STYLE.md` |
 | **treatise** | plates from an illustrated technical treatise: each plate its own idiom (chart, oscilloscope, form, map, prompt), one spark and one running number tie them together, deadpan | code (hairline drawing, Swiss typography); no generated art needed | per word, set into each plate its own way (on the curve, typed, stamped, slammed) | `styles/treatise/STYLE.md` |
 | **stage** | a watercolour picture-book show: an original puppet troupe acts every line as a cartoon gag; choruses return to the same stage, bigger each time | code-painted (watercolour + ink puppets, sets, props); optional generated picture-book cut-outs | a painted karaoke bar; a few big sound effects | `styles/stage/STYLE.md` |
 
 Choose from the user's words ("chat", "terminal", "UI" → interface; "glitch", "fast", "VHS", "疾走", "signal" → signal; "cute", "cartoon",
 "watercolour", "picture book", "mascot", "stage show", "绘本" → stage; "diagram", "infographic", "chart",
-"technical", "deadpan", "kinetic typography" (no character) → treatise;
+"technical", "deadpan", "kinetic typography" (no character) → treatise; "paper", "pop-up book", "RPG",
+"adventure", "fairy tale", "剪纸", "童话" → papercraft;
 "illustrated", "anime girl", "手書き", or nothing said → tegaki) and from the song (a song addressed to someone / about
 machines → interface works; a frantic, high-BPM song → signal; a funny, bouncy or novelty song → stage; a song about an idea, science or
-technology, with no character → treatise; a story or a
+technology, with no character → treatise; a story song with a quest, a journey or a fairy tale → papercraft; a story or a
 ballad → tegaki). When the user names none
 and the song fits two, say which you picked in one line and why. Styles can be **mixed by section** — all scenes live in
 one engine (e.g. a tegaki film whose bridge collapses into signal, or an interface film whose chorus cuts to plates).
@@ -46,7 +49,7 @@ one engine (e.g. a tegaki film whose bridge collapses into signal, or an interfa
 ## What you have
 
 - `template/` — a complete project: engine (`engine/core`), scene library (`engine/scenes/*.js`, tegaki), **style packs**
-  (`engine/styles/interface/`, `engine/styles/signal/`, `engine/styles/stage/`, `engine/styles/treatise/`), starters (`engine/starters/<style>.js`), JIZURA adapter, all tools
+  (`engine/styles/interface/`, `engine/styles/signal/`, `engine/styles/stage/`, `engine/styles/treatise/`, `engine/styles/papercraft/`), starters (`engine/starters/<style>.js`), JIZURA adapter, all tools
   (`tools/`), Blender scripts, palettes/LUTs, a procedural demo song.
 - `scripts/new_project.py` — scaffold (`--song --lyrics --title --title-sub --artist --credit --style --setup`);
   `scripts/check_env.py` — what's installed.
@@ -68,7 +71,7 @@ ask the user which generator they want (once, or per kind of asset) and record i
 `new_project.py --art`). Never ask the user to paste an API key or a password into the chat and never write one into
 a file: the CLIs use the user's own sign-in, NovelAI reads `NOVELAI_API_KEY` from the user's environment. If a key
 shows up in the chat anyway, store it nowhere; tell the user to set the env var themselves and to rotate the key.
-With no generator at all, interface, stage or treatise (all code-drawn) are the natural styles.
+With no generator at all, interface, stage, treatise or papercraft (all code-drawn) are the natural styles.
 
 ## Workflow (phases; each ends with files on disk and a check that passes)
 
@@ -95,7 +98,8 @@ STYLE.md; the check order: `references/09` §7. Commit the project at the end of
    `docs/STORYBOARD.md` + `plan/shots.json` and must PASS (every sung line shown, cuts on the grid / their cue, no gaps).
 4. **Assets** — the style's list (STYLE.md): tegaki = character bible + master + poses + backgrounds; signal = neutral
    images for full / crop / silhouette framings; interface = mostly code-drawn; stage = code-painted (design the
-   troupe; optional picture-book cut-outs); treatise = code-drawn plates (write the deadpan copy and the number). `tools/artgen.py run` (`references/04`
+   troupe; optional picture-book cut-outs); treatise = code-drawn plates (write the deadpan copy and the number); papercraft = code-drawn
+   cut paper (design the cast with PC.doll, the lands and the quest). `tools/artgen.py run` (`references/04`
    §11–13); **look at every check sheet**; missing pictures go into `docs/WANTED_ART.md`. Cut-outs: `alpha_matte.py`
    (`redraw` = mask from a green redraw, `--seal` for light-on-light); 2+ characters: `tools/lineup.py`.
 5. **Build** — adapt scenes, write new ones for signature moments; one test timeline per new scene

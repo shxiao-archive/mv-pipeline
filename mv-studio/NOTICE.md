@@ -71,9 +71,17 @@ mascot belongs to another company and is not drawn; the default puppet is an ori
 `licenses/LICENSE-pdoom-video.txt`): its palette, the spark and its deterministic particles, the plate idioms and the
 per-word karaoke rules, rewritten for this Canvas2D engine. Its song, lyrics, timing data and scene copy are not used.
 
+## The papercraft style
+
+`styles/papercraft/` and `template/engine/styles/papercraft/` adapt the paper-drawing primitives of **dalabengba-mv**
+(licence ISC as declared in its package.json; text in `licenses/LICENSE-dalabengba-mv.txt`) and follow its pop-up book,
+multiplane camera, paper RPG interface and transitions. Its song, lyrics, characters and story are not used; the
+paper doll is a generic original rig.
+
 ## Fonts added by mv-studio (fetched at setup, not bundled)
 
-Inter, IBM Plex Mono, Archivo and Cormorant Garamond (SIL Open Font License 1.1), from github.com/google/fonts, like the base kit's fonts.
+Inter, IBM Plex Mono, Archivo, Cormorant Garamond, ZCOOL QingKe HuangYou, ZCOOL KuaiLe, ZCOOL XiaoWei and Fredoka
+(SIL Open Font License 1.1), from github.com/google/fonts, like the base kit's fonts.
 
 ## Using the output
 

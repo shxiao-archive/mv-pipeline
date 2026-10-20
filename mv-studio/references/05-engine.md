@@ -269,7 +269,8 @@ The library was written for 残光; before reusing a scene with new assets, chec
   `ifChat ifPlate ifCode`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
   zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`,
-  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`). Their guides: `<skill>/styles/<style>/STYLE.md`. Starters: `engine/starters/<style>.js`.
+  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
+  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md`. Starters: `engine/starters/<style>.js`.
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.
