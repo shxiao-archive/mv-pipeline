@@ -1,0 +1,26 @@
+{
+  "skill_name": "mv-studio",
+  "evals": [
+    {
+      "id": 1,
+      "name": "interface-en-chat",
+      "prompt": "I made a little demo track (test_song.wav) and wrote lyrics with timestamps (lyrics_en.lrc). Make me a lyric video where the song plays out as a chat on a screen: the singer is texting someone who never quite answers in time. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the interface style: a code-drawn chat client where the lyric lines arrive as the singer's messages with the voice, the other side shown only through typing / presence / short replies, colour states that change on events, keyword plates in the chorus, an ending event; all lines readable; no lyric text in code.",
+      "files": ["fixtures/test_song.wav", "fixtures/lyrics_en.lrc"]
+    },
+    {
+      "id": 2,
+      "name": "signal-zh-glitch",
+      "prompt": "帮我给 test_song.wav 做一个故障风、信号劣化的PV，歌词是 lyrics_zh.lrc（带时间轴）。要很强的疾走感快剪，画面像一台快坏掉的录像设备，越到副歌越“热”。可以用 Grok 生图。1920x1080，整首。",
+      "expected_output": "A 1920x1080 MP4 of the whole song in the signal style: tiered fast cuts with filler frames that speed up in the chorus, a heat grade that rises toward the chorus, analog tearing / sensor noise, a recorder HUD, correctly rendered Chinese lyrics (no tofu), 回家 lines as peaks; passes the flash check.",
+      "files": ["fixtures/test_song.wav", "fixtures/lyrics_zh.lrc"]
+    },
+    {
+      "id": 3,
+      "name": "tegaki-vertical-plain",
+      "prompt": "need a vertical lyric MV (1080x1920, 30fps) for reels from test_song.wav. i only have the lyrics as plain text (lyrics_en_plain.txt), no timestamps. singing starts at about 4 seconds and each line is roughly 2 bars. illustrated anime look with an original character, a river at dusk with paper lanterns on the water. use grok for the art.",
+      "expected_output": "A 1080x1920 30 fps MP4 with estimated lyric timing starting ~4.25 s and a note that timing is estimated; illustrated original character and dusk river; lanterns sit ON the water (not floating above it); soft light sources; a composed final frame.",
+      "files": ["fixtures/test_song.wav", "fixtures/lyrics_en_plain.txt"]
+    }
+  ]
+}

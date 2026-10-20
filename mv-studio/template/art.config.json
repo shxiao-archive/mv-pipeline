@@ -1,0 +1,16 @@
+{
+  "_doc": "Image generator settings for tools/artgen.py. 'provider' is the USER's choice (codex | grok | novelai | a custom name); null = ask them (python tools/artgen.py providers). A job's own \"provider\" field wins over this. Never put keys or passwords in this file: NovelAI reads NOVELAI_API_KEY from the environment.",
+  "provider": null,
+  "codex": {
+    "args": ["--concurrency", "8"]
+  },
+  "grok": {},
+  "novelai": {
+    "_doc": "Defaults for tools/novelaigen.py. Free on Opus: <= 1048576 px and <= 28 steps, no references.",
+    "model": "nai-diffusion-4-5-full",
+    "steps": 28,
+    "scale": 5.0,
+    "max_pixels": 1048576
+  },
+  "custom": {}
+}

@@ -1,0 +1,8 @@
+{
+  "_doc": "Project settings read by the engine and the tools. mode: solo | team (references/01). timing: offset > 0 shows every picture later; lyricOffset > 0 moves only the lyrics (core/cues.js). render.shutter: motion blur, samples 1 = off (core/cues.js). review: tolerances of tools/storyboard.mjs and the checks (references/09 section 7).",
+  "mode": "solo",
+  "style": "tegaki",
+  "timing": { "offset": 0, "lyricOffset": 0 },
+  "render": { "shutter": { "samples": 1, "angle": 180 } },
+  "review": { "cutTolerance": 0.04, "cueTolerance": 0.15, "grid": "half", "minShotFrames": 3, "maxStaticFraction": 0.1 }
+}

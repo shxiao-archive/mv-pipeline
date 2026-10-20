@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyric timing editor</title>
+<style>
+  :root { --bg: #15161a; --panel: #1e2026; --line: #2c2f38; --text: #e7e8ec; --mute: #9aa0ad; --accent: #6fd3b8; --warn: #f2b45a; --edit: #ff8a6a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; display: grid; grid-template-rows: auto auto 1fr; height: 100vh; }
+  header { display: flex; gap: 16px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  header b { font-size: 15px; }
+  header .status { color: var(--mute); }
+  header .dirty { color: var(--edit); font-weight: 600; }
+  button, input { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; font: inherit; }
+  button:hover { border-color: var(--accent); }
+  #wave { width: 100%; height: 190px; display: block; background: #101115; cursor: crosshair; }
+  main { display: grid; grid-template-columns: 1fr 300px; min-height: 0; }
+  #list { overflow: auto; border-right: 1px solid var(--line); }
+  .row { display: grid; grid-template-columns: 44px 84px 70px 1fr; gap: 8px; padding: 5px 12px; border-bottom: 1px solid #22252c; cursor: pointer; }
+  .row.sel { background: #253039; }
+  .row.edited .time { color: var(--edit); }
+  .row .src { color: var(--mute); font-size: 12px; }
+  .row .src.estimate { color: var(--warn); }
+  .row.bad .time { text-decoration: underline wavy var(--warn); }
+  .time { font-variant-numeric: tabular-nums; }
+  aside { padding: 12px 16px; overflow: auto; color: var(--mute); }
+  aside kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--text); font-size: 12px; }
+  aside td { padding: 2px 6px 2px 0; vertical-align: top; }
+  #log { white-space: pre-wrap; font-size: 12px; margin-top: 12px; color: var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <b>Lyric timing editor</b>
+  <span class="time" id="clock">0:00.000</span>
+  <label>tap latency <input id="lat" type="number" step="0.01" value="0.08" style="width:70px"> s</label>
+  <label>view <input id="zoom" type="number" step="1" value="8" style="width:56px"> s</label>
+  <button id="save">Save (S)</button>
+  <span id="dirty" class="status"></span>
+</header>
+<canvas id="wave"></canvas>
+<main>
+  <div id="list"></div>
+  <aside>
+    <table>
+      <tr><td><kbd>Space</kbd></td><td>play / pause</td></tr>
+      <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>select line</td></tr>
+      <tr><td><kbd>T</kbd> / <kbd>Enter</kbd></td><td>tap: start of the selected line = now − latency, then next line</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>nudge 10 ms (<kbd>Shift</kbd> 100 ms)</td></tr>
+      <tr><td><kbd>O</kbd></td><td>snap to the nearest voice onset (± 250 ms)</td></tr>
+      <tr><td><kbd>G</kbd></td><td>snap to the nearest beat / half-beat</td></tr>
+      <tr><td><kbd>P</kbd></td><td>play from 1.5 s before the selected line</td></tr>
+      <tr><td><kbd>J</kbd> <kbd>L</kbd></td><td>seek −2 s / +2 s</td></tr>
+      <tr><td><kbd>Z</kbd></td><td>undo</td></tr>
+      <tr><td><kbd>S</kbd></td><td>save (backs up the LRC first)</td></tr>
+    </table>
+    <p>Canvas: click to seek, drag a line marker to move it. Teal ticks = beats, short white ticks = voice onsets.
+      Underlined times are out of order.</p>
+    <div id="log"></div>
+  </aside>
+</main>
+<audio id="au" src="/audio" preload="auto"></audio>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const au = $('au'), cv = $('wave'), cx = cv.getContext('2d');
+  let D = { lines: [], beats: [], vocal: [], duration: 0 }, sel = 0, edits = {}, undo = [], peaks = null, sr = 1, drag = null;
+  const fmt = t => { const m = Math.floor(t / 60), s = t - m * 60; return `${m}:${s.toFixed(3).padStart(6, '0')}`; };
+  const startOf = L => (L.i in edits ? edits[L.i] : L.t);
+  const halves = () => { const out = []; D.beats.forEach((b, k) => { out.push(b); if (k + 1 < D.beats.length) out.push((b + D.beats[k + 1]) / 2); }); return out; };
+
+  async function load() {
+    D = await (await fetch('/api/data')).json();
+    edits = {}; undo = []; render(); list();
+    try {
+      const buf = await (await fetch('/audio')).arrayBuffer();
+      const ab = await new AudioContext().decodeAudioData(buf);
+      const ch = ab.getChannelData(0); sr = ab.sampleRate;
+      const step = Math.floor(sr / 200); peaks = new Float32Array(Math.ceil(ch.length / step));     // 5 ms peaks
+      for (let i = 0; i < peaks.length; i++) { let m = 0; for (let j = i * step; j < Math.min(ch.length, (i + 1) * step); j++) m = Math.max(m, Math.abs(ch[j])); peaks[i] = m; }
+      if (!D.duration) D.duration = ab.duration;
+      render();
+    } catch (e) { log('could not decode the audio for the waveform: ' + e); }
+  }
+  function log(s) { $('log').textContent = s; }
+  function setStart(i, t, push = true) {
+    const L = D.lines.find(x => x.i === i); if (!L) return;
+    if (push) undo.push([i, i in edits ? edits[i] : null]);
+    t = Math.max(0, Math.round(t * 1000) / 1000);
+    if (Math.abs(t - L.t) < 1e-4) delete edits[i]; else edits[i] = t;
+    list(); render();
+  }
+  function list() {
+    const el = $('list'); el.innerHTML = '';
+    let prev = -1;
+    D.lines.forEach((L, k) => {
+      const t = startOf(L), r = document.createElement('div');
+      r.className = 'row' + (k === sel ? ' sel' : '') + (L.i in edits ? ' edited' : '') + (t <= prev ? ' bad' : '');
+      prev = t;
+      r.innerHTML = `<span>${L.i}</span><span class="time">${fmt(t)}</span><span class="src ${L.i in edits ? '' : L.source}">${L.i in edits ? 'edited' : L.source}</span><span></span>`;
+      r.lastChild.textContent = L.text;
+      r.onclick = () => { sel = k; au.currentTime = Math.max(0, t - 1.5); list(); render(); };
+      el.appendChild(r);
+      if (k === sel) r.scrollIntoView({ block: 'nearest' });
+    });
+    const n = Object.keys(edits).length;
+    $('dirty').textContent = n ? `${n} unsaved change(s)` : 'saved'; $('dirty').className = n ? 'dirty' : 'status';
+  }
+  function view() { const w = Math.max(2, +$('zoom').value || 8), c = au.currentTime; return [c - w * 0.35, c + w * 0.65]; }
+  function render() {
+    const W = cv.width = cv.clientWidth * devicePixelRatio, H = cv.height = cv.clientHeight * devicePixelRatio;
+    const [a, b] = view(), X = t => ((t - a) / (b - a)) * W;
+    cx.fillStyle = '#101115'; cx.fillRect(0, 0, W, H);
+    if (peaks) { cx.fillStyle = '#3b4250'; for (let x = 0; x < W; x++) { const t0 = a + (x / W) * (b - a), i = Math.floor(t0 * 200); const p = i >= 0 && i < peaks.length ? peaks[i] : 0; cx.fillRect(x, H / 2 - p * H * 0.45, 1, Math.max(1, p * H * 0.9)); } }
+    cx.fillStyle = '#6fd3b8'; for (const t of D.beats) if (t >= a && t <= b) cx.fillRect(X(t), 0, 1, 14 * devicePixelRatio);
+    cx.fillStyle = '#ffffff99'; for (const t of D.vocal) if (t >= a && t <= b) cx.fillRect(X(t), H - 12 * devicePixelRatio, 1, 12 * devicePixelRatio);
+    D.lines.forEach((L, k) => {
+      const t = startOf(L); if (t < a - 1 || t > b + 1) return;
+      cx.fillStyle = k === sel ? '#ff8a6a' : (L.i in edits ? '#ffb39a' : '#e7e8ec');
+      cx.fillRect(X(t) - 1, 0, 2 * devicePixelRatio, H);
+      cx.font = `${12 * devicePixelRatio}px system-ui`; cx.fillText(String(L.i), X(t) + 4, 28 * devicePixelRatio);
+    });
+    cx.fillStyle = '#f2b45a'; cx.fillRect(X(au.currentTime), 0, 2 * devicePixelRatio, H);
+    $('clock').textContent = fmt(au.currentTime);
+  }
+  (function tick() { if (!au.paused) render(); requestAnimationFrame(tick); })();
+  const timeAt = e => { const r = cv.getBoundingClientRect(), [a, b] = view(); return a + ((e.clientX - r.left) / r.width) * (b - a); };
+  cv.onmousedown = e => {
+    const t = timeAt(e), [a, b] = view(), tol = (b - a) * 0.01;
+    const k = D.lines.findIndex(L => Math.abs(startOf(L) - t) < tol);
+    if (k >= 0) { sel = k; drag = { i: D.lines[k].i, first: true }; list(); } else { au.currentTime = Math.max(0, t); render(); }
+  };
+  window.onmousemove = e => { if (!drag) return; setStart(drag.i, timeAt(e), drag.first); drag.first = false; };
+  window.onmouseup = () => { drag = null; };
+  window.onkeydown = e => {
+    if (e.target.tagName === 'INPUT') return;
+    const L = D.lines[sel], k = e.key.toLowerCase();
+    if (e.key === ' ') { e.preventDefault(); au.paused ? au.play() : au.pause(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(D.lines.length - 1, sel + 1); list(); render(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(0, sel - 1); list(); render(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); if (L) setStart(L.i, startOf(L) + (e.key === 'ArrowLeft' ? -1 : 1) * (e.shiftKey ? 0.1 : 0.01)); }
+    else if ((k === 't' || e.key === 'Enter') && L) { setStart(L.i, au.currentTime - (+$('lat').value || 0)); sel = Math.min(D.lines.length - 1, sel + 1); list(); }
+    else if (k === 'o' && L) { const t = startOf(L); let best = null; for (const v of D.vocal) if (Math.abs(v - t) <= 0.25 && (best === null || Math.abs(v - t) < Math.abs(best - t))) best = v; if (best !== null) setStart(L.i, best); else log('no voice onset within 250 ms'); }
+    else if (k === 'g' && L) { const t = startOf(L), g = halves(); if (g.length) setStart(L.i, g.reduce((x, y) => (Math.abs(y - t) < Math.abs(x - t) ? y : x))); }
+    else if (k === 'p' && L) { au.currentTime = Math.max(0, startOf(L) - 1.5); au.play(); }
+    else if (k === 'j') { au.currentTime = Math.max(0, au.currentTime - 2); render(); }
+    else if (k === 'l') { au.currentTime = au.currentTime + 2; render(); }
+    else if (k === 'z') { const u = undo.pop(); if (u) { if (u[1] === null) delete edits[u[0]]; else edits[u[0]] = u[1]; list(); render(); } }
+    else if (k === 's') { e.preventDefault(); save(); }
+  };
+  async function save() {
+    if (!Object.keys(edits).length) { log('nothing to save'); return; }
+    const r = await (await fetch('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ starts: edits }) })).json();
+    log(r.ok ? r.log : 'save failed: ' + r.error);
+    if (r.ok) await load();
+  }
+  $('save').onclick = save;
+  $('zoom').oninput = render;
+  window.onbeforeunload = e => { if (Object.keys(edits).length) { e.preventDefault(); return ''; } };
+  window.onresize = render;
+  load();
+})();
+</script>
+</body>
+</html>
