@@ -59,6 +59,12 @@ their films. All tools listed above were written for this skill.
   cut-outs masked from a green redraw and a keyer for light-on-light subjects (`alpha_matte.py redraw`, `--seal`),
   reference images labelled as style or design.
 
+## The stage style
+
+`styles/stage/` and `template/engine/styles/stage/` were written for this skill after the look of **PDoomVideo** (a
+watercolour stage-show MV painted with p5.brush; no licence published, so ideas only: no code, art or characters). Its
+mascot belongs to another company and is not drawn; the default puppet is an original design.
+
 ## Fonts added by mv-studio (fetched at setup, not bundled)
 
 Inter and IBM Plex Mono (SIL Open Font License 1.1), from github.com/google/fonts, like the base kit's fonts.

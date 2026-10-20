@@ -60,7 +60,7 @@ estimated); sections labelled; every line cue has a hint.
 
 ## 1b. Style (mv-studio)
 
-Pick tegaki / interface / signal (SKILL.md table; `styles/<style>/STYLE.md`) before the concept: it decides the starter
+Pick tegaki / interface / signal / stage (SKILL.md table; `styles/<style>/STYLE.md`) before the concept: it decides the starter
 timeline (`new_project.py --style`), the asset list and how lyrics are set. Styles can be mixed by section.
 
 ## 2. Concept
