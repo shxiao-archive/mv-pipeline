@@ -18,7 +18,8 @@ bigger than the last. Often there is a twist at the end ("it was all a play": th
 - **Text-light.** The karaoke bar already sets the lyric. Tell every joke with pictures and acting. Use a handful of
   big sound effects in the whole film (`ST.sfx`: POP!, BOOM, TA-DA!). No labels, captions or signs that repeat the lyric.
 - **Faces never snap.** Mood changes go through a blink, a squash "take" and an emote, then the new face opens (`ST.mood`).
-- **Motivated transitions.** Brush wipes (`brushWipe`) mark chapter breaks. Inside a chapter, the action carries the cut:
+- **Motivated transitions.** Brush wipes (`brushWipe`) mark chapter breaks. Give a transition a whole number of beats
+  (`dur: 60 / audio.bpm`), so the reveal ends on the beat (the grid check reads a transition's start or end). Inside a chapter, the action carries the cut:
   a chomp to black, a rocket, a fall, a zoom through an eye, a door slam, an iris into a mouth or a heart (`irisInk`).
 - **Every shot moves.** A push, pan, tilt, whip, zoom-out or an on-beat push / shake (`camera.beat`, `camera.shake`).
 - **Palette arc.** Each chapter has its own palette (warm lamp-lit → sky → violet night → alarm red → back to warm
@@ -67,9 +68,10 @@ S.push({ id: 'c1', t0: B(10), t1: B(12), scene: 'stShow', text: ST.karaoke, lyri
     camera: { from: { zoom: 1.0 }, to: { zoom: 1.1 }, beat: 0.03 }, confetti: [B(10)],
     sfx: [{ text: 'BOOM', at: B(11), x: 1300, y: 280, size: 170, col: PAL.ochre }] } });
 ```
-- **Scenes:** `stShow` (the stage: backdrop, floor, spots, cast, props, curtains 0..1, alarm wash), `stSet` (a painted
+- **Scenes:** `stShow` (the stage: backdrop, floor, spots, cast, props, curtains 0..1 or `curtains: false` for a
+  full-width set, alarm wash), `stSet` (a painted
   place: sky preset or two colours, sun, stars, hills, ground, or your own background image), `stTitle` (curtain up with
-  the title painted on a banner). Anything else: write a scene that starts with `ST.begin(ctx, S.t); ST.paper();`,
+  the title painted on a banner and `Z.CREDIT` under it). Anything else: write a scene that starts with `ST.begin(ctx, S.t); ST.paper();`,
   paints with `ST.paint / ST.ink`, and lists `stXxx` as its name (the paper finish applies to `st` + capital letter).
 - **Painting API:** `ST.paint(pts, { wash, fill, bleed, tex, border, hatch, ink, sw, curv, still })`, `ST.ink(pts, sw,
   col)`, shapes `ST.rect ell rr star heart`, `ST.cam / camEnd / shake`, `ST.letter / sfx`, `ST.confetti`, `ST.flash`.

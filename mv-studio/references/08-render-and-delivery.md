@@ -97,6 +97,9 @@ settings as above, BT.709 tags) and `render/mv_warning.txt`, the same warning fo
 share file, so they include the card). It refuses a film that FAILS `check_flash` -- a card does not make flashes safe.
 Without warning ranges it does nothing (encode the share version as above). The master stays as it is.
 
+Run `check_flash.py` and `motion_check.py` again on every re-encode you deliver (share, 720p): a lower-quality
+encode smooths fine motion and can turn a borderline stretch static, or change a flash count.
+
 `setparams` keeps the full BT.709 tags (with FFmpeg 8 the output flags alone leave primaries/transfer "unknown", which some players then guess wrong). Same commands with `mv_vertical` for 9:16. Report to the user: file list with sizes, durations (all ≈ song + tail), codec lines from ffprobe.
 
 ## 5. Vertical 9:16 re-layout (`engine/vertical.html` + `engine/vertical.js`)

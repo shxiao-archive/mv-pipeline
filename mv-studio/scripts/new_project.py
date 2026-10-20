@@ -271,8 +271,8 @@ def main() -> int:
         steps.insert(-3, "# lyrics have no timings yet: see references/03-audio-and-lyrics.md (alignment) "
                          "before writing analysis/lyrics_mv.lrc")
     print("\nNext steps:\n  " + "\n  ".join(steps))
-    print("\nThe default engine/timeline.js is the procedural demo film: replace its shots with your storyboard "
-          "(README.md, SKILL.md phases 2-7).")
+    print("\nengine/timeline.js is " + ("the procedural demo film" if a.style == "tegaki" else f"the {a.style} starter")
+          + ": replace its shots with your storyboard (README.md, SKILL.md phases 2-7).")
     return rc
 
 

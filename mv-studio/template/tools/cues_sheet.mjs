@@ -28,7 +28,8 @@ if (!cues.length) { console.log('[cues_sheet] no cues of kinds ' + [...kinds].jo
 const shotAt = t => { let s = null; for (const x of P.shots) if (x.t0 <= t + 1e-6) s = x; return s; };
 const tiles = [];
 for (const c of cues) {
-  const t = c.t + after;
+  const s0 = shotAt(c.t + after), tr = s0 && s0.trans && s0.trans.dur ? s0.t0 + s0.trans.dur + 0.05 : 0;
+  const t = Math.max(c.t + after, tr);                       // after the wipe / iris into this shot
   await E.frame(t);
   const f = path.join(outDir, `${c.id.replace(/[^\w.-]/g, '_')}.png`);
   fs.writeFileSync(f, await E.png());

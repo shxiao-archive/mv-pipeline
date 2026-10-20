@@ -3,12 +3,12 @@
  * Lyric text never appears here: the karaoke bar reads Z.LYR (set `text: Z.ST.karaoke` on the shot).
  *
  * 'stShow'  the stage: { backdrop: { a, b, spin, wall } | { paint(t) }, floor, spots: [[x, col], ...] | (S) => [...],
- *            curtain: k | [[t, k], ...], alarm: k | [[t, k], ...], cast, props(S, ST), front(S, ST),
+ *            curtain: k | [[t, k], ...] (curtains: false = no side curtains or valance: full-width set), alarm: k | [[t, k], ...], cast, props(S, ST), front(S, ST),
  *            confetti: [t0, ...], sfx: [{ text, at, x, y, size, col, rot, life }], camera, flash: [[t, k], ...] }
  * 'stSet'   a painted place: { sky: 'day' | 'dusk' | 'night' | 'sea' | 'room' | [top, bottom], ground: { y, col } | false,
  *            sun: { x, y, r, col }, stars: n, clouds: n (drifting; default 3, 0 at night), img: 'assets/bg/x.png' (your painted background under a light wash),
  *            hills: true, cast, props, front, confetti, sfx, camera }
- * 'stTitle' curtain up: { title (default Z.TITLE), open: 1.6 (s), lead: { col, top, hat }, a, b }
+ * 'stTitle' curtain up: { title (default Z.TITLE), credit (default Z.CREDIT), open: 1.6 (s), lead: { col, top, hat }, a, b }
  *
  * cast: [{ x, y (ground, default 880), u, move ('bounce' ...; ST.move), seed, mood: [[t, eyes, emote], ...],
  *          walkTo: [[t, x], ...], ...any ST.puppet option }]  or  { img: 'assets/char/a.png', x, y, h, flip }
@@ -72,7 +72,7 @@
       drawCast(S, a.cast);
       if (a.front) a.front(S, ST);
       extras(S, a);
-      ST.curtains(S.t, at(a.curtain, S.t, 1.2));
+      if (a.curtains !== false) ST.curtains(S.t, at(a.curtain, S.t, 1.2));
       ST.camEnd();
       ST.alarm(at(a.alarm, S.t));
       if (a.flash) ST.flash(at(a.flash, S.t, 0.15));
@@ -123,6 +123,8 @@
         ctx.save(); ctx.font = `400 ${Math.min(150, 2100 / Math.max(4, [...title].length))}px ${ST.FONTS.sfx}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = pal.ink; ctx.fillText(title, 966, 333); ctx.fillStyle = pal.crimson; ctx.fillText(title, 960, 326); ctx.restore();
       }
+      const credit = a.credit ?? Z.CREDIT ?? '';
+      if (credit) ST.letter(credit, 960, 478, 34, pal.ink, { ink: false, font: ST.FONTS.sing, weight: 800, alpha: Z.smooth(0.3, 0.9, S.lt) });
       const pop = Z.ease.outBack(Z.clamp((S.lt - open * 0.6) / 0.5), 2.2), L = a.lead || {};
       if (pop > 0.01) ST.puppet(960, 880, 46, Object.assign({ dy: (1 - pop) * 6, eyes: 'happy', mouth: 'grin', aR: 1.4 + 0.4 * Math.sin(S.t * 9), aL: 0.2, blush: true }, L));
       ST.curtains(S.t, 1 - k);

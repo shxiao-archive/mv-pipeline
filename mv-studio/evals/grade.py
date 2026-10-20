@@ -13,7 +13,35 @@ SPEC = {
     "interface-en-chat": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True),
     "signal-zh-glitch": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_zh.lrc", pops=False),   # 1-2 frame inserts are the style
     "tegaki-vertical-plain": dict(size=(1080, 1920), span=(0.5, 33.5), fps=30, lyr="lyrics_en_plain.txt", estimated=True, pops=True),
+    "stage-en-show": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, stage=True),
 }
+STARTER = Path(__file__).resolve().parents[1] / "template" / "engine" / "starters" / "stage.js"
+PAINT = re.compile(r"\bST\.(paint|ink|puppet|dancer)\(")
+
+
+def stage_checks(proj, add):
+    """Stage style: the style is used, the starter was replaced (not shipped), and the film paints its own gags."""
+    sj = proj / "plan" / "shots.json"
+    shots = json.loads(sj.read_text(encoding="utf-8"))["shots"] if sj.is_file() else []
+    st = [s for s in shots if re.match(r"^st[A-Z]", s.get("scene", ""))]
+    declared = {i for s in shots for i in (s.get("line") if isinstance(s.get("line"), list) else [s.get("line")]) if isinstance(i, int)}
+    add("uses the stage style: >= 80% of the shots are st* scenes and every lyric line 0-7 is declared by a shot",
+        shots and len(st) >= 0.8 * len(shots) and set(range(len(TRUTH))) <= declared,
+        f"{len(st)}/{len(shots)} st* shots; lines declared {sorted(declared)}" if shots else "no plan/shots.json (run tools/storyboard.mjs)")
+    moments = [s.get("moment") or "" for s in shots]
+    left = sum("REPLACE" in m for m in moments)
+    add("the starter was replaced: no placeholder moments left and >= 80% of the moments are distinct",
+        shots and not left and len(set(moments)) >= 0.8 * len(shots), f"{left} placeholder(s); {len(set(moments))} distinct of {len(shots)}")
+    base = len(PAINT.findall(STARTER.read_text(encoding="utf-8")))
+    mine = 0
+    for f in [proj / "engine" / "timeline.js", *(proj / "engine" / "scenes").glob("*.js"), *(proj / "engine" / "tests").glob("*.js")]:
+        if f.is_file() and not (f.parent.name == "scenes" and (STARTER.parents[1] / "scenes" / f.name).is_file()):
+            mine += len(PAINT.findall(f.read_text(encoding="utf-8", errors="ignore")))
+    for f in (proj / "engine" / "styles").rglob("*.js") if (proj / "engine" / "styles").is_dir() else []:
+        if not (STARTER.parents[1] / "styles" / f.relative_to(proj / "engine" / "styles")).is_file():
+            mine += len(PAINT.findall(f.read_text(encoding="utf-8", errors="ignore")))
+    add("the film paints its own gags: >= 15 ST.paint / ST.ink / ST.puppet calls beyond the starter's",
+        mine - base >= 15, f"{mine} calls in the project's own engine files, starter has {base}")
 TRUTH = [4.25, 8.25, 12.25, 16.25, 20.25, 22.25, 26.25, 28.25]   # sung line onsets of the fixture song (all three lyric files)
 LRC_TIME = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\]")
 TOOLS = Path(__file__).resolve().parents[1] / "template" / "tools"
@@ -138,14 +166,20 @@ def main():
             while e < len(d) and d[e] > 0.3 * pk and (e + 1 - i) / fps <= 0.5:
                 e += 1
             on.append(j); en.append(e)
-        keep = [k for k in range(len(on)) if on[k] / fps + off > 0.3]
+        # a planned transition (wipe, iris: plan/shots.json `trans`) is dated from its start, which is on the grid; its
+        # visible change peaks part-way through, so events inside a transition window are skipped (as check_sync does)
+        sj = out / "project" / "plan" / "shots.json"
+        tw = [(s["t0"] - 0.05, s["t0"] + s["trans"]["dur"] + 0.1) for s in json.loads(sj.read_text(encoding="utf-8"))["shots"]
+              if s.get("trans") and s["trans"].get("dur")] if sj.is_file() else []
+        inside = lambda t: any(a <= t <= b for a, b in tw)
+        keep = [k for k in range(len(on)) if on[k] / fps + off > 0.3 and not inside(on[k] / fps + off)]
         times = np.array([on[k] / fps + off for k in keep])
         ends = np.array([en[k] / fps + off for k in keep])
         gd = lambda x: np.abs(((x - T0) / (PER / 2) + 0.5) % 1 - 0.5) * (PER / 2)
         dist = np.minimum(gd(times), gd(ends)) if len(times) else np.array([])
         frac = float((dist <= 0.05).mean()) if len(times) else 0.0
         add("at least 3 hard cuts, and >= 75% of them land within 50 ms of a beat / half-beat", len(times) >= 3 and frac >= 0.75,
-            f"{len(times)} hard cuts; {frac:.0%} on grid; at song times {np.round(times, 2).tolist()[:20]}")
+            f"{len(times)} hard cuts; {frac:.0%} on grid; at song times {np.round(times, 2).tolist()[:20]}" + (f"; {len(tw)} planned transitions skipped" if tw else ""))
         # systematic lateness: the signed distance of each cut onset to the nearest beat / half-beat (one frame = 33 ms)
         sd = lambda x: (((x - T0) / (PER / 2) + 0.5) % 1 - 0.5) * (PER / 2)
         near = [sd(t) for t, dd in zip(times, dist) if dd <= 0.12]
@@ -188,6 +222,8 @@ def main():
             f"{good}/{len(TRUTH)} within 120 ms ({lrc.relative_to(out / 'project').as_posix()}); errors {[round(e, 2) for e in errs]}")
     else:
         add("lyric timing: >= 90% of the line starts within 120 ms of where the lines are sung", False, "no .lrc in the project")
+    if sp.get("stage"):
+        stage_checks(out / "project", add)
     if sp.get("estimated"):
         sm = (out / "summary.md").read_text(encoding="utf-8", errors="ignore") if (out / "summary.md").exists() else ""
         add("summary tells the user the lyric timing is estimated / approximate", re.search(r"estimat|approximat|rough", sm, re.I), "found" if re.search(r"estimat|approximat|rough", sm, re.I) else "not mentioned")

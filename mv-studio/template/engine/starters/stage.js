@@ -47,7 +47,8 @@
     secs.forEach((sec, si) => {
       const a = Math.max(open, sec.start), b = Math.min(END, sec.end ?? END);
       if (b <= a + 0.3) return;
-      const wipe = { type: 'brushWipe', dur: 0.6, cols: si % 2 ? [PAL.indigo, PAL.violet] : [PAL.crimsonDk, PAL.crimson] };
+      // a one-beat wipe: the cover lands on the half-beat, the reveal ends on the beat
+      const wipe = { type: 'brushWipe', dur: 60 / (audio.bpm || 120), cols: si % 2 ? [PAL.indigo, PAL.violet] : [PAL.crimsonDk, PAL.crimson] };
       if (isChorus(sec)) {
         // ---- chorus: the troupe dances on the stage; every chorus is bigger than the last (more dancers, spots, confetti)
         const ci = chorusN++, cuts = audio.bars.filter(x => x.start >= a - 0.01 && x.start < b - 0.5).filter((_, j) => j % 2 === 0).map(x => x.start);
