@@ -1,11 +1,38 @@
-# Style: INTERFACE — the song as a conversation on a screen
+# Style: INTERFACE — the song set on a screen or a page: a conversation, or plates from a treatise
+
+One code-drawn, typography-led style with two treatments that a film can switch between by section. In both, the words
+are part of the picture, the pictures are drawn in code (no generated art needed), and the copy around the lyric (system
+messages, form titles, stamps, axis labels) is your own, written per film.
+
+| treatment | the film IS | engine | lyrics | starter |
+|---|---|---|---|---|
+| **screen** (default) | one session on a screen: "me" (the singer) talks to "you" (never shown), the client itself reacts | `engine/styles/interface/` (`Z.IF`: `ifChat ifPlate ifCode`) | the conversation: lines are messages, keywords become plates | `engine/starters/interface.js` (`--style interface`) |
+| **treatise** | plates from an illustrated technical treatise on the song's subject: each plate its own idiom, one spark and one running number tie them together, deadpan | `engine/styles/treatise/` (`Z.TR`: `trSheet trPlot trScope trForm trPrompt trHook trContour`) | per word, set into each plate its own way | `engine/starters/treatise.js` (`--style interface:treatise`) |
+
+Pick by the song: a song addressed to someone / about machines → screen; a song about an idea, science or technology →
+treatise. Mixing:
+- **A conversation that turns into a treatise:** the chorus (or the bridge) cuts from the chat to plates that diagram
+  what "me" is saying (a chart of the feeling, a form it must fill, a map of where "you" went); the plates return
+  broken in the final chorus. `ifPlate` and the treatise plates are both "plates": pick one family per film, or give
+  each section one.
+- **One palette.** In a mixed film the two treatments share inks: set the screen's states from the treatise palette, or
+  the other way round, in `Z.setup` (e.g. `Z.IF.STATES.on.me = Z.TR.PAL.signal`, `Z.IF.STATES.on.text = Z.TR.PAL.bone`),
+  so accent = "me" = the spark, cream = "you" = bone.
+- **One look per treatment:** `Z.LOOK_DEFAULT = Object.assign({}, Z.IF.post)` and `post: Z.TR.post` on each treatise
+  shot (or the other way round in a treatise film with chat shots).
+- **The running number and the spark** can live in the chat too (a counter in the status bar, the cursor's trail) — set
+  them up there, pay them off in the plates.
+
+---
+
+## A. Screen — the song as a conversation on a screen
 
 Engine code: `template/engine/styles/interface/` (`ink.js`, `chat.js`, `print.js`, `scenes.js`). Starter:
 `engine/starters/interface.js` (`new_project.py --style interface`). Adapted from *world-execute-me-lyric-mv* by
 Nyankomint (code MIT): its brief and kit are the worked example of this grammar — read them for craft, never reuse
 its story, copy, character art (CC BY-NC-SA) or its product look.
 
-## 1. The idea
+### A.1 The idea
 
 The whole film is one session on a screen. Three voices with fixed roles for the whole film:
 
@@ -29,7 +56,7 @@ Three kinds of picture:
 - **CODE** (`ifCode`) — the machinery underneath: a listing with a current-line bar, a terminal, an odometer. Reserve it
   (a bridge, a loop section, a breakdown); it hits harder when rare.
 
-## 2. Colour = state (it changes only when something happens)
+### A.2 Colour = state (it changes only when something happens)
 
 States (`Z.IF.STATES`, original palettes — redefine per film): `off` (greyscale: not started / the other side gone),
 `on` (live), `warm` (the conversation heats: same hue, brighter — a blend, never a hue jump), `error` (red appears: first
@@ -38,7 +65,7 @@ on ONE component, then it spreads), `ash` (after the errors), `dead` (powered do
 In a shot: `state: [[t, 'off'], [t2, 'on'], [t3, ['on', 'warm', 0.5]]]` (changes blend over 0.6 s; on a cut it is a hard
 switch). Set your own hues: `Z.IF.STATES.on.me = '#…'` etc. in `Z.setup` (all roles of all states that use it).
 
-## 3. Scenes (args take lyric line INDICES, never text)
+### A.3 Scenes (args take lyric line INDICES, never text)
 
 ```js
 Z.LOOK_DEFAULT = Object.assign({}, Z.IF.post);          // clean UI type: no boil, little bloom
@@ -66,7 +93,7 @@ shot('s08', B(22), B(23), 'ifPlate', { layers: [{ kind: 'keyword', line: 8, maxS
   `composer`, `toggle`, `slider`, `toast`, `card`, `ground`, `keyword`, `glyphPlate`, `listing`, `terminal`, `drawCursor`.
 - Chinese lyrics: `Z.IF.useChinese()` (the starter does it automatically when the lyrics have Han but no kana).
 
-## 4. Grammar that works
+### A.4 Grammar that works
 
 - **Frame the thread.** A full window at 1920 px shows tiny text: push the camera to the region that matters (the newest
   line, the composer while the user types, a toggle). Change framing per phrase; a slow push inside every shot.
@@ -80,7 +107,7 @@ shot('s08', B(22), B(23), 'ifPlate', { layers: [{ kind: 'keyword', line: 8, maxS
   (presence goes offline, a message fails, the window closes), the state goes `ash` / `dead`.
 - **Three layers in every picture** (room / window / content; paper / shadow plate / ink).
 
-### Motion budget (measured — a UI is the hardest picture to keep alive)
+#### Motion budget (measured — a UI is the hardest picture to keep alive)
 
 A chat window is mostly flat dark surfaces with small text: typing, a blinking caret and glyph flicker are real motion
 to the eye but barely change the picture at a distance, and reviewers call such films "a slideshow". Measured with
@@ -92,13 +119,103 @@ that enters with a 200 px move, and cuts between a close chat framing and a plat
   pan, creep, zoom }`); keep it unless a shot needs a designed still (and then make that still an event);
 - plates move: default slide + push; give entrances real travel (`in: { dy: 200 }`), misregistration, landing letters;
 - a `backdrop` (the place, blurred, drifting) adds a textured layer behind / through the window (`glass` 0.86);
-- run `motion_check.py` on every render; the interface starter scores ~27 % static: your film must do better (≤ 10 %).
+- run `motion_check.py` on every render; the screen starter scores ~27 % static: your film must do better (≤ 10 %).
 
-## 5. Review checks (in addition to references/09)
+---
 
+## B. Treatise — the song as plates from an illustrated technical treatise
+
+Engine code: `template/engine/styles/treatise/` (`treatise.js`, `plates.js`). Starter: `engine/starters/treatise.js`
+(`new_project.py --style interface:treatise`). After *pdoom-video* by Giacomo Magnanini (MIT, see
+`licenses/LICENSE-pdoom-video.txt`): its palette, the spark, the plate idioms and the karaoke rules, rewritten for this
+Canvas2D engine. Its song, lyrics, timing data and its film's jokes are not ours: make your own film from your song.
+
+### B.1 The idea
+
+The film is a series of **plates from an illustrated treatise** on the song's subject. Each set piece has its own
+drawing idiom (a chart, an oscilloscope, a form, a survey map, a prompt, an engraving, a blueprint, a banknote), its own
+deadpan humour, and treats concrete things as **visual puns and transformations**, never as literal illustrations of a
+line. Around that variety, everything shares one palette, one type system, one grain:
+
+- **The spark** runs through the whole film: one orange point dragging a hairline. It writes the title, draws the curve,
+  travels the map, becomes whatever the song needs (a fuse, a pen, a cursor) and finally ends the film.
+- **The running number** (`TR.NUM`): one value the song keeps raising, staged inside the plates (a readout on the chart,
+  a field on the form, a contour label), never as a corner overlay. The hooks blow it up full-frame as it rolls to its
+  next value. Name it after the song's subject; the steps are yours.
+- **The hook** is one recurring typographic slam whose look escalates each time (`trHook n`: clean → on a signal field →
+  hairline and eerie → maximal).
+- **Bookends:** the film opens on a construction sheet with crop marks and closes back to it, so the last frame matches
+  the first and the film loops.
+
+### B.2 Look and tone
+
+- **Palette (`TR.PAL`):** ink `#0A0A0B`, ink2 `#151517`, graphite, ash, bone `#EEE9DF`, **signal** `#FF4D12` (the spark,
+  the number, the sung word), ember, blood. One rare accent (`acid`) for one moment of the film only. Some plates invert
+  to bone paper with ink lines (forms, charts), which gives the edit a light / dark rhythm; orange stays orange on both.
+  Only signal and ember glow (the post's bloom threshold is set so); bone type stays crisp.
+- **Type:** Archivo (the lyric voice; animate its **width** 62–125 and weight: condense under pressure, stretch on held
+  notes), IBM Plex Mono (the machine: tokens, labels, forms, footnotes), Cormorant Garamond italic (the rare prophetic
+  register). Swiss-grid discipline: asymmetric layouts, negative space, hairline rules, small mono annotations next to
+  big display type. Fonts come with `npm run fonts` (Archivo, Cormorant Garamond added for this treatment).
+- **Tone:** impressive, not cute; funny the way a straight-faced scientist is funny: deadpan captions, footnotes, stamps,
+  probability bars. **No mascots, no cartoon faces, no emoji.**
+- **Not slop:** no purple / cyan neon, glowing brains, code rain, lens flares, particle nebulae or stock "AI" imagery.
+  Never copy existing artworks, meme drawings, logos or real product UIs.
+- **Dynamic:** something always moves; big changes land on the beat. Hard cuts on downbeats; inside a plate, reframing
+  snaps every half bar (`TR.cam` does it) and a camera that **tracks the action** (`cam.follow`: the spark, the pen).
+  Hairlines on black change few pixels: a slow drift alone reads as a still (and fails `motion_check.py`).
+
+### B.3 Karaoke rules (every plate)
+
+- Every line readable and **synced per word**: a word lights at its start, never ahead of the voice (`TR.words(i)`:
+  per-character times from `analysis/lyric_timing.json` when present, else spread over the line; without word times the
+  highlight is an estimate: say so in the report).
+- Each plate sets the lyric **graphically and differently**: riding the curve (`trPlot`), on the trace (`trScope`), typed
+  into a form (`trForm`), typed as tokens with next-token odds (`trPrompt`), slammed word by word (`trHook`), as map
+  labels (`trContour`), written by the spark. The words are part of the picture, not subtitles.
+- Unsung words dim (~30 % bone), sung bone or ink, the current word signal. Lines may show up to 0.4 s early.
+- Keep lyrics inside the title-safe area (≥ 96 px from the edges) — check framing when the camera tracks or zooms.
+
+### B.4 Building it
+
+```js
+const TR = Z.TR;
+Z.LOOK_DEFAULT = Object.assign({}, TR.post);
+TR.NUM.label = 'p'; TR.NUM.keys = [[0, 0.02], [B(10) + 1.2, 0.15], [B(26) + 1.2, 0.42]];   // raised by the hooks
+S.push({ id: 'p03', t0: B(6), t1: B(8), scene: 'trPlot', lyric: 'none', hud: false, line: 3,
+  args: { line: 3, mode: 'drop', xl: 'step', yl: 'loss' }, moment: 'the curve falls off a cliff on the line\'s last word' });
+```
+- **Plates:** `trSheet` (bookend: crop marks, the spark writes the title; `close: true` at the end), `trPlot` (`mode
+  drop | exp | walk`, `inv` for bone paper, axis labels), `trScope` (the song itself on an oscilloscope), `trForm` (form
+  title, field label, `stamp` text, `stampWord` index), `trPrompt` (tokens + next-token distribution; the other candidates
+  are other words of the song), `trHook` (`n` 1–4), `trContour` (survey map, `seed`). Every plate takes `cam` (`from / to /
+  ease / follow / reframe`).
+- **New plates:** write a scene named `trXxx` that paints in this palette with the kit: `TR.text / measure` (width axis),
+  `TR.lineWords` (per-word karaoke with your own `place(word)`), `TR.spark / trail`, `TR.grid / axes / cropMarks /
+  callout / stamp / hatch / contours / readout`, `TR.cam`. Engraving = `TR.hatch` (parallel hairlines, tone by spacing).
+- **Copy:** write your own deadpan text (form titles, stamps, axis labels, footnotes) per film; never lyric text in code.
+- Chinese / Japanese lyrics: the starter calls `TR.useCJK()` (Noto fallbacks behind Archivo / Cormorant).
+
+---
+
+## Review checks (in addition to references/09)
+
+Screen shots:
 - [ ] Every sung line readable for its whole sung duration (thread lines ≥ 40 px on screen after camera zoom).
-- [ ] Each plate: which word, which beat it lands on, what ends it. No plate fades in/out unmotivated.
+- [ ] Each `ifPlate`: which word, which beat it lands on, what ends it. No plate fades in/out unmotivated.
 - [ ] Colour states change only on events; no red before the first error.
 - [ ] The user is never shown (no face, no avatar picture): cursor, typing, bubbles, presence only.
-- [ ] No real product's branding, logo or exact UI; window `brand` empty or invented for the film.
-- [ ] Motion check passes: chat shots have camera moves, typing, cursor; plates have landing letters, misregistration, drift.
+
+Treatise plates:
+- [ ] Each plate has its own idiom and a visual pun on its line; the spark and the running number tie them together.
+- [ ] Every word lights at its start, never ahead; lines readable, inside title-safe, never cropped by the camera.
+- [ ] Palette held: only signal / ember glow; the acid accent used once at most; light / dark rhythm across the edit.
+- [ ] The hook escalates each time; the number rises in steps you can read; first frame = last frame.
+
+Every film:
+- [ ] A mixed film shares one palette and one look per treatment; the switch between screen and plates is an event.
+- [ ] `motion_check.py` PASS (camera moves, tracking and snaps, not slow drifts); `check_flash.py` PASS (the prompt's
+      return flash and full-frame hits are single events).
+- [ ] `pops.mjs`: the hook's word slams and the prompt's return rush show as JUMPs — they are the planned hits; any
+      other JUMP is a bug.
+- [ ] No mascots, faces, logos, real product branding or exact UIs; window `brand` empty or invented for the film.

@@ -1,4 +1,4 @@
-/* engine/timeline.js — STARTER for the INTERFACE style (styles/interface; read <skill>/styles/interface/STYLE.md first).
+/* engine/timeline.js — STARTER for the INTERFACE style, screen treatment (styles/interface; read <skill>/styles/interface/STYLE.md §A first).
  * The song as a conversation on a screen: the singer is "me" (accent colour, serif), the listener is "you" (cream, sans,
  * never shown: only a cursor, typing, bubbles, presence), the client itself is "system" (mono). Three kinds of picture:
  * the INTERFACE (ifChat), PLATES (ifPlate: what "me" means and feels, printed in three flat inks) and CODE (ifCode).

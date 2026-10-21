@@ -2,7 +2,7 @@
 """new_project.py -- scaffold an mv-studio (lyric-MV) project from the skill's template (base: vocaloid-style-mv).
 
   python scripts/new_project.py <target_dir> [--song song.wav] [--lyrics lyrics.lrc] [--title NAME] [--title-sub LATIN]
-                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style tegaki|interface|signal|stage|treatise|papercraft]
+                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid[:signal]|interface[:treatise]|stage|papercraft]
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
@@ -18,8 +18,9 @@ What it does
   * --title / --title-sub / --artist / --credit set Z.TITLE / Z.TITLE_SUB / Z.ARTIST / Z.CREDIT in engine/timeline.js
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
                 --credit alone also sets Z.ARTIST to the name after its last colon (： or :)
-  * --style  tegaki (default: the demo timeline 「蛍火」) | interface | signal | stage | treatise | papercraft: engine/timeline.js starts from
-                engine/starters/<style>.js (the demo is kept as engine/starters/tegaki_demo.js)
+  * --style  vocaloid (default: the tegaki demo timeline 「蛍火」) | vocaloid:signal | interface | interface:treatise | stage |
+                papercraft: engine/timeline.js starts from the style's starter in engine/starters/ (the demo is kept as
+                engine/starters/tegaki_demo.js); the names before the merge (tegaki, signal, treatise) still work
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -52,6 +53,11 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
                    "Thumbs.db", ".DS_Store", "desktop.ini", "npm-debug.log*"]
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
+# --style -> starter in engine/starters (None: the tegaki demo timeline); <style>:<treatment> picks a treatment
+STYLES = {"vocaloid": None, "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
+          "stage": "stage", "papercraft": "papercraft"}
+STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
+                 "interface:screen": "interface", "treatise": "interface:treatise"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
 
 
@@ -165,8 +171,8 @@ def main() -> int:
     ap.add_argument("--title-sub", help="small Latin line under the title for Z.TITLE_SUB (default with --title: none)")
     ap.add_argument("--artist", help="artist name for Z.ARTIST (9:16 header; default: the name after --credit's colon)")
     ap.add_argument("--credit", help="credit line for Z.CREDIT, e.g. 'Music / Lyrics / Movie：Artist'")
-    ap.add_argument("--style", default="tegaki", choices=["tegaki", "interface", "signal", "stage", "treatise", "papercraft"],
-                    help="style pack the timeline starts from (see <skill>/styles/<style>/STYLE.md)")
+    ap.add_argument("--style", default="vocaloid", choices=[*STYLES, *STYLE_ALIASES],
+                    help="style (and treatment) the timeline starts from (see <skill>/styles/<style>/STYLE.md)")
     ap.add_argument("--mode", default="solo", choices=["solo", "team"],
                     help="solo: one agent builds the film; team: a lead + parallel builders (references/01)")
     ap.add_argument("--no-git", action="store_true", help="do not git init the project (default: init, if git exists)")
@@ -181,6 +187,8 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             pass
     a = ap.parse_args()
+    a.style = STYLE_ALIASES.get(a.style, a.style)
+    starter = STYLES[a.style]
 
     dst = Path(a.target).expanduser().resolve()
     tpl = TEMPLATE.resolve()
@@ -199,9 +207,9 @@ def main() -> int:
     tl, starters = dst / "engine" / "timeline.js", dst / "engine" / "starters"
     if tl.is_file():
         shutil.copy2(tl, starters / "tegaki_demo.js")
-    if a.style != "tegaki":
-        shutil.copy2(starters / f"{a.style}.js", tl)
-        print(f"  style  : {a.style} -> engine/timeline.js is the {a.style} starter (read styles/{a.style}/STYLE.md in the skill)")
+    if starter:
+        shutil.copy2(starters / f"{starter}.js", tl)
+        print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (read styles/{a.style.split(':')[0]}/STYLE.md in the skill)")
     pj = dst / "project.json"
     proj = json.loads(pj.read_text(encoding="utf-8")) if pj.is_file() else {}
     proj.update({"mode": a.mode, "style": a.style})
@@ -230,7 +238,7 @@ def main() -> int:
     set_timeline_strings(dst, values)
     if song or lyrics:
         keep = [f"Z.{k}" for k, v in values.items() if v is None]
-        if keep and a.style == "tegaki":
+        if keep and starter is None:
             print(f"  note: {', '.join(keep)} still hold the demo's values (蛍火 / HOTARUBI / NikusonP): set them in "
                   "engine/timeline.js (or pass --title / --title-sub / --artist / --credit)")
 
@@ -271,7 +279,7 @@ def main() -> int:
         steps.insert(-3, "# lyrics have no timings yet: see references/03-audio-and-lyrics.md (alignment) "
                          "before writing analysis/lyrics_mv.lrc")
     print("\nNext steps:\n  " + "\n  ".join(steps))
-    print("\nengine/timeline.js is " + ("the procedural demo film" if a.style == "tegaki" else f"the {a.style} starter")
+    print("\nengine/timeline.js is " + ("the procedural demo film" if starter is None else f"the {starter} starter")
           + ": replace its shots with your storyboard (README.md, SKILL.md phases 2-7).")
     return rc
 

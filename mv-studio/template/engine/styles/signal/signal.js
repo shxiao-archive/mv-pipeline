@@ -7,7 +7,9 @@
  *   Z.SIG.kicks = [t, ...]               cut / hit times: a short burst of distortion after each (cuts() fills it)
  *   Z.SIG.distort(t)                     d 0..1 = floor + gain * heat^1.3 + section boost * (0.5 + heat) + kick
  *   Z.SIG.cfg                            { floor 0.04, gain 0.6, tearText true, hotPixels 220, sparkles 1, grade true, gradeMix 0.85 }
- *   Z.SIG.install()                      sets Z.layerFX (the degradation below) — call it once in Z.setup
+ *   Z.SIG.spans = null | [[t0, t1], ...] where the device is failing (null = the whole film; a vocaloid film that
+ *                                        collapses into signal for its bridge sets the bridge here)
+ *   Z.SIG.install()                      chains Z.layerFX: the degradation below inside the spans — call it once in Z.setup
  *   Z.SIG.grade(P, t)                    heat -> gradient map: cold (navy) -> warm (amber) -> hot (vermilion) -> over (white-hot)
  *                                        (install() calls it; ramps 'sigCold' 'sigWarm' 'sigHot' 'sigOver' are in the LUT atlas)
  *
@@ -16,7 +18,7 @@
  *            the rows it passes, vertical-hold jumps (1-2 frames), multipath ghost; chroma shift through post `hca`
  *   sensor   white sparkles (more with heat), hot pixels that ACCUMULATE over the film (the device is being damaged and
  *            never recovers), CCD column smear, row dropouts
- * Nothing here flashes the whole frame: tears and bands are local and mostly dark-neutral (references: styles/signal/STYLE.md).
+ * Nothing here flashes the whole frame: tears and bands are local and mostly dark-neutral (references: <skill>/styles/vocaloid/STYLE.md §B).
  *
  * mv-studio (MIT). Written for this kit from a description of the look of a fan PV's "signal degradation" style; no code
  * from that project is used.
@@ -126,5 +128,7 @@
     }
     if (SIG.extraFX) SIG.extraFX(L, t, d);
   };
-  SIG.install = () => { Z.layerFX = SIG.layerFX; };
+  SIG.spans = null;
+  SIG.on = t => !SIG.spans || SIG.spans.some(([a, b]) => t >= a && t < b);
+  SIG.install = () => { const prev = Z.layerFX; Z.layerFX = (L, t) => { if (prev) prev(L, t); if (SIG.on(t)) SIG.layerFX(L, t); }; };
 })();

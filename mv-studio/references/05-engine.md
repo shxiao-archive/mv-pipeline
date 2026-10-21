@@ -270,7 +270,7 @@ The library was written for 残光; before reusing a scene with new assets, chec
   zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`,
   per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
-  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md`. Starters: `engine/starters/<style>.js`.
+  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.
@@ -311,5 +311,5 @@ Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT) · §12: mv-studio (MIT
 - **Per-character times:** `Z.charTimes(i)`; `Z.charsAt(i, t)` uses them when `analysis/lyric_timing.json` has them
   for a line (and it still matches the LRC), unless the caller passes `rate` or `over`.
 - `Z.shotList()` returns the sorted shots (the tools read it); `Z.hudShowsLyrics = true` tells the storyboard check
-  that a `Z.hud` sets the lyrics (signal style).
+  that a `Z.hud` sets the lyrics (vocaloid's signal treatment).
 - `audio.json` → `onsets.kick / snare / hat / vocal` (`[t, strength]`) for hits; `grid_fit` for the tempo.

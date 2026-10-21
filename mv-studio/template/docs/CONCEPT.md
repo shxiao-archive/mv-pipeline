@@ -5,7 +5,7 @@ user before any art is generated.
 
 - **Thesis** (what the song is about, in one sentence of your own):
 - **Logline** (what the film shows, in one sentence):
-- **Style** (tegaki / interface / signal / mixed by section) and why it fits this song:
+- **Style** (vocaloid: tegaki / signal; interface: screen / treatise; stage; papercraft; treatments mixed by section) and why it fits this song:
 
 ## Frame and arc
 

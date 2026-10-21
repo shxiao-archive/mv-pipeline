@@ -1,8 +1,9 @@
 # Lyric MV project (mv-studio)
 
 A lyric MV project made with the **mv-studio** skill, built on the **vocaloid-style-mv-pipeline** template (author: **NikusonP**,
-MIT licence). Style packs: tegaki (`engine/scenes`), interface (`engine/styles/interface`), signal (`engine/styles/signal`);
-starter timelines in `engine/starters/`. Every frame is drawn by a deterministic front-end engine (Canvas2D scenes + a transparent lyric layer +
+MIT licence). Styles: vocaloid (tegaki: `engine/scenes`; signal: `engine/styles/signal`),
+interface (screen: `engine/styles/interface`; treatise: `engine/styles/treatise`), stage (`engine/styles/stage`), papercraft
+(`engine/styles/papercraft`); starter timelines in `engine/starters/`. Every frame is drawn by a deterministic front-end engine (Canvas2D scenes + a transparent lyric layer +
 a foreground layer + a WebGL2 post pass), rendered headless by Playwright and encoded by ffmpeg. The film is code:
 `engine/timeline.js` is the edit, and re-rendering always gives the same frames.
 

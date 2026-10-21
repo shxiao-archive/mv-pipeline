@@ -15,7 +15,7 @@
       "id": 2,
       "name": "signal-zh-glitch",
       "prompt": "帮我给 test_song.wav 做一个故障风、信号劣化的PV，歌词是 lyrics_zh.lrc（带时间轴）。要很强的疾走感快剪，画面像一台快坏掉的录像设备，越到副歌越“热”。可以用 Grok 生图。1920x1080，整首。",
-      "expected_output": "A 1920x1080 MP4 of the whole song in the signal style: tiered fast cuts with filler frames that speed up in the chorus, a heat grade that rises toward the chorus, analog tearing / sensor noise, a recorder HUD, correctly rendered Chinese lyrics (no tofu), 回家 lines as peaks; passes the flash check.",
+      "expected_output": "A 1920x1080 MP4 of the whole song in the vocaloid style's signal treatment: tiered fast cuts with filler frames that speed up in the chorus, a heat grade that rises toward the chorus, analog tearing / sensor noise, a recorder HUD, correctly rendered Chinese lyrics (no tofu), 回家 lines as peaks; passes the flash check.",
       "files": [
         "fixtures/test_song.wav",
         "fixtures/lyrics_zh.lrc"

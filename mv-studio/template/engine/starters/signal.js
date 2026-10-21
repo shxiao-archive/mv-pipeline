@@ -1,4 +1,4 @@
-/* engine/timeline.js — STARTER for the SIGNAL style (styles/signal; read <skill>/styles/signal/STYLE.md first).
+/* engine/timeline.js — STARTER for the VOCALOID style, signal treatment (styles/signal; read <skill>/styles/vocaloid/STYLE.md §B first).
  * A recording device failing in heat: speed is editing (tiered cut engine with fillers and 1-2 frame inserts), one
  * number — HEAT — grades the whole film (cold navy -> amber -> vermilion -> white-hot), the signal degrades with it,
  * and the device's own HUD (REC, timecode, LOG, CORE TEMP) frames everything.
