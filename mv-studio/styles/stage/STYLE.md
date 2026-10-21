@@ -90,7 +90,23 @@ alarm wash), and what the last chorus breaks. Keep one running prop or number th
 pile, a giant version of the lead), so the choruses read as one story. End on the curtain: the troupe bows (`move:
 'bow'`), the curtain closes (`curtain: [[END, 0], [END + 1.2, 1]]`).
 
-## 6. Review checks (in addition to references/09)
+## 6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)
+
+Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `sheets/stage_person.js`):
+- **The troupe on `ST.puppet`:** the lead's design plus 3–5 members (colour, top, hat); the vocabulary is the point:
+  13 eye shapes, 7 mouths, 6 hats, 8 emotes, 12 beat-synced moves, `ST.mood` changes — use them all over the film.
+- **A human on `ST.person`** (the biped skeleton: 34 poses, 19 expressions; coat, hair, glasses, bowtie): the "I" of the
+  song or a stagehand; props in the hand (`hold`).
+- **Guests:** each verse may bring a guest character, drawn by the chapter that introduces it and kept as a function so
+  the finale can bring every guest back for the curtain call.
+- **The stage set:** backdrop, floor, curtains, spotlights, and the **running prop on stage** that gets worse every
+  chorus (a meter and a pump, a pile, a crack); one painted set per chapter with its palette.
+- **Sound effects:** a handful in the whole film (`ST.sfx`), each a punch line.
+
+Targets: chapters of 6–10 shots; every shot a named gag in phases (hop → slide → teeter → fall → land); the lead about
+40 % of the frame height in chorus and dance shots; the four choruses on the same stage, escalating.
+
+## 7. Review checks (in addition to references/09)
 
 - [ ] Every shot has one readable action; the lead is on-model (same design, colours and top) in every shot.
 - [ ] Mood changes go through `ST.mood`, never a snap; dances land on the beat.

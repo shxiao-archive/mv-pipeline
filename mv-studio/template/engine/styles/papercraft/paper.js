@@ -13,7 +13,14 @@
  *   PC.line(g, pts, o)               a hand-drawn line (route, speed lines): o: { seed, amp, lw, color, dash, p 0..1 drawn }
  *   PC.cam(x, y, zoom, rot) / PC.applyCam(g, cam, depth)   the multiplane camera: depth 1 = the subject plane, < 1
  *                                    background (moves less), > 1 foreground (moves more)
- *   PC.doll(g, x, y, s, o)           a jointed paper doll (an ORIGINAL generic rig: design your cast with its options)
+ *   PC.doll(g, x, y, s, o) -> anchors  a jointed paper doll pinned on the biped skeleton (core/rig.js; ORIGINAL generic
+ *                                    design: make your cast with its options). (x, y) = between the feet; s = 1 is ~260 px.
+ *                                    o: pose (Z.rig.biped.NAMES or { from, to, k }), act, phase, beat, t, expr
+ *                                    (Z.rig.biped.EXPRS), eyes / mouth / brows overrides, ik { F, B }, joints, jointsAdd,
+ *                                    face +-1, emote ('!' '?' heart spark sweat music) + emoteK, blink, sq / take,
+ *                                    look: skin hair hairStyle (mop bob spiky braid) outfit outfitDark trim legs shoes
+ *                                    hat (crown cap hood) hatCol scarf vel seed; hold(g, s) at the near hand; detail 0;
+ *                                    silhouette (colour); pins false; rigOnly (anchors only). Old: walk, jump, armF, armB, lean
  *   PC.burst(g, t, t0, x, y, o)      paper confetti / coins / petals burst from (x, y) at t0, pure function of t
  *   PC.texture()                     the paper fibre tile; multiplied over every papercraft shot (scenes.js install)
  *
@@ -151,59 +158,111 @@
   //      mouth 'smile' | 'o' | 'flat' | 'grin', blush, hat ('crown' | 'cap' | 'hood' | null), scarf (colour or null),
   //      walk (phase), jump 0..1, armF / armB (radians: 0 down, + forward), lean, hold(g, s) (prop in the front hand), shadow 12,
   //      t (song time: blinks, scarf flutter) }
+  // the doll: cut-paper parts pinned on the generic biped skeleton (core/rig.js). Old options still work (walk, jump,
+  // armF, armB, lean, eyes, mouth); new: pose / act / phase / beat / expr / ik / joints / jointsAdd / emote / rigOnly.
+  const capsule = (a, b, w0, w1) => {
+    const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), p = new Path2D();
+    p.arc(b[0], b[1], w1 / 2, ang - Math.PI / 2, ang + Math.PI / 2);
+    p.arc(a[0], a[1], w0 / 2, ang + Math.PI / 2, ang + Math.PI * 1.5);
+    p.closePath();
+    return p;
+  };
+  PC.capsule = capsule;
+  const EMOTE = {
+    '!': (g, k) => { PC.cut(g, PC.blob(0, 0, 26 * k, 30 * k, { seed: 5 }), P.white, { stroke: P.ink, lw: 3 }); g.fillStyle = P.red; g.fillRect(-4 * k, -18 * k, 8 * k, 22 * k); g.beginPath(); g.arc(0, 13 * k, 4.5 * k, 0, TAU); g.fill(); },
+    '?': (g, k) => { PC.cut(g, PC.blob(0, 0, 26 * k, 30 * k, { seed: 6 }), P.white, { stroke: P.ink, lw: 3 }); g.fillStyle = P.blue; g.font = `700 ${40 * k}px ${PC.FONTS.latin}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 0, 2 * k); },
+    heart: (g, k) => { const h = new Path2D(); h.moveTo(0, 18 * k); h.bezierCurveTo(-30 * k, -2 * k, -14 * k, -26 * k, 0, -10 * k); h.bezierCurveTo(14 * k, -26 * k, 30 * k, -2 * k, 0, 18 * k); PC.cut(g, h, P.heart, { stroke: P.ink, lw: 3, rim: P.pink }); },
+    spark: (g, k) => PC.sparkle(g, 0, 0, 30 * k, { color: P.gold }),
+    sweat: (g, k) => { const d = new Path2D(); d.moveTo(0, -22 * k); d.quadraticCurveTo(14 * k, 2 * k, 0, 12 * k); d.quadraticCurveTo(-14 * k, 2 * k, 0, -22 * k); PC.cut(g, d, P.skyDay, { stroke: P.ink, lw: 3, rim: P.white }); },
+    music: (g, k) => { g.fillStyle = P.ink; g.beginPath(); g.ellipse(-6 * k, 10 * k, 9 * k, 7 * k, -0.4, 0, TAU); g.fill(); g.fillRect(1 * k, -22 * k, 4 * k, 32 * k); g.fillRect(1 * k, -22 * k, 16 * k, 5 * k); },
+  };
   PC.doll = (g, x, y, s = 1, o = {}) => {
+    const RB = Z.rig.biped, seed = o.seed || 1, t = o.t || 0, face = o.face === -1 ? -1 : 1, D = Math.PI / 180;
+    let pose = o.pose, phase = o.phase;
+    if (!pose) { if (o.walk != null) { pose = o.run ? 'run' : 'walk'; phase = phase ?? o.walk; } else pose = 'idle'; }
+    const add = Object.assign({}, o.jointsAdd || {}), joints = Object.assign({}, o.joints || {});
+    if (o.armF != null) joints.aF = [o.armF / D, 12, 0];
+    if (o.armB != null) joints.aB = [-o.armB / D, 12, 0];
+    if (o.lean) add.lean = (add.lean || 0) + o.lean / D;
+    if (o.jump) add.lift = (add.lift || 0) - o.jump * 60;
+    const sk = RB.solve({ pose, phase, t, act: o.act, beat: o.beat, joints, jointsAdd: add, ik: o.ik, squash: (o.sq || 0) + (o.take || 0), spec: o.spec });
+    const W = p => [x + face * s * p[0], y + s * p[1]];
+    const an = RB.anchors(sk), anchors = {};
+    for (const k in an) anchors[k] = W(an[k]);
+    if (o.rigOnly) return anchors;
     const skin = o.skin || P.skin, hair = o.hair || P.woodDark, out = o.outfit || P.blue, outD = o.outfitDark || PC.mix(out, P.ink, 0.35), trim = o.trim || P.gold;
-    const ph = o.walk != null ? o.walk * TAU : null, lift = (o.jump || 0) * 60, bob = ph != null ? Math.abs(Math.sin(ph)) * 6 : 0;
-    g.save(); g.translate(x, y - (lift + bob) * s); g.scale(s * (o.face === -1 ? -1 : 1), s); if (o.lean) g.rotate(o.lean);
-    const sh = o.shadow ?? 12, seed = o.seed || 1;
-    if (sh) { g.save(); g.translate(0, lift + bob); g.fillStyle = PC.rgba(P.shadow, 0.22 * (1 - Math.min(0.6, lift / 120))); g.beginPath(); g.ellipse(0, 2, 56, 11, 0, 0, TAU); g.fill(); g.restore(); }
-    const limb = (x0, y0, a, len, w, col) => { g.save(); g.translate(x0, y0); g.rotate(a); PC.cut(g, PC.poly([[-w / 2, 0], [w / 2, 0], [w / 2 * 0.85, len], [-w / 2 * 0.85, len]], { seed: seed + len, amp: 0.8, round: 0.6 }), col, { stroke: P.ink, lw: 3 }); g.restore(); };
-    const legA = ph != null ? Math.sin(ph) * 0.5 : 0;
-    limb(-14, -62, legA, 60, 22, outD); limb(14, -62, -legA, 60, 22, outD);                             // legs
-    PC.cut(g, PC.blob(-14 + Math.sin(legA) * 60, -4, 17, 9, { seed: seed + 2 }), P.woodDark, { stroke: P.ink, lw: 3 });
-    PC.cut(g, PC.blob(14 - Math.sin(legA) * 60, -4, 17, 9, { seed: seed + 3 }), P.woodDark, { stroke: P.ink, lw: 3 });
-    const swing = ph != null ? Math.sin(ph) * 0.5 : 0;
-    limb(-24, -138, (o.armB ?? 0.15) - swing, 52, 18, outD);                                                   // back arm
-    const body = PC.poly([[-38, -150], [38, -150], [48, -62], [-48, -62]], { seed: seed + 4, amp: 1.2, round: 0.5 });
-    PC.cut(g, body, out, { shadow: sh * 0.4, stroke: P.ink, lw: 3.5, rim: PC.mix(out, P.white, 0.35) });
-    PC.shade(g, body, P.ink, 0, -150, 0, -62, 0, 0.25);
-    g.fillStyle = trim; g.fillRect(-44, -86, 88, 9);                                                              // belt / hem trim
-    if (o.scarf) PC.cut(g, PC.ribbon([[-20, -150], [-60, -140 + Math.sin(Z.TAU * 0.8 * (o.t || 0)) * 4], [-110, -128], [-150, -118]], q => 13 * (1 - q * 0.4)), o.scarf, { stroke: P.ink, lw: 3 });
-    // head
-    const head = PC.blob(0, -200, 52, 48, { seed: seed + 5, amp: 0.02 });
-    PC.cut(g, head, skin, { shadow: sh * 0.5, stroke: P.ink, lw: 3.5, rim: PC.mix(skin, P.white, 0.5) });
-    const hs = o.hairStyle || 'mop';
-    const hairPath = hs === 'bob' ? PC.blob(-4, -222, 58, 38, { seed: seed + 6 }) : hs === 'spiky'
-      ? PC.poly([[-56, -206], [-46, -250], [-24, -236], [-8, -262], [12, -238], [36, -256], [48, -222], [56, -206], [0, -228]], { seed: seed + 6, round: 0.2 })
-      : PC.blob(-6, -226, 56, 32, { seed: seed + 6, amp: 0.06, freq: 7 });
-    PC.cut(g, hairPath, hair, { stroke: P.ink, lw: 3.5, rim: PC.mix(hair, P.goldLight, 0.3) });
-    if (hs === 'braid') PC.cut(g, PC.ribbon([[-40, -200], [-58, -160], [-60, -120]], q => 13 - q * 4), hair, { stroke: P.ink, lw: 3 });
-    // face
-    const ey = -198, blink = ((o.t || 0) + seed * 0.7) % 3.4 < 0.12, e = blink ? 'closed' : o.eyes || 'dot';
-    for (const ex of [6, 32]) {
-      g.save(); g.fillStyle = P.ink; g.strokeStyle = P.ink; g.lineWidth = 3.5; g.lineCap = 'round';
-      if (e === 'happy') { g.beginPath(); g.arc(ex, ey + 4, 7, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); }
-      else if (e === 'closed') { g.beginPath(); g.moveTo(ex - 7, ey); g.lineTo(ex + 7, ey); g.stroke(); }
-      else { const r = e === 'wide' ? 8 : 6; g.beginPath(); g.ellipse(ex, ey, r * 0.85, r * 1.15, 0, 0, TAU); g.fill(); g.fillStyle = P.white; g.beginPath(); g.arc(ex - 2, ey - 3, 2.2, 0, TAU); g.fill(); }
-      g.restore();
+    const legCol = o.legs || outD, shoe = o.shoes || P.woodDark, far = c => PC.mix(c, P.ink, 0.2);
+    const flat = o.detail === 0, sil = o.silhouette, lw = flat ? 0 : 3;
+    const piece = (path, fill, op = {}) => sil ? (g.fillStyle = sil, g.fill(path)) : PC.cut(g, path, fill, Object.assign({ stroke: flat ? null : P.ink, lw }, op));
+    const pin = p => { if (flat || sil || o.pins === false) return; g.fillStyle = P.goldDark; g.beginPath(); g.arc(p[0], p[1], 2.6, 0, TAU); g.fill(); g.fillStyle = P.goldLight; g.beginPath(); g.arc(p[0] - 0.8, p[1] - 0.8, 1.1, 0, TAU); g.fill(); };
+    g.save(); g.translate(x, y); g.scale(s * face, s);
+    // shadow on the ground (shrinks while airborne)
+    const low = Math.max(sk.legs.F.toe[1], sk.legs.F.heel[1], sk.legs.B.toe[1], sk.legs.B.heel[1]), air = Z.clamp(-low / 140);
+    const sh = o.shadow ?? 12;
+    if (sh && !sil) { g.fillStyle = PC.rgba(P.shadow, 0.22 * (1 - 0.6 * air)); g.beginPath(); g.ellipse(sk.P[0], 2, 56 * (1 - 0.4 * air), 11 * (1 - 0.4 * air), 0, 0, TAU); g.fill(); }
+    const leg = (L, col, sc) => {
+      piece(capsule(L.hip, L.knee, 22, 20), col); piece(capsule(L.knee, L.ankle, 20, 17), col);
+      piece(capsule([L.heel[0], L.heel[1] - 6], [L.toe[0], L.toe[1] - 6], 15, 16), sc);
+      pin(L.knee);
+    };
+    const hand = (A, kind, col) => {
+      const h = A.hand;
+      if (kind === 'point') { piece(capsule(h, [h[0] + (h[0] - A.wri[0]) * 1.6, h[1] + (h[1] - A.wri[1]) * 1.6], 7, 6), col); piece(PC.blob(h[0], h[1], 9, 9, { seed: seed + 11 }), col); }
+      else if (kind === 'open') piece(PC.blob(h[0], h[1], 10.5, 12, { seed: seed + 12, rot: A.ha }), col);
+      else piece(PC.blob(h[0], h[1], 9.5, 9.5, { seed: seed + 10 }), col);
+    };
+    const arm = (A, sleeve, kind, sk2) => { piece(capsule(A.sho, A.elb, 17, 15), sleeve); piece(capsule(A.elb, A.wri, 15, 13), sleeve); hand(A, kind, sk2); pin(A.elb); };
+    // far side first, darker
+    arm(sk.arms.B, far(outD), sk.J.hB, far(skin));
+    leg(sk.legs.B, far(legCol), far(shoe));
+    leg(sk.legs.F, legCol, shoe);
+    pin(sk.legs.F.hip);
+    if (o.scarf && !sil) {
+      // behind the torso: the scarf hangs down the back when still and streams out behind with speed (o.vel px/s, or the walk / run itself)
+      const N = sk.N, v = Z.clamp((o.vel ?? (pose === 'run' ? 400 : pose === 'walk' ? 150 : 0)) / 400), len = o.scarfLen || 130;
+      const pts = [0, 1, 2, 3, 4].map(i => { const q = i / 4, wv = Math.sin(Z.TAU * (0.6 + 0.8 * v) * t - q * 3 + seed) * (3 + 10 * v) * q;
+        return [N[0] - 12 - q * len * (0.25 + 0.75 * v), N[1] + 4 + q * len * (0.85 - 0.7 * v) + wv]; });
+      piece(PC.ribbon(pts, q => 13 * (1 - q * 0.4)), o.scarf);
     }
-    if (o.blush !== false) { g.fillStyle = PC.rgba(P.blush, 0.55); for (const bx of [-6, 44]) { g.beginPath(); g.ellipse(bx, -182, 9, 5, 0, 0, TAU); g.fill(); } }
-    g.save(); g.strokeStyle = P.ink; g.fillStyle = '#7A2E3A'; g.lineWidth = 3; g.lineCap = 'round'; const m = o.mouth || 'smile';
-    if (m === 'o') { g.beginPath(); g.ellipse(20, -176, 5, 7, 0, 0, TAU); g.fill(); g.stroke(); }
-    else if (m === 'flat') { g.beginPath(); g.moveTo(13, -176); g.lineTo(27, -176); g.stroke(); }
-    else if (m === 'grin') { g.beginPath(); g.moveTo(9, -180); g.quadraticCurveTo(20, -164, 31, -180); g.closePath(); g.fill(); g.stroke(); }
-    else { g.beginPath(); g.moveTo(12, -179); g.quadraticCurveTo(20, -172, 28, -179); g.stroke(); }
+    // torso (lean and squash through the skeleton's torso transform)
+    const T = sk.T, poly = pts => PC.poly(pts.map(p => T(p[0], p[1])), { seed: seed + 4, amp: 1.2, round: 0.5 });
+    const body = poly([[-36, -92], [36, -92], [47, 8], [-47, 8]]);
+    piece(body, out, { shadow: sh * 0.4, rim: PC.mix(out, P.white, 0.35) });
+    if (!flat && !sil) { PC.shade(g, body, P.ink, ...T(0, -92), ...T(0, 8), 0, 0.25); g.fillStyle = trim; g.fill(poly([[-44, -30], [44, -30], [45, -21], [-45, -21]])); }
+    const ikF = (o.ik && o.ik.F) || sk.J.ikF, armUp = RB.handBehindHead(sk) && !['head', 'chin', 'mouth'].includes(ikF);
+    if (armUp) arm(sk.arms.F, outD, sk.J.hF, skin);             // a raised near arm passes behind the big head, not across the face
+    // head (nods with the neck)
+    const [hx, hy] = sk.H;
+    g.save(); g.translate(hx, hy); g.rotate(sk.hA);
+    const head = PC.blob(0, 0, 52, 48, { seed: seed + 5, amp: 0.02 });
+    piece(head, skin, { shadow: sh * 0.5, rim: PC.mix(skin, P.white, 0.5) });
+    const hs = o.hairStyle || 'mop';
+    const hairPath = hs === 'bob' ? PC.blob(-4, -22, 58, 38, { seed: seed + 6 }) : hs === 'spiky'
+      ? PC.poly([[-56, -6], [-46, -50], [-24, -36], [-8, -62], [12, -38], [36, -56], [48, -22], [56, -6], [0, -28]], { seed: seed + 6, round: 0.2 })
+      : PC.blob(-6, -30, 56, 30, { seed: seed + 6, amp: 0.06, freq: 7 });
+    piece(hairPath, hair, { rim: PC.mix(hair, P.goldLight, 0.3) });
+    if (hs === 'braid') piece(PC.ribbon([[-40, 0], [-58, 40], [-60, 80]], q => 13 - q * 4), hair);
+    if (!sil) {
+      const ex = RB.EXPRS[o.expr || sk.J.expr || 'normal'] || RB.EXPRS.normal;
+      const legacyEyes = { dot: 'open', wide: 'wide', happy: 'happy', closed: 'closed' };
+      Z.rig.face(g, { x: 0, y: 4, r: 50, dir: 0.75 * (sk.J.yaw ?? 1), ink: P.ink, white: P.white, lw: flat ? 2.5 : 3.4,
+        eyes: flat ? 'dot' : o.eyes ? (legacyEyes[o.eyes] || o.eyes) : ex.eyes, brows: flat ? 'none' : o.brows || ex.brows, mouth: o.mouth || ex.mouth,
+        blush: o.blush === false || flat ? 0 : ex.blush ? 1 : 0.8, blushCol: P.blush, sweat: ex.sweat, look: o.look || ex.look,
+        blink: Math.max(o.blink || 0, Z.rig.blink(t, seed)), mouthCol: '#7A2E3A', tongue: P.heart });
+    }
+    if (o.hat === 'crown') piece(PC.poly([[-30, -46], [30, -46], [36, -80], [18, -60], [0, -88], [-18, -60], [-36, -80]], { seed: seed + 8, round: 0.15 }), P.gold, { rim: P.goldLight });
+    else if (o.hat === 'cap') piece(PC.poly([[-50, -32], [40, -50], [70, -32], [10, -22]], { seed: seed + 8, round: 0.6 }), o.hatCol || P.red);
+    else if (o.hat === 'hood') piece(PC.blob(-4, -14, 64, 58, { seed: seed + 8 }), o.hatCol || P.forest);
     g.restore();
-    if (o.hat === 'crown') PC.cut(g, PC.poly([[-30, -246], [30, -246], [36, -280], [18, -260], [0, -288], [-18, -260], [-36, -280]], { seed: seed + 8, round: 0.15 }), P.gold, { stroke: P.ink, lw: 3, rim: P.goldLight });
-    else if (o.hat === 'cap') PC.cut(g, PC.poly([[-50, -232], [40, -250], [70, -232], [10, -222]], { seed: seed + 8, round: 0.6 }), o.hatCol || P.red, { stroke: P.ink, lw: 3 });
-    else if (o.hat === 'hood') PC.cut(g, PC.blob(-4, -214, 64, 58, { seed: seed + 8 }), o.hatCol || P.forest, { stroke: P.ink, lw: 3 });
-    // front arm (+ held prop)
-    g.save(); g.translate(24, -138); g.rotate(-(o.armF ?? 0.15) + swing);
-    PC.cut(g, PC.poly([[-9, 0], [9, 0], [8, 52], [-8, 52]], { seed: seed + 9, round: 0.6 }), outD, { stroke: P.ink, lw: 3 });
-    PC.cut(g, PC.blob(0, 56, 10, 10, { seed: seed + 10 }), skin, { stroke: P.ink, lw: 3 });
-    if (o.hold) { g.translate(0, 56); o.hold(g, s); }
+    // near arm last (in front of the body), with the held prop
+    if (!armUp) arm(sk.arms.F, outD, sk.J.hF, skin);
+    pin(sk.arms.F.sho);
+    if (o.hold) { g.save(); g.translate(sk.arms.F.hand[0], sk.arms.F.hand[1]); g.rotate(sk.arms.F.ha); o.hold(g, s); g.restore(); }
+    if (o.emote && EMOTE[o.emote] && (o.emoteK ?? 1) > 0.01) {
+      g.save(); g.translate(sk.H[0] + 44, sk.H[1] - 78); g.scale(face, 1); EMOTE[o.emote](g, o.emoteK ?? 1); g.restore();
+    }
     g.restore();
-    g.restore();
+    return anchors;
   };
 
   // ---------------------------------------------------------------- bursts (confetti, coins, petals): pure functions of t

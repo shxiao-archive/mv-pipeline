@@ -139,6 +139,43 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ---
 
+## Characters with a living face (both treatments)
+
+Characters stay **mostly still**: they blink, sing and change expression — no other motion is needed. The faces come
+from ONE generation (an **expression sheet**), so every expression has exactly the master's style (tested on NovelAI):
+
+1. One sheet row in the generation table (`tools/gen_table.py`; `assets/gen/table.json`):
+   `{ "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view facing right", "size":
+   "1024x1024", "transparent": true, "key": "#FF00FF", "sheet": { "cells": ["neutral", "blink", "open", "smile"] } }`
+   (add `sad`, `surprised` … as the song needs; one sheet per framing the film uses: bust, half body).
+2. `gen_table.py jobs` → generate → `post`. Look at `_CH03_figures.jpg`: generators often add a figure (a full body)
+   or reorder them — set `"pick": { "neutral": 2, "blink": 4, "open": 5, "smile": 3 }` by number. Look at
+   `_CH03_grid.jpg` (the neutral figure with a grid) and set `"eyes"` and `"mouth"` [u0, v0, u1, v1] a little larger
+   than the features (keep the eye area off the hair edge). `post` again: it aligns each copy to the neutral one and
+   pastes its eye / mouth area (a blink takes only the eyes, a mouth only the mouth, other expressions both), and
+   writes `CH03.anim.json`. Look at each patch over the neutral face.
+3. In the shot, paste the snippet: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { blink: '…CH03_blink.png',
+   mouth: '…CH03_open.png', expr: { smile: '…CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]], seed } }]`.
+   Blinks run on a seeded clock (give each character its own seed), the mouth opens on each sung character of the
+   lyric (closed on silence; `sings: false` for a listener), expressions change on cues (`exprAt`).
+4. Do not ask the generator for a changed version of a finished picture (a turned head, another pose): tested, it
+   either drifts in style or does not change. Other poses are other pictures (their own sheets), cut to, not morphed.
+   (`anim.tilt` / `anim.hair` mesh warps and `states` exist but are rarely needed.)
+
+## Asset library and density (method: references/10 §3, team: 11)
+
+- **Tegaki (「残光」):** a character bible, three master candidates → one master, about 20 poses and expressions keyed to
+  RGBA, close-ups (eye, hands), 14 backgrounds from the lyric's imagery and the colour script, the story props; Blender
+  shots for 1–2 showcases. Review every batch as one sheet (`art_grid.py`, `lineup.py`).
+- **Signal (netsu-ijou-pv):** 3–10 style-test rounds before production; a locked character sheet (front, back, face,
+  every design element written down); one generation table of ~40–60 components (≈ 18 places, ≈ 14 character framings
+  incl. extreme crops of eyes / hands / neck, ≈ 22 objects), all NEUTRAL colour, with motion as separate images (a bird
+  in three wing positions) and states (clean / soiled); proportions fixed after generation; a review sheet per
+  category (BG / CH / OBJ).
+- Both: prompts name what each reference image is for ("the first image is style only; the others are this character's
+  design"); missing pictures go to `docs/WANTED_ART.md`; per lyric line 2–5 motif variants (signal), a composed picture
+  per line (tegaki).
+
 ## Review checks (in addition to references/09)
 
 Tegaki shots:

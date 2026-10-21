@@ -77,7 +77,8 @@ With no generator at all, interface, stage or papercraft (all code-drawn) are th
 Details, commands and gates: `references/01-workflow.md` (phase table first); per-style differences: the style's
 STYLE.md; the check order: `references/09` §7. Commit the project at the end of every phase (it is a git repo).
 
-0. **Intake + scaffold** — style (above), image generator (`artgen.py providers`, the user's choice), credit line.
+0. **Intake + scaffold** — style (above), image generator (`artgen.py providers`, the user's choice), credit line, and
+   the **scale**: solo, or team mode at the reference films' level (`references/10` §9, `11`; tell the user the cost first).
    `python <skill>/scripts/new_project.py <dir> --song <song> --lyrics <lyrics> --style <style> [--art <gen>] --title …
    --credit "Music / Lyrics / Movie：<artist>" --setup`. npm can fail on a locked global cache: `npm install --cache
    ./.npm-cache` in the project, then re-run setup. Reuse fonts: `--setup-args "-FontsFrom ../<other>/engine/fonts"`.
@@ -95,7 +96,9 @@ STYLE.md; the check order: `references/09` §7. Commit the project at the end of
    `moment` (what it shows, why), `line` (the lyric line it answers) and, where it belongs to one, `cue`. Cuts come
    from the grid (`B(n)`, `nb(t)`, `Z.cue('L07')`, `Z.SIG.cuts`). `node tools/storyboard.mjs` writes
    `docs/STORYBOARD.md` + `plan/shots.json` and must PASS (every sung line shown, cuts on the grid / their cue, no gaps).
-4. **Assets** — the style's list (STYLE.md): vocaloid = character bible + master + poses + backgrounds (tegaki), neutral
+4. **Assets** — build the library before the shots, each asset checked on a model sheet (`engine/sheets/`, `references/10`).
+   Generated art: one table (`tools/gen_table.py`); a character's expressions from one expression sheet (vocaloid STYLE.md).
+   The style's list (STYLE.md): vocaloid = character bible + master + poses + backgrounds (tegaki), neutral
    images for full / crop / silhouette framings (signal); interface = code-drawn (screen: write the user's lines and
    system copy; treatise: write the deadpan copy and the number); stage = code-painted (design the
    troupe; optional picture-book cut-outs); papercraft = code-drawn
@@ -161,6 +164,8 @@ reports) instead of guessing. Credit the artist on screen and in the README.
 | `references/07-blender-3d.md` | toon 3D sequences (tegaki) |
 | `references/08-render-and-delivery.md` | rendering, encodes, vertical 9:16, review tooling |
 | `references/09-qa-and-lessons.md` | review checklist, failure modes; mv-studio checks (§6); the check order and P0 / P1 / P2 (§7) |
+| `references/10-craft.md` | how the reference films reach their level: asset library first, rigs, sets, choreography and timing rules, density targets, model sheets, revision rounds, scaling to the budget |
+| `references/11-team.md` | team mode: a lead + storyboard proposers, judges, asset builders, block builders and reviewers in parallel; `core/blocks.js`; the prompt templates; the budget table |
 | `references/effect-cookbook.md` | motion / FX recipes, palette and typography systems, safety |
 
 Base kit and 「残光」: **NikusonP** (vocaloid-style-mv-pipeline, MIT). JIZURA 字面: github.com/852wa/JIZURA (MIT).

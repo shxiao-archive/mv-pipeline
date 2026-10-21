@@ -174,7 +174,7 @@ def main() -> int:
     ap.add_argument("--style", default="vocaloid", choices=[*STYLES, *STYLE_ALIASES],
                     help="style (and treatment) the timeline starts from (see <skill>/styles/<style>/STYLE.md)")
     ap.add_argument("--mode", default="solo", choices=["solo", "team"],
-                    help="solo: one agent builds the film; team: a lead + parallel builders (references/01)")
+                    help="solo: one agent builds the film; team: a lead + parallel builders (references/11-team.md)")
     ap.add_argument("--no-git", action="store_true", help="do not git init the project (default: init, if git exists)")
     ap.add_argument("--art", choices=["codex", "grok", "novelai"],
                     help="image generator the user chose (written to art.config.json; default: ask later)")

@@ -16,10 +16,12 @@ Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; 
   "negative": "..."            extra negative prompt (added to the default one)
   "seed": 1234                 fixed seed (default: derived from id + prompt, so a re-run gives the same image;
                                change the seed or the prompt for another take)
-  "ref_mode": "character" | "img2img" | "vibe"
+  "ref_mode": "character" | "img2img" | "inpaint" | "vibe"
                                how "images" are used: "character" = V4.5 character reference (identity of the FIRST
                                image; default on V4.5 models), "img2img" = the first image is the starting picture
-                               ("strength" 0..1, default 0.6), "vibe" = vibe transfer (V3 models only)
+                               ("strength" 0..1, default 0.6), "inpaint" = repaint only the box "region" [u0, v0, u1, v1] (on the 8 px grid)
+                               of the first image (the <model>-inpainting model; variants for tools/gen_table.py),
+                               "vibe" = vibe transfer (V3 models only). A cut-out is flattened on the key colour first
   "ref_strength": 1.0          character / vibe reference strength;  "fidelity": 1.0 (character reference)
   "nai": {...}                 raw overrides of the request "parameters" (steps, scale, sampler, ...) -- rarely needed
 Project defaults (model, steps, scale, size cap, negative prompt) come from art.config.json -> "novelai".
@@ -171,13 +173,31 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
                 "director_reference_strength_values": [float(job.get("ref_strength", 1.0))],
                 "director_reference_secondary_strength_values": [round(1.0 - float(job.get("fidelity", 1.0)), 3)],
             })
-        elif mode == "img2img":
-            from PIL import Image
-            action = "img2img"
-            init = Image.open(refs[0]).convert("RGB").resize((w, h), Image.LANCZOS)
+        elif mode in ("img2img", "inpaint"):
+            from PIL import Image, ImageDraw
+            src = Image.open(refs[0])
+            if src.mode in ("RGBA", "LA", "P"):                      # a cut-out: flatten onto the key colour, so the result keys again
+                rgba = src.convert("RGBA"); flat = Image.new("RGB", rgba.size, job_key(job) if job.get("transparent") else "#FFFFFF")
+                flat.paste(rgba, mask=rgba.getchannel("A")); src = flat
+            init = src.convert("RGB").resize((w, h), Image.LANCZOS)
             p.update({"image": b64_png(init) if data else f"<{refs[0].name} {w}x{h}>",
-                      "strength": float(job.get("strength", 0.6)), "noise": float(job.get("noise", 0.0)),
+                      "strength": float(job.get("strength", 0.6 if mode == "img2img" else 1.0)), "noise": float(job.get("noise", 0.0)),
                       "extra_noise_seed": job_seed(job)})
+            action = "img2img"
+            if mode == "inpaint":                                     # repaint only job["region"] [u0, v0, u1, v1]; the rest stays
+                u0, v0, u1, v1 = job.get("region") or (0, 0, 1, 1)
+                mask = Image.new("RGB", (w, h), "black")
+                box = [int(u0 * w) // 8 * 8, int(v0 * h) // 8 * 8, -(-int(u1 * w) // 8) * 8, -(-int(v1 * h) // 8) * 8]
+                ImageDraw.Draw(mask).rectangle(box, fill="white")   # a box on the 8 px grid (an ellipse mask came back as garbage)
+                action = "infill"
+                model = job.get("inpaint_model") or (model if model.endswith("-inpainting") else model + "-inpainting")
+                p.update({"mask": b64_png(mask) if data else f"<mask {job.get('region')}>"})
+            if job.get("char_ref") and "4-5" in model:                # also hold identity + style to the reference (V4.5)
+                caption = {"caption": {"base_caption": "character&style", "char_captions": []}, "legacy_uc": False}
+                p.update({"director_reference_images": [char_ref_image(refs[0]) if data else f"<{refs[0].name}>"],
+                          "director_reference_descriptions": [caption], "director_reference_information_extracted": [1],
+                          "director_reference_strength_values": [float(job.get("ref_strength", 1.0))],
+                          "director_reference_secondary_strength_values": [round(1.0 - float(job.get("fidelity", 1.0)), 3)]})
         elif mode == "vibe":
             if v4:
                 raise ValueError(f"job {job['id']}: ref_mode 'vibe' is for V3 models here; use 'character' on V4.5")
@@ -187,7 +207,7 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
                       "reference_information_extracted_multiple": [1.0] * len(refs),
                       "reference_strength_multiple": [float(job.get("ref_strength", 0.6))] * len(refs)})
         else:
-            raise ValueError(f"job {job['id']}: ref_mode {mode!r} is not character / img2img / vibe")
+            raise ValueError(f"job {job['id']}: ref_mode {mode!r} is not character / img2img / inpaint / vibe")
     p.update(job.get("nai") or {})
     return {"input": prompt, "model": model, "action": action, "parameters": p}
 
@@ -208,7 +228,7 @@ HTTP_HINTS = {
     400: "the request was rejected (a field NovelAI does not accept: try another ref_mode, or check 'nai' overrides)",
     401: f"the key in {KEY_ENV} was refused: create a new persistent API token in NovelAI's account settings",
     402: "this needs an active subscription or more Anlas (size > 1 MP, > 28 steps, img2img and references cost Anlas)",
-    403: "forbidden for this account (subscription tier or model access)",
+    403: "forbidden (subscription tier or model access; an HTML page with 'error code: 1010' is Cloudflare blocking the client)",
 }
 
 
@@ -217,7 +237,8 @@ def post(body: dict, key: str, timeout: float, attempts: int) -> bytes:
     wait = 8.0
     for attempt in range(1, attempts + 1):
         req = urllib.request.Request(API + "/ai/generate-image", data=data, method="POST", headers={
-            "Authorization": "Bearer " + key, "Content-Type": "application/json", "Accept": "application/zip, image/png"})
+            "Authorization": "Bearer " + key, "Content-Type": "application/json", "Accept": "application/zip, image/png",
+            "User-Agent": "mv-studio/1.0 (tools/novelaigen.py)"})   # Cloudflare blocks the default Python-urllib agent (error 1010)
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read()
@@ -226,7 +247,7 @@ def post(body: dict, key: str, timeout: float, attempts: int) -> bytes:
             if e.code in (429, 500, 502, 503, 504) and attempt < attempts:
                 print(f"    HTTP {e.code} (busy or concurrent generation), retrying in {wait:.0f} s", flush=True)
                 time.sleep(wait); wait = min(wait * 2, 120); continue
-            raise RuntimeError(f"HTTP {e.code}: {HTTP_HINTS.get(e.code, msg.strip() or e.reason)}") from None
+            raise RuntimeError(f"HTTP {e.code}: {HTTP_HINTS.get(e.code, e.reason)}" + (f" -- server: {msg.strip()[:200]}" if msg.strip() else "")) from None
         except (urllib.error.URLError, TimeoutError) as e:
             if attempt < attempts:
                 print(f"    network error ({e}), retrying in {wait:.0f} s", flush=True)

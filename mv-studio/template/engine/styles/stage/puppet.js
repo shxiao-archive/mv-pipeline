@@ -12,6 +12,8 @@
  *     hooks: draw(u, sw) in body space (body centre (0, -5u)); armL / armR(u, sw) at the hand, for held props
  *   ST.move(style, t, seed)   beat-synced pose offsets: bounce hop sway spin wave roof stomp shimmy walk idle bow mix
  *   ST.dancer(x, y, u, style, t, o)   puppet + move
+ *   ST.person(x, y, s, o)     a human on the biped skeleton (core/rig.js): Z.rig.biped poses and expressions, painted
+ *                             in watercolour; s = 1 is ~260 px tall (see the function for its options)
  *   ST.mood(t, [[t0, 'normal'], [t1, 'scared', 'sweat'], ...])   never snap faces: eyes squeeze shut, the body does a
  *                             squash "take", the emote pops, the new eyes open. Spread the result into ST.puppet.
  *
@@ -165,5 +167,73 @@
     const out = { eyes, emote, emoteK: emote ? Z.clamp((dt - 0.1) / 0.2) * (1 - Z.smooth(1.2, 1.6, dt)) : 0 };
     if (i > 0 && dt < 0.22) { out.squint = 1 - Math.abs(dt - 0.08) / 0.14; out.take = 0.14 * Math.sin(Z.clamp(dt / 0.22) * Math.PI); if (dt < 0.08) out.eyes = keys[i - 1][1]; }
     return out;
+  };
+
+  // ---------------------------------------------------------------- a human for the troupe, on the biped skeleton
+  // ST.person(x, y, s, o) -> anchors: (x, y) between the feet, s = 1 is ~260 px. The same options as PC.doll for the rig
+  // (pose / act / phase / beat / expr / ik / joints / jointsAdd / face / emote + emoteK / blink / take / hold / rigOnly),
+  // painted in watercolour + boiling ink: skin, hair, hairStyle (scribble | bun | short), coat, coatDk, pants, shoes,
+  // glasses, bowtie. An ORIGINAL generic design: give each film its own human.
+  const capPts = (a, b, w0, w1, n = 5) => {
+    const ang = Math.atan2(b[1] - a[1], b[0] - a[0]), pts = [];
+    for (let i = 0; i <= n; i++) { const q = -Math.PI / 2 + Math.PI * i / n; pts.push([b[0] + Math.cos(ang + q) * w1 / 2, b[1] + Math.sin(ang + q) * w1 / 2]); }
+    for (let i = 0; i <= n; i++) { const q = Math.PI / 2 + Math.PI * i / n; pts.push([a[0] + Math.cos(ang + q) * w0 / 2, a[1] + Math.sin(ang + q) * w0 / 2]); }
+    return pts;
+  };
+  ST.capPts = capPts;
+  ST.person = (x, y, s = 1, o = {}) => {
+    const c = ST.ctx, pal = P(), ink = pal.ink, RB = Z.rig.biped, t = o.t ?? ST.t ?? 0, seed = o.seed || 2, face = o.flip || o.face === -1 ? -1 : 1;
+    const sk = RB.solve({ pose: o.pose || (o.walk != null ? 'walk' : 'idle'), phase: o.phase ?? o.walk, t, act: o.act, beat: o.beat, joints: o.joints, jointsAdd: o.jointsAdd, ik: o.ik, squash: (o.sq || 0) + (o.take || 0), spec: o.spec });
+    const an = RB.anchors(sk), anchors = {};
+    for (const k in an) anchors[k] = [x + face * s * an[k][0], y + s * an[k][1]];
+    if (o.rigOnly) return anchors;
+    const skin = o.skin || pal.peach, hair = o.hair || pal.woodDk, coat = o.coat || pal.cream, coatDk = o.coatDk || ST.mix(coat, ink, 0.25), pants = o.pants || pal.indigo, shoes = o.shoes || pal.woodDk;
+    const far = col => ST.mix(col, ink, 0.18), sw = Z.clamp(s * 1.1, 0.5, 2.2), J = 0.6;
+    c.save(); c.translate(x, y); c.scale(s * face, s);
+    if (!o.noShadow) { const low = Math.max(sk.legs.F.toe[1], sk.legs.B.toe[1]), air = Z.clamp(-low / 140); ST.paint(ST.ell(sk.P[0], 2, 50 * (1 - 0.4 * air), 9, 16), { fill: ink, fillOp: 0.3 * (1 - 0.5 * air), bleed: 0.25, tex: 0.2, border: 0.2, ink: null }); }
+    const leg = (L, pc, sc) => {
+      ST.paint(capPts(L.hip, L.knee, 20, 18), { wash: pc, ink, sw: sw * 0.8 });
+      ST.paint(capPts(L.knee, L.ankle, 18, 15), { wash: pc, ink, sw: sw * 0.8 });
+      ST.paint(capPts([L.heel[0], L.heel[1] - 5], [L.toe[0] + 3, L.toe[1] - 5], 14, 15), { wash: sc, ink, sw: sw * 0.8 });
+    };
+    const hand = (A, kind, col) => {
+      const h = A.hand;
+      if (kind === 'point') ST.ink([h, [h[0] + (h[0] - A.wri[0]) * 1.8, h[1] + (h[1] - A.wri[1]) * 1.8]], sw * 2.2, col);
+      ST.paint(ST.ell(h[0], h[1], kind === 'open' ? 10 : 8.5, kind === 'open' ? 11 : 8.5, 12, J * 0.5), { wash: col, ink, sw: sw * 0.7 });
+    };
+    const arm = (A, sleeve, kind, sc) => { ST.paint(capPts(A.sho, A.elb, 16, 14), { wash: sleeve, ink, sw: sw * 0.8 }); ST.paint(capPts(A.elb, A.wri, 14, 12), { wash: sleeve, ink, sw: sw * 0.8 }); hand(A, kind, sc); };
+    arm(sk.arms.B, far(coatDk), sk.J.hB, far(skin));
+    leg(sk.legs.B, far(pants), far(shoes));
+    leg(sk.legs.F, pants, shoes);
+    // the coat: a flat wash, a light pool, a settle of shade along the hem, ink last (as the troupe is painted)
+    const T = sk.T, body = [[-30, -92], [30, -92], [40, -30], [48, 22], [-48, 22], [-38, -30]].map(p => T(p[0], p[1]));
+    ST.paint(body, { wash: coat, ink: null, curv: 0.5 });
+    ST.paint([[-26, -86], [18, -86], [10, -50], [-22, -50]].map(p => T(p[0], p[1])), { fill: ST.mix(coat, '#FFFFFF', 0.4), fillOp: 0.5, bleed: 0.2, tex: 0.6, border: 0.5, ink: null, curv: 1 });
+    ST.paint([[-46, 6], [46, 6], [48, 22], [-48, 22]].map(p => T(p[0], p[1])), { fill: coatDk, fillOp: 0.45, bleed: 0.1, tex: 0.6, border: 0.4, ink: null });
+    ST.paint(body, { ink, sw, curv: 0.5 });
+    ST.ink([T(2, -88), T(4, -20), T(6, 20)], sw * 0.8, coatDk);                         // the coat's front edge
+    if (o.bowtie) { const b = T(8, -88); ST.paint([[b[0] - 12, b[1] - 7], [b[0], b[1]], [b[0] - 12, b[1] + 7]], { wash: o.bowtie, ink, sw: sw * 0.6 }); ST.paint([[b[0] + 12, b[1] - 7], [b[0], b[1]], [b[0] + 12, b[1] + 7]], { wash: o.bowtie, ink, sw: sw * 0.6 }); }
+    const ikF = (o.ik && o.ik.F) || sk.J.ikF, armUp = RB.handBehindHead(sk) && !['head', 'chin', 'mouth'].includes(ikF);
+    if (armUp) arm(sk.arms.F, coatDk, sk.J.hF, skin);
+    // head
+    c.save(); c.translate(sk.H[0], sk.H[1]); c.rotate(sk.hA);
+    const hs = o.hairStyle || 'scribble';
+    if (hs === 'bun') ST.paint(ST.ell(-30, -40, 20, 20, 14, J), { wash: hair, ink, sw: sw * 0.8 });
+    ST.paint(ST.ell(0, 0, 50, 47, 24, J), { wash: skin, ink, sw });
+    ST.paint(ST.ell(16, 22, 30, 12, 14, J), { fill: ST.mix(skin, pal.rose, 0.5), fillOp: 0.35, bleed: 0.3, tex: 0.4, ink: null });
+    if (hs === 'scribble') ST.ink(Array.from({ length: 26 }, (_, i) => { const a = Math.PI * (1.02 + i * 0.95 / 25) + Math.sin(i * 2.7) * 0.06, r = 50 + 10 * Math.sin(i * 1.9 + seed); return [Math.cos(a) * r, Math.sin(a) * r - 8]; }), sw * 4, hair, { curv: 1 });
+    else ST.paint([[-50, -6], [-44, -36], [-18, -54], [18, -54], [44, -36], [50, -14], [30, -26], [0, -30], [-30, -22]], { wash: hair, ink, sw: sw * 0.8, curv: 1 });
+    const ex = RB.EXPRS[o.expr || sk.J.expr || 'normal'] || RB.EXPRS.normal;
+    c.save(); c.translate(ST.jit(0.8), ST.jit(0.8));                               // the face boils with the line
+    Z.rig.face(c, { x: 0, y: 4, r: 50, dir: 0.7 * (sk.J.yaw ?? 1), ink, white: pal.cream, lw: 3.2, eyes: o.eyes || ex.eyes, brows: o.brows || ex.brows, mouth: o.mouth || ex.mouth,
+      blush: o.blush === false ? 0 : ex.blush ? 1 : 0.6, blushCol: pal.rose, sweat: ex.sweat, sweatCol: pal.sky, look: o.look || ex.look, blink: Math.max(o.blink || 0, Z.rig.blink(t, seed)), mouthCol: '#5A2430', tongue: pal.rose });
+    c.restore();
+    if (o.glasses) for (const gx of [-4, 30]) ST.ink(ST.ell(gx, 4, 15, 13, 18), sw * 0.9, ink, { closed: true });
+    c.restore();
+    if (!armUp) arm(sk.arms.F, coatDk, sk.J.hF, skin);
+    if (o.hold) { c.save(); c.translate(sk.arms.F.hand[0], sk.arms.F.hand[1]); c.rotate(sk.arms.F.ha); o.hold(s, sw); c.restore(); }
+    c.restore();
+    if (o.emote) ST.emote(o.emote, anchors.head[0] + face * 60 * s, anchors.head[1] - 70 * s, 14 * s, o.emoteK ?? 1);
+    return anchors;
   };
 })();

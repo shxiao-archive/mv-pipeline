@@ -137,6 +137,7 @@ Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboa
 
 ## Parallelising
 
+- **Team mode** (`--mode team`): the full process with parallel agents, blocks in `engine/blocks/` and prompt templates — `references/11-team.md`.
 - Split scene work by file (`intro.js`, `typo.js`, `glass.js`, …) — one owner each, plus their own test timeline. Shared core files (`engine/core/*`, `index.html`, `timeline.js`) belong to the lead.
 - Asset batches and Blender shots run independently of scene code.
 - Long agent runs can stop on usage limits: have agents write files early and often; after an interruption, review what's on disk before re-running anything (in 残光 all seven scene modules were complete on disk even though every agent "failed" before reporting).

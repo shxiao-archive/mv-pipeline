@@ -41,6 +41,30 @@
   //       tint:{ color, a } (multiply by the scene's light colour: light match; not with wave) }
   const ids = new WeakMap(); let nextId = 0;
   const imgId = img => { let i = ids.get(img); if (i == null) ids.set(img, (i = ++nextId)); return i; };   // cache keys for derived copies
+  // draw img into the rect (x0, y0, w, h) through a grid warped by field(u, v) -> [dx, dy] (px). Cells that do not move
+  // are plain blits; moving cells are two affine-mapped triangles, each grown a little so no seams show.
+  D.meshDraw = (ctx, img, x0, y0, w, h, field, mesh = {}) => {
+    const C = mesh.cols || 12, R = mesh.rows || 18, iw = img.width, ih = img.height;
+    const P = [];
+    for (let j = 0; j <= R; j++) for (let i = 0; i <= C; i++) { const u = i / C, v = j / R, d = field(u, v) || [0, 0]; P.push([x0 + u * w + d[0], y0 + v * h + d[1], u * iw, v * ih, Math.abs(d[0]) + Math.abs(d[1])]); }
+    const tri = (a, b, c) => {
+      const cx = (a[0] + b[0] + c[0]) / 3, cy = (a[1] + b[1] + c[1]) / 3, g = q => { const dx = q[0] - cx, dy = q[1] - cy, l = Math.hypot(dx, dy) || 1; return [q[0] + dx / l * 0.7, q[1] + dy / l * 0.7]; };
+      const den = (b[2] - a[2]) * (c[3] - a[3]) - (c[2] - a[2]) * (b[3] - a[3]); if (!den) return;
+      const m11 = ((b[0] - a[0]) * (c[3] - a[3]) - (c[0] - a[0]) * (b[3] - a[3])) / den, m21 = ((c[0] - a[0]) * (b[2] - a[2]) - (b[0] - a[0]) * (c[2] - a[2])) / den;
+      const m12 = ((b[1] - a[1]) * (c[3] - a[3]) - (c[1] - a[1]) * (b[3] - a[3])) / den, m22 = ((c[1] - a[1]) * (b[2] - a[2]) - (b[1] - a[1]) * (c[2] - a[2])) / den;
+      const ga = g(a), gb = g(b), gc = g(c);
+      ctx.save(); ctx.beginPath(); ctx.moveTo(ga[0], ga[1]); ctx.lineTo(gb[0], gb[1]); ctx.lineTo(gc[0], gc[1]); ctx.closePath(); ctx.clip();
+      ctx.transform(m11, m12, m21, m22, a[0] - m11 * a[2] - m21 * a[3], a[1] - m12 * a[2] - m22 * a[3]);
+      const sx = Math.max(0, Math.min(a[2], b[2], c[2]) - 1), sy = Math.max(0, Math.min(a[3], b[3], c[3]) - 1), ex = Math.min(iw, Math.max(a[2], b[2], c[2]) + 1), ey = Math.min(ih, Math.max(a[3], b[3], c[3]) + 1);
+      ctx.drawImage(img, sx, sy, ex - sx, ey - sy, sx, sy, ex - sx, ey - sy);
+      ctx.restore();
+    };
+    for (let j = 0; j < R; j++) for (let i = 0; i < C; i++) {
+      const a = P[j * (C + 1) + i], b = P[j * (C + 1) + i + 1], c = P[(j + 1) * (C + 1) + i], d = P[(j + 1) * (C + 1) + i + 1];
+      if (a[4] + b[4] + c[4] + d[4] < 0.05) { ctx.drawImage(img, a[2], a[3], b[2] - a[2], c[3] - a[3], a[0], a[1], b[0] - a[0] + 0.5, c[1] - a[1] + 0.5); continue; }
+      tri(a, b, d); tri(a, d, c);
+    }
+  };
   D.sprite = (ctx, img, x, y, h, opt = {}) => {
     const s = h / img.height, w = img.width * s;
     const [ax, ay] = opt.anchor || [0.5, 1];
@@ -54,6 +78,12 @@
     const br = 1 + (opt.breathe || 0) * 0.012 * Math.sin(t * 2.1 + (opt.phase || 0));
     ctx.scale(opt.flip ? -1 : 1, br);
     const x0 = -w * ax, y0 = -h * ay;
+    if (opt.field) {                                         // a mesh warp: field(u, v) -> [dx, dy] px (head tilt, hair sway: chars[].anim)
+      D.meshDraw(ctx, img, x0, y0, w, h, opt.field, opt.mesh);
+      if (opt.tint) { ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha *= opt.tint.a ?? 0.5; D.meshDraw(ctx, Z.tinted(img, opt.tint.color, 'tint' + imgId(img)), x0, y0, w, h, opt.field, opt.mesh); }
+      ctx.restore();
+      return { w, h };
+    }
     if (opt.wave && opt.wave.amp) {
       // horizontal strips displaced by a travelling sine, stronger further from `from` (0 = top)
       const N = 90, from = opt.wave.from ?? 0.25, amp = opt.wave.amp, fr = opt.wave.freq ?? 2.2, sp = opt.wave.speed ?? 3.2;

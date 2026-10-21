@@ -76,7 +76,10 @@ per-word karaoke rules, rewritten for this Canvas2D engine. Its song, lyrics, ti
 `styles/papercraft/` and `template/engine/styles/papercraft/` adapt the paper-drawing primitives of **dalabengba-mv**
 (licence ISC as declared in its package.json; text in `licenses/LICENSE-dalabengba-mv.txt`) and follow its pop-up book,
 multiplane camera, paper RPG interface and transitions. Its song, lyrics, characters and story are not used; the
-paper doll is a generic original rig.
+paper doll is a generic original rig. `template/engine/core/rig.js` (joint tables, keyed actions, gait phase from
+distance, two-bone IK, ground contact, time-lagged trails) and `core/blocks.js` follow its rig and block methods; the
+team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
+documents of all six study films (methods only; none of their characters, songs, copy or art).
 
 ## Fonts added by mv-studio (fetched at setup, not bundled)
 

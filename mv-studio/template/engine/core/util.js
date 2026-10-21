@@ -72,6 +72,7 @@
     const C = {
       spb, beats, idx, since, phase,
       beat: t => beatNo(t),
+      pos: t => beatNo(t) + phase(t),                                              // continuous beat position (dance moves)
       bar: t => Math.floor(beatNo(t) / 4),
       inBar: t => ((beatNo(t) % 4) + 4) % 4,
       barPhase: t => (((beatNo(t) % 4) + 4) % 4 + phase(t)) / 4,

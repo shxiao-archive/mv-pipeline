@@ -125,8 +125,12 @@
         }
         if (B.crystals) for (let i = 0; i < 9; i++) { const x = -300 + i * 330, h = 80 + 90 * Z.rnd(i, 4); PC.cut(g, PC.poly([[x - 26, GY], [x + 26, GY], [x + 8, GY - h], [x - 6, GY - h * 0.85]], { seed: 70 + i }), P.crystal, { shadow: 8, stroke: P.ink, lw: 3, rim: P.white }); PC.glow(g, x, GY - h * 0.6, 110, P.crystal, 0.35 + 0.15 * Math.sin(S.t * 2 + i)); }
         for (const m of cast) {
-          const x = m.walkTo ? walkAt(m, S.t) : m.x, moving = m.walkTo && Math.abs(walkAt(m, S.t + 0.05) - x) > 0.5;
-          PC.doll(g, x, m.y ?? GY + 10, m.s ?? 1.1, Object.assign({ t: S.t, walk: moving ? S.t * 2.2 : undefined, jump: m.hop ? Math.max(0, Math.sin(Math.PI * S.clock.phase(S.t))) * S.clock.pulse(S.t, 2) * 0.6 : 0 }, m));
+          // walk or run by speed; the cycle's phase comes from the distance travelled, so the feet do not slide
+          const x = m.walkTo ? walkAt(m, S.t) : m.x, v = m.walkTo ? (walkAt(m, S.t + 0.05) - x) / 0.05 : 0, sc = m.s ?? 1.1;
+          const moving = Math.abs(v) > 10, gait = Math.abs(v) / sc > 200 ? 'run' : 'walk';
+          PC.doll(g, x, m.y ?? GY + 10, sc, Object.assign({ t: S.t, beat: S.clock.pos(S.t), vel: Math.abs(v), face: v < -10 ? -1 : 1,
+            pose: moving ? gait : undefined, phase: moving ? Math.abs(x) / (Z.rig.biped.stride(gait) * sc) : undefined,
+            jump: m.hop ? Math.max(0, Math.sin(Math.PI * S.clock.phase(S.t))) * S.clock.pulse(S.t, 2) * 0.6 : 0 }, m));
         }
         for (const b of a.burst || []) PC.burst(g, S.t, b.at, b.x, b.y, b);
       });

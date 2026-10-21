@@ -271,6 +271,16 @@ The library was written for 残光; before reusing a scene with new assets, chec
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`,
   per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
   `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
+- **Rigs, particles, model sheets** (`core/rig.js`, method in `references/10`): `Z.rig` (joint-table blending
+  `mix`, keyed actions `keyed`, `cycle` from distance, `ik2`, `squash`, `trail`, `blink`, `take` for expression
+  changes), `Z.rig.biped` (a generic skeleton: 34 poses incl. walk / run / jump / fall / dance moves, 19 expressions,
+  `solve(o)` → skeleton, `anchors`, measured `STRIDE`), `Z.rig.face` (one face construction for a cast); stateless
+  `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/*.js`:
+  `biped`, `papercraft_doll`, `stage_person`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage).
+  Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
+- **Living faces on cut-outs** (`scenes/scenes.js` `chars[].anim`): a still character with face patches from one
+  expression sheet (`tools/gen_table.py`): `blink` on a seeded clock, `mouth` on the sung characters, `expr` +
+  `exprAt` on cues; optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states`.
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.

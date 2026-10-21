@@ -241,6 +241,18 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   `nai-diffusion-4-full`, `nai-diffusion-3`. `NOVELAI_API_URL` overrides the endpoint (a proxy or a local mock).
 - The returned PNG is re-encoded on save (NovelAI's metadata chunks with the prompt are not kept).
 
+## 12b. The generation table and expression sheets (`tools/gen_table.py`)
+
+One table for the film's images (locks + a subject per row, references, sizes, keys), compiled into jobs files for
+`artgen.py`, then `post` (finals, review sheets per category, `status`). A character's expressions come from a
+**sheet row**: one generation of all of them (same style), split, aligned and cut to eye / mouth patches for the
+engine (`styles/vocaloid/STYLE.md`). Lessons from the first real runs (NovelAI): its "magenta" screen comes out hot
+pink (the keyer treats it as a two-channel screen; before, it ate every red / brown / skin colour); it lays a sheet out
+its own way (a full body plus heads: pick the figures by number); copies on a sheet are each redrawn a little, so a
+whole feature area is pasted, not only the changed pixels; asking for a changed version of a finished picture (img2img
+/ inpaint of a head) drifts in style or does not change — variant rows remain for small fixes to one face (inpaint of
+an eye or mouth region, `"takes": 3`).
+
 ## 13. Choosing the generator (`tools/artgen.py`)
 
 The kit prefers no generator: **the user chooses.** Ask once, at the assets checkpoint, which one they want (or which

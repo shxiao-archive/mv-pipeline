@@ -198,6 +198,21 @@ S.push({ id: 'p03', t0: B(6), t1: B(8), scene: 'trPlot', lyric: 'none', hud: fal
 
 ---
 
+## Asset library and density (method: references/10, team: 11)
+
+- **Screen (world-execute-me v4, 87 shots in 3:32):** the conversation as data (the user's lines, system copy, error
+  texts per beat, in your own words); one picture module per section (its plates, objects, code pictures) with **check
+  cards** — each picture rendered alone without lyrics (`engine/sheets/`): if it cannot be named without the text, it
+  fails; silhouettes split into ink plates; every new shared effect off by default and checked with the regression
+  sheets (`regress.mjs`).
+- **Treatise (pdoom-video, 17 plates):** one plate module per section, each with its own drawing idiom and its own
+  camera choreography (sub-cuts, half-bar reframes, a tracking camera), the spark and the running number threaded
+  through all of them, each plate's exit turning into the next plate's entry; type crafted per word (kerning, width
+  animation, written strokes); a revision round per plate after the first cut (pdoom-video went through five).
+
+Targets: cut every line or two; 3–6 events per shot (a message, a reply, a reaction of the client, a plate's landing
+letters); every plate a visual pun, never a literal illustration.
+
 ## Review checks (in addition to references/09)
 
 Screen shots:

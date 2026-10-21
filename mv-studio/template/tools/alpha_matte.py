@@ -336,7 +336,9 @@ def _key_chroma(rgb8, C, K, src_alpha, *, tol_bg, despill, contract, feather, mi
     order = np.argsort(K)[::-1]
     kc = int(order[0])
     # magenta-like keys have two strong channels; treat the pair as the key "channel"
-    two = K[order[1]] > 0.6 * K[order[0]]
+    # (a generator's "magenta" is often hot pink, e.g. (255, 0, 144): still a two-channel screen. Keyed as a pure red
+    # screen it would eat every red, brown, skin and amber colour of the subject.)
+    two = K[order[1]] > 0.4 * K[order[0]] and K[order[1]] - K[order[2]] > 60
     if two:
         kcs = [int(order[0]), int(order[1])]
         oth = [int(order[2])]
