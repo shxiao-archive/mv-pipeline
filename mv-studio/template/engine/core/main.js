@@ -11,6 +11,9 @@
  *   post  : object or (S) => object     (merged over the section look, see Z.post.DEFAULTS)
  *   trans : { type, dur }   transition INTO this shot, occupying [t0, t0+dur]; the previous shot keeps rendering
  *   text  : (ctx, S) => void           custom typography drawn on the text layer (after JIZURA)
+ *   fps   : n                          the scene is drawn at n frames a second (dropped frames; lyrics stay smooth)
+ *   tmap  : t => t'                    the time the scene draws at (Z.replayMap: a gesture played again)
+ *   span  : [t0, t1]                   S.lt / S.p run over this span (set by Z.withInserts: a shot cut away from and back)
  */
 (() => {
   'use strict';
@@ -74,15 +77,19 @@
     return [{ shot: cur, k: 1 }];
   }
 
+  // shot.span [t0, t1]: a part of a longer shot (Z.withInserts) keeps the whole shot's local time and progress
   function stateFor(shot, t) {
-    const dur = shot.t1 - shot.t0, lt = t - shot.t0;
+    const [a, b] = shot.span || [shot.t0, shot.t1], dur = b - a, lt = t - a;
     return {
       t, lt, dur, p: Z.clamp(lt / dur), shot, args: shot.args || {}, W, H,
       clock: Z.clock, env: Z.env, section: Z.sectionAt ? Z.sectionAt(t) : null,
-      tq: Z.quant(t, 12), ltq: Z.quant(t, 12) - shot.t0,       // 2コマ打ち times
-      rng: seed => Z.rng(Z.hash(Z.hash(shot.id.length, shot.t0 * 1000), seed)),
+      tq: Z.quant(t, 12), ltq: Z.quant(t, 12) - a,       // 2コマ打ち times
+      rng: seed => Z.rng(Z.hash(Z.hash(shot.id.length, a * 1000), seed)),
     };
   }
+  // shot.fps (a dropped-frame look: the scene is drawn at that rate) and shot.tmap(t) -> t (Z.replayMap, ...): the time the
+  // scene draws at. The lyric layer and the post params keep song time, so the line stays readable and in sync.
+  const sceneT = (shot, t) => { if (shot.tmap) t = shot.tmap(t); return shot.fps ? Z.dropFrames(t, shot.fps, shot.span ? shot.span[0] : shot.t0) : t; };
 
   async function drawShot(ctx, shot, t, fg = null) {
     const def = Z.SCENES[shot.scene];
@@ -91,7 +98,7 @@
     ctx.clearRect(0, 0, W, H);
     if (!def) { ctx.fillStyle = '#300'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#fff'; ctx.font = '40px sans-serif'; ctx.fillText('missing scene ' + shot.scene, 60, 100); }
     else {
-      const S = stateFor(shot, t); S.fg = fg || ctx;               // scenes draw "in front of the lyrics" elements into S.fg
+      const S = stateFor(shot, sceneT(shot, t)); S.fg = fg || ctx;              // scenes draw "in front of the lyrics" elements into S.fg
       if (fg) { fg.save(); }
       const r = def.draw(ctx, S); if (r && r.then) await r;
       if (fg) { fg.restore(); }

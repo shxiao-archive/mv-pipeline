@@ -19,6 +19,32 @@
   Z.hex = h => { const n = parseInt(h.replace('#', ''), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
   Z.rgba = (h, a = 1) => { const [r, g, b] = Z.hex(h); return `rgba(${r},${g},${b},${a})`; };
   Z.quant = (t, fps) => Math.floor(t * fps + 1e-6) / fps;    // 2コマ打ち: quant(t, 12)
+  // time effects (after world-execute-me v4, MIT): give a shot `tmap: t => ...` (core/main.js) or use them inside a scene
+  //   dropFrames(t, fps, from)   the instant a film running at only `fps` frames a second would show (a stutter; from = shot start)
+  //   replay(t, starts, len)     a stretch played again from its start at each time in `starts`: the time since the last
+  //                              start (capped at len), -1 before the first one. passOf(t, starts): how many have passed
+  //   replayMap(src, starts, len)  a tmap: from each start on, song time runs again from src (the same gesture, again)
+  //   tear(t, at, amount, hold)  post params of ONE glitch tear at `at` whose pattern holds `hold` s (a seed per frame strobes)
+  Z.dropFrames = (t, fps, from = 0) => from + Math.floor((t - from) * fps + 1e-6) / fps;
+  Z.replay = (t, starts, len = Infinity) => { let last = -Infinity; for (const s of starts) if (t >= s && s > last) last = s; return last === -Infinity ? -1 : Math.min(len, t - last); };
+  Z.passOf = (t, starts) => starts.reduce((n, s) => n + (t >= s ? 1 : 0), 0);
+  Z.replayMap = (src, starts, len = Infinity) => t => { const r = Z.replay(t, starts, len); return r < 0 ? t : src + r; };
+  Z.tear = (t, at, amount = 0.5, hold = 0.1) => (t >= at && t < at + hold ? { glitch: amount, glitchSeed: Math.floor(at * 7) % 101 } : {});
+  // a shot that cuts away to inserts and comes back in the state it would have by then (world-execute-me v4 withInserts):
+  //   Z.withInserts(shot, [{ t0, t1, shot: { scene, args, id, line, moment, ... }, back: { type, dur } }])
+  // the parts of `shot` keep its whole span (S.p, S.lt, cameras run across the inserts); ids get -b, -c, ...
+  Z.withInserts = (def, inserts) => {
+    const out = [], span = def.span || [def.t0, def.t1];
+    let from = def.t0, n = 0, trans = def.trans;
+    const part = to => { if (to - from > 1e-6) out.push(Object.assign({}, def, { id: n ? `${def.id}-${'bcdefghij'[n - 1]}` : def.id, t0: from, t1: to, span, trans })); n++; };
+    for (const ins of [...inserts].sort((a, b) => a.t0 - b.t0)) {
+      part(ins.t0);
+      out.push(Object.assign({ id: `${def.id}-ins${out.length}`, line: def.line }, ins.shot, { t0: ins.t0, t1: ins.t1 }));
+      from = ins.t1; trans = ins.back || null;
+    }
+    part(def.t1);
+    return out;
+  };
 
   // ---------------------------------------------------------------- easing
   const E = (Z.ease = {

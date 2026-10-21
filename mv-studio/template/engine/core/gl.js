@@ -6,7 +6,7 @@
  * Pass 1 (comp):  scene -> line boil + glitch slices + zoom blur + chromatic aberration + palette gradient map
  *                 text  -> (optional small CA) composited over the scene
  * Pass 2 (bloom): bright-pass + 3-level downsample/blur chain
- * Pass 3 (final): comp + bloom, flash, invert, vignette, grain, dither -> screen
+ * Pass 3 (final): comp + bloom, rays, streak, flash, invert, vignette, grain, dither -> screen
  */
 (() => {
   'use strict';
@@ -30,6 +30,8 @@
     grain: 0.06, grainSeed: 0,
     shake: [0, 0],        // px
     textOpacity: 1,
+    rays: 0, raysAt: [960, 540],   // light rays of whatever blooms, outwards from a point (px) (world-execute-me v4)
+    streak: 0,            // a horizontal streak through whatever blooms
     letterbox: 0,         // 0..1 fraction of the 2.39 bars
     fade: 0,              // fade to black 0..1
   };
@@ -131,8 +133,8 @@
   const FS_FINAL = COMMON + `
   uniform sampler2D comp, b1, b2, b3;
   uniform vec2 res;
-  uniform float bloom, flash, invert, vignette, grain, grainSeed, letterbox, fade;
-  uniform vec3 flashColor;
+  uniform float bloom, flash, invert, vignette, grain, grainSeed, letterbox, fade, rays, streak;
+  uniform vec3 flashColor; uniform vec2 raysAt;
   // per-pixel white noise on the integer pixel lattice (Dave Hoskins' hash12). h21 on raw uv*res aliases into
   // visible vertical stripes at grain strength, so grain and dither use this one; h21 stays for boil / glitch.
   float hpx(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -140,6 +142,17 @@
     vec3 c = texture(comp, uv).rgb;
     vec3 bl = texture(b1, uv).rgb*0.5 + texture(b2, uv).rgb*0.8 + texture(b3, uv).rgb*1.1;
     c += bl * bloom;
+    // rays and streak light what is DARK: only as far as the brightest channel has room left (a flat orange keeps its hue)
+    if (rays > 0.){
+      vec2 dir = raysAt - uv; vec3 r = vec3(0.); float w = 1., ws = 0.;
+      for (int i = 1; i <= 16; i++){ vec2 u = uv + dir*(float(i)/16.)*0.9; r += (texture(b2, u).rgb + texture(b3, u).rgb)*w; ws += w; w *= 0.9; }
+      c += r/ws * rays * clamp(1. - max(c.r, max(c.g, c.b)), 0., 1.);
+    }
+    if (streak > 0.){
+      vec3 s = vec3(0.); float ws = 0.;
+      for (int i = -8; i <= 8; i++){ float w = 1. - abs(float(i))/9.; s += texture(b3, uv + vec2(float(i)*0.03, 0.)).rgb*w; ws += w; }
+      c += s/ws * streak * clamp(1. - max(c.r, max(c.g, c.b)), 0., 1.);
+    }
     c = mix(c, 1.-c, invert);
     c = mix(c, flashColor, flash);
     vec2 d = uv - 0.5; d.x *= res.x/res.y;
@@ -247,7 +260,7 @@
         exposure: P.exposure, contrast: P.contrast, saturation: P.saturation, lift: P.lift, gain: P.gain,
         shake: [P.shake[0], -P.shake[1]], textOpacity: P.textOpacity,
       }, { scene: texScene, text: texText, lut: texLut, fg: texFg });
-      if (P.bloom > 0) {
+      if (P.bloom > 0 || P.rays > 0 || P.streak > 0) {
         draw(progs.bright, fbo.b1, { thr: P.bloomThreshold }, { src: fbo.comp.t });
         const blur = (a, b) => { draw(progs.blur, b, { dir: [1 / a.w, 0] }, { src: a.t }); draw(progs.blur, a, { dir: [0, 1 / a.h] }, { src: b.t }); };
         blur(fbo.b1, fbo.b1b);
@@ -259,6 +272,7 @@
       draw(progs.final, acc ? fbo.sub : null, {
         res: [W, H], bloom: P.bloom, flash: P.flash, flashColor: P.flashColor, invert: P.invert, vignette: P.vignette,
         grain: P.grain, grainSeed: P.grainSeed, letterbox: P.letterbox, fade: P.fade,
+        rays: P.rays || 0, raysAt: [P.raysAt[0] / W, 1 - P.raysAt[1] / H], streak: P.streak || 0,
       }, { comp: fbo.comp.t, b1: fbo.b1.t, b2: fbo.b2.t, b3: fbo.b3.t });
       if (acc) {
         if (sub.i === 0) { gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.acc.f); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }

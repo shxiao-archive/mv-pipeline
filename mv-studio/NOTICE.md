@@ -14,7 +14,9 @@ reserved, and are not part of this skill.
 ## Interface style (screen treatment): adapted from world-execute-me-lyric-mv — © 2026 Nyankomint, code MIT
 
 https://github.com/Nyankomintsu/world-execute-me-lyric-mv. `template/engine/styles/interface/` ports and adapts its
-chat, cursor, plate, code and glyph components and its role-palette drawing context; `tools/check_flash.py`,
+chat, cursor, plate, code and glyph components and its role-palette drawing context; `styles/interface/kit.js` (ink-plate
+separation, parts, sagging type, masks), the time helpers in `core/util.js` (`withInserts`, `dropFrames`, `replay`,
+`tear`), `Z.wordsAt` and the `rays` / `streak` post light follow its v4 kit (art.js, type.js, draw.js, post.js, kit.js); `tools/check_flash.py`,
 `tools/check_no_lyrics.mjs` and the motion / storyboard ideas of the earlier lyric-mv skill also derive from it. Licence:
 `licenses/LICENSE-world-execute-me-lyric-mv.txt`. NOT included: its character silhouettes (CC BY-NC-SA 4.0), its copy and
 chat script, the song and lyrics (© Mili and rights holders), and its product branding (the interface here is generic;
@@ -69,7 +71,17 @@ mascot belongs to another company and is not drawn; the default puppet is an ori
 
 `styles/interface/` (§B) and `template/engine/styles/treatise/` follow **pdoom-video** by Giacomo Magnanini (MIT; licence in
 `licenses/LICENSE-pdoom-video.txt`): its palette, the spark and its deterministic particles, the plate idioms and the
-per-word karaoke rules, rewritten for this Canvas2D engine. Its song, lyrics, timing data and scene copy are not used.
+per-word karaoke rules, rewritten for this Canvas2D engine. `core/shade.js` (scene shaders, the engraving GLSL `hatch` /
+`engrave`, the capsule line batch) and `core/stroke.js` (single-stroke fonts) follow its engine toolbox. Its song,
+lyrics, timing data and scene copy are not used.
+
+## Single-stroke fonts (`template/engine/fonts/stroke/`)
+
+Unmodified SVG fonts converted by Windell H. Oskay (Evil Mad Scientist), taken from pdoom-video. Hershey Sans 1,
+Hershey Script 1, Hershey Serif Med: the Hershey Fonts were originally created by Dr. A. V. Hershey while working at the
+U. S. National Bureau of Standards; the format of the font data in this distribution was originally created by James
+Hurt, Cognition, Inc. (full use restriction in each file's metadata). EMS Readability and EMS Allure (Sheldon B.
+Michaels; derivatives of Source Sans Pro and Allura): SIL Open Font License 1.1, `fonts/stroke/OFL_ems.txt`.
 
 ## The papercraft style
 

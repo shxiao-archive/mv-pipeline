@@ -12,12 +12,17 @@
             camera: 'follow' (default: re-frames on every new message, frames the composer while the user types, floats)
                     | { follow: true, zoom, move, beat, focus: [[t, { x, y, zoom }], ...] } | { from:{x,y,zoom,rot}, to:{...}, ease },
             fx(ink, S, L, items) (extra drawing on top) }
- *     'me' lines type out with the voice (Z.charsAt); a 'you' message in msgs simply arrives at `at`.
+ *     'me' lines type out with the voice (Z.charsAt; `words: true`: word by word, Z.wordsAt); a 'you' message in msgs simply arrives at `at`.
  * 'ifPlate' a full-frame print: { state ('paper'), ground:{...IF.ground options}, camera, misreg (px of out-of-register jitter),
  *            layers:[ { kind:'keyword', line|text, at, step, x, y, maxW, maxSize, color, off, font }
  *                    | { kind:'band', line|text, x, y, size, align, color }
  *                    | { kind:'glyph', img, rect:[x,y,w,h], cell, reveal:[t0,t1], decode:[t0,t1], inks, ramp }
  *                    | { kind:'print', img, x, y, h, color, shadow:[dx,dy], shade, anchor, in:{at,dur,dy} }   (a flat-ink silhouette)
+ *                    | { kind:'inks', img, x, y, h, anchor, roles:['text','me','panel'], reveal:[[t0,t1,dir] | null, ...],
+ *                        offset:[[dx,dy], ...] (default: misreg, each plate further out), keyline, flip }   (the art's ink plates,
+ *                        each in a palette role: IF.inks in kit.js)
+ *                    | { kind:'limp', line|text, x, y, size (fit to maxW 1700), sag:[t0,t1], amount .7, drop 24, side 'left'|'right', font, color }
+ *                        (the word sags: kit.js IF.limp)
  *                    | { kind:'custom', fn(ink, S) } ] }
  * 'ifCode'  code / terminal underneath: { state, listing:{ x, y, lines:[str], current:[[t,i]], size, hi }, terminal:{ rect:[x,y,w,h],
  *            entries:[{ at, text|line, role, typeOver }], size, prompt }, odometer:{ x, y, from, to, t0, t1, digits, size }, camera }
@@ -93,7 +98,7 @@
         const txt = textOf(m); if (!txt) continue;
         const o = Object.assign({}, m, { text: txt, at, hot: m.hot ?? (L0 ? L0.kime : false) }); delete o.thinking; delete o.typing;
         for (const k of ['status', 'note', 'noteColor', 'tone']) if (Array.isArray(m[k])) o[k] = IF.at(m[k], t, undefined);   // per-time: status: [[t, 'sending'], [t2, 'failed']]
-        if (m.who === 'me' && L0 && m.n == null && m.instant !== true) o.n = Z.charsAt(m.line, t, { lead: 0.15 });
+        if (m.who === 'me' && L0 && m.n == null && m.instant !== true) o.n = (m.words ? Z.wordsAt : Z.charsAt)(m.line, t, { lead: 0.15 });
         if (m.thinking && t < m.thinking[1]) continue;                          // still thinking: the line is not out yet
         msgs.push(o);
       }
@@ -150,7 +155,7 @@
           IF.keyword(ink, l.upper ? s.toUpperCase() : s, t, Object.assign({}, l, { at, step, off }));
         } else if (l.kind === 'band') {
           const L0 = l.line != null ? Z.line(l.line) : null, s = textOf(l);
-          IF.band(ink, s, Object.assign({}, l, { n: L0 ? Z.charsAt(l.line, t, { lead: 0.15 }) : null }));
+          IF.band(ink, s, Object.assign({}, l, { n: L0 ? (l.words ? Z.wordsAt : Z.charsAt)(l.line, t, { lead: 0.15 }) : null }));
         } else if (l.kind === 'glyph') {
           const [x, y, w, h] = l.rect || [360, 90, 1200, 900];
           const rv = l.reveal ? E.outCubic(Z.inv(l.reveal[0], l.reveal[1], t)) : 1, dc = l.decode ? 1 - Z.inv(l.decode[0], l.decode[1], t) : 0;
@@ -161,6 +166,20 @@
           const draw = (col, dx, dyy) => Z.draw.sprite(ctx, Z.tinted(img, ink.col(col), 'ifp' + col + l.img + ink.p[col]), l.x + dx, l.y + dy + dyy, l.h, { anchor: l.anchor || [0.5, 1], alpha: ia, sway: l.sway ?? 0.004, t });
           const sh = l.shadow || [14, 14];
           draw(l.shade || 'bg', sh[0] + mis[0], sh[1] + mis[1]); draw(l.color || 'me', 0, 0);
+        } else if (l.kind === 'inks') {
+          const img = Z.imgSync(l.img); if (!img) continue;
+          const n = l.roles ? l.roles.length : 3, h = l.h ?? 900, w = l.w ?? h * img.width / img.height;
+          const [ax, ay] = l.anchor || [0.5, 1], rect = { x: (l.x ?? 960) - w * ax, y: (l.y ?? 1080) - h * ay, w, h };
+          const reveal = l.reveal && l.reveal.map(r => (r ? { k: E.outCubic(Z.inv(r[0], r[1], t)), dir: r[2] || 'down' } : null));
+          const offset = l.offset || Array.from({ length: n }, (_, j) => [mis[0] * j, mis[1] * j]);   // misreg: each plate a little further out
+          IF.inks(ink, img, rect, Object.assign({}, l, { reveal, offset }));
+        } else if (l.kind === 'limp') {
+          const s = textOf(l), k = l.sag ? E.inOutSine(Z.inv(l.sag[0], l.sag[1], t)) : 1, amt = l.amount ?? 0.7;
+          const size = Math.min(l.size ?? 200, ink.fit(s, l.maxW ?? 1700, { font: l.font || 'serif', weight: l.weight ?? 400 }));
+          IF.limp(ink, s, l.x ?? 960, l.y ?? 640, Object.assign({}, l, { size,
+            squash: u => k * amt * Math.pow(Math.sin(Math.PI * u), 1.5) * (l.side === 'right' ? u : l.side === 'left' ? 1 - u : 1),
+            shift: u => [0, k * (l.drop ?? 24) * Math.sin(Math.PI * u)],
+          }));
         } else if (l.kind === 'custom' && l.fn) l.fn(ink, S, mis);
       }
       ctx.restore();

@@ -49,7 +49,8 @@
     "sheet:cues": "node tools/cues_sheet.mjs",
     "regress:snap": "node tools/regress.mjs snap",
     "regress:compare": "python tools/compare_sheets.py",
-    "rig:test": "node tools/rig_selftest.mjs"
+    "rig:test": "node tools/rig_selftest.mjs",
+    "time:test": "node tools/time_selftest.mjs"
   },
   "devDependencies": {
     "playwright": "^1.63.0"

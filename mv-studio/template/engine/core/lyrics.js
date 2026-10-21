@@ -14,6 +14,8 @@
  *   Z.charsAt(i, t, o)        how many characters of line i are out at t: { lead 0.2, rate (chars/s) | over (s) }
  *                             default: the line types out over min(60 % of its duration, 0.09 s per char)
  *   Z.isEmph(i, k)            is character k of line i inside an *emphasis*?
+ *   Z.wordsAt(i, t, o)        like charsAt, but whole words: a word is out once its first character is sung
+ *   Z.wordIndex(i, word, last) index of a word in line i (letters only, any case); -1 if absent
  *   Z.charTimes(i)            per-character start times of line i from analysis/lyric_timing.json (or null)
  *
  * analysis/lyric_timing.json (text-free; tools/lrc.py) adds, per line, where its timing came from (`source`), how sure
@@ -104,4 +106,16 @@
     return over <= 0 ? n : Math.max(0, Math.min(n, Math.floor((t - t0) / over * n + 1e-6) + (t >= t0 ? 1 : 0)));
   };
   Z.isEmph = (i, k) => Z.line(i).emph.some(([a, b]) => k >= a && k < b);
+  // word by word (world-execute-me v4): a word comes out whole when its first character is sung (Latin text; a line
+  // without spaces falls back to characters). wordIndex(i, word, last): which word of line i a word is (by its letters)
+  Z.wordsAt = (i, t, o = {}) => {
+    const ch = [...Z.line(i).text], k = Z.charsAt(i, t, o);
+    if (!k || !ch.includes(' ')) return k;
+    let e = k; while (e < ch.length && ch[e] !== ' ') e++;
+    return e;
+  };
+  Z.wordIndex = (i, word, last = false) => {
+    const w = Z.line(i).text.split(' ').map(x => x.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()), q = String(word).toLowerCase();
+    return last ? w.lastIndexOf(q) : w.indexOf(q);
+  };
 })();

@@ -41,7 +41,7 @@
 
     const keys = [[0, 0.02]];
     let k = 0, chorusN = 0, idiom = 0;
-    const VERSE = [['trPlot', { mode: 'drop' }], ['trScope', {}], ['trForm', {}], ['trContour', {}], ['trPlot', { mode: 'walk', inv: true }]];
+    const VERSE = [['trPlot', { mode: 'drop' }], ['trEngrave', { form: 'bulb' }], ['trScope', {}], ['trForm', {}], ['trField', {}], ['trContour', {}], ['trPlot', { mode: 'walk', inv: true }]];
     secs.forEach((sec, si) => {
       const a = Math.max(open, sec.start), b = Math.min(END, sec.end ?? END);
       if (b <= a + 0.3) return;

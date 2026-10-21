@@ -86,14 +86,44 @@ shot('s08', B(22), B(23), 'ifPlate', { layers: [{ kind: 'keyword', line: 8, maxS
 - `ifPlate` — `layers`: `keyword` (letters land one by one across the first half of the sung line; `parts` for
   syllables; `off` shadow plate), `band` (a caption line in serif on a paper strip), `glyph` (a picture printed in
   characters from an image or a draw function; `reveal`, `decode` spans), `print` (a cut-out as a flat-ink silhouette
-  with its shadow plate; `in` entrance), `custom`; `misreg` (px of out-of-register jitter at 12 fps), `ground` options.
+  with its shadow plate; `in` entrance), `inks` (a three-ink cut-paper figure printed from its own plates, each in a
+  palette role, each with its wipe-in and misregistration: §A.4), `limp` (a word that sags), `custom`; `misreg` (px of
+  out-of-register jitter at 12 fps), `ground` options. `band` and `ifChat` 'me' messages take `words: true` (word by word).
 - `ifCode` — `listing` (strings you write for the moment, or a lyric index as a quoted string), `current` steps,
   `terminal` entries (`text` or `line`), `odometer`.
 - Helpers for your own scenes: `Z.IF.ink(ctx, state)` (role-coloured drawing), `Z.IF.chatLayout`, `drawThread`,
   `composer`, `toggle`, `slider`, `toast`, `card`, `ground`, `keyword`, `glyphPlate`, `listing`, `terminal`, `drawCursor`.
 - Chinese lyrics: `Z.IF.useChinese()` (the starter does it automatically when the lyrics have Han but no kana).
 
-### A.4 Grammar that works
+### A.4 The v4 tools (what lifted world-execute-me's v4 over its v3)
+
+```js
+// a chat that cuts away to a plate on a beat and comes BACK in the state it would have by then (not where it left)
+for (const s of Z.withInserts({ id: 's07', t0: B(20), t1: B(22), scene: 'ifChat', line: [6], args: {...}, moment: '...' },
+  [{ t0: B(21), t1: B(21) + P, shot: { scene: 'ifPlate', args: { layers: [{ kind: 'keyword', line: 6 }] }, moment: 'the word' } }])) S.push(s);
+// the figure printed from its plates: cream, then the accent, then the dark ink, each wiping in, out of register
+{ kind: 'inks', img: 'assets/char/bust.png', h: 860, roles: ['text', 'me', 'panel'],
+  reveal: [[B(8), B(8) + 0.5], [B(8) + 0.5, B(9), 'up'], [B(9), B(9) + 0.4, 'right']], keyline: { color: 'line', width: 3 } }
+{ kind: 'limp', line: 9, sag: [B(30), B(31)], amount: 0.8, side: 'right' }      // the word goes soft
+shot.fps = 8;                                                                      // the picture stutters, the lyric does not
+post: S => Object.assign({}, Z.IF.post, Z.tear(S.t, B(40)), { rays: 0.8, raysAt: [960, 400], streak: 0.3 })
+```
+- **Cut-aways keep time.** A plate is a word; when it ends, the conversation has gone on without you (`Z.withInserts`).
+- **Word by word** (`words: true`, `Z.wordsAt`): Latin lines come out whole words at their sung times; use it on lines
+  that are read, keep character typing for lines that are TYPED in the story.
+- **Ink plates, not pictures.** Art is a flat three-ink silhouette (cut paper: light / accent / dark; generate it so,
+  `kit.js` separates it once by brightness). Every plate takes a palette role, so the figure greys out, warms up or turns
+  red with the state like the UI. A plate can come in alone, be missing (a dashed ring where it should be), slip out of
+  register in the broken reprise. `IF.inkClip` (a glyph field only inside the dark ink) and `IF.part(img, [u, v])` (one
+  connected patch: her hand, an ear, cut out of the art, never drawn as a polygon) build on it.
+- **Time effects:** `fps` (dropped frames on one-way moves), `Z.replayMap` (the same gesture again from each start: a
+  stuck loop), `Z.tear` (ONE tear whose pattern holds 0.1 s; a seed per frame strobes), a trail (`ink.trail`).
+- **Light:** `bloom` + low `bloomThreshold` (cream and hot accent bloom), `rays` from a point, `streak`, `zoomBlur`
+  for a push. Build the light of a climax as a ratchet: it only rises inside a shot and falls on cuts. None is capped:
+  `check_flash.py` on the render.
+- **Type as a window:** `IF.masked(ink, content, mask)` (the picture seen through the letters).
+
+### A.5 Grammar that works
 
 - **Frame the thread.** A full window at 1920 px shows tiny text: push the camera to the region that matters (the newest
   line, the composer while the user types, a toggle). Change framing per phrase; a slow push inside every shot.
@@ -190,10 +220,46 @@ S.push({ id: 'p03', t0: B(6), t1: B(8), scene: 'trPlot', lyric: 'none', hud: fal
   title, field label, `stamp` text, `stampWord` index), `trPrompt` (tokens + next-token distribution; the other candidates
   are other words of the song), `trHook` (`n` 1–4), `trContour` (survey map, `seed`). Every plate takes `cam` (`from / to /
   ease / follow / reframe`).
+- **GPU plates:** `trEngrave` (an engraved 3D form under a raking light: burin lines that wrap it, line WIDTH is the
+  light; `form bulb | sphere | torus`, `turn`, `light [a0, a1]`, `freq`; the line is written under it) and `trField`
+  (57 000 hairlines combed round a pole that is the pen writing the line; it swells with the music). Both write the
+  lyric with `TR.write` (single-stroke `script` by default: `font: 'sans' | 'serif' | 'readable' | 'allure'`).
 - **New plates:** write a scene named `trXxx` that paints in this palette with the kit: `TR.text / measure` (width axis),
   `TR.lineWords` (per-word karaoke with your own `place(word)`), `TR.spark / trail`, `TR.grid / axes / cropMarks /
   callout / stamp / hatch / contours / readout`, `TR.cam`. Engraving = `TR.hatch` (parallel hairlines, tone by spacing).
 - **Copy:** write your own deadpan text (form titles, stamps, axis labels, footnotes) per film; never lyric text in code.
+
+### B.5 Shaders, hairlines and written type (what makes pdoom-video's plates)
+
+pdoom-video's plates are not Canvas2D drawings: each draws its subject with its own shader, shades it like an
+engraving, puts tens of thousands of hairlines on the GPU and writes its words with a pen. This engine has the same
+three tools (`core/shade.js`, `core/stroke.js`; reference 05 §12):
+
+```js
+Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
+  c.fillStyle = TR.PAL.ink; c.fillRect(0, 0, 1920, 1080);
+  Z.shade(c, `uniform float uTurn; uniform vec3 uBone, uInk2;
+    float map(vec3 p){ p.xz = rot2(uTurn)*p.xz; return smin(sdSphere(p - vec3(-.45, 0., 0.), .7), sdSphere(p - vec3(.45, 0., 0.), .7), .3); }
+    #include <raymarch>
+    vec4 frag(vec2 p){
+      vec3 ro = vec3(0., 0., 4.), rd = camRay(p, ro, vec3(0.), .8); float t = march(ro, rd, 10.); if (t < 0.) return vec4(0.);
+      vec3 x = ro + rd*t, n = normal(x); float light = lambert(n, vec3(-.6, .8, .5))*softShadow(x + n*.004, vec3(-.6, .8, .5), 12.);
+      return vec4(mix(uInk2, uBone, slice(x, vec3(0., 1., .3), 28., .07 + .93*light)), 1.);
+    }`, { uTurn: S.p * 0.8, uBone: [0.93, 0.91, 0.87], uInk2: [0.08, 0.08, 0.09] }, { rect: [460, 90, 1000, 800] });
+  TR.write(c, S.args.line, S.t, 960, 990, 64);
+} });
+```
+- **Engrave, do not render.** Tone is line WIDTH (`hatch`), never grey fill; lines follow the form (`slice`: the form cut
+  by parallel planes, or a coordinate of the surface: latitude, distance along a fibre); a hairline survives in the
+  dark (`.07 + .93 * light`); a second set crosses only the deepest shadows (`slice2`, `engrave`). One accent: the
+  signal on a rim, on a downbeat.
+- **Hairline fields** (`Z.lineBatch`): fibres, field lines, fur, flow, rain, wireframes. Thousands of short segments
+  at width < 1 px and alpha 0.2–0.5 with `blend: 'add'`: density becomes tone. Seed them on a jittered grid with
+  `Z.rnd(i, j)` (never `Math.random`), advance them through a field that is a function of t.
+- **Written type** (`TR.write`, `Z.stroke`): the pen writes the line as it is sung; the spark sits on the pen head; use
+  the head as a pole, a light, a camera target (`cam.follow`).
+- **No GPU:** Chrome falls back to SwiftShader; everything renders, slower. Give `Z.shade` a `rect` and keep marches ≤ 96
+  steps; check the frame time in `stills.mjs` output.
 - Chinese / Japanese lyrics: the starter calls `TR.useCJK()` (Noto fallbacks behind Archivo / Cormorant).
 
 ---

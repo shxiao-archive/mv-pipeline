@@ -59,6 +59,11 @@ JIZURA plan (shot.lyric) ─► TEXT layer (transparent) ◄─ shot.text(ctx,S)
 - `post`: object or `S => object`, merged over `Z.LOOK_DEFAULT` (+ `Z.LOOKS[section.look]` if you define looks and `Z.sectionAt`).
 - `trans`: `{type, dur, …params, post?: (k, P) => {}}` — transition *into* this shot, occupying `[t0, t0+dur]`.
 - `text: (ctx, S) => {}` custom typography on the text layer (after JIZURA). `hud: false` hides `Z.hud` for this shot.
+- `fps: 8` draws the scene at 8 frames a second (a dropped-frame stutter); `tmap: t => t'` draws it at another time
+  (`Z.replayMap(src, [t1, t2], len)`: the same gesture again from each start). The lyric layer and post keep song time.
+- `span: [t0, t1]`: `S.lt` / `S.p` run over the whole span. `Z.withInserts(shot, [{ t0, t1, shot: {...}, back }])` sets it:
+  the shot cuts away to an insert and comes back in the state it would have by then (ids `-b`, `-c`, ...; `back` = the
+  transition back, default a cut).
 
 **Globals the timeline may define**: `Z.LOOK_DEFAULT`, `Z.LOOKS` + `Z.sectionAt(t)` (section-based looks; also feeds `S.section`), `Z.globalFX(P, t)` (mutate post params every frame — 残光 used it for six big-downbeat flashes and a kick-driven shake `5·env.low(t)^3` during choruses only), `Z.hud(ctx, S)` (small corner typography on the text layer; skipped when `Z.VERTICAL`), `Z.CREDIT` (used by the title lockup and the vertical footer), `Z.VERTICAL_CFG` (the 9:16 build: §10, 08 §5). The template timeline also keeps the film's identity in `Z.TITLE`, `Z.TITLE_SUB` (HUD, end card, vertical header) and `Z.ARTIST` (artist name in the 9:16 header); `new_project.py --title --title-sub --artist --credit` writes them. `Z.NO_LYRICS` disables the lyric layer (vertical build).
 
@@ -120,6 +125,7 @@ New: `Z.transition('name', (ctx, A, B, k, o) => {})` — draw the blend of canva
 | `textCa` 0 | horizontal RGB split on the text layer |
 | `glitch` 0..1, `glitchSeed` | horizontal slice displacement (seed auto 24/s) |
 | `zoomBlur` 0, `zoomCenter [.5,.5]` | radial zoom blur (14 taps) |
+| `rays` 0, `raysAt [960,540]` px; `streak` 0 | light rays of whatever blooms, outwards from a point; a horizontal streak through it. Both light only what is dark, so a flat colour keeps its hue; they use the bloom pyramid even when `bloom` is 0. Not capped by any flash limit: run `check_flash.py` |
 | `bloom` 0.35, `bloomThreshold` 0.72, `beatBloom` | bright pass + 3-level blur, added back — the bright pass keys on max(R,G,B), so at 0.72 every pixel of a blue sky or white cloud blooms and a daylight frame turns milky: on daylight plates use `bloom` 0.1–0.2, `bloomThreshold` 0.9–0.95, `beatBloom` ≤ 0.1, `vignette` ≤ 0.15 and no `exposure` pushes in `Z.globalFX` (e.g. `Z.LOOK_DEFAULT = { boil: 1.0, bloom: 0.15, bloomThreshold: 0.93, grain: 0.04, vignette: 0.1, lutMix: 0 }`) |
 | `flash` 0, `flashColor [1,1,1]` | mix to colour (keep ≤ 3 full-frame flashes/s) |
 | `invert` 0, `vignette` 0.35, `grain` 0.06 (re-seeded 24/s), `fade` 0 (to black), `letterbox` 0..1 (2.39:1 bars), `shake [x,y]` px, `textOpacity` 1 | finish |
@@ -266,9 +272,10 @@ The library was written for 残光; before reusing a scene with new assets, chec
 ## 12. mv-studio additions (core)
 
 - **Style packs** load after the scene library (`index.html`, `vertical.html`): `styles/interface/*` (`Z.IF`, scenes
-  `ifChat ifPlate ifCode`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
+  `ifChat ifPlate ifCode`; `kit.js`: ink plates `IF.inks / inkClip / part`, sagging type `IF.limp`, `IF.masked`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
   zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
-  karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`,
+  karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
+  and the GPU plates `trEngrave trField`, `TR.write` (a line written by the pen),
   per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
   `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
 - **Rigs, particles, model sheets** (`core/rig.js`, method in `references/10`): `Z.rig` (joint-table blending
@@ -284,6 +291,23 @@ The library was written for 残光; before reusing a scene with new assets, chec
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.
+- **Time and words** (`core/util.js`, `core/lyrics.js`; after world-execute-me v4): `Z.dropFrames(t, fps, from)`,
+  `Z.replay(t, starts, len)` / `Z.passOf(t, starts)` / `Z.replayMap`, `Z.tear(t, at, amount, hold)` (post params of ONE
+  glitch tear that holds its pattern: `post: S => Object.assign({}, look, Z.tear(S.t, at))`), `Z.withInserts`;
+  `Z.wordsAt(i, t)` (words come out whole when their first character is sung), `Z.wordIndex(i, word, last)`.
+  Self-test: `node tools/time_selftest.mjs`.
+- **Scenes with their own GLSL** (`core/shade.js`): `Z.shade(ctx, frag, uniforms, { rect, ss })` runs a fragment
+  shader that defines `vec4 frag(vec2 p)` (p = scene px under the ctx transform: cameras apply) and lands on the ctx
+  like any drawing; `Z.glScene(name, { frag, uniforms(S), before, after })`. `Z.GLSL` is in every shader: noise, 2D/3D
+  distances, `smin`, `lineAA`, the ENGRAVING set (`hatch`, `hatchD`, `engrave`, `slice` / `slice2` = burin lines that
+  wrap a 3D form, `stipple`), `lambert`, `rim`, `camRay`; `#include <raymarch>` after your `map()` adds `march`,
+  `normal`, `softShadow`, `ao`. `Z.lineBatch(cap)`: tens of thousands of anti-aliased capsule hairlines per frame on
+  the GPU (`seg`, `poly`, `draw(ctx, { blend: 'add' })`). Without a GPU Chrome uses SwiftShader: correct, slower
+  (measured here: a raymarched 1400×840 plate ~0.3 s/frame, 57k hairlines ~0.4 s/frame); keep `rect` tight.
+- **Single-stroke fonts** (`core/stroke.js`, fonts in `engine/fonts/stroke`: `sans script serif` Hershey, `readable
+  allure` EMS, OFL): `await Z.stroke.load([...])` in a scene `init`, `Z.stroke.layout(text, font, capPx, o)`,
+  `Z.stroke.draw(ctx, st, x, y, { len })` → the pen head, `Z.stroke.at(st, len)`, `Z.stroke.lenAt(st, i, t)` (written as
+  it is sung). Latin text only.
 - **Layer hook** `Z.layerFX({ scene, text, fg, P, shot }, t)`: runs after the Canvas2D layers are drawn and before the
   WebGL post; may draw over / displace the layers and edit post params `P` (signal's degradation uses it).
 - **Extra LUT ramps** `Z.RAMPS = { name: [[k, '#hex'], ...] }` (defined before `main.js` runs) join the atlas; the atlas has
