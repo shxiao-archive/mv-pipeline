@@ -113,6 +113,7 @@ no green fringes; nothing imitates an existing character.
 
 - **Scene library first**: `references/05-engine.md` lists every scene in `engine/scenes/*.js` with args. Most shots are `illust` (background + camera move + characters + fx). Adapt existing special scenes before writing new ones.
 - **New scenes** for the song's signature moments (a new song needs new metaphors: rain → ink, light → fireflies, broken glass → paper, etc.). One file per area, registered with `Z.scene(name, {preload, init, draw})`.
+- **The film's own scene file** `engine/scenes/<film>.js`: its set pieces and the 3–6 events of every shot are drawn there, `timeline.js` keeps the edit (`references/10-craft.md` §7: 30+ own lines per shot; `tools/storyboard.mjs` warns when it is missing).
 - **JIZURA**: plans per section + curation (`references/06-jizura.md`).
 - **3D**: 1–2 Blender sequences for the instrumental showcases (`references/07-blender-3d.md`); run them with `python tools/blender_run.py blender/shots/<shot>.py -- --mode full --res 100` (it finds Blender; `--res 100` = true 1080p).
 - Each scene author keeps a test timeline `engine/tests/<name>.js` and renders stills with `node tools/stills.mjs --url "engine/index.html?tl=tests/<name>.js" --times …`.

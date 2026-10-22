@@ -7,8 +7,12 @@ From analysis/audio.json sections it writes into --out:
   sheets/NN_<label>/sheet_00.jpg   one contact sheet per section: 25 frames spread over it (tools/review_sheets.py)
   strips/<t>.jpg                   2 s at 8 fps as a 8 x 2 filmstrip, at the start of every chorus / hook / drop section
                                    and at each --hero time (song seconds): how the fastest moves and the hero moments move
+  cuts/<t>.jpg                     every frame from 0.3 s before to 0.3 s after each shot cut and lyric cut (plan/shots.json)
+                                   and each time render/pops.json or render/<video>_flash.json flags: transitions,
+                                   overlapping lyrics, pops (at most 40, at least 0.6 s apart)
   stills/<t>.png                   a full-resolution frame at the middle of each section: edges, type, banding, aliasing
-  index.md                         the list with times and section names (no lyric text), for the jury prompt
+  index.md                         the list with times and section names (no lyric text) and tools/motion_check.py's
+                                   motion per second, for the jury prompt
 Times are song seconds; the file's mv_start tag (or --start) maps them to the video. Needs ffmpeg.
 mv-studio (MIT). Adapted from the review process of mg-styles-15 (Vincentwei1021, MIT).
 """
@@ -34,6 +38,23 @@ def plan(sections, hero, duration):
     return sheets, strips, stills
 
 
+def cut_plan(cuts, flags, cap=40, gap=0.6):
+    """cuts [t], flags [(t, why)] -> [(t, why)]: shot cuts first, then flagged times, at least `gap` s apart, at most `cap`."""
+    keep = []
+    for t, why in [(c, "cut") for c in sorted(cuts)] + sorted(flags):
+        if all(abs(t - k) >= gap for k, _ in keep):
+            keep.append((round(t, 2), why))
+    keep.sort()
+    return keep if len(keep) <= cap else [keep[round(i * (len(keep) - 1) / (cap - 1))] for i in range(cap)]
+
+
+def load(p: Path):
+    try:
+        return json.loads(p.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return {}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("video", nargs="?")
@@ -46,6 +67,8 @@ def main():
         secs = [{"label": "intro", "start": 0, "end": 10}, {"label": "chorus", "start": 10, "end": 20}, {"label": "outro", "start": 20, "end": 30}]
         sh, st, sl = plan(secs, [25.5], 28.0)
         ok = [n for n, *_ in sh] == [1, 2, 3] and sh[2][3] == 28.0 and st == [10, 25.5] and sl == [5.0, 15.0, 24.0]
+        ok = ok and cut_plan([10.0, 10.5, 15.0, 22.0], [(15.3, "pop"), (18.0, "flash")]) == [(10.0, "cut"), (15.0, "cut"), (18.0, "flash"), (22.0, "cut")]
+        ok = ok and len(cut_plan([i * 2.0 for i in range(100)], [])) == 40
         print(f"[jury_pack] selftest {'ok' if ok else 'FAIL'}"); sys.exit(0 if ok else 1)
     if not a.video:
         ap.error("the video is required")
@@ -76,14 +99,33 @@ def main():
         subprocess.run([FF, "-v", "error", "-y", "-ss", f"{max(0.0, t - off):.3f}", "-t", "2", "-i", str(video), "-vf", "fps=8,scale=480:-2,tile=8x2",
                         "-frames:v", "1", str(p)], check=True)
         lines.append(f"- `strips/{p.name}` from {fmt(t)}")
+    sp = load(ROOT / "plan" / "shots.json") or {}
+    shots = sp.get("shots") or []
+    pops = [(f["t"], f"pop ({f.get('kind', '')})") for f in (load(ROOT / "render" / "pops.json") or {}).get("found") or []]
+    fl = load(ROOT / "render" / f"{video.stem}_flash.json") or {}
+    flash = [(a, "flash warning") for a, _ in fl.get("warning_ranges") or []] + [(a, "overexposed") for a, _ in fl.get("overexposed") or []]
+    lyric = [(t, "lyric cut") for t in sp.get("lyricCuts") or [] if t < duration - 0.3]   # JIZURA cut changes (tools/storyboard.mjs)
+    cuts = cut_plan([s["t0"] for s in shots if 0.3 < s.get("t0", 0) < duration - 0.3], pops + flash + lyric)
+    lines += ["", "## Around the cuts (every frame, 0.3 s before to 0.3 s after; read left to right, top row first)", "",
+              "Transitions, lyrics that overlap while one line leaves and the next comes in, pops and flashes show here.", ""]
+    (out / "cuts").mkdir(parents=True, exist_ok=True)
+    for t, why in cuts:
+        p = out / "cuts" / f"{t:07.2f}.jpg"
+        subprocess.run([FF, "-v", "error", "-y", "-ss", f"{max(0.0, t - off - 0.3):.3f}", "-t", "0.6", "-i", str(video), "-vf", "scale=320:-2,tile=9x2",
+                        "-frames:v", "1", str(p)], check=True)
+        lines.append(f"- `cuts/{p.name}` {why} at {fmt(t)}")
     lines += ["", "## Full-resolution stills (section middles)", ""]
     (out / "stills").mkdir(parents=True, exist_ok=True)
     for t in stills:
         p = out / "stills" / f"{t:07.2f}.png"
         subprocess.run([FF, "-v", "error", "-y", "-ss", f"{max(0.0, t - off):.3f}", "-i", str(video), "-frames:v", "1", str(p)], check=True)
         lines.append(f"- `stills/{p.name}` at {fmt(t)}")
+    mo = subprocess.run([sys.executable, str(ROOT / "tools" / "motion_check.py"), str(video), "--start", f"{off:.3f}"],
+                        capture_output=True, text=True, encoding="utf-8", errors="replace").stdout.strip()
+    if mo:
+        lines += ["", "## Motion per second (tools/motion_check.py; a long bar = much changes on screen)", "", "```", mo, "```"]
     (out / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"[jury_pack] {len(sheets)} section sheets, {len(strips)} filmstrips, {len(stills)} stills -> {out / 'index.md'}")
+    print(f"[jury_pack] {len(sheets)} section sheets, {len(strips)} filmstrips, {len(cuts)} cut strips, {len(stills)} stills -> {out / 'index.md'}")
 
 
 if __name__ == "__main__":

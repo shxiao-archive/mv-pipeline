@@ -21,6 +21,8 @@
  *          (< max(0.7 s, 0.09 s per character)) · line cues without a picture hint (analysis/cues.json)
  *          · characters placed the same way (ERROR with --strict): over half of the character shots centred (|u - 0.5| < 0.08), or a third
  *            of the frame never used (u < 0.4 / u > 0.6), with 4+ character shots (args.chars x or pin)
+ *          · 12+ shots and no scene file of the film's own in engine/scenes/ (the depth the reference films have comes
+ *            from per-shot drawing there, references/10 §7)
  * Tolerances from project.json -> review: { cutTolerance: 0.04, cueTolerance: 0.15, grid: 'half' | 'beat', minShotFrames: 3 }.
  *
  * mv-studio (MIT).
@@ -88,6 +90,13 @@ if (placed.length >= 4) {
   if (centred > placed.length / 2 || !left || !right)
     (strict ? err : warn)('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
 }
+// the template's scene files; a film's set pieces and per-shot events go in a file of its own. A short test timeline
+// (the demo has 11 shots) is spared
+const STOCK_SCENES = new Set(['scenes.js', 'intro.js', 'typo.js', 'glass.js', 'dark.js', 'night.js', 'memory.js', 'meta.js']);
+const sceneDir = path.join(ROOT, 'engine', 'scenes');
+const ownScenes = fs.existsSync(sceneDir) ? fs.readdirSync(sceneDir).filter(f => f.endsWith('.js') && !STOCK_SCENES.has(f)) : [];
+if (shots.length >= 12 && !ownScenes.length)
+  warn('depth', `${shots.length} shots and no scene file of the film's own in engine/scenes/: draw its set pieces and 3-6 events per shot there, keep timeline.js for the edit (references/10 §7: 30+ own lines per shot)`);
 
 // ---- outputs
 const rows = shots.map((s, k) => {
@@ -96,7 +105,7 @@ const rows = shots.map((s, k) => {
     line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined, animFaces: s.animFaces || undefined };
 });
 fs.mkdirSync(path.join(ROOT, 'plan'), { recursive: true });
-fs.writeFileSync(path.join(ROOT, 'plan', 'shots.json'), JSON.stringify({ generator: 'tools/storyboard.mjs', duration: P.duration, fps, shots: rows }, null, 1) + '\n');
+fs.writeFileSync(path.join(ROOT, 'plan', 'shots.json'), JSON.stringify({ generator: 'tools/storyboard.mjs', duration: P.duration, fps, shots: rows, lyricCuts: P.lyricCuts || [] }, null, 1) + '\n');
 const esc = s => String(s ?? '').replace(/\|/g, '\\|');
 const md = [
   '# Storyboard', '',

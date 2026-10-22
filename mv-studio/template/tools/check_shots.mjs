@@ -12,7 +12,10 @@
  *            3+ times in 3 s (inside a shot or across short shots); sampled at --sprite-fps (default 4, 0 = off);
  *            an ERROR with --strict
  *          · LYRICS OUTSIDE THE SAFE AREA: lyric-layer pixels (JIZURA + shot.text, not the HUD) in the outer 5 % of the frame,
- *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen.
+ *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen; a
+ *            JIZURA cut is judged while its words hold (glyphs flying off the frame in an enter / exit are motion)
+ *          · LYRIC OVERLAP: a JIZURA cut comes in by one of JIZURA's own transitions, which draws the outgoing and the
+ *            incoming line on top of each other (TEXT_TRANS in timeline.js); an ERROR with --strict
  * Exit 1 on any ERROR.
  *
  * mv-studio (MIT).
@@ -43,6 +46,17 @@ export function spriteFlips(samples) {
 }
 const short = p => p.split('/').pop().replace(/\.\w+$/, '');
 
+// shots [{ id, t0, t1, plan }] (plan null = no JIZURA lyrics), cuts { plan: [{ index, start, trans }] } (trans = a
+// registered JIZURA transition or null) -> [{ id, t, msg }]
+export function lyricOverlaps(shots, cuts) {
+  const out = [];
+  for (const s of shots) for (const c of (s.plan && cuts[s.plan]) || [])
+    if (c.trans && c.index > 0 && c.start >= s.t0 && c.start < s.t1) out.push({ id: s.id, t: c.start, msg: `cut ${c.index} comes in by the JIZURA transition '${c.trans}' over the previous line` });
+  return out;
+}
+// a cut's words come in or go out (enter / exit, plus a frame or two of ghost lag)
+export const moving = (c, t) => !!c && (t - c.start < c.inDur + 0.1 || c.end - t < c.outDur + 0.1);
+
 if (flag('selftest')) {
   const seq = (ps, id = 's1', dt = 0.25) => ps.map((p, i) => ({ t: i * dt, p, id }));
   const ok = [
@@ -50,6 +64,9 @@ if (flag('selftest')) {
     spriteFlips(seq(['a', null, null, 'a', 'b'])).length === 0,                                          // a gap is not a change
     spriteFlips(seq(['a', 'b', 'c', 'd'], 's1', 0.6)).some(f => f.kind === 'rapid'),                  // 4 sprites in 1.8 s
     spriteFlips(seq(['a', 'b', 'a'], 's1', 3)).length === 0,                                             // a return after 3 s is a motif
+    lyricOverlaps([{ id: 's1', t0: 0, t1: 4, plan: 'main' }], { main: [{ index: 0, start: 0, trans: 'x' }, { index: 1, start: 2, trans: 'x' }] }).length === 1,
+    lyricOverlaps([{ id: 's1', t0: 0, t1: 4, plan: null }], { main: [{ index: 1, start: 2, trans: 'x' }] }).length === 0,
+    moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.7) && !moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.0),
   ];
   console.log(`[check_shots] selftest ${ok.every(Boolean) ? 'ok' : 'FAIL ' + JSON.stringify(ok)}`); process.exit(ok.every(Boolean) ? 0 : 1);
 }
@@ -95,7 +112,10 @@ if (spriteFps > 0) {                                           // which sprite i
       const { p, out, all } = await E.page.evaluate(async t => {
         let best = null, out = 0, all = 0;
         window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
-        window.Z.onText = c => {                                   // lyric pixels outside the 90 % title-safe box
+        window.Z.onText = (c, shot) => {                           // lyric pixels outside the 90 % title-safe box
+          const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main');
+          const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
+          if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion
           const s = window.__safe || (window.__safe = Object.assign(document.createElement('canvas'), { width: 192, height: 108 }));
           const x = s.getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, 192, 108); x.drawImage(c, 0, 0, 192, 108);
           const a = x.getImageData(0, 0, 192, 108).data;
@@ -109,6 +129,18 @@ if (spriteFps > 0) {                                           // which sprite i
     }
   }
   for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words: pick a calmer plan or reframe)`);
+  const jz = await E.page.evaluate(() => {
+    const Z = window.Z, JZ = window.JZ, out = { shots: [], cuts: {} };
+    if (!JZ || !JZ.plans) return out;
+    for (const [name, P] of Object.entries(JZ.plans))
+      out.cuts[name] = P.plan.cuts.map(c => ({ index: c.index, start: c.start + (Z.LYRIC_OFFSET || 0), trans: c.trans && window.J.TRANS[c.trans] ? c.trans : null }));
+    for (const s of Z.SHOTS || []) {
+      const L = s.lyric === undefined ? 'front' : s.lyric;
+      out.shots.push({ id: s.id, t0: s.t0, t1: s.t1, plan: !L || L === 'none' ? null : typeof L === 'object' ? L.plan || 'main' : s.plan || 'main' });
+    }
+    return out;
+  });
+  for (const o of lyricOverlaps(jz.shots.filter(s => !only || only.has(s.id)), jz.cuts)) (flag('strict') ? errors : warns).push(`${o.id} @${o.t.toFixed(2)}: LYRIC OVERLAP ${o.msg} (TEXT_TRANS = false in timeline.js; references/06)`);
   for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
 }
 const badFonts = await E.page.evaluate(() => [...document.fonts].filter(f => f.status === 'error').map(f => `${f.family} ${f.weight}`));

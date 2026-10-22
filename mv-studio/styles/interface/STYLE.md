@@ -285,6 +285,12 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
 Targets: cut every line or two; 3–6 events per shot (a message, a reply, a reaction of the client, a plate's landing
 letters); every plate a visual pun, never a literal illustration.
 
+Those events are drawn in the film's own scene file (`engine/scenes/<film>.js`, references/10 §7), not set as
+arguments of the starter's scenes in `timeline.js`: Screen, the conversation's beats (a message that arrives word by
+word, the cursor that hesitates, an error that spreads, a plate that lands and is struck by the next event); Treatise,
+one drawing module per plate with its own camera. In the acceptance test the screen film kept everything in
+`timeline.js` (9 own lines per shot) and the treatise film had too thin a plate file (22): the bar is 30.
+
 ## Signature features (the jury judges against these; references/09 §8)
 
 Screen:

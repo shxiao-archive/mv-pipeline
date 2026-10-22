@@ -109,7 +109,7 @@ line, plus trial placements in two sets. It finds what no single pack builder ca
    follow-through, a camera that is always alive, everyone reacting, text rules, the lyric band, no dead 0.5 s).
 6. Work in three passes and log each in `docs/blocks/<id>.md`: **A rough (~30 min)**: every shot exists, every cue has
    the right picture, timing right, no gaps; **B refine (~60 min)**: performance, depth, light, particles, impacts,
-   transitions; **C polish (~30 min)**: every cue at full size, `pops.mjs`, the budget, another look. Do not wait for the
+   transitions, drawn in the block's own scene file (references/10 §7: 30+ own lines per shot, not more arguments); **C polish (~30 min)**: every cue at full size, `pops.mjs`, the budget, another look. Do not wait for the
    neighbours.
 7. Open every image you render (Read it) and check it against the storyboard; at least two full rounds.
 8. Return: shot count and summary, differences from the storyboard, the seam / transition check, known problems,

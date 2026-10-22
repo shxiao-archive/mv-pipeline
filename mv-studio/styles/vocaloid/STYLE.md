@@ -172,7 +172,10 @@ with the generator, so everything else stays identical and the whole picture can
    - keep each box **inside the face**: a box that crosses the chin or the face outline got key-coloured smudges;
    - an eye box must take in the upper lid line: one that stopped short of the fringe came back with the eyes open in
      4 of 4 takes; one that took in some fringe closed them and softened that bit of fringe;
-   - takes differ a lot: `"takes": 3`, and look at all of them (`assets/gen/raw/<id>__t*.png`);
+   - takes differ a lot: `"takes": 3`, and look at all of them on `assets/gen/_review_<id>_takes.jpg` (the box from the
+     base and from every take). `post` keeps the take that changed most, which is not always the closed eyes: set
+     `"take": 2` on the row to keep another, and run `post` again;
+   - if no take closed the eyes: a taller eye box (from mid-fringe to below the lower lashes) and `"noise": 0.15`;
    - the open mouth and the smile came out clean on the first good box; the blink was the hard one.
 3. In the shot: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { whole: true, blink: 'assets/gen/CH03_blink.png',
    mouth: 'assets/gen/CH03_open.png', expr: { smile: 'assets/gen/CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]],
@@ -222,6 +225,9 @@ Tegaki:
 - **Set pieces for the song's own metaphors** (custom scenes), one or two instrumental showcases (Blender toon 3D or 2.5D).
 - **Beat-locked editing**: cuts on lyric onsets and downbeats; quiet verses with chosen holds, choruses that hit.
 - An **ending**: a composed last picture with a subject, depth and light.
+- **Drawn depth, not only arguments**: the film's own `engine/scenes/<film>.js` (references/10 §7) draws its set pieces
+  and the 3–6 events of each shot: props and light that react on their cues, things that cross the painted plates
+  (pinned with `D.coverPt`), a foreground layer, the lead's reactions. 30+ own lines per shot.
 
 Signal:
 - **Speed is editing**: motifs, fillers and 1–2 frame inserts on a beat grid; the tiers (T1 sprint, T2, T3 slow, hold)

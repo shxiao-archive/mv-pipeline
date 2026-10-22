@@ -62,8 +62,9 @@ V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"k
 
 
 def own_files(proj):
-    """The project's engine files the agent wrote or changed: (path, own lines) with lines that are not in the template's
-    counterpart (for timeline.js: the style's starter) left out, so a shipped starter scores ~0."""
+    """The project's engine files the agent wrote: (path, own lines). timeline.js (compared with the style's starter by
+    the caller, so a shipped starter scores ~0) and files the template does not have; a template file the project
+    carries (core/, styles/, the stock scenes) is the template's."""
     eng, out = proj / "engine", []
     if not eng.is_dir():
         return out
@@ -71,14 +72,13 @@ def own_files(proj):
         rel = f.relative_to(eng)
         if rel.parts[0] in {"vendor", "fonts", "starters"}:            # starters/: the scaffold keeps the demo there
             continue
-        base = ENGINE / rel
-        if rel.as_posix() == "timeline.js":
-            base = None                                                   # compared with the starter by the caller
-        ref = set(l.strip() for l in base.read_text(encoding="utf-8", errors="ignore").splitlines()) if base and base.is_file() else set()
+        # shortcut: edits to a template file are not counted: a copy from an older skill differs line by line (drift, not
+        # the agent's work); count them against the run's own skill snapshot once runs keep one
+        if rel.as_posix() != "timeline.js" and (ENGINE / rel).is_file():
+            continue
         lines = [l for l in f.read_text(encoding="utf-8", errors="ignore").splitlines() if l.strip() and not l.strip().startswith(("//", "*", "/*"))]
-        mine = [l for l in lines if l.strip() not in ref]
-        if mine:
-            out.append((rel.as_posix(), mine))
+        if lines:
+            out.append((rel.as_posix(), lines))
     return out
 
 

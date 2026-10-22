@@ -1,6 +1,6 @@
 # 04 — Asset generation (characters, backgrounds, props)
 
-Contents: 0 Start here: the generation table (`tools/gen_table.py`) · 1 What to generate (shot-driven list) · 2 `tools/imagegen.py` · 3 Codex CLI gotchas · 4 Alpha: native vs chroma key (`tools/alpha_matte.py`) · 5 Character consistency method · 6 Style-block templates · 7 Backgrounds and props · 8 Review · 9 Other image models · 10 Pitfalls · 11 Grok · 12 NovelAI · 13 Choosing the generator (`tools/artgen.py`)
+Contents: 0 Start here: the generation table (`tools/gen_table.py`) · 0b Other styles · 1 What to generate (shot-driven list) · 2 `tools/imagegen.py` · 3 Codex CLI gotchas · 4 Alpha: native vs chroma key (`tools/alpha_matte.py`) · 5 Character consistency method · 6 Style-block templates · 7 Backgrounds and props · 8 Review · 9 Other image models · 10 Pitfalls · 11 Grok · 12 NovelAI · 13 Choosing the generator (`tools/artgen.py`)
 
 The method is model-agnostic: **one master reference image + a verbatim character sentence + a verbatim style block** for every pose, transparent output via native alpha or a flat chroma-key background. The kit wraps the **Codex CLI**'s native image tool because that is what 残光 used; §9 covers other generators.
 
@@ -57,6 +57,52 @@ Sheet layout (iteration-4 run): a row of 4 busts (`"cells": [...], "cols": 4, "s
 take of a sheet that only listed the cell names came back with no blink and no smile) and budget a second take.
 Busts drawn touching merge into one figure: `post` then cuts the sheet's own `cols` grid. A row's `size`, `aspect`,
 `seed` and `negative` pass through to the generator.
+
+## 0b. Other styles: one lock and one table per style
+
+The sections below are written for tegaki. The other styles that use generated art need other locks; the table works
+the same (`jobs` → generate → `post` → review sheets). These examples compile with `gen_table.py jobs`; they have not
+been through a full film yet, so take a second batch after the first review sheet. Write your own words in the locks.
+
+**Signal** (`vocaloid:signal`, STYLE.md B.4): NEUTRAL images that the code recolours (heat ramps, channel splits), so
+no colour cast, mid contrast, no grade in the picture. Places and objects read best from Codex or Grok (NovelAI is weak
+at photographic plates and legible objects, §12); the character can stay on the film's generator.
+```json
+{ "locks": { "NEUTRAL": "photograph-like still, natural daylight colour, mid contrast, no colour grading, no colour cast, sharp focus",
+             "CHAR": "...", "ISO": "the subject alone on a flat #00FF00 background, nothing else", "EMPTY": "no people, no text" },
+  "out": "assets/gen",
+  "rows": [
+    { "id": "PL01", "kind": "world", "locks": ["NEUTRAL", "EMPTY"], "subject": "an empty concrete corridor, ceiling lamps, a door at the end", "aspect": "16:9" },
+    { "id": "OBJ01", "kind": "world", "locks": ["NEUTRAL", "ISO"], "subject": "a portable cassette recorder, three-quarter view", "transparent": true },
+    { "id": "CH30", "kind": "char", "locks": ["NEUTRAL", "CHAR"], "subject": "extreme close-up of her eye, looking left", "aspect": "16:9" },
+    { "id": "SIL01", "kind": "world", "locks": ["NEUTRAL", "ISO"], "subject": "the silhouette of a bird in flight, wings up", "transparent": true } ] }
+```
+Motion as separate rows (the same bird, wings level and wings down), states as variant rows (`"edit": "soiled, dust on it"`).
+
+**Interface** (screen / treatise, its STYLE.md, Ink plates): art is a flat three-ink cut-paper figure that `kit.js`
+splits by brightness into plates, so ask for exactly three flat tones and nothing in between. Codex or Grok first
+(flat graphic shapes); on NovelAI lead with tags (`silhouette, flat color, limited palette, no gradients`) and budget
+takes.
+```json
+{ "locks": { "INKS": "flat cut-paper figure in exactly three flat tones (light cream, mid orange, near-black), hard edges, no gradients, no shading, no outlines, no texture",
+             "ISO": "the subject alone on a flat #00FF00 background, nothing else" },
+  "rows": [
+    { "id": "INK01", "kind": "world", "locks": ["INKS", "ISO"], "subject": "a woman at a desk seen from the side, one hand on a keyboard", "transparent": true },
+    { "id": "INK02", "kind": "world", "locks": ["INKS", "ISO"], "subject": "an open hand reaching up", "transparent": true } ] }
+```
+Look at it as the plates (`kit.js` separation in a test sheet): a fourth tone or a soft gradient turns into a ragged
+plate edge.
+
+**Stage** (its STYLE.md, cut-outs that join the painted troupe): flat-colour picture-book characters with ink outlines,
+plain background, matching the watercolour `ST.paint` sets.
+```json
+{ "locks": { "BOOK": "picture-book illustration, flat watercolour-like colour areas, thin dark ink outline, simple rounded shapes, paper white",
+             "ISO": "the subject alone on a flat #00FF00 background, nothing else" },
+  "rows": [
+    { "id": "CAST01", "kind": "world", "locks": ["BOOK", "ISO"], "subject": "an old lighthouse keeper with a lantern, full body, front view", "transparent": true } ] }
+```
+Line it up with the troupe in a test still (`lineup.py` against a frame) before ordering the rest: the outline weight
+and the size of the colour areas must match the drawn puppets.
 
 ---
 

@@ -83,7 +83,13 @@ export async function openEngine({ url = 'engine/index.html', width = 1920, heig
         });
         const lines = (Z.LYR || []).map(L => ({ i: L.i, t: L.t, end: L.end, n: [...L.text].length, kime: L.kime, source: L.source || null, conf: L.conf ?? null }));
         const cues = Z.cues ? Z.cues().map(c => ({ id: c.id, t: c.t, kind: c.kind, hint: c.hint || '', source: c.source || '' })) : [];
-        return { shots, lines, cues, beats: (Z.audio && Z.audio.beats) || [], duration: window.__zankoMeta.duration,
+        // song times where a JIZURA lyric cut starts inside a shot that shows that plan (split lines included)
+        const lyricCuts = new Set();
+        if (jz) for (const s of Z.SHOTS || []) {
+          const L = s.lyric === undefined ? 'front' : s.lyric, P = L && L !== 'none' && window.JZ.plans[typeof L === 'object' ? L.plan || 'main' : s.plan || 'main'];
+          if (P) for (const c of P.plan.cuts) { const t = c.start + (Z.LYRIC_OFFSET || 0); if (c.index > 0 && t > s.t0 && t < s.t1) lyricCuts.add(+t.toFixed(3)); }
+        }
+        return { shots, lines, cues, lyricCuts: [...lyricCuts].sort((a, b) => a - b), beats: (Z.audio && Z.audio.beats) || [], duration: window.__zankoMeta.duration,
           fps: window.__zankoMeta.fps || 30, project: Z.PROJECT || {}, offset: Z.OFFSET || 0 };
       });
     },

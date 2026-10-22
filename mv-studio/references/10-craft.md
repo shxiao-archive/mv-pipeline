@@ -214,6 +214,23 @@ falls. The picture tells the joke; text in the frame only when the joke needs a 
 
 Each style's STYLE.md gives its own asset list and targets. Hitting them takes budget: plan it with the user (§9).
 
+**Where that code goes: a scene file of the film's own.** In the iteration-4 acceptance test the two films that reached
+the bar each wrote `engine/scenes/<film>.js` (papercraft 63 own lines per shot, stage 44); the three that stayed at
+9–22 only filled stock scenes with arguments in `timeline.js` (a background, a camera move, a cut-out, the same few
+effects in every shot). So every film:
+1. creates `engine/scenes/<film>.js` (one IIFE, like the template's scene files; a `<script>` line in
+   `engine/index.html` after the others) holding its library (the set, the props that react, the lead's actions, named
+   cameras) and its scenes, registered with `Z.scene(name, { preload, init, draw })`;
+2. draws 3–6 events per shot there, each on its cue: a train crossing the painted bridge (points of the background
+   image mapped to the screen with `D.coverPt`, so it stays glued to the picture through the camera move), lanterns
+   that flare on the beat, a blurred foreground branch passing the lens, a message that arrives and is answered;
+3. keeps `timeline.js` for the edit: times, scene, arguments.
+
+Build from what exists: `D.travel` / `D.along` (paths), `D.coverPt`, `D.contactShadow`, `D.onWater`, `D.glow`,
+`D.rays`, `D.embers` / `D.fireflies` / `D.dust`, `Z.burst` / `Z.stream` (particles), `Z.tween`, `Z.rig`, and inside
+`illust` an effect `{ type: 'custom', fn }`. `tools/storyboard.mjs` warns when a film of 12+ shots has no scene file of
+its own; `evals/grade.py` counts own lines per shot (bar: 30).
+
 ## 8. Review
 
 - **Model sheets** for every asset (§2.4, §4): `engine/sheets/<name>.js` is a timeline whose shots lay out a grid of

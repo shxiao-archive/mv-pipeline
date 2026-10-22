@@ -99,15 +99,20 @@ The 残光 deny-lists (adapt per film):
 **JIZURA's own transitions between lyric cuts are off by default** (`TEXT_TRANS = false` in `timeline.js`): they
 drew the outgoing and the incoming line on top of each other for a few frames, which a viewer read as overlapping
 text. Each line now leaves by its exit and the next arrives by its enter; shot transitions are the engine's. Many
-layouts also set the whole line small next to the words of a cut when a line is split with `/`: split a line only
-where the picture should change, and look at the stills of split lines.
+layouts also set the whole line small next to the words of a cut when a line is split with `/`; that copy is off
+too (`fullLine: false` in the plans' common settings): each cut shows only its own words. An editorial film that
+wants the whole line as a running caption sets `fullLine: true`.
 
 **Captions and stacked repeats are off by default** (a jury round read them as a debug layer and as garbled text):
 `fx.hideNo` / `fx.hideTime` drop the small "No.06 — 0:26.00" captions under the lines; the parts that still draw
 digits (index numbers, timecodes, rulers, reticles, dimension marks: 25 decors, 5 layouts) and the layouts that draw
 the line 4× more often than a plain one (a wall of copies, rings, echoes: 10 layouts and the `shadowSway` hold) are
 denied in `timeline.js`. Both lists were measured by planning each part alone and counting the glyphs it draws (the
-sample words had no digits). An editorial or HUD film can switch them back on.
+sample words had no digits). An editorial or HUD film can switch them back on. After the whole-line copy went off, a look at the demo's
+stills found more copies of the line and denied them too: `stack`, `perspective`, `tyCross`, `vcols` (stacked, receding,
+crossing and column copies), `circle` (words on a dark disc), the `romajiLine` decor (codepoints under kanji) and
+`watermarkKanji` (one glyph huge behind the line). The adapter keeps the centre-free bands inside the 90 % title-safe
+box; `tools/check_shots.mjs` measures that box while a cut's words hold, and flags a JIZURA transition (LYRIC OVERLAP).
 
 **Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample
 words with one part at a time (every other group pinned to its plain part), renders front mode where that part is used

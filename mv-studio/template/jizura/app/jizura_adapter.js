@@ -19,6 +19,13 @@
 
   const mkCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
 
+  // centerFree side bands run to the frame edge: keep them inside the 90 % title-safe box (tools/check_shots.mjs)
+  const sideZones = J.sideZones;
+  J.sideZones = (W, H, dir) => sideZones(W, H, dir).map(z => {
+    const x0 = Math.max(z.x, W * 0.05), y0 = Math.max(z.y, H * 0.05), x1 = Math.min(z.x + z.w, W * 0.95), y1 = Math.min(z.y + z.h, H * 0.95);
+    return Object.assign({}, z, { x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+  });
+
   function mergeProject(p) {
     const base = J.defaultProject();
     const out = Object.assign({}, base, p || {});
@@ -29,6 +36,13 @@
       for (const [g, m] of Object.entries(p.enabled)) Object.assign(out.enabled[g] || (out.enabled[g] = {}), m);
     }
     return out;
+  }
+
+  // A line split with '/' gives each cut its words (text) and the whole line (lineText); many layouts set lineText small
+  // beside the cut, which reads as overlapping text. Unless the project asks for it (fullLine: true), a cut only knows its words.
+  function ownWords(plan, p) {
+    if (!(p && p.fullLine)) for (const c of plan.cuts) c.lineText = c.text;
+    return plan;
   }
 
   const JZ = {
@@ -47,7 +61,7 @@
 
     async setProject(p) {
       S.project = mergeProject(p);
-      S.plan = J.plan(S.project, S.audio);
+      S.plan = ownWords(J.plan(S.project, S.audio), p);
       const [w, h] = J.outputSize(S.project);
       if (!S.canvas) S.canvas = mkCanvas(w, h);
       if (S.canvas.width !== w || S.canvas.height !== h) { S.canvas.width = w; S.canvas.height = h; }
@@ -97,7 +111,7 @@
     plans: {},
     async addPlan(name, p) {
       const project = mergeProject(p);
-      const plan = J.plan(project, S.audio);
+      const plan = ownWords(J.plan(project, S.audio), p);
       // p.schemes: which of the style's colour schemes the cuts may use (each cut's scheme is remapped into that set)
       //   'dark'   schemes with a dark background (luminance < 0.25): light text, for night / dusk films
       //            (light-background schemes draw dark text that vanishes over night scenes)

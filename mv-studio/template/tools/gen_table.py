@@ -40,7 +40,10 @@ Table (JSON):
   review-sheet category (BG, CH, OBJ ...). A variant is generated FROM its base (the base is the reference image and
   the prompt says to change only the edit); `post` aligns it to the base (scale + offset, refuses a misfit) and writes
     patch  only the pixels that changed (the blobs centred in `region`, if given), on the base's canvas: drawn over the base
-  "takes": 3 generates three seeds of a variant and keeps the one that changed least outside its region.
+  "takes": 3 generates three seeds of a variant and keeps the one that changed least outside its region (an inpaint
+  face variant: the one that changed most inside it, which is not always the one with the eyes closed); `post` writes
+  _review_<id>_takes.jpg (the box from the base and from every take) and "take": 2 keeps take 2 instead.
+  "noise": 0.1 (NovelAI inpaint / img2img) adds noise to the start image: try 0.1-0.2 when a blink comes back unchanged.
     full   the whole aligned variant on the base's canvas: swapped for the base (pose / turn / big changes); with
            "ref_mode": "inpaint" and a region (a face variant): the repainted box blended into the base with a soft
            edge inside the figure, the base everywhere else (engine chars[].anim whole: true swaps it in)
@@ -186,7 +189,7 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
         ch = char_of(t, r) or char_of(t, next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {}))
         if ch:
             job["char"] = ch                                              # NovelAI: a V4 character caption
-        for k in ("size", "aspect", "seed", "negative"):                 # passed through to the generator wrapper
+        for k in ("size", "aspect", "seed", "negative", "noise"):        # passed through to the generator wrapper
             if k in r:
                 job[k] = r[k]
         if r.get("view") == "back":
@@ -617,15 +620,18 @@ def cmd_post(table: Path) -> int:
         takes = [p for p in takes if not p.name.endswith(".raw.png")]
         if takes and final_path(t, r["variant_of"]).is_file():        # pick the take that changed least outside its region
             b = _rgba(final_path(t, r["variant_of"]))
-            if r.get("ref_mode") == "inpaint" and r.get("region"):     # outside is the base anyway: keep the take that changed most inside
+            if r.get("ref_mode") == "inpaint" and r.get("region"):     # outside is the base anyway: keep the take that changed most inside (change, not closed eyes: see the takes sheet)
                 def inside(p):
                     v = np.asarray(Image.open(p).convert("RGBA").resize((b.shape[1], b.shape[0]), Image.LANCZOS), np.float32) / 255
                     return -feather_in(b, np.dstack([v[..., :3], np.ones(v.shape[:2], np.float32)]), r["region"])[1]
                 scored = sorted((inside(p), p) for p in takes)
             else:
                 scored = sorted((drift(b, align(b, _rgba(p))[0], r.get("region")), p) for p in takes)
-            raw = scored[0][1]
-            print(f"  {r['id']}: takes " + ", ".join(f"{p.stem.split('__')[-1]} {d:.4f}" for d, p in scored) + f" -> {raw.stem.split('__')[-1]}")
+            raw = pick_take(scored, r.get("take"))
+            print(f"  {r['id']}: takes " + ", ".join(f"{p.stem.split('__')[-1]} {d:.4f}" for d, p in scored) + f" -> {raw.stem.split('__')[-1]}"
+                  + (" (row's take)" if r.get("take") else ""))
+            if r.get("region"):
+                takes_sheet(t, r, b, takes, raw)
         if not raw.is_file():
             continue
         if r.get("sheet"):                                            # one image, several expressions: split and align
@@ -657,6 +663,43 @@ def cmd_post(table: Path) -> int:
     (out / "variants.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     sheets(t)
     return 1 if bad else 0
+
+
+def pick_take(scored, take=None):
+    """scored [(score, path)] best first -> the path to keep: the row's "take": k when given, else the best score."""
+    if take:
+        hit = [q for _, q in scored if q.stem.endswith(f"__t{int(take)}")]
+        if not hit:
+            sys.exit(f"take {take} not found among {', '.join(q.name for _, q in scored)}")
+        return hit[0]
+    return scored[0][1]
+
+
+def takes_sheet(t: dict, r: dict, base: np.ndarray, takes: list, chosen: Path) -> Path:
+    """The region (with a margin) from the base and from every take side by side, for picking with the eyes."""
+    H, W = base.shape[:2]
+    u0, v0, u1, v1 = r["region"]
+    mu, mv = (u1 - u0) * 0.5, (v1 - v0) * 0.5
+    box = (int(max(0, u0 - mu) * W), int(max(0, v0 - mv) * H), int(min(1, u1 + mu) * W), int(min(1, v1 + mv) * H))
+    grey = Image.new("RGBA", (W, H), (128, 128, 128, 255))
+    tiles = [("base", Image.alpha_composite(grey, Image.fromarray((base * 255).astype(np.uint8), "RGBA")))]
+    tiles += [(q.stem.split("__")[-1] + (" kept" if q == chosen else ""), Image.alpha_composite(grey, Image.open(q).convert("RGBA").resize((W, H), Image.LANCZOS)))
+              for q in takes]
+    th = 256
+    tw = max(1, round(th * (box[2] - box[0]) / max(1, box[3] - box[1])))
+    sheet = Image.new("RGB", (len(tiles) * (tw + 8) + 8, th + 40), (236, 232, 224))
+    dr = ImageDraw.Draw(sheet)
+    try:
+        font = ImageFont.truetype("arial.ttf", 18)
+    except OSError:
+        font = ImageFont.load_default()
+    for i, (name, im) in enumerate(tiles):
+        sheet.paste(im.crop(box).convert("RGB").resize((tw, th), Image.LANCZOS), (8 + i * (tw + 8), 8))
+        dr.text((10 + i * (tw + 8), th + 14), name, fill=(40, 34, 51), font=font)
+    out = rp(t.get("out", "assets/gen")) / f"_review_{r['id']}_takes.jpg"
+    sheet.save(out, quality=90)
+    print(f"  takes sheet: {out.relative_to(ROOT) if out.is_relative_to(ROOT) else out}")
+    return out
 
 
 def sheets(t: dict) -> None:
@@ -762,6 +805,9 @@ def selftest() -> int:
     if "eyes" in pb or "bangs" in pb or "black jacket" not in pb or "seen from behind" not in pb \
             or char_of(tv, tv["rows"][0]) != "1girl, white bob hair, black jacket":
         print("FAIL automatic back view:", pb); bad += 1
+    sc = [(-0.3, Path("CH01_blink__t2.png")), (-0.1, Path("CH01_blink__t1.png"))]
+    if pick_take(sc).name != "CH01_blink__t2.png" or pick_take(sc, 1).name != "CH01_blink__t1.png":
+        print("FAIL take pick / the row's take"); bad += 1
     print("align:", info, f"patch {frac:.2%} of the canvas; sheet face region {reg}")
     print("gen_table self-test: " + ("ok" if not bad else f"{bad} failed"))
     return 1 if bad else 0

@@ -105,7 +105,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 |---|---|---|---|
 | 1 | `node tools/lint.mjs` | syntax errors, U+FFFD (CJK text lost in a write), `Math.random` / `Date.now` in engine code, lyric text in code | every change |
 | 2 | `node tools/storyboard.mjs` | unknown scenes, black gaps, cuts off the grid, cuts far from their cue, sung lines no shot shows, shots without `moment`, unreadably short lines, line cues without hints; writes STORYBOARD.md | every edit of the timeline |
-| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, lyrics outside the 90 % safe area (4 samples/s; `--sprite-fps 0` skips it; errors with `--strict`) | every edit |
+| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, lyrics outside the 90 % safe area while a cut's words hold, a JIZURA transition drawing two lines at once (LYRIC OVERLAP) (4 samples/s; `--sprite-fps 0` skips them; errors with `--strict`) | every edit |
 | 4 | `node tools/cues_sheet.mjs` | the wrong picture for a line (look at it) | after the plan, after big changes |
 | 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back) | before a full render |
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |
@@ -137,7 +137,9 @@ or a subagent started with no history. Never the builder judging its own film: i
 
 1. Steps 1–8 of §7 green; `git commit` and `git tag review-1`; keep the render as `render/mv_r1.mp4`.
 2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, 2 s filmstrips
-   at every chorus / hook and at `--hero t1,t2` (your signature moments), full-resolution stills, `index.md`). Add
+   at every chorus / hook and at `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
+   cut and each flagged pop or flash, full-resolution stills, motion per second in `index.md`). Run
+   `node tools/storyboard.mjs` first: it writes the lyric cut times to `plan/shots.json`. Add
    `docs/CONCEPT.md`, the style's **Signature features** (its STYLE.md) and the output of the step-7 checks.
 3. The jury prompt below → its answer saved as `docs/review/jury-1.md` and its JSON block as `docs/review/jury-1.json`.
 4. The revise prompt below, in the building session. Then steps 1–8 again, render, pack, jury round 2, revise.
@@ -151,10 +153,12 @@ of an animation studio, a top ボカロP / MV director for the Japanese and Chin
 Judge it harshly and precisely so it can reach award level. Kindness is useless here; specificity is everything.
 
 The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index.md> (contact sheet per section,
-filmstrips, full-resolution stills). The concept: <docs/CONCEPT.md>. The style and its signature features, which the
+filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept: <docs/CONCEPT.md>. The style and its signature features, which the
 film is judged against: <styles/<style>/STYLE.md, Signature features>. Automatic checks: <paste the check outputs>.
 
-1. Look properly: every contact sheet, every filmstrip (motion: easing, spacing, overlap, holds), every still at full
+1. Look properly: every contact sheet, every filmstrip (motion: easing, spacing, overlap, holds), every cut strip
+   (18 frames around a shot or lyric cut: two lines on top of each other, a pop, a flash, a transition that stutters,
+   the same words drawn twice), every still at full
    resolution (edges, type setting, aliasing, banding, texture, clipping, AI-image errors such as hands, extra fingers,
    garbled text, a face off-model). Open the video itself where you can.
 2. Score 1-10 per dimension (5 = competent student work; 6 = decent template; 7 = solid professional; 8 = high-end
