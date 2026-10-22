@@ -285,6 +285,28 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
 Targets: cut every line or two; 3–6 events per shot (a message, a reply, a reaction of the client, a plate's landing
 letters); every plate a visual pun, never a literal illustration.
 
+## Signature features (the jury judges against these; references/09 §8)
+
+Screen:
+- **One session on a screen** with three fixed voices: me (accent, serif), you (never shown: cursor, typing, presence),
+  system (mono); a conversation arc from the song (starts, warms, is interrupted, goes wrong, ends).
+- **Colour = state**: it changes only on events; red only after the first error, then it spreads.
+- **Plates** from three flat inks with an out-of-register shadow plate and big keyword type; each lands on a beat and is
+  ended by an event.
+- **The v4 tools**: lines arriving word by word, cut-aways that come back in state, dropped frames and replays, ink-plate
+  silhouettes, sagging type, light; code (`ifCode`) kept for a rare section.
+
+Treatise:
+- **Each plate its own idiom** (chart, scope, form, prompt, map, engraving …) with a visual pun and deadpan copy of your
+  own; never a literal illustration.
+- **The spark and the running number** tie the plates together; **the hook** escalates each time; **bookends**: the
+  last frame matches the first.
+- **Palette and type held**: only signal / ember glow, one acid accent at most, a light / dark rhythm; Archivo with its
+  width animated, mono annotations, Swiss-grid layouts.
+- **Words in the picture**: per-word karaoke set into each plate its own way; engraved GPU plates, hairline fields and
+  pen-written lines; a camera that tracks the action and snaps on half bars.
+- Not slop: no neon, glowing brains, code rain, lens flares or stock "AI" imagery.
+
 ## Review checks (in addition to references/09)
 
 Screen shots:

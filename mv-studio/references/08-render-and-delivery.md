@@ -128,6 +128,7 @@ To adapt: set `Z.VERTICAL_CFG = { full, planMap, title, sub, artist, credits: [t
 | `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.5 --out render/review_v` | portrait videos get 216×384 thumbnails automatically (or a denser strip: `ffmpeg -v error -i render/mv_vertical.mp4 -vf "fps=1/3,scale=144:256,tile=16x3:padding=4:color=black" -q:v 3 render/review_v/vsheet_%02d.jpg` — 48 frames per sheet, 2 sheets for 3:46) |
 | `node tools/jz_cuts_at.mjs 196.8,203.5 main` | which JIZURA parts a lyric frame uses (06-jizura) |
 | `node tools/jizura_cover.mjs` | which JIZURA parts cover the picture in front mode, as DENY lines (06 §5) |
+| `python tools/jury_pack.py render/mv.mp4` | the jury's pack: a contact sheet per section, filmstrips at the hooks, full-resolution stills (09 §8) |
 | `ffmpeg -ss 62.4 -i render/mv.mp4 -frames:v 12 render/check/f_%02d.png` | a burst of consecutive frames to check motion, seams, flashes |
 
 Review order that worked: stills at every shot midpoint (pacing, composition) → fix → `--preview` full render → review sheets → fix → full master → review sheets (16:9 and vertical) → spot-check the worker seams (frames at 1/3 and 2/3 of the duration, e.g. `ffmpeg -ss <t>` around them) and every flash for the photosensitivity rule (≤ 3 full-frame flashes per second).

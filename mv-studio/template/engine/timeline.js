@@ -198,6 +198,12 @@
       DENY.layout += ' marquee diag filmstrip contour knZoomDive knTypeSlam sliceStack';
       DENY.treat += ' ransom monoGrid';
       DENY.layout += ' huge gloss zoomRepeat';                         // the noir / mono plans: giant type over 40 % of the frame
+      // editorial captions (No.06, LINE 06, 0:26.00, 13 x 37, rulers, reticles) read as a debug layer over an illustrated
+      // film (a jury round, references/09 §8); measured: parts that draw digits with hideNo / hideTime on (references/06 §5)
+      DENY.decor += ' atomOrbit barcode constellation counter crosshair dimension glitchRects glyphLock guides headingTape hexGrid indexNum knWordTicks leaders progressRing radar registration reticle rings ruledLines rulerEdge spectrumRing tyGlyphBody tyRunningHead verticalStrip';
+      DENY.layout += ' corners crossBands ruler swissGrid type';
+      // stacked repeats: the line drawn 4x more often than a plain layout draws it (a wall of copies, echoes, rings)
+      DENY.layout += ' circleWords credits edgeFrame justified mirror orbit rain tunnel tyBandHide'; DENY.hold = 'shadowSway';
       // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
       // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only
       // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.
@@ -218,7 +224,8 @@
       const common = {
         enabled, lyrics: lrc, fps: 30, res: 1080, aspect: '16:9', seed: 128, unify: true, typeset: true, extra: true, wa: false, horror: false,
         colors: { accentOn: true, accent: FF.glow, ghostA: '#39C6E0', ghostB: '#9BD86A' }, schemes: 'dark',   // daylight film: schemes: 'light' (dark text) -- references/06 §4
-        fx: { motion: 0.7, glitch: 0.4, chroma: 0.55, decor: 0.4, density: 0.5, texture: 0.5, flash: false, koma: 12, hud: 'off', bgSwitch: 0.3 } };
+        fx: { motion: 0.7, glitch: 0.4, chroma: 0.55, decor: 0.4, density: 0.5, texture: 0.5, flash: false, koma: 12, hud: 'off', bgSwitch: 0.3,
+              hideNo: true, hideTime: true } };   // no 'No.06 — 0:26.00' captions under the lines (an editorial / HUD film: false)
       // one plan per look; a shot picks one with `plan:` (default 'main'). 'cf' = centre-free: text in bands left /
       // right of the centre, for shots whose subject sits in the middle (a face, the first light, the 蛍 glyph).
       // `mood` is a label only: J.plan ignores it (JIZURA's おまかせ randomiser is the only reader). The tone comes from

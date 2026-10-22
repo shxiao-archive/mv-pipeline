@@ -190,6 +190,29 @@ from ONE generation (an **expression sheet**), so every expression has exactly t
   design"); missing pictures go to `docs/WANTED_ART.md`; per lyric line 2–5 motif variants (signal), a composed picture
   per line (tegaki).
 
+## Signature features (the jury judges against these; references/09 §8)
+
+Tegaki:
+- One original character, on-model in every shot, with a **living face** (blinks, sings, changes expression) and
+  **varied framing**: left and right thirds, close-ups and long shots, back views; never the same centred figure.
+- A **colour script**: the light changes with the story (time of day, mood per section); light sources are painted and
+  pinned, the grade (gradient-map LUTs) pulls the shots together.
+- **Grounded compositing**: characters stand on their plates with contact shadows, take the plate's light; three depth
+  layers.
+- **JIZURA kinetic lyrics** in at least three plans, the lyric passing behind the character in hero shots, the キメ lines
+  in their own typographic scenes (`kanjiSlam`, `typeCard` or your own).
+- **Set pieces for the song's own metaphors** (custom scenes), one or two instrumental showcases (Blender toon 3D or 2.5D).
+- **Beat-locked editing**: cuts on lyric onsets and downbeats; quiet verses with chosen holds, choruses that hit.
+- An **ending**: a composed last picture with a subject, depth and light.
+
+Signal:
+- **Speed is editing**: motifs, fillers and 1–2 frame inserts on a beat grid; the tiers (T1 sprint, T2, T3 slow, hold)
+  follow the song's sections.
+- **Heat** grades the whole film from one curve: cold → hot → drained.
+- **Decay**: tear bands, chroma, interference, hot pixels that accumulate and never heal; never over the subject or a
+  lyric for more than a frame.
+- **The device's type**: vertical mincho, beat-stamped lines, big WORD frames; the song's stops as held NO SIGNAL frames.
+
 ## Review checks (in addition to references/09)
 
 Tegaki shots:

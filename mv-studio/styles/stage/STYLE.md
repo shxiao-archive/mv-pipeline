@@ -106,6 +106,19 @@ Build these, each with a model sheet you have looked at (`engine/sheets/`; start
 Targets: chapters of 6–10 shots; every shot a named gag in phases (hop → slide → teeter → fall → land); the lead about
 40 % of the frame height in chorus and dance shots; the four choruses on the same stage, escalating.
 
+## Signature features (the jury judges against these; references/09 §8)
+
+- **A stage show**: it opens and closes on the painted curtain; chapters on painted sets; the choruses return to the
+  same stage, each one bigger, with a finale bow (and often an "it was all a play" pull-back).
+- **A watercolour picture-book look**: flat wash with an ink outline, linework that boils at 12 fps, paper under
+  everything, soft saturated colour, no pure black or white.
+- **An original puppet troupe** acting the song as gags: one readable action per shot, faces that never snap (blink,
+  take, emote).
+- **Motivated transitions**: brush wipes on chapter breaks, the action carrying the cuts inside a chapter (a chomp, a
+  fall, an iris into a mouth).
+- **A palette arc** per chapter and **a running prop** that climbs through the film.
+- **Text-light**: the karaoke band and a handful of big sound effects; the jokes are told with pictures.
+
 ## 7. Review checks (in addition to references/09)
 
 - [ ] Every shot has one readable action; the lead is on-model (same design, colours and top) in every shot.

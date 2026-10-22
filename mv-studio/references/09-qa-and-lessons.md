@@ -1,6 +1,6 @@
 # 09 — QA: review loop, checklist, failure modes we hit
 
-Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pipeline & tooling pitfalls · 5 Working with agents
+Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pipeline & tooling pitfalls · 5 Working with agents · 6 mv-studio checks · 7 Review order · 8 The jury (two rounds)
 
 ## 1. The loop
 
@@ -111,7 +111,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |
 | 7 | render → `check_flash.py`, `motion_check.py`, `check_sync.py` | flashes, stillness, picture / audio / lyric offsets | every render |
 | 8 | contact / review sheets, read by the lead | everything else | every render |
-| 9 | independent review → `docs/REVIEW.md` (P0 / P1 / P2), fix, back to 1 | what the builder no longer sees | before delivery |
+| 9 | the jury, two rounds (§8): `tools/jury_pack.py`, an independent session scores and lists fixes → revise → back to 1 | what the builder no longer sees; film quality, not only correctness | before delivery |
 
 P0 = wrong picture for its line, wrong time, a failing check, a page error, a broken brief rule or seam; P1 = not
 refined; P2 = nice to have. Delivery needs P0 empty.
@@ -126,3 +126,73 @@ refined; P2 = nice to have. Delivery needs P0 empty.
 | `lines N start INSIDE a sung phrase` | check_sync (`--lyrics-only` before rendering) | those lines are probably on the wrong phrase (bars counted wrong in an estimate): listen, move them in tools/lyric_editor |
 | `lyrics best shift +150 ms` | check_sync | the LRC is early against the voice: estimated timing, or set timing.lyricOffset after checking by ear |
 | changed frames outside the shots you edited | compare_sheets | the shared-file change leaked: fix it or scope it to the shots that need it |
+
+## 8. The jury: an independent review in two rounds
+
+The automatic checks prove a film is correct; they cannot say whether it is good. Before delivery the film goes through
+**build → jury → revise → jury → revise** (the process of mg-styles-15, MIT, adapted to music videos). The jury is a
+session that **did not make the film**: another model if the user has one (Gemini, GPT …), else a fresh Claude session
+or a subagent started with no history. Never the builder judging its own film: it no longer sees what the film lacks.
+
+1. Steps 1–8 of §7 green; `git commit` and `git tag review-1`; keep the render as `render/mv_r1.mp4`.
+2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, 2 s filmstrips
+   at every chorus / hook and at `--hero t1,t2` (your signature moments), full-resolution stills, `index.md`). Add
+   `docs/CONCEPT.md`, the style's **Signature features** (its STYLE.md) and the output of the step-7 checks.
+3. The jury prompt below → its answer saved as `docs/review/jury-1.md` and its JSON block as `docs/review/jury-1.json`.
+4. The revise prompt below, in the building session. Then steps 1–8 again, render, pack, jury round 2, revise.
+5. Stop after round 2, or earlier when every dimension is ≥ 8. Critical issues map to P0 (§7: delivery needs them
+   gone), the fix list to P1, nitpicks to P2. Log both rounds in `docs/PROGRESS.md`.
+
+**The jury prompt** (paste with the paths filled in):
+```text
+You are a senior jury member for music videos and motion design (think: a Motionographer editor, the creative director
+of an animation studio, a top ボカロP / MV director for the Japanese and Chinese styles). You did NOT make this film.
+Judge it harshly and precisely so it can reach award level. Kindness is useless here; specificity is everything.
+
+The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index.md> (contact sheet per section,
+filmstrips, full-resolution stills). The concept: <docs/CONCEPT.md>. The style and its signature features, which the
+film is judged against: <styles/<style>/STYLE.md, Signature features>. Automatic checks: <paste the check outputs>.
+
+1. Look properly: every contact sheet, every filmstrip (motion: easing, spacing, overlap, holds), every still at full
+   resolution (edges, type setting, aliasing, banding, texture, clipping, AI-image errors such as hands, extra fingers,
+   garbled text, a face off-model). Open the video itself where you can.
+2. Score 1-10 per dimension (5 = competent student work; 6 = decent template; 7 = solid professional; 8 = high-end
+   studio work; 9 = award shortlist; 10 = best in the world). Most first passes of a full song deserve 5-7. Do not
+   inflate. Score the weakest section, not only the opening.
+   - style_fidelity: an expert names the style at once; every signature feature is present and done right
+   - concept_story: a visual idea about what the song is about; each line answered by a picture (not a literal
+     illustration); a hook in the first 5 s; unmistakable hero moments; choruses that escalate; an ending, not a stop
+   - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; no dead or
+     jittery motion, no sprites flipping back and forth
+   - composition_type: framing and size vary (not always centred), depth, negative space; lyrics legible, set as part
+     of the picture, inside the safe area; CJK and Latin type set well
+   - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts
+   - sync: cuts and hits on the music, sections change with the song, the lyric never ahead of the voice
+   - technical: the automatic checks, fonts (no tofu or fallback), no pops, black frames or seams
+3. Give 5-10 fixes ordered by impact on the final impression. Each: shot id or timecode, what is wrong (observable),
+   why it matters, and how to fix it concretely (scene, args, easing, frames, px, colours, a different shot idea). Prefer
+   a few big upgrades to many nitpicks. At least one fix must raise the wow factor, not just polish; at least one must
+   lift the weakest section.
+4. Flag as critical: anything generic or AI-template, an existing character, brand or real UI imitated, wrong or
+   garbled lyric text, tofu, a failed check, an off-model character.
+5. List the 3 strongest things, so the revision keeps them.
+Return the score table, the critical issues, the fixes and the strengths, then one JSON block:
+{"round": N, "scores": {"style_fidelity": 0, "concept_story": 0, "motion_craft": 0, "composition_type": 0,
+ "finish": 0, "sync": 0, "technical": 0}, "critical": ["..."], "fixes": [{"at": "s12 / 1:02.4", "what": "...",
+ "why": "...", "how": "...", "impact": "high|medium"}], "strengths": ["..."]}
+```
+
+**The revise prompt** (in the building session):
+```text
+An independent jury reviewed your film. Here is the full review: <docs/review/jury-N.md>
+Raise the film to award level (target >= 8 in every dimension, 9 where the style allows):
+- The current version is tagged review-N and kept as render/mv_rN.mp4; work on top of it.
+- Implement every critical issue and every high-impact fix. You may replace a listed fix with a better solution if you
+  are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
+  weakest section. Do not regress anything the jury listed as a strength.
+- Run the checks of references/09 §7 again, re-render, build a new pack and look at the frames until the fixes have
+  truly landed.
+- Write docs/REVIEW.md: each fix applied or skipped, and why.
+```
+The jury's scores are a model's opinion, not a measurement: use them to find and rank problems and to compare rounds of
+the same film, not as proof of quality. A judge from another model family sees more of the builder's blind spots.

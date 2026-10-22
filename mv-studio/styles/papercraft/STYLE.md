@@ -100,6 +100,17 @@ before writing shots:
 Targets: 3–6 events per shot; the lead acts every cue (a pose change, an expression, a reaction); the running gag
 escalates every repeat; bookends (the book opens / closes) match.
 
+## Signature features (the jury judges against these; references/09 §8)
+
+- **A moving pop-up book**: everything is cut paper (wavy hand-cut edge, a shadow that grows with height, a lit rim,
+  fibre), light from the top left; the book opens on the first frame and closes on the last.
+- **Multiplane depth** with a camera that tracks the hero, pushes on emotion and bumps on steps and hits.
+- **The RPG interface in paper**: the dialogue box with the lyric typed as sung, name tabs, HP / EXP bars, LV UP, a
+  battle menu, damage numbers, coins; **the map with a red dashed route** as the film's navigation prop.
+- **A quest**: outbound left → right, lands with their own colour script, a fight, a level-up, home right → left.
+- **An original jointed paper cast**, on-model, at a consistent scale, acting with poses, expressions and emotes.
+- **Running gags** that escalate each chorus and pay off.
+
 ## 6. Review checks (in addition to references/09)
 
 - [ ] Every object reads as cut paper (edge, shadow, rim); light from the top left; one palette.

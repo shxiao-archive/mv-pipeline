@@ -111,7 +111,9 @@ STYLE.md; the check order: `references/09` §7. Commit the project at the end of
    shared file: `node tools/regress.mjs snap before|after` + `python tools/compare_sheets.py before after`.
 6. **Review** — `node tools/pops.mjs` (unplanned jumps, short flashes), full render, review sheets, then on the file:
    `check_flash.py` (must PASS), `motion_check.py` (static ≤ 10 %), `check_sync.py` (audio, cut frames, lyrics vs voice).
-   An independent pass writes `docs/REVIEW.md` (P0 / P1 / P2); fix, re-check. Log the round in `docs/PROGRESS.md`
+   Then the jury, two rounds (09 §8): `tools/jury_pack.py`, a session that did not make the film scores it against the
+   style's Signature features and lists fixes by impact; revise (`docs/REVIEW.md`: applied / skipped), re-check, repeat
+   once. Log the rounds in `docs/PROGRESS.md`
    (built, departures from the brief and why, ten places to check by ear).
 7. **Deliver** — master, share encode (`tools/preroll.py` adds the warning card when `check_flash` lists warning
    ranges), 9:16, previews, credits (`references/08`). Review any time with `npm run preview` (`?play`, keys). Report what was verified and what is

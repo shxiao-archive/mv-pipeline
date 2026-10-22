@@ -96,6 +96,13 @@ The 残光 deny-lists (adapt per film):
 | enter / exit | bubbles, stickerPeel, crumple, loadingBar, tokoroten / balloonOff, crumpleOut, peelOff | comic motion |
 | bg (only `full` mode) | argyle, tartan, polka, checker, retroGrid, kaleidoscope, fireworks, sunburst, seigaiha, asanoha, … | pattern backgrounds clash with illustrated shots |
 
+**Captions and stacked repeats are off by default** (a jury round read them as a debug layer and as garbled text):
+`fx.hideNo` / `fx.hideTime` drop the small "No.06 — 0:26.00" captions under the lines; the parts that still draw
+digits (index numbers, timecodes, rulers, reticles, dimension marks: 25 decors, 5 layouts) and the layouts that draw
+the line 4× more often than a plain one (a wall of copies, rings, echoes: 10 layouts and the `shadowSway` hold) are
+denied in `timeline.js`. Both lists were measured by planning each part alone and counting the glyphs it draws (the
+sample words had no digits). An editorial or HUD film can switch them back on.
+
 **Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample
 words with one part at a time (every other group pinned to its plain part), renders front mode where that part is used
 and prints the parts that cover more than 30 % of the frame as ready `DENY.<group> += '...'` lines (`jizura/cover.json`

@@ -1,5 +1,7 @@
 """Grade one run: python grade.py <run_dir> <eval_name>   (run_dir = .../with_skill or .../without_skill)
 Writes <run_dir>/grading.json and <run_dir>/outputs/contact.png (frames every 2 s, for the viewer).
+A juror's review (references/09 §8: a session that did not make the film, its JSON block saved as <run_dir>/jury.json)
+is copied into grading.json as "jury" (scores, mean, critical count): an opinion for comparing runs, not a pass / fail.
 Fixtures: python fixtures/make_test_song.py fixtures   (test_song.wav + the three lyric files of evals.json)."""
 import json, re, shutil, subprocess, sys
 from pathlib import Path
@@ -332,10 +334,28 @@ def main():
             m and pct <= 15, f"{pct} % static ({m.group(1) if m else '?'} s)")
     passed = sum(e["passed"] for e in ex)
     res = {"expectations": ex, "summary": {"passed": passed, "failed": len(ex) - passed, "total": len(ex), "pass_rate": round(passed / len(ex), 3)}}
+    jury = jury_of(rd / "jury.json")
+    if jury:
+        res["jury"] = jury
     (rd / "grading.json").write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"{name}/{rd.name}: {passed}/{len(ex)}")
+    print(f"{name}/{rd.name}: {passed}/{len(ex)}" + (f"  jury mean {jury['mean']} ({jury['critical']} critical)" if jury else ""))
     for e in ex:
         print(f"  {'PASS' if e['passed'] else 'FAIL'}  {e['text']}  -- {e['evidence']}")
+
+
+JURY_DIMS = ("style_fidelity", "concept_story", "motion_craft", "composition_type", "finish", "sync", "technical")
+
+
+def jury_of(p):
+    """The juror's scores from jury.json (references/09 §8), checked: all seven dimensions, each 1-10; else None."""
+    if not p.exists():
+        return None
+    j = json.loads(p.read_text(encoding="utf-8"))
+    sc = {k: j.get("scores", {}).get(k) for k in JURY_DIMS}
+    if not all(isinstance(v, (int, float)) and 1 <= v <= 10 for v in sc.values()):
+        print(f"  jury.json ignored: scores must give {', '.join(JURY_DIMS)} as 1-10")
+        return None
+    return {"round": j.get("round"), "scores": sc, "mean": round(sum(sc.values()) / len(sc), 2), "critical": len(j.get("critical") or [])}
 
 
 if __name__ == "__main__":

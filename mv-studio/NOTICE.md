@@ -93,6 +93,13 @@ distance, two-bone IK, ground contact, time-lagged trails) and `core/blocks.js` 
 team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
 documents of all six study films (methods only; none of their characters, songs, copy or art).
 
+## Review process
+
+The two-round jury of references/09 §8 (an independent session scores the film on an anchored 1-10 scale and lists
+fixes by impact, with one that raises the wow factor; the builder revises; twice) follows the review prompt of
+[mg-styles-15](https://github.com/Vincentwei1021/mg-styles-15) (Vincentwei1021, MIT), rewritten for music videos.
+`tools/jury_pack.py` is our own.
+
 ## Fonts added by mv-studio (fetched at setup, not bundled)
 
 Inter, IBM Plex Mono, Archivo, Cormorant Garamond, ZCOOL QingKe HuangYou, ZCOOL KuaiLe, ZCOOL XiaoWei and Fredoka

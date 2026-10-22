@@ -43,6 +43,7 @@ call `PC.dialog(g, …)` like this".
 | 5 | review + fix | reviewer-fixer per block (recommended) | `docs/review/<id>.md` (P0 / P1 / P2), fixes | the P0s are gone |
 | 6 | integration | lead | the full film | `storyboard.mjs`, `check_shots.mjs`, `pops.mjs`, `cues_sheet.mjs`, full render, `check_flash.py`, `motion_check.py`, `check_sync.py` (09 §7) |
 | 7 | revision round | lead → builders | `docs/REVISION.md` per section: keep / wrong / measured times / where in code | as phase 4–6 |
+| 8 | jury, two rounds | a juror that built nothing (another model, or a fresh agent) → lead → builders | `docs/review/jury-{1,2}.md` + `.json` (09 §8): scores, critical issues, fixes by impact with shot ids; the lead splits the fixes into `docs/REVISION.md` per block | every critical issue gone; round 2 done |
 
 ## 3. Engine side: blocks
 

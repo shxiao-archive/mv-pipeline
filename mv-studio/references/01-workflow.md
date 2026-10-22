@@ -17,7 +17,7 @@ git commit`) at the end of every phase: `new_project.py` runs `git init`.
 | 3 plan | the shot list in `engine/timeline.js` (`moment`, `line`, `cue` per shot) → `docs/STORYBOARD.md`, `plan/shots.json` | `node tools/storyboard.mjs` PASS |
 | 4 assets | images, `docs/WANTED_ART.md`, `render/lineup.jpg` (2+ characters) | every check sheet looked at |
 | 5 build | scenes, timeline | `node tools/lint.mjs`, `node tools/check_shots.mjs` PASS |
-| 6 review | sheets, reports, `docs/REVIEW.md`, `docs/PROGRESS.md` | 09 §7 order; P0 empty |
+| 6 review | sheets, reports, the jury's two rounds (`docs/review/jury-{1,2}.*`), `docs/REVIEW.md`, `docs/PROGRESS.md` | 09 §7 order; P0 empty; jury round 2 done |
 | 7 deliver | master, share (+ preroll card when `check_flash` lists warning ranges), 9:16, credits | `check_flash`, `motion_check`, `check_sync` PASS on the final file |
 
 ---
@@ -125,6 +125,12 @@ node tools/render_final.mjs --name mv                       # full render + audi
 python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/review1
 ```
 Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboard.mjs`, `node tools/check_shots.mjs`, `node tools/pops.mjs`; after it: `python tools/check_flash.py render/mv.mp4`, `python tools/motion_check.py render/mv.mp4`, `python tools/check_sync.py render/mv.mp4` (the full order and what each catches: 09 §7). Before changing a shared file, `node tools/regress.mjs snap before`; after it, `snap after` and `python tools/compare_sheets.py before after`. Write problems into `docs/REVIEW.md` (P0 / P1 / P2) and the round into `docs/PROGRESS.md`. Use `references/09-qa-and-lessons.md` (checklist + failure modes). Query JIZURA when a lyric frame looks wrong: `node tools/jz_cuts_at.mjs 196.8,203.5 main`. Fix → re-render → re-review. Two or three passes is normal.
+
+**The jury, two rounds, before delivery** (09 §8): `git tag review-1`, `python tools/jury_pack.py render/mv.mp4`, then a
+session that did not make the film (another model if the user has one, else a fresh session or a subagent with no
+history) reviews the pack, `docs/CONCEPT.md`, the style's Signature features and the check outputs with the jury prompt;
+the building session revises with the revise prompt; render, pack, jury and revise once more. **Checkpoint:** show the
+user each round's scores and fix list.
 
 ## 7. Deliver
 
