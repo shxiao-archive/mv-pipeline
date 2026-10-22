@@ -1,8 +1,59 @@
 # 04 — Asset generation (characters, backgrounds, props)
 
-Contents: 1 What to generate (shot-driven list) · 2 `tools/imagegen.py` · 3 Codex CLI gotchas · 4 Alpha: native vs chroma key (`tools/alpha_matte.py`) · 5 Character consistency method · 6 Style-block templates · 7 Backgrounds and props · 8 Review · 9 Other image models · 10 Pitfalls · 11 Grok · 12 NovelAI · 13 Choosing the generator (`tools/artgen.py`)
+Contents: 0 Start here: the generation table (`tools/gen_table.py`) · 1 What to generate (shot-driven list) · 2 `tools/imagegen.py` · 3 Codex CLI gotchas · 4 Alpha: native vs chroma key (`tools/alpha_matte.py`) · 5 Character consistency method · 6 Style-block templates · 7 Backgrounds and props · 8 Review · 9 Other image models · 10 Pitfalls · 11 Grok · 12 NovelAI · 13 Choosing the generator (`tools/artgen.py`)
 
 The method is model-agnostic: **one master reference image + a verbatim character sentence + a verbatim style block** for every pose, transparent output via native alpha or a flat chroma-key background. The kit wraps the **Codex CLI**'s native image tool because that is what 残光 used; §9 covers other generators.
+
+---
+
+## 0. Start here: the generation table (`tools/gen_table.py`)
+
+Every image of the film is a row of ONE table, `assets/gen/table.json`: the locks (your words, pasted verbatim into
+every row), a subject per row, references, sizes, keys. `gen_table.py jobs` compiles it into the jobs files the
+generators read (§2, §11, §12); `post` keys, splits and sorts the results (finals in `assets/gen/<id>.png`, review
+sheets per category, `status`). Write a jobs file by hand only for a one-off retake. The sections below are the craft
+behind the locks (§5–7) and the generators' own fields.
+
+```json
+{ "locks": { "STYLE": "...", "CHAR": "...", "CHAR_BACK": "...", "WORLD": "...", "ISO": "...", "EMPTY": "..." },
+  "refs": { "char": [] }, "out": "assets/gen",
+  "rows": [
+    { "id": "CH00a", "kind": "char", "subject": "full body, standing, front three-quarter view", "aspect": "2:3", "transparent": true },
+    { "id": "CH10", "kind": "char", "subject": "bust, singing into a microphone, facing the viewer", "transparent": true,
+      "size": "1472x704", "sheet": { "cells": ["neutral", "blink", "open", "smile"], "cols": 4 } },
+    { "id": "CH20", "kind": "char", "subject": "full body seen from behind, looking up at the sky", "transparent": true,
+      "locks": ["STYLE", "CHAR_BACK"], "negative": "face, eyes, looking at viewer" },
+    { "id": "BG01", "kind": "world", "subject": "a rooftop at dusk, a radio mast on the left ...", "aspect": "16:9" },
+    { "id": "OBJ01", "kind": "world", "subject": "a porcelain locket, closed", "transparent": true } ] }
+```
+1. **Locks.** `STYLE` (medium, line, shading, palette), `CHAR` (the character sentence, §5), `WORLD` (the background
+   style block, §6), `ISO` (a cut-out: the subject alone on the key colour), `EMPTY` (no people, no text). Rows get
+   `STYLE + CHAR` (char) or `STYLE + WORLD` (world) unless they list their own `"locks"`.
+   **`CHAR_BACK`** is the character from behind: hair as seen from behind, outfit, signature items, and no eye, bang,
+   face or expression words. A back view prompted with the full `CHAR` comes back with eyes on the back of her head.
+2. **Masters first:** three char rows with no `refs.char`; `jobs` → generate → `post`; pick one with the user; then
+   `"refs": { "char": ["assets/gen/CH00b.png"] }` carries her face into every later char row (Codex, Grok). On
+   NovelAI a character reference costs Anlas: leave `refs.char` empty there and lean on `CHAR` plus takes (§12).
+3. **Faces that live:** one sheet row per framing the film's faces use (bust, half body). A character who sings or
+   reacts in a shot is drawn from a sheet framing, so she can blink and sing (`chars[].anim`; styles/vocaloid/STYLE.md,
+   Characters with a living face). `tools/storyboard.mjs` warns when a vocaloid film's characters never move a face.
+4. **The rest** from the storyboard (§1): poses, the eye close-up (opaque 16:9), backgrounds with their time-of-day
+   variants, props. Look at every `_review_<category>.jpg`; line them up with
+   `python tools/lineup.py assets/gen/CH*.png --bg assets/gen/BG01.png` (§5.9).
+
+A character's expressions come from a **sheet row**: one generation of all of them (same style), split, aligned and
+cut to eye / mouth patches for the engine (`styles/vocaloid/STYLE.md`). Lessons from the first real runs (NovelAI): its
+"magenta" screen comes out hot pink (the keyer treats it as a two-channel screen; before, it ate every red / brown /
+skin colour); it lays a sheet out its own way (a full body plus heads: pick the figures by number); copies on a sheet
+are each redrawn a little, so a whole feature area is pasted, not only the changed pixels; asking for a changed version
+of a finished picture (img2img / inpaint of a head) drifts in style or does not change — variant rows remain for small
+fixes to one face (inpaint of an eye or mouth region, `"takes": 3`).
+
+Sheet layout (iteration-4 run): a row of 4 busts (`"cells": [...], "cols": 4, "size": "1472x704"`) gave about
+400x650 px per figure; a 2x2 sheet at 1024x1024 gives small faces. Name every expression in the subject (the first
+take of a sheet that only listed the cell names came back with no blink and no smile) and budget a second take.
+Busts drawn touching merge into one figure: `post` then cuts the sheet's own `cols` grid. A row's `size`, `aspect`,
+`seed` and `negative` pass through to the generator.
 
 ---
 
@@ -22,7 +73,8 @@ Do not generate a generic pose library. Go through `docs/STORYBOARD.md` shot by 
 | locations (8–14) | `bg_crossing`, `_night`, `_dawn`, `bg_platform`, `bg_embankment`, `bg_train`, `_night`, `bg_rooftop`, `bg_sky` (sky only), `bg_fireflies`, `bg_classroom`, `bg_vending`, `bg_door`, `bg_wetstreet` | every `illust` shot |
 | props | `prop_heart` (cracked glass heart, RGBA) | the song's central metaphor |
 
-Rules of thumb: one image per *lyric image* the song insists on (in 残光: cracked sky, thread, rusted door, cold fingertips, falling, a small flame, shattered heart, wet floor, broken wings, tears → road); a back view and a sky-only plate are always useful; generate the **time-of-day variants** your colour script needs for the 2–3 key locations (残光: night/dawn; a daylight film: noon / afternoon / golden hour) — a LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted; make close-ups as separate generations (cropping a full body gives soft, low-detail faces).
+Rules of thumb: one image per *lyric image* the song insists on (in 残光: cracked sky, thread, rusted door, cold fingertips, falling, a small flame, shattered heart, wet floor, broken wings, tears → road); a back view and a sky-only plate are always useful; generate the **time-of-day variants** your colour script needs for the 2–3 key locations (残光: night/dawn; a daylight film: noon / afternoon / golden hour) — a LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted; make close-ups as separate generations (cropping a full body gives soft, low-detail faces). A face that blinks
+or sings comes from an expression-sheet row (§0), one per framing.
 
 ## 2. `tools/imagegen.py`
 
@@ -97,7 +149,7 @@ python tools/alpha_matte.py redraw  orig.png orig_green.png out.png         # ma
 
 1. **Character bible** `docs/CHARACTER.md` (cover: name & concept · silhouette · hair (colour + inner colour) · eyes · signature item · outfit layers · motion prop (which side!) · palette roles as hex · do-nots (existing-character likenesses); a worked example is [examples/zanko/CHARACTER.md](https://github.com/EGSECDA/vocaloid-style-mv-pipeline/blob/main/examples/zanko/CHARACTER.md) in the kit repo, not inside the installed skill): an *original* design (never an existing character — say so in the prompt: "ORIGINAL virtual singer girl (Vocaloid-style design, NOT Hatsune Miku, not any existing character)"), with hair (colour + an inner colour that rim-lights well), eyes, a **signature item** (残光: white headphones with orange ring lights, a setting-sun hairpin), outfit, a **motion prop** that animates for free (a 1 m vermilion ribbon on the left wrist), and the palette roles as hex.
 2. **Character sentence**: compress the bible into one sentence that is pasted verbatim into every pose prompt (see §6). Name the side of asymmetric details ("ribbon on her LEFT wrist", "hairpin on her right side") — models flip them otherwise.
-3. **Three master candidates** (`jobs_master.jsonl`): full body, plain pose, different angle/expression each, *no* reference image, full bible + style block. Make a contact sheet, pick one (ask the user at this checkpoint), copy it to `assets/char/REF_master.png`. 残光 chose `master_b` (front, arms loose, wind in the hair).
+3. **Three master candidates** (three master rows, §0): full body, plain pose, different angle/expression each, *no* reference image, full bible + style block. Make a contact sheet, pick one (ask the user at this checkpoint), copy it to `assets/char/REF_master.png`. 残光 chose `master_b` (front, arms loose, wind in the hair).
 4. **Every pose** = `images: ["assets/char/REF_master.png"]` + pose description + *"The same original character as in the reference image (…character sentence…)"* + the style block. The reference carries the face and proportions; the sentence carries the details the model would drift on.
 5. **Two takes of difficult poses** (unusual camera angles, foreshortening, lying/falling, hands): run the job twice (a second jobs file with `alt/` outputs) and keep the better one. 残光 generated alternates of `fall`, `flame_hands`, `hug_self`, `kneel_pick`, `reach_viewer`, `smile_dawn`. A "lying on her back, seen directly from above" prompt came back as a **standing** figure; an extreme close-up asked as a cut-out (`eyes_ecu`, `transparent: true`) came back as a floating face crop and was redone **opaque, full-bleed 16:9**; `hand_reach` needed a rewrite that described only the arm ("Crop shows only the forearm, hand and ribbon").
 6. Check every result against the master side by side: hair inner colour, eye colour, signature item, motion prop side, outfit layers. Regenerate rather than "fix in post".
@@ -226,8 +278,21 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   (`1girl, solo, original, full body, ...` then the character sentence). **Never use character, series or artist tags**:
   they reproduce existing characters and styles, which breaks "original characters only". The tool adds a negative
   prompt (`nsfw`, text, logo, watermark, bad hands, ...) from `art.config.json` → `novelai.negative`; a job adds its own
-  with `"negative"`. Cut-outs get `simple background, green background` plus the usual key sentence; check the edge for
-  a green rim and use `"key": "#FF00FF"` for green / teal designs as usual.
+  with `"negative"`. Cut-outs get the tags `solo, simple background, green background` (V3 models: plus the usual key
+  sentence); check the edge for a green rim and use `"key": "#FF00FF"` for green / teal designs as usual.
+- **Write the locks as tags on NovelAI.** Prompt = `1girl, solo, original character,` + framing + pose + emotion +
+  the STYLE tags + `masterpiece, best quality, very aesthetic`. The character goes in `"char"` (a V4 character caption:
+  hair, eyes, outfit, signature items as tags); `gen_table.py` fills it from the row's `CHAR` / `CHAR_BACK` lock. Leave
+  out prose sentences, "generous margin" and "nothing touching the edges": in an A/B on one pose (Gemini runs of
+  2026-10, seed 1003) the prose version stood front-on with both hands at the chest, the tag version with the character
+  caption threw her head back with the microphone raised.
+- **Backgrounds on NovelAI:** start the WORLD lock with `scenery, no humans,` and end it with `anime background art,
+  detailed background, painterly sky, dramatic lighting` (+ quality tags). The §6 wording "flat cel colour areas …
+  sky painted as a few posterised colour bands" reads as screen-print to NovelAI: in the same A/B it gave a halftone dot
+  sky, the tag lock a painted dusk sky. Never add an artist's name to reach a look.
+- **More variety:** `"nai": {"skip_cfg_above_sigma": 58}` on a job (or `skip_cfg_above_sigma` in `art.config.json` →
+  `novelai`) gives livelier poses, and the design drifts more (the A/B lost the outfit's details): use it for action
+  poses, check the design, keep it off for masters and sheets.
 - **Seeds.** Default seed = hash of id + prompt, so a re-run gives the same image (the manifest records it). For
   another take change `"seed"` (or the prompt) and pass `--force`.
 - **References** (`"images"`), by `ref_mode`: `"character"` (V4.5 character reference: the identity of the first image;
@@ -240,24 +305,6 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   `max_pixels`, `negative`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-curated`,
   `nai-diffusion-4-full`, `nai-diffusion-3`. `NOVELAI_API_URL` overrides the endpoint (a proxy or a local mock).
 - The returned PNG is re-encoded on save (NovelAI's metadata chunks with the prompt are not kept).
-
-## 12b. The generation table and expression sheets (`tools/gen_table.py`)
-
-One table for the film's images (locks + a subject per row, references, sizes, keys), compiled into jobs files for
-`artgen.py`, then `post` (finals, review sheets per category, `status`). A character's expressions come from a
-**sheet row**: one generation of all of them (same style), split, aligned and cut to eye / mouth patches for the
-engine (`styles/vocaloid/STYLE.md`). Lessons from the first real runs (NovelAI): its "magenta" screen comes out hot
-pink (the keyer treats it as a two-channel screen; before, it ate every red / brown / skin colour); it lays a sheet out
-its own way (a full body plus heads: pick the figures by number); copies on a sheet are each redrawn a little, so a
-whole feature area is pasted, not only the changed pixels; asking for a changed version of a finished picture (img2img
-/ inpaint of a head) drifts in style or does not change — variant rows remain for small fixes to one face (inpaint of
-an eye or mouth region, `"takes": 3`).
-
-Sheet layout (iteration-4 run): a row of 4 busts (`"cells": [...], "cols": 4, "size": "1472x704"`) gave about
-400x650 px per figure; a 2x2 sheet at 1024x1024 gives small faces. Name every expression in the subject (the first
-take of a sheet that only listed the cell names came back with no blink and no smile) and budget a second take.
-Busts drawn touching merge into one figure: `post` then cuts the sheet's own `cols` grid. A row's `size`, `aspect`,
-`seed` and `negative` pass through to the generator.
 
 ## 13. Choosing the generator (`tools/artgen.py`)
 

@@ -30,7 +30,8 @@ Case study 「残光」: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/t
 from it, do not reuse its motifs, character or palettes).
 
 Read, in order: `references/02-creative-direction.md` (thesis, colour script, motifs, signature moments, variation
-matrix, bright films §13) → `references/04-asset-generation.md` (character bible, master, poses, backgrounds; Codex §2–3,
+matrix, bright films §13) → `references/04-asset-generation.md` (start at §0, the generation table: masters, expression sheets for the living
+faces below, poses, plates; character bible §5; Codex §2–3,
 Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline, `illust` and the scene library, post, LUTs; additions §12) →
 `references/06-jizura.md` (lyric plans, curation) → `references/07-blender-3d.md` (optional) → `references/09` (QA).
 
@@ -44,6 +45,18 @@ Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline,
 - **Light sources** are `fx: [{ type: 'light', pin: [u, v], core, color }]` (soft stacked halos), not discs.
 - **Motion with weight:** moving props travel on arcs with anticipation and follow-through (`D.travel`, `D.along` bank
   angle); nothing glides at a constant speed on a straight line unless it is a machine on rails.
+- **Placement varies:** most character shots put her on the left or right third (`x` ≈ 640 / 1280 or `pin` u ≈
+  0.33 / 0.67), facing into the open side (`flip` when she looks the wrong way), with the lyric in the other two
+  thirds; the centre is for frontal singing, kime lines and the climax. Change side and size from shot to shot (a
+  cut from her small on the left third to a close-up on the right reads as a cut; the same spot twice reads as a
+  jump), move her across the frame with `x2` / `pin2`, and give two-character shots both thirds. `tools/storyboard.mjs`
+  warns when over half the character shots are centred or a third is never used (a Gemini film had 10 of 16 at u = 0.5).
+- **One pose per shot.** Inside a shot a character keeps one picture; her face lives through `chars[].anim` (blink,
+  mouth, expressions), not by swapping whole sprites. A new pose comes with a cut to a new framing, at most every
+  1.5–2 s, and never back and forth: A → B → A reads as a glitch, not as animation (a Gemini film stepped three poses
+  on each band stop of its outro). Stepping through pictures is only for a real drawn sequence of ONE action, in order,
+  each held ≥ 0.3 s; `burst` (a mini-shot per beat) stays ≤ 2 bars and gives every cut its own framing and place.
+  `tools/check_shots.mjs` warns on SPRITE PING-PONG (A → B → A within 2 s) and RAPID SWAPS (3+ changes in 3 s).
 - **Composition:** subject on a third, three depth layers (a blurred foreground element sells depth cheaply), the lyric
   in a quiet zone (centre-free JIZURA plan `cf` when the subject is central); the final shot is a composed picture with
   a subject, depth and light — never one small object in an empty frame.

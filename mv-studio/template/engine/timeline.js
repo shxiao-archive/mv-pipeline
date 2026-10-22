@@ -193,6 +193,10 @@
       DENY.layout += ' shadowPlay glitchGrid';                        // opaque plates: a grey floor (9:16) / beige glyph tiles
       DENY.trans += ' knStutterCut zoomThrough inkBlob';              // black out / cover the picture under the lyric in front mode
       DENY.layout += ' curtain'; DENY.fx += ' filmAdvance';           // an opaque theatre curtain; black film frames (pops.mjs flags them)
+      // measured by tools/jizura_cover.mjs (> 30 % of the frame covered in front mode; references/06 §5)
+      DENY.trans += ' uncover whipPan flashCross';
+      DENY.layout += ' marquee diag filmstrip contour knZoomDive knTypeSlam sliceStack';
+      DENY.treat += ' ransom monoGrid';
       // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
       // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only
       // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.

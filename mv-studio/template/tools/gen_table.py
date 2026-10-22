@@ -13,7 +13,7 @@ it so the engine can switch them (engine/scenes/scenes.js chars[].anim).
   python tools/gen_table.py selftest
 
 Table (JSON):
-  { "locks": { "STYLE": "...", "CHAR": "...", "WORLD": "...", "ISO": "...", "EMPTY": "..." },   # your words per film
+  { "locks": { "STYLE": "...", "CHAR": "...", "CHAR_BACK": "...", "WORLD": "...", "ISO": "...", "EMPTY": "..." },   # your words per film
     "refs":  { "style": "assets/ref/style_ref.png", "char": ["assets/ref/char_front.png", "assets/ref/char_approved.png"] },
     "out":   "assets/gen",                       # finals go to <out>/<id>.png, raw generations to <out>/raw/
     "refs_first": "style",                       # "char" for NovelAI (its character reference reads the first image)
@@ -22,6 +22,8 @@ Table (JSON):
       { "id": "BG01", "kind": "world", "subject": "A vast ruined city plain ...", "size": "1536x1024" },
       { "id": "OBJ10a", "kind": "world", "subject": "A swallow, wings spread", "transparent": true },
       { "id": "CH01_blink", "variant_of": "CH01", "edit": "her eyes closed", "mode": "patch", "region": [0.3, 0.05, 0.75, 0.3], "takes": 3 },
+      { "id": "CH02", "kind": "char", "subject": "Full body seen from behind ...", "transparent": true,
+        "locks": ["STYLE", "CHAR_BACK"], "negative": "face, eyes, looking at viewer" },   # CHAR_BACK: no face words (else eyes on the back of the head)
       { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full" },
       { "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view", "size": "1024x1024", "transparent": true,
         "sheet": { "cells": ["neutral", "blink", "open", "smile"] } } ] }
@@ -123,6 +125,14 @@ def prompt_of(t: dict, r: dict) -> str:
     return "\n".join(locks[n] for n in names) + "\n\nNew image: " + subject
 
 
+def char_of(t: dict, r: dict) -> str | None:
+    """The row's character lock (CHAR, CHAR_BACK, ...): NovelAI sends it as a character caption."""
+    if r.get("kind") != "char":
+        return None
+    names = r.get("locks") or DEFAULT_LOCKS["char"]
+    return next((t.get("locks", {})[n] for n in names if n.startswith("CHAR") and n in t.get("locks", {})), None)
+
+
 def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
     t = load(table)
     refs = t.get("refs", {})
@@ -152,6 +162,9 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
                 job["region"] = r["region"]
         else:
             continue
+        ch = char_of(t, r) or char_of(t, next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {}))
+        if ch:
+            job["char"] = ch                                              # NovelAI: a V4 character caption
         for k in ("size", "aspect", "seed", "negative"):                 # passed through to the generator wrapper
             if k in r:
                 job[k] = r[k]
@@ -678,6 +691,10 @@ def selftest() -> int:
     eye_v, eye_u = (70 + (ch - H) / 2) / ch, (100 + (cw - W) / 2) / cw
     if not (reg[0] < eye_u < reg[2] and reg[1] < eye_v < reg[3]) or (reg[3] - reg[1]) > 0.4:
         print("FAIL sheet face region:", reg, (eye_u, eye_v)); bad += 1
+    tb = {"locks": {"STYLE": "s", "CHAR": "front", "CHAR_BACK": "back", "WORLD": "w"}, "rows": [
+        {"id": "CH01", "kind": "char"}, {"id": "CH02", "kind": "char", "locks": ["STYLE", "CHAR_BACK"]}, {"id": "BG01", "kind": "world"}]}
+    if [char_of(tb, r) for r in tb["rows"]] != ["front", "back", None] or "front" in prompt_of(tb, dict(tb["rows"][1], subject="x")):
+        print("FAIL character caption / CHAR_BACK lock"); bad += 1
     print("align:", info, f"patch {frac:.2%} of the canvas; sheet face region {reg}")
     print("gen_table self-test: " + ("ok" if not bad else f"{bad} failed"))
     return 1 if bad else 0

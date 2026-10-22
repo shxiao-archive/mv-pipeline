@@ -63,7 +63,7 @@ let lyricsOk = true;
 if (!flag('no-lyrics-check') && fs.existsSync(path.join(ROOT, 'tools', 'check_no_lyrics.mjs'))) {
   const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'check_no_lyrics.mjs')], { encoding: 'utf8', cwd: ROOT });
   lyricsOk = r.status === 0;
-  if (!lyricsOk) problems.push(`LYRICS   ${(r.stdout || '').trim().split('\n').slice(-6).join(' | ').slice(0, 600)}`);
+  if (!lyricsOk) problems.push(`LYRICS   ${(r.stderr || r.stdout || '').trim().split('\n').slice(-6).join(' | ').slice(0, 600)}`);
 }
 for (const p of problems) console.log(p);
 console.log(`[lint] ${files.length} files: ${problems.length ? `FAIL (${problems.length} problems)` : 'ok'}`);

@@ -57,7 +57,7 @@ def main() -> int:
     ap.add_argument("--out", default="render/lineup.jpg")
     a = ap.parse_args()
     files = [Path(f) if Path(f).is_absolute() else ROOT / f for f in a.images] or \
-        sorted(p for p in (ROOT / "assets" / "char").glob("*.png") if not p.stem.startswith("REF"))
+        sorted(p for p in (ROOT / "assets" / "char").glob("*.png") if not p.stem.startswith("REF") and not p.name.endswith(".raw.png"))
     if not files:
         sys.exit("no cut-outs: pass images or put them in assets/char/")
     hmap = dict(kv.split("=", 1) for kv in a.height)

@@ -89,7 +89,8 @@ Keep the structure of the demo timeline and replace its shots:
   times from the BPM.
 - `shot(id, t0, t1, scene, args, { lyric, plan, post, trans, text, hud })` — one call per shot, ids `s01…` in film order.
 - JIZURA plans (`main`, `cf` centre-free, `noir`, `mono`) and the curation deny-lists: change them per film and
-  re-check the stills (any change re-rolls the cuts). Find a bad lyric frame with `node tools/jz_cuts_at.mjs 12.5 main`.
+  re-check the stills (any change re-rolls the cuts). Find a bad lyric frame with `node tools/jz_cuts_at.mjs 12.5 main`;
+  list the parts that cover the picture with `node tools/jizura_cover.mjs`.
 - `Z.LOOK_DEFAULT` / `Z.LOOKS` (per section label), `Z.globalFX` (flashes, kick shake), `Z.hud`.
 - `Z.VERTICAL_CFG`: which shots keep the whole 16:9 composition in the 9:16 version (`full`), the plan map, header text
   (`title` / `sub` / `artist` = `Z.TITLE` / `Z.TITLE_SUB` / `Z.ARTIST`), when header and footer show (`credits`), the

@@ -197,7 +197,7 @@ fx specs (`fxBack`/`fx`, or `Z.fx`): `embers`, `fireflies`, `rain`, `dust`, `fea
 | scene | what | args | 残光 |
 |---|---|---|---|
 | `panels` | manga コマ割り: slanted ink gutters, staggered 8th-note openings, per-beat punch-ins, collapse into one panel | `panels [{bg\|img, view, viewTo, char, charX/Y/H, flip, tone, lines 'focus'\|'speed', punch, alt, lamps, tint, fx, fxBack, illust:{…}}]`, `collapseAt`, `hero`, `gutter 22`, `margin 22`, `gutterColor`, `keyline`, `openAt`, `openDur .36`, `order`, `layout`, `collapseDur .2`, `collapseZoom .045`, `shake 7` | s20, s41 |
-| `burst` | one composed mini-shot per beat: framing, character pop, smear, flash, speed lines; optional night→dawn grade | `cuts [{bg, view, viewTo, char, charX/Y/H, flip, rim, tint, dir, lamps}]`, `every 1`, `lead 1/30`, `flash 'alt'\|'all'\|'none'\|[k…]`, `flashColor`, `speed`, `grade null\|'night2dawn'`, `roll .018` | s55, s59 |
+| `burst` | one composed mini-shot per beat: framing, character pop, smear, flash, speed lines; optional night→dawn grade; ≤ 2 bars, no A → B → A sprite order (check_shots warns) | `cuts [{bg, view, viewTo, char, charX/Y/H, flip, rim, tint, dir, lamps}]`, `every 1`, `lead 1/30`, `flash 'alt'\|'all'\|'none'\|[k…]`, `flashColor`, `speed`, `grade null\|'night2dawn'`, `roll .018` | s55, s59 |
 | `ref` | re-renders another shot: `freeze` (desaturate, crack, split), `rewind` (VHS, OSD), `melt` (columns drip, cool to blue) | `shot`, `mode`, `at`; freeze: `live`, `crackAt`, `crackXY`, `crackAngle`, `desat .88`, `push`, `jitter`, `split 8`; rewind: `span 3`, `from`, `follow`, `hold .1`, `fps 15`, `osd`; melt: `meltAt`, `meltEnd`, `cols`, `depth`, `drip`, `seed`, `rate` | s22, s43, s32 |
 | `seq` | Blender image sequence in sync with song time | `pattern 'blender/renders/A/f_####.jpg'`, `t0` (shot t0), `fps 30`, `frames`, `offset 0`, `rate 1`, `view`, `prefetch 2`, `overlay {leak, flash, letterbox, introFlash, vignette, grade}` | s23, s44 |
 
@@ -219,7 +219,7 @@ fx specs (`fxBack`/`fx`, or `Z.fx`): `embers`, `fireflies`, `rain`, `dust`, `fea
       const a = S.args, t = S.t, n = a.drops ?? 60, seed = a.seed ?? 5;
       ctx.drawImage(blurred(a.bg), 0, 0, W, H);                                      // background (cached blur)
       const zoom = 1 + 0.015 * S.clock.pulse(t, 8);                                  // camera: full time + beat breath
-      if (a.char) Z.drawChar(ctx, S, { img: a.char, x: 960, y: 1100, h: 1000 * zoom, sil: '#140B1E', rim: { color: '#9CC2C0' } });
+      if (a.char) Z.drawChar(ctx, S, { img: a.char, x: a.x ?? 1280, y: 1100, h: 1000 * zoom, sil: '#140B1E', rim: { color: '#9CC2C0' } });
       ctx.save(); ctx.globalCompositeOperation = 'lighter';
       for (let i = 0; i < n; i++) {                                                  // closed-form drops: pure function of t
         const life = 2 + 3 * Z.rnd(i, seed), k = Z.fract((t + Z.rnd(i, seed + 1) * life) / life);
@@ -343,7 +343,8 @@ Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT) · §12: mv-studio (MIT
 - **Shot fields read by the tools** (all optional): `moment` (what the shot shows and why, your words), `line` (the
   lyric line number(s) it answers), `cue` (the cue its cut sits on; checked within `review.cueTolerance`), `offgrid:
   'reason'` (a deliberate off-grid cut), `insert: true` (1-2 frame inserts), `allowBlack: true` (a deliberately black
-  shot). Line indices inside `args` (`line`, `lines`) count as "this shot shows that line".
+  shot), `hold: true` (a deliberate still: motion_check.py leaves it out, up to 8 % of the film; the song's own stops
+  and the tail after `music_cut` are left out without it). Line indices inside `args` (`line`, `lines`) count as "this shot shows that line".
 - **Offsets** (`project.json` → `timing`): `offset` delays every picture (applied in `window.renderFrame`),
   `lyricOffset` delays the lyrics only (Z.LYR, line cues, the JIZURA layer). Scenes never add them.
 - **Per-character times:** `Z.charTimes(i)`; `Z.charsAt(i, t)` uses them when `analysis/lyric_timing.json` has them

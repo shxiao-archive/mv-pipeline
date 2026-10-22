@@ -14,6 +14,8 @@ Then LOOK at <out-dir>/_check_novelai.jpg (every image, with its id).
 
 Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; tools/grokgen.py: aspect) plus:
   "negative": "..."            extra negative prompt (added to the default one)
+  "char": "1girl, ..."         the character's tags as a V4 character caption (tools/gen_table.py fills it from the
+                               CHAR / CHAR_BACK lock of char rows); the prompt keeps the scene and the pose
   "size": "1472x704"           width x height (or "width" + "height"; else "aspect"); snapped to 64 px, capped by max_pixels
   "seed": 1234                 fixed seed (default: derived from id + prompt, so a re-run gives the same image;
                                change the seed or the prompt for another take)
@@ -41,6 +43,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -64,7 +67,7 @@ SIZES = {"16:9": (1344, 768), "9:16": (768, 1344), "1:1": (1024, 1024), "2:3": (
 DEFAULTS = {
     "model": "nai-diffusion-4-5-full",
     "steps": 28, "scale": 5.0, "sampler": "k_euler_ancestral", "noise_schedule": "karras", "cfg_rescale": 0.0,
-    "quality_tags": True, "uc_preset": 0,
+    "quality_tags": True, "uc_preset": 0, "skip_cfg_above_sigma": None,
     # NSFW, text and existing-character look-alikes are never wanted in an MV asset
     "negative": "nsfw, lowres, bad anatomy, bad hands, extra digits, fewer digits, text, logo, watermark, signature, "
                 "username, artist name, speech bubble, jpeg artifacts, blurry",
@@ -130,33 +133,45 @@ def char_ref_image(path: Path) -> str:
     return b64_png(canvas)
 
 
+def model_gen(model: str) -> float:
+    """Model generation from its name: nai-diffusion-4-5-full -> 4.5, nai-diffusion-3 / -furry-3 -> 3; unknown -> 4."""
+    m = re.search(r"diffusion-(?:furry-)?(\d+)(?:-(\d)(?!\d))?", model)
+    return float(f"{m.group(1)}.{m.group(2) or 0}") if m else 4.0
+
+
 def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
     """The JSON body of POST /ai/generate-image. data=False leaves image payloads out (for --dry-run)."""
     w, h = size_for(job, cfg)
+    model = job.get("model") or cfg["model"]
+    gen = model_gen(model)
+    v4 = gen >= 4                                                  # V4 caption format (v4_prompt)
     prompt = job["prompt"].strip()
     if job.get("transparent"):
         key = job_key(job)
         tag = KEY_TAGS.get(key, f"plain {key} background")
-        tags = [t for t in ("solo", "simple background", tag, "no shadow") if t not in prompt.lower()]
-        prompt = ", ".join([prompt] + tags) + "." + key_suffix(key)
+        if v4:   # tags only: the Codex key sentence and "no shadow" flatten V4 poses and shading (Gemini old/new runs)
+            prompt = ", ".join([prompt] + [t for t in ("solo", "simple background", tag) if t not in prompt.lower()])
+        else:
+            tags = [t for t in ("solo", "simple background", tag, "no shadow") if t not in prompt.lower()]
+            prompt = ", ".join([prompt] + tags) + "." + key_suffix(key)
     negative = ", ".join(x for x in (cfg["negative"], job.get("negative", "")) if x)
     if job.get("transparent"):
-        negative += ", scenery, detailed background, gradient background, cast shadow, cropped"
-    model = job.get("model") or cfg["model"]
-    v4 = "diffusion-4" in model
+        negative += ", scenery, detailed background, gradient background, cast shadow"
     p = {
         "params_version": 3, "width": w, "height": h, "scale": cfg["scale"], "sampler": cfg["sampler"],
         "steps": cfg["steps"], "n_samples": 1, "seed": job_seed(job), "ucPreset": cfg["uc_preset"],
         "qualityToggle": bool(cfg["quality_tags"]), "dynamic_thresholding": False, "controlnet_strength": 1,
         "legacy": False, "add_original_image": True, "cfg_rescale": cfg["cfg_rescale"],
-        "noise_schedule": cfg["noise_schedule"], "legacy_v3_extend": False, "skip_cfg_above_sigma": None,
+        "noise_schedule": cfg["noise_schedule"], "legacy_v3_extend": False, "skip_cfg_above_sigma": cfg["skip_cfg_above_sigma"],
         "negative_prompt": negative, "deliberate_euler_ancestral_bug": False, "prefer_brownian": True,
     }
+    chars = [{"char_caption": job["char"].strip(), "centers": [{"x": 0.5, "y": 0.5}]}] if v4 and job.get("char") else []
     if v4:
         p.update({
             "use_coords": False, "characterPrompts": [], "legacy_uc": False,
-            "v4_prompt": {"caption": {"base_caption": prompt, "char_captions": []}, "use_coords": False, "use_order": True},
-            "v4_negative_prompt": {"caption": {"base_caption": negative, "char_captions": []}, "legacy_uc": False},
+            "v4_prompt": {"caption": {"base_caption": prompt, "char_captions": chars}, "use_coords": False, "use_order": True},
+            "v4_negative_prompt": {"caption": {"base_caption": negative, "char_captions": [dict(c, char_caption="") for c in chars]},
+                                   "legacy_uc": False},
         })
     action = "generate"
     refs = [ref_path(r) for r in job.get("images") or []]
@@ -164,9 +179,9 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
         if not r.is_file():
             raise FileNotFoundError(f"job {job['id']}: reference image {r} does not exist")
     if refs:
-        mode = job.get("ref_mode") or ("character" if "4-5" in model else "vibe" if not v4 else "img2img")
+        mode = job.get("ref_mode") or ("character" if gen >= 4.5 else "vibe" if not v4 else "img2img")
         if mode == "character":
-            if "4-5" not in model:
+            if gen < 4.5:
                 raise ValueError(f"job {job['id']}: ref_mode 'character' needs a V4.5 model (model is {model})")
             caption = {"caption": {"base_caption": "character&style", "char_captions": []}, "legacy_uc": False}
             p.update({
@@ -195,7 +210,7 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
                 action = "infill"
                 model = job.get("inpaint_model") or (model if model.endswith("-inpainting") else model + "-inpainting")
                 p.update({"mask": b64_png(mask) if data else f"<mask {job.get('region')}>"})
-            if job.get("char_ref") and "4-5" in model:                # also hold identity + style to the reference (V4.5)
+            if job.get("char_ref") and gen >= 4.5:                # also hold identity + style to the reference (V4.5)
                 caption = {"caption": {"base_caption": "character&style", "char_captions": []}, "legacy_uc": False}
                 p.update({"director_reference_images": [char_ref_image(refs[0]) if data else f"<{refs[0].name}>"],
                           "director_reference_descriptions": [caption], "director_reference_information_extracted": [1],

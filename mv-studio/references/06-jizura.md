@@ -96,6 +96,13 @@ The 残光 deny-lists (adapt per film):
 | enter / exit | bubbles, stickerPeel, crumple, loadingBar, tokoroten / balloonOff, crumpleOut, peelOff | comic motion |
 | bg (only `full` mode) | argyle, tartan, polka, checker, retroGrid, kaleidoscope, fireworks, sunburst, seigaiha, asanoha, … | pattern backgrounds clash with illustrated shots |
 
+**Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample
+words with one part at a time (every other group pinned to its plain part), renders front mode where that part is used
+and prints the parts that cover more than 30 % of the frame as ready `DENY.<group> += '...'` lines (`jizura/cover.json`
+has every value). Three rounds of hand-made lists each missed some (`uncover`, `whipPan`, …); the template's lists
+now include everything it measured. Run it again after changing styles, schemes or the JIZURA pin, and add what it
+prints; big-type layouts it lists are a choice (they cover with letters, not plates): keep the ones the film wants.
+
 Dump the registry with `node tools/jizura_parts.mjs` → `jizura/parts.json` (per part: name, tags in the `moods` field, set) when building a new deny-list.
 
 ## 6. Character shots & text-behind

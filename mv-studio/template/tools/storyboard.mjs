@@ -12,12 +12,16 @@
  *   offgrid: 'reason'     this cut is deliberately off the beat grid (a pickup, a rubato hold): skip the grid check
  *   insert: true          a 1-2 frame insert: skip the minimum-length check
  *   allowBlack: true      a deliberately black shot (check_shots.mjs)
+ *   hold: true            a deliberate still (a held breath, a stop): motion_check.py does not count it, up to 8 % of the film
  * Checks (ERROR fails the run, WARN is listed):
  *   ERROR  unknown scene · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)
  *          · a cut far from its declared cue · a shot shorter than review.minShotFrames · a sung line no shot shows
  *          (no JIZURA layer, no text hook, no line index in its args)
  *   WARN   a shot without `moment` (ERROR with --strict) · a line no shot declares it answers · a line too short to read
  *          (< max(0.7 s, 0.09 s per character)) · line cues without a picture hint (analysis/cues.json)
+ *          · a vocaloid film whose characters never blink or sing (no `chars[].anim`; ERROR with --strict)
+ *          · characters placed the same way: over half of the character shots centred (|u - 0.5| < 0.08), or a third
+ *            of the frame never used (u < 0.4 / u > 0.6), with 4+ character shots (args.chars x or pin)
  * Tolerances from project.json -> review: { cutTolerance: 0.04, cueTolerance: 0.15, grid: 'half' | 'beat', minShotFrames: 3 }.
  *
  * mv-studio (MIT).
@@ -79,12 +83,21 @@ lines.forEach(L => {
 });
 const noHint = cues.filter(c => c.kind === 'line' && !c.hint).length;
 if (noHint) warn('cues', `${noHint} line cue(s) without a picture hint (analysis/cues.json "hint")`);
+const withFaces = shots.filter(s => s.faces);
+const placed = shots.filter(s => s.place && s.place.length).map(s => s.place[0]);   // the first char of a shot: the lead
+if (placed.length >= 4) {
+  const centred = placed.filter(u => Math.abs(u - 0.5) < 0.08).length, left = placed.filter(u => u < 0.4).length, right = placed.filter(u => u > 0.6).length;
+  if (centred > placed.length / 2 || !left || !right)
+    warn('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
+}
+if (/^(vocaloid|tegaki|signal)/.test((P.project && P.project.style) || '') && withFaces.length && !withFaces.some(s => s.animFaces))
+  (strict ? err : warn)('faces', `${withFaces.length} shot(s) show characters but none blinks or sings: make an expression sheet (references/04 §0) and give chars an anim (styles/vocaloid/STYLE.md, Characters with a living face)`);
 
 // ---- outputs
 const rows = shots.map((s, k) => {
   const end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
   return { n: k + 1, id: s.id, t0: s.t0, t1: end, dur: +(end - s.t0).toFixed(3), scene: s.scene,
-    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid };
+    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined };
 });
 fs.mkdirSync(path.join(ROOT, 'plan'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'plan', 'shots.json'), JSON.stringify({ generator: 'tools/storyboard.mjs', duration: P.duration, fps, shots: rows }, null, 1) + '\n');

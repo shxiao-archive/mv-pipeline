@@ -40,22 +40,24 @@ nums = sorted(set(round(tt * fps) for tt in times))
 w, h = (384, 216) if vw >= vh else (216, 384)
 tmp = tempfile.mkdtemp(prefix='review_')
 try:
-    sel = '+'.join(f'lt(abs(t-{n / fps:.6f}),{0.5 / fps:.6f})' for n in nums)   # inside select='...' commas need no escaping
-    seek = max(0.0, a.start - 1.0)
-    base = [kit_env.FFMPEG, '-v', 'error', '-ss', f'{seek:.6f}', '-t', f'{end - seek + 0.5:.6f}', '-copyts', '-i', video,
-            '-vf', f"select='{sel}',scale={w}:{h}"]
-    outp = os.path.join(tmp, 'f_%05d.png')
-    if subprocess.run(base + ['-fps_mode', 'passthrough', outp]).returncode != 0:   # ffmpeg >= 5.1
-        subprocess.run(base + ['-vsync', '0', outp], check=True)                    # older ffmpeg
-    frames = sorted(os.listdir(tmp))
     per = a.cols * a.cols
-    for si in range(0, len(frames), per):
-        chunk = frames[si:si + per]
+    for si in range(0, len(nums), per):
+        # one ffmpeg run per sheet: ffmpeg 8 fails to parse a select expression of ~150 terms (songs over ~3.5 min)
+        part = nums[si:si + per]
+        sub = os.path.join(tmp, f'{si // per:02d}'); os.makedirs(sub)
+        sel = '+'.join(f'lt(abs(t-{n / fps:.6f}),{0.5 / fps:.6f})' for n in part)   # inside select='...' commas need no escaping
+        seek = max(0.0, part[0] / fps - 1.0)
+        base = [kit_env.FFMPEG, '-v', 'error', '-ss', f'{seek:.6f}', '-t', f'{part[-1] / fps - seek + 0.5:.6f}', '-copyts', '-i', video,
+                '-vf', f"select='{sel}',scale={w}:{h}"]
+        outp = os.path.join(sub, 'f_%05d.png')
+        if subprocess.run(base + ['-fps_mode', 'passthrough', outp]).returncode != 0:   # ffmpeg >= 5.1
+            subprocess.run(base + ['-vsync', '0', outp], check=True)                    # older ffmpeg
+        chunk = [os.path.join(sub, f) for f in sorted(os.listdir(sub))]
         rows = (len(chunk) + a.cols - 1) // a.cols
         S = Image.new('RGB', (a.cols * w, rows * (h + 18)), (12, 12, 12)); d = ImageDraw.Draw(S)
         for i, f in enumerate(chunk):
-            tt = nums[si + i] / fps if si + i < len(nums) else a.start + (si + i) * a.step
-            with Image.open(os.path.join(tmp, f)) as src:
+            tt = part[i] / fps if i < len(part) else a.start + (si + i) * a.step
+            with Image.open(f) as src:
                 im = src.convert('RGB')
             x, y = (i % a.cols) * w, (i // a.cols) * (h + 18)
             S.paste(im, (x, y)); d.text((x + 4, y + h + 3), f'{int(tt // 60)}:{tt % 60:05.2f}', fill=(230, 230, 230))

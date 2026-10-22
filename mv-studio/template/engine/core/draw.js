@@ -66,6 +66,7 @@
     }
   };
   D.sprite = (ctx, img, x, y, h, opt = {}) => {
+    if (Z.onSprite) Z.onSprite(Z.pathOf && Z.pathOf.get(img), h);   // set only by tools/check_shots.mjs
     const s = h / img.height, w = img.width * s;
     const [ax, ay] = opt.anchor || [0.5, 1];
     const t = opt.t || 0;

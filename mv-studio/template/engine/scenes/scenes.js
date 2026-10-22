@@ -182,6 +182,7 @@
     }
     if (c.pin && S.bgImg) { const q = pinPt(S, c, k); x = q[0] + (x - c.x || 0); y = q[1] + (y - c.y || 0); h *= q[2]; }
     if (alpha <= 0.001) return;
+    if (Z.onSprite) Z.onSprite(c.img, h);                    // set only by tools/check_shots.mjs (sprite pass)
     if (c.water) {                                             // afloat: sunk into the waterline at its pin, reflected below
       D.onWater(ctx, img, x, y, h, S.t, Object.assign({ alpha, seed: c.phase || 0, tint: c.tint }, c.water)); return;
     }

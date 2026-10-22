@@ -25,9 +25,10 @@
   };
   Z.imgSync = p => Z.loaded.get(p) || null;                      // after preload
   Z.loaded = new Map();
+  Z.pathOf = new WeakMap();                                      // image -> its path (tools/check_shots.mjs sprite pass)
   Z.preload = async (paths) => {
     const uniq = [...new Set(paths)];
-    await Promise.all(uniq.map(async p => { Z.loaded.set(p, await Z.img(p)); }));
+    await Promise.all(uniq.map(async p => { const im = await Z.img(p); Z.loaded.set(p, im); Z.pathOf.set(im, p); }));
     return uniq.length;
   };
 

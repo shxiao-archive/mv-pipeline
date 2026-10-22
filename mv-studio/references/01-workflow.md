@@ -73,18 +73,29 @@ thesis (one sentence about what the song is *about* visually), logline, emotiona
 
 ## 3. Assets
 
-Read `references/04-asset-generation.md`.
-1. Character bible `docs/CHARACTER.md` (hair/eyes/outfit/signature item/motion prop/palette) + a shared **style block**.
-2. Three master candidates → pick → `assets/char/REF_master.png`. **Checkpoint:** contact sheet.
-3. Poses (from the storyboard's needs: close-ups, back view, hands, signature props, dynamic poses, emotional beats) → `assets/char/*.png` (RGBA). Two takes for hard poses.
-4. Locations (from the lyrics' imagery + the colour script) → `assets/bg/*.png`. Generate the time-of-day variants your colour script needs for the 2–3 key locations (e.g. noon / golden hour / night). A LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted.
-5. Props (transparent) for symbolic objects.
+Read `references/04-asset-generation.md`, starting at §0: every image of the film is a row of ONE generation table,
+`assets/gen/table.json` (`tools/gen_table.py`).
+1. Character bible `docs/CHARACTER.md` (hair/eyes/outfit/signature item/motion prop/palette), then the table's
+   **locks**: `STYLE`, `CHAR` (the character sentence), `CHAR_BACK` (her from behind, no face words), `WORLD`, `ISO`,
+   `EMPTY`.
+2. Three master rows → generate → pick one with the user → the table's `refs.char`. **Checkpoint:** contact sheet.
+3. The rest of the rows, from the storyboard's needs:
+   - one **expression-sheet row** per framing the faces use (bust, half body): her blink, singing mouth and
+     expressions for `chars[].anim` (styles/vocaloid/STYLE.md, Characters with a living face);
+   - poses (close-ups, back view, hands, signature props, dynamic poses, emotional beats; two takes for hard poses);
+   - locations from the lyrics' imagery and the colour script, with the time-of-day variants your colour script needs
+     for the 2–3 key locations (a LUT can shift a plate's mood, but light sources must be painted);
+   - transparent props for the symbolic objects.
 
 ```bash
 python tools/artgen.py providers                                                # which generator? ask the user once
-python tools/artgen.py run assets/char/jobs_core.jsonl --out-dir assets/char    # Codex / Grok / NovelAI / custom (04 §13)
+python tools/gen_table.py jobs assets/gen/table.json                            # -> assets/gen/jobs_base.jsonl
+python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  # Codex / Grok / NovelAI / custom (04 §13)
+python tools/gen_table.py post assets/gen/table.json                            # finals, sheets split, _review_*.jpg
+python tools/gen_table.py status assets/gen/table.json
 ```
-Acceptance: every image viewed; character recognisably identical across poses; no green fringes; nothing imitates an existing character.
+Acceptance: every image viewed (`_review_*.jpg`, `_<id>_figures.jpg`); character recognisably identical across poses;
+no green fringes; nothing imitates an existing character; each singing framing has its `.anim.json`.
 
 ## 4. Storyboard & timeline
 

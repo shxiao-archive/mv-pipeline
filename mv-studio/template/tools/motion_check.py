@@ -12,9 +12,12 @@ The threshold was calibrated on reviewer feedback ("it looks like a slideshow"):
 fade or a tiny drift happens. Adapted from the lyric-mv skill (mv-studio, MIT).
 
 Usage:  python tools/motion_check.py render/mv.mp4 [--start S] [--threshold 0.006] [--min 1.5]
-Exit 1 when static stretches add up to more than 10 % of the export.
+Exit 1 when static stretches add up to more than 10 % of the export. Not counted: stillness inside the song's own
+stops (analysis/audio.json `stops` of kind 'stop', +- 0.3 s) and after `music_cut`, and inside shots marked `hold: true`
+(plan/shots.json from tools/storyboard.mjs; run it after changing the timeline) up to 8 % of the export.
 """
 import argparse
+import json
 import os
 import re
 import shutil
@@ -62,10 +65,26 @@ def main():
         else:
             i += 1
     total = len(d) / fps
-    still = sum(j - i for i, j in runs) / fps
+    t = np.arange(len(d)) / fps + start                    # song time of each frame step
+    silent, held, inrun = (np.zeros(len(d), bool) for _ in range(3))
+    for i, j in runs:
+        inrun[i:j] = True
+    au = read_json(ROOT / "analysis" / "audio.json")
+    for s in au.get("stops") or []:
+        if s.get("kind") == "stop":
+            silent |= (t >= s["start"] - 0.3) & (t <= s["end"] + 0.3)
+    if au.get("music_cut"):
+        silent |= t >= au["music_cut"]
+    for s in read_json(ROOT / "plan" / "shots.json").get("shots") or []:
+        if s.get("hold"):
+            held |= (t >= s["t0"]) & (t < s["t1"])
+    n_silent = int((inrun & silent).sum())
+    n_hold = min(int((inrun & held & ~silent).sum()), int(0.08 * len(d)))
+    still = (int(inrun.sum()) - n_silent - n_hold) / fps
     st = lambda f: f / fps + start
     print(f"[motion] {Path(a.mp4).name}: {total:.1f} s, mean motion {d.mean():.4f}, static stretches (< {a.threshold} for >= {a.min} s): "
-          f"{len(runs)} totalling {still:.1f} s ({100 * still / total:.0f} %)")
+          f"{len(runs)} totalling {inrun.sum() / fps:.1f} s; counted {still:.1f} s ({100 * still / total:.0f} %)"
+          + (f", not counted: {n_silent / fps:.1f} s in the song's stops / after the cut, {n_hold / fps:.1f} s in hold shots" if n_silent or n_hold else ""))
     for i, j in runs:
         print(f"  STATIC  song {st(i):7.2f} - {st(j):7.2f} s  ({(j - i) / fps:.1f} s, level {lvl[i:j].mean():.4f})")
     if not a.quiet:
@@ -75,6 +94,13 @@ def main():
         for s in range(sec):
             print(f"  {st(s * fps):6.1f}s {'#' * int(round(per[s] / top * 40)):<40s} {per[s]:.4f}{'  <- static' if per[s] < a.threshold else ''}")
     sys.exit(1 if still / total > 0.10 else 0)
+
+
+def read_json(p: Path) -> dict:
+    try:
+        return json.loads(p.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return {}
 
 
 if __name__ == "__main__":
