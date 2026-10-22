@@ -93,6 +93,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--css-only", action="store_true",
                     help="no downloads: rebuild fonts.css from the existing manifest.json")
+    ap.add_argument("--refresh", action="store_true",
+                    help="list every family through the GitHub API again (new files upstream); default: the manifest's files")
     ap.add_argument("--out-dir", default=FONT_DIR, help=f"font directory (default {FONT_DIR})")
     args = ap.parse_args()
     root = str(kit_env.resolve(args.out_dir))
@@ -104,7 +106,19 @@ def main():
         manifest = json.load(open(manifest_path, encoding="utf-8"))
     else:
         jobs = []
+        # files the shipped manifest already names come straight from raw.githubusercontent.com: the contents API
+        # (60 requests an hour without GITHUB_TOKEN) is asked only for families the manifest does not list, or --refresh
+        known = {}
+        if not args.refresh and os.path.exists(manifest_path):
+            for m in json.load(open(manifest_path, encoding="utf-8")):
+                known.setdefault(m["dir"], []).append(m)
+        RAW = "https://raw.githubusercontent.com/google/fonts/main/ofl/"
         for fam, d in FAMILIES:
+            if d in known:
+                for m in known[d]:
+                    jobs.append((fam, d, m["src"], RAW + d + "/" + urllib.parse.quote(m["src"]), os.path.join(root, m["file"]), m["size"]))
+                jobs.append((fam, d, "OFL.txt", RAW + d + "/OFL.txt", os.path.join(root, f"OFL_{d}.txt"), None))
+                continue
             items = retry(api_list, d)
             for it in items:
                 n = it["name"]
@@ -118,7 +132,12 @@ def main():
             futs = {ex.submit(retry, download, j[3], j[4], j[5]): j for j in jobs}
             for fu in cf.as_completed(futs):
                 j = futs[fu]
-                print(fu.result()[1], os.path.basename(j[4]), j[5], flush=True)
+                try:
+                    print(fu.result()[1], os.path.basename(j[4]), j[5], flush=True)
+                except Exception as e:
+                    if j[2] != "OFL.txt":
+                        raise
+                    print("warn: no", j[3], f"({e}); keeping the shipped licence file if there is one", flush=True)
         for fam, d, n, url, local, size in jobs:
             if n.endswith(".ttf"):
                 manifest.append({"family": fam, "dir": d, "src": n, "file": os.path.basename(local), "size": size})

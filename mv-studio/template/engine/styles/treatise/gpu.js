@@ -118,7 +118,10 @@
       let pole = [960 + 420 * Math.cos(t * 0.4), 520 + 160 * Math.sin(t * 0.55)];
       if (L0 && a.line != null) {
         const st = layoutOf(a.line, a.font || 'script', 84), len = Z.stroke.lenAt(st, a.line, t);
-        if (len > 0) { const h = Z.stroke.at(st, len); pole = [960 + h[0], 620 + h[1]]; }
+        if (len > 0) {                                                      // the line is written in SCREEN space (never cropped):
+          const h = Z.stroke.at(st, len), iv = c.getTransform().inverse(), sx = 960 + h[0], sy = 620 + h[1];   // its pen head
+          pole = [iv.a * sx + iv.c * sy + iv.e, iv.b * sx + iv.d * sy + iv.f];                                  // in world space
+        }
       }
       const field = (x, y) => {                                                    // a dipole at the pole + a slow swirl
         const dx = x - pole[0], dy = y - pole[1], r2 = dx * dx + dy * dy + 900, k = 9e4 / r2;
@@ -133,9 +136,9 @@
         for (let s = 0; s < steps; s++) { const [vx, vy] = field(x, y), x2 = x + vx * seg, y2 = y + vy * seg; batch.seg(x, y, x2, y2, 0.8, col, alpha); x = x2; y = y2; }
       }
       batch.draw(c, { blend: 'add' });
-      if (a.line != null) TR.write(c, a.line, t, 960, 620, 84, { font: a.font || 'script', width: 3.2 });
       TR.cropMarks(c, 120, 80, 1680, 920, { k: 1 });
       c.restore();
+      if (a.line != null) TR.write(c, a.line, t, 960, 620, 84, { font: a.font || 'script', width: 3.2 });
     },
   });
 })();

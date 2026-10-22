@@ -17,7 +17,7 @@ What it does
                 (plain official text: timings come later, see references/03-audio-and-lyrics.md)
   * --title / --title-sub / --artist / --credit set Z.TITLE / Z.TITLE_SUB / Z.ARTIST / Z.CREDIT in engine/timeline.js
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
-                --credit alone also sets Z.ARTIST to the name after its last colon (： or :)
+                --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  vocaloid (default: the tegaki demo timeline 「蛍火」) | vocaloid:signal | interface | interface:treatise | stage |
                 papercraft: engine/timeline.js starts from the style's starter in engine/starters/ (the demo is kept as
                 engine/starters/tegaki_demo.js); the names before the merge (tegaki, signal, treatise) still work
@@ -127,7 +127,11 @@ def timeline_values(a) -> dict:
     sub = a.title_sub if a.title_sub is not None else ("" if a.title else None)   # a new title drops 'HOTARUBI'
     artist = a.artist
     if artist is None and a.credit:
-        artist = re.split(r"[：:]", a.credit)[-1].strip() or None   # 'Music / Lyrics / Movie：Name' -> 'Name'
+        # the name after the FIRST role: 'Music / Lyrics / Movie：Name' -> 'Name';
+        # 'Music / Lyrics：Name / Movie：Maker' -> 'Name' (not the film's maker)
+        parts = re.split(r"[：:]", a.credit, maxsplit=1)
+        artist = re.split(r"\s+/\s+", parts[1])[0].strip() if len(parts) > 1 else None
+        artist = artist or None
     return {"TITLE": a.title, "TITLE_SUB": sub, "ARTIST": artist, "CREDIT": a.credit}
 
 

@@ -105,7 +105,13 @@ try {
   Write-Step 'Python packages'
   if ($SkipPip) { Write-Note 'skipped (-SkipPip)' }
   else {
-    Invoke-Py 'pip install' @('-m', 'pip', 'install', '--disable-pip-version-check', '-r', 'requirements.txt')
+    # already installed (e.g. a uv-managed Python that refuses pip: PEP 668)? then pip is not needed at all
+    & $PyExe @PyPre 'tools/reqs_ok.py' 'requirements.txt' | Out-Null
+    if ($LASTEXITCODE -eq 0) { Write-Ok 'requirements already installed (pip skipped)' }
+    else {
+      & $PyExe @PyPre -m pip install --disable-pip-version-check -r requirements.txt
+      if ($LASTEXITCODE -ne 0) { throw "pip install failed. If it says 'externally-managed-environment' (uv / distro Python): install the requirements with that manager (uv pip install -r requirements.txt) or into a venv, then re-run with -SkipPip" }
+    }
     if ($Lyrics) {
       $opt = @(Get-Content -LiteralPath 'requirements.txt' | ForEach-Object { if ($_ -match '^#\s*\[lyrics\]\s+(\S+)') { $Matches[1] } })
       if ($opt.Count) { Invoke-Py 'pip install (lyrics)' (@('-m', 'pip', 'install', '--disable-pip-version-check') + $opt) }

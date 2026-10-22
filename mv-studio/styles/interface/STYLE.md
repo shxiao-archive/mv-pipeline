@@ -258,7 +258,12 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
   `Z.rnd(i, j)` (never `Math.random`), advance them through a field that is a function of t.
 - **Written type** (`TR.write`, `Z.stroke`): the pen writes the line as it is sung; the spark sits on the pen head; use
   the head as a pole, a light, a camera target (`cam.follow`).
-- **No GPU:** Chrome falls back to SwiftShader; everything renders, slower. Give `Z.shade` a `rect` and keep marches ≤ 96
+- **Motion on paper:** a bone-paper chart under a 75 px/s camera move measured as static (`motion_check.py`). The
+  screen budget (§A.5) holds here too: ≥ 110 px/s of travel, a slide-in, or something drawn moving in every 1.5 s.
+- **Lyrics stay in frame:** cameras push and reframe; keep set words inside the central 90 % at the shot's widest
+  zoom, and look at the stills for cropped words (no tool checks it). `TR.write` lines in the GPU plates are drawn in
+  screen space for this reason.
+- **No GPU:** an integrated GPU runs these plates fine; with no GPU at all Chrome falls back to SwiftShader and everything renders, slower. Give `Z.shade` a `rect` and keep marches ≤ 96
   steps; check the frame time in `stills.mjs` output.
 - Chinese / Japanese lyrics: the starter calls `TR.useCJK()` (Noto fallbacks behind Archivo / Cormorant).
 

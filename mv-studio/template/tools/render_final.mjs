@@ -31,6 +31,7 @@ render_final.mjs -- full render (render_frames.mjs) + audio mux
   --fps N            frames per second                                              [30]
   --codec C          nvenc | x264 | hevc                                            [nvenc]
   --cq N             nvenc constant quality                                         [16]
+  --crf N            x264 crf of the master (15 = near-lossless and large; 18-21 for a file to share)   [18]
   --audio FILE       song to mux (relative to the project root)                     [audio/song.wav]
   --shutter N        motion-blur sub-frames per frame (overrides project.json render.shutter.samples; 1 = off)
                      [project.json; 1 with --preview]
@@ -39,8 +40,8 @@ Env: BROWSER_CHANNEL, BROWSER_ANGLE, FFMPEG, FFPROBE (see tools/kit_env.mjs)`;
 
 function parseArgs(argv) {
   const a = { workers: 3, start: 0, end: null, name: 'mv', preview: false, url: 'engine/index.html', selector: 'canvas#out',
-    width: 1920, height: 1080, fps: 30, codec: 'nvenc', cq: 16, audio: 'audio/song.wav', noAudio: false, shutter: null };
-  const nums = new Set(['workers', 'start', 'end', 'width', 'height', 'fps', 'cq', 'shutter']);
+    width: 1920, height: 1080, fps: 30, codec: 'nvenc', cq: 16, crf: 18, audio: 'audio/song.wav', noAudio: false, shutter: null };
+  const nums = new Set(['workers', 'start', 'end', 'width', 'height', 'fps', 'cq', 'crf', 'shutter']);
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (k === '--help' || k === '-h') { console.log(HELP.replace(/^\n/, '')); process.exit(0); }
@@ -80,7 +81,7 @@ function main() {
     '--width', String(a.width), '--height', String(a.height), '--start', String(a.start)];
   if (a.end != null) nodeArgs.push('--end', String(a.end));
   nodeArgs.push('--fps', String(a.fps), '--workers', String(a.workers), '--mode', 'blob', '--out', video,
-    '--codec', a.codec, '--cq', String(a.cq), '--stats', statsFile);
+    '--codec', a.codec, '--cq', String(a.cq), '--crf', String(a.crf), '--stats', statsFile);
   if (a.preview) nodeArgs.push('--preview');
 
   const t0 = performance.now();

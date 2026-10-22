@@ -191,7 +191,8 @@
       };
       DENY.decor += ' dataColumns timecodeBar rainStreaks';           // this film: no data tables / timecodes (the HUD has them), no rain
       DENY.layout += ' shadowPlay glitchGrid';                        // opaque plates: a grey floor (9:16) / beige glyph tiles
-      DENY.trans += ' knStutterCut';                                  // blacks out the picture under the lyric in front mode
+      DENY.trans += ' knStutterCut zoomThrough inkBlob';              // black out / cover the picture under the lyric in front mode
+      DENY.layout += ' curtain'; DENY.fx += ' filmAdvance';           // an opaque theatre curtain; black film frames (pops.mjs flags them)
       // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
       // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only
       // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.

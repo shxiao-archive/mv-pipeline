@@ -1562,7 +1562,12 @@ def main():
         k1 = int(down_idx[j + 1])
         bars.append({"index": j + 1, "start": r3(beats[k]), "end": r3(downbeats[j + 1]), "_k0": k,
                      "bpm": r3(60.0 * (k1 - k) / (grid[k1] - grid[k]))})
-    fullbars = [b for b in bars if not b.get("pickup")]
+    # the bar the song ends in (from the last downbeat to the cut): flagged partial, so B(n) / sections.json reach it,
+    # but it is kept out of the full-bar analysis (similarity, novelty)
+    if cut > downbeats[-1] + 0.25:
+        bars.append({"index": len(down_idx), "start": r3(downbeats[-1]), "end": r3(cut),
+                     "partial": True, "beats": int(len(beats) - down_idx[-1]), "_k0": int(down_idx[-1])})
+    fullbars = [b for b in bars if not b.get("pickup") and not b.get("partial")]
     log(f"beats {len(beats)}, downbeats {len(downbeats)}, full bars {len(fullbars)}; last downbeat "
         f"{downbeats[-1]:.3f} vs cut {cut:.3f}")
 

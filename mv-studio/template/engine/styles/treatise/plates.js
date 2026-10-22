@@ -7,11 +7,11 @@
  *             'exp' | 'walk', inv (bone paper), xl, yl }
  * 'trScope'   an oscilloscope under glass: the trace is the song (Z.env), echoes fade; the line rides the wave. { line }
  * 'trForm'    bureaucracy on bone paper: the line is typed into a form as sung; a stamp slams on a word. { line, form,
- *             field, stamp ('APPROVED'), stampWord (index; default the last) }
+ *             field, stamp ('APPROVED'), stampWord (index; default the last), boxes (4 checkbox labels) }
  * 'trPrompt'  a prompt field: the line typed as tokens, each with a tiny next-token distribution (the other candidates
- *             are other words of the song), then the return key. { line, rings }
+ *             are other words of the song), then the return key. { line, rings, label ('> prompt') }
  * 'trHook'    the hook slam: one word per sung word, full frame, then the running number takes the frame and rolls to
- *             its next value. { line, n 1..4 (escalation: clean / signal field / hairline / maximal) }
+ *             its next value. { line, n 1..4 (escalation: clean / signal field / hairline / maximal), foot (its footnote) }
  * 'trContour' a topographic engraving: the camera drifts over contour lines, the spark travels, the words are map
  *             labels with leaders. { line, seed }
  *
@@ -49,7 +49,7 @@
       const sub = a.sub ?? Z.TITLE_SUB ?? '';
       if (sub) TR.text(c, sub, 960, ty + 110, 52, { face: 'serif', italic: true, weight: 500, align: 'center', alpha: k * Z.clamp((u - 0.6) * 3) });
       if (Z.CREDIT) TR.text(c, Z.CREDIT, X + 24, Y + h - 24, 20, { face: 'mono', col: P.ash, alpha: k * Z.clamp((u - 0.8) * 5) });
-      TR.readout(c, X + w - 190, Y + h - 70, 40, S.t);
+      c.save(); c.globalAlpha *= k; TR.readout(c, X + w - 190, Y + h - 70, 40, S.t); c.restore();   // fades with the sheet: last frame = first
       c.restore();
     },
   }));
@@ -66,7 +66,7 @@
       const X = 200, Y = 170, w = 1520, h = 640, kx = E.outExpo(Z.clamp(S.lt / 0.5));
       const u = E.inOutSine(Z.clamp((S.lt - 0.15) / (S.dur - 0.3))), pt = q => [X + w * q, Y + h - h * f(q)];
       ground(c, inv);
-      c.save(); TR.cam(c, S, a.cam || Object.assign({ follow: pt(u) }, (a.mode === 'drop' ? { from: { zoom: 1.0, x: -100 }, to: { zoom: 1.18, x: 140, y: 70 }, ease: 'linear' } : { from: { zoom: 1.0, x: 140 }, to: { zoom: 1.18, x: -120, y: -40 } })));
+      c.save(); TR.cam(c, S, a.cam || Object.assign({ follow: pt(u) }, (a.mode === 'drop' ? { from: { zoom: 1.0, x: -100 }, to: { zoom: 1.1, x: 90, y: 40 }, ease: 'linear' } : { from: { zoom: 1.0, x: 140 }, to: { zoom: 1.1, x: -80, y: -30 } })));
       TR.grid(c, X, Y, w, h, 64, { col: inv ? P.ash : P.graphite, a: 0.3 });
       TR.axes(c, X, Y, w, h, { col, k: kx, xl: a.xl || 'step', yl: a.yl || 'value' });
       const pts = []; for (let q = 0; q <= u + 1e-6; q += 0.004) pts.push(pt(Math.min(q, u)));
@@ -76,7 +76,7 @@
         TR.lineWords(c, a.line, S.t, 0, 0, 56, { weight: 800, width: 96, lead: 0.3, dimCol: col, sungCol: col,
           place: (wd) => { const ww = TR.measure(c, wd.w, 56, { weight: 800, width: 96 }), q = Z.clamp((x + ww / 2 - X) / w), y = Y + h - h * f(q) - 34; const r = { x, y }; x += ww + 22; return r; } });
       }
-      const [hx, hy] = pt(u); TR.spark(c, hx, hy, S.t, { particles: tt => { const q = E.inOutSine(Z.clamp((tt - S.shot.t0 - 0.15) / (S.dur - 0.3))); const [x, y] = pt(q); return { x, y }; } });
+      const [hx, hy] = pt(u); TR.spark(c, hx, hy, S.t, { light: inv ? 0.15 : 1, particles: tt => { const q = E.inOutSine(Z.clamp((tt - S.shot.t0 - 0.15) / (S.dur - 0.3))); const [x, y] = pt(q); return { x, y }; } });
       TR.readout(c, X + w - 170, Y + 10, 34, S.t, { col: inv ? P.graphite : P.ash });
       c.restore();
     },
@@ -129,7 +129,7 @@
       // checkboxes tick on the beats
       for (let b = 0; b < 4; b++) {
         const bx = X + 40 + b * 300, by = Y + h - 110; c.strokeRect(bx, by, 28, 28);
-        TR.text(c, ['REVIEWED', 'NOTED', 'FILED', 'FORWARDED'][b], bx + 42, by + 22, 18, { face: 'mono', col: P.ink });
+        TR.text(c, (a.boxes || ['REVIEWED', 'NOTED', 'FILED', 'FORWARDED'])[b] || '', bx + 42, by + 22, 18, { face: 'mono', col: P.ink });
         if (S.clock.beat(S.t) - S.clock.beat(S.shot.t0) > b) { c.save(); c.strokeStyle = P.signal; c.lineWidth = 3; c.beginPath(); c.moveTo(bx + 4, by + 14); c.lineTo(bx + 12, by + 24); c.lineTo(bx + 26, by + 2); c.stroke(); c.restore(); }
       }
       if (a.line != null) TR.lineWords(c, a.line, S.t, X + 60, Y + 250, 60, { face: 'mono', weight: 600, maxW: w - 140, lh: 1.5, dimCol: P.ink, sungCol: P.ink, dimA: 0.18 });
@@ -144,7 +144,7 @@
     draw(c, S) {
       const a = S.args, words = a.line != null ? TR.words(a.line) : [], L = Z.line(a.line ?? -1);
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.0, x: -100 }, to: { zoom: 1.25, x: 100 } });
+      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.0, x: -60 }, to: { zoom: 1.12, x: 60 } });
       // engraved rings behind, pulling in; on the return key they rush at the camera
       const ret = Z.clamp((S.t - (L.end || S.shot.t1)) / 0.35), rush = E.inExpo(Z.clamp((S.lt - (S.dur - 0.35)) / 0.35));
       c.save(); c.strokeStyle = P.graphite; c.lineWidth = 1;
@@ -178,7 +178,7 @@
         c.restore();
       }
       if (ret > 0) TR.text(c, '⏎', fx + fw - 60, fy - 2, 48, { face: 'mono', col: P.signal, alpha: ret });
-      TR.text(c, '> prompt', fx, fy - 90, 20, { face: 'mono', col: P.ash });
+      TR.text(c, a.label ?? '> prompt', fx, fy - 90, 20, { face: 'mono', col: P.ash });
       c.restore();
       if (rush > 0) { c.fillStyle = Z.rgba(P.bone, rush * 0.9); c.fillRect(0, 0, W, H); }
     },
@@ -210,7 +210,8 @@
         TR.text(c, (TR.NUM.label || 'p') + ' =', 140, 300, 90, { face: 'serif', italic: true, weight: 500, col: fg, alpha: k });
         TR.text(c, TR.fmt(v), 120, 760, 420 * Z.lerp(0.6, 1, k), { face: 'mono', weight: 600, col: n === 2 ? P.ink : P.signal });
         c.strokeStyle = fg; c.lineWidth = 2; c.beginPath(); c.moveTo(140, 880); c.lineTo(140 + 1640 * Z.clamp(v) * k, 880); c.stroke();
-        TR.text(c, 'posterior · updated on chorus ' + n, 140, 940, 24, { face: 'mono', col: n === 2 ? P.ink : P.ash, alpha: k });
+        const foot = a.foot ?? 'updated on chorus ' + n;                  // write the film's own footnote (args.foot)
+        if (foot) TR.text(c, foot, 140, 940, 24, { face: 'mono', col: n === 2 ? P.ink : P.ash, alpha: k });
       }
       c.restore();
     },
@@ -222,7 +223,7 @@
       const a = S.args;
       const path = q => [180 + 1500 * q, 560 + 260 * Math.sin(q * 5 + (a.seed || 3)) * (1 - q * 0.4)], u = E.inOutSine(Z.clamp(S.lt / S.dur));
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.1, rot: 0.03 }, to: { zoom: 1.3, rot: -0.04 }, follow: path(u), followK: 0.6 });
+      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.05, rot: 0.03 }, to: { zoom: 1.18, rot: -0.04 }, follow: path(u), followK: 0.5 });
       TR.contours(c, -400, -300, W + 800, H + 600, { seed: a.seed || 3, t: S.t, alpha: 0.7 });
       const pts = []; for (let q = 0; q <= u; q += 0.005) pts.push(path(q));
       c.save(); c.setLineDash([10, 8]); TR.trail(c, pts, { w: 2, glow: false }); c.restore();

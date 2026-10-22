@@ -253,6 +253,12 @@ whole feature area is pasted, not only the changed pixels; asking for a changed 
 / inpaint of a head) drifts in style or does not change — variant rows remain for small fixes to one face (inpaint of
 an eye or mouth region, `"takes": 3`).
 
+Sheet layout (iteration-4 run): a row of 4 busts (`"cells": [...], "cols": 4, "size": "1472x704"`) gave about
+400x650 px per figure; a 2x2 sheet at 1024x1024 gives small faces. Name every expression in the subject (the first
+take of a sheet that only listed the cell names came back with no blink and no smile) and budget a second take.
+Busts drawn touching merge into one figure: `post` then cuts the sheet's own `cols` grid. A row's `size`, `aspect`,
+`seed` and `negative` pass through to the generator.
+
 ## 13. Choosing the generator (`tools/artgen.py`)
 
 The kit prefers no generator: **the user chooses.** Ask once, at the assets checkpoint, which one they want (or which

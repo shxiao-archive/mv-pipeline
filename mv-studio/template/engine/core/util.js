@@ -38,6 +38,8 @@
     let from = def.t0, n = 0, trans = def.trans;
     const part = to => { if (to - from > 1e-6) out.push(Object.assign({}, def, { id: n ? `${def.id}-${'bcdefghij'[n - 1]}` : def.id, t0: from, t1: to, span, trans })); n++; };
     for (const ins of [...inserts].sort((a, b) => a.t0 - b.t0)) {
+      if (!(ins.t1 > ins.t0) || ins.t0 < from - 1e-6 || ins.t1 > def.t1 + 1e-6)
+        throw new Error(`Z.withInserts(${def.id}): insert ${ins.t0}-${ins.t1} must lie inside ${def.t0}-${def.t1} after the previous insert (check the bar helper near the song's end)`);
       part(ins.t0);
       out.push(Object.assign({ id: `${def.id}-ins${out.length}`, line: def.line }, ins.shot, { t0: ins.t0, t1: ins.t1 }));
       from = ins.t1; trans = ins.back || null;

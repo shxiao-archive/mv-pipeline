@@ -25,6 +25,10 @@ check(parts.filter(p => p.scene === 'ifChat').every(p => p.span[0] === 0 && p.sp
 check(parts[0].trans.type === 'xfade' && parts[2].trans.type === 'xfade' && parts[4].trans === null, 'transitions back');
 check(parts[1].line[0] === 2, 'an insert answers for the shot\'s line unless it says otherwise');
 
+let threw = false;
+try { Z.withInserts({ id: 's2', t0: 0, t1: 8 }, [{ t0: 7, t1: 9, shot: {} }]); } catch (e) { threw = true; }
+check(threw, 'an insert that runs past its shot is refused');
+
 // replay / dropped frames / tear
 check(Z.replay(0.5, [1, 2]) === -1 && Z.replay(1.25, [1, 2]) === 0.25 && Z.replay(2.1, [1, 2], 0.05) === 0.05, 'replay');
 check(Z.passOf(1.5, [1, 2]) === 1, 'passOf');

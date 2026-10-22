@@ -152,8 +152,9 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
                 job["region"] = r["region"]
         else:
             continue
-        if "size" in r:
-            job["size"] = r["size"]
+        for k in ("size", "aspect", "seed", "negative"):                 # passed through to the generator wrapper
+            if k in r:
+                job[k] = r[k]
         base_row = next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {})
         if r.get("key") or base_row.get("key"):
             job["key"] = r.get("key") or base_row["key"]                 # a variant keeps its base's screen colour
@@ -471,10 +472,29 @@ def grid_image(a: np.ndarray, dst: Path, step: float = 0.05) -> None:
 ROLE = {"blink": "blink", "closed": "blink", "open": "mouth", "mouth": "mouth", "sing": "mouth"}
 
 
+def grid_figures(sheet: np.ndarray, cols: int, rows: int) -> list[tuple[int, int, int, int]]:
+    """one box per cell of a cols x rows grid: the content bounds inside each cell (empty cells are left out)"""
+    H, W = sheet.shape[:2]
+    out = []
+    for j in range(rows):
+        for i in range(cols):
+            x0, x1, y0, y1 = W * i // cols, W * (i + 1) // cols, H * j // rows, H * (j + 1) // rows
+            ys, xs = np.nonzero(sheet[y0:y1, x0:x1, 3] > 0.5)
+            if len(ys) > 0.02 * (x1 - x0) * (y1 - y0):
+                out.append((x0 + int(xs.min()), y0 + int(ys.min()), x0 + int(xs.max()) + 1, y0 + int(ys.max()) + 1))
+    return out
+
+
 def split_sheet(t: dict, r: dict, raw: Path) -> dict:
     sh = r["sheet"]; names = sh["cells"]; rid = r["id"]; out = rp(t.get("out", "assets/gen"))
     img = _rgba(raw)
     allb = figures(img)
+    if len(allb) < len(names) and not sh.get("pick"):                # figures drawn touching merge: cut the sheet's own grid
+        cols = sh.get("cols", 2 if len(names) == 4 else len(names))
+        grid = grid_figures(img, cols, -(-len(names) // cols))
+        if len(grid) == len(names):
+            print(f"{rid}: {len(allb)} separate figure(s) found; using the {cols}-column grid of the sheet instead", flush=True)
+            allb = grid
     numbered(img, allb, out / f"_{rid}_figures.jpg")                  # LOOK at it: which figure is which expression
     pick = sh.get("pick")                                             # {"neutral": 2, "blink": 4, ...} (1-based numbers)
     if pick:
@@ -647,6 +667,11 @@ def selftest() -> int:
     cells = cells_of(sheet, 4)
     if len(figures(sheet)) != 4:
         print("FAIL sheet: expected 4 figures"); bad += 1
+    touch = sheet.copy()                                              # a bar through each row joins its two figures
+    for yc in (20 + H // 2, H + 60 + H // 2):
+        touch[yc - 4:yc + 4, :, 3] = 1.0
+    if len(figures(touch)) >= 4 or len(grid_figures(touch, 2, 2)) != 4:
+        print("FAIL sheet: touching figures are not recovered from the grid"); bad += 1
     al = [cells[0]] + [align(cells[0], c)[0] for c in cells[1:3]]
     reg = face_region(cells[0], al[1:])
     ch, cw = cells[0].shape[:2]

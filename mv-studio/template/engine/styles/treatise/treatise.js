@@ -215,7 +215,7 @@
     const k = (Z.ease[cam.ease || 'outCubic'] || Z.ease.outCubic)(S.p), a = cam.from || {}, b = cam.to || a;
     const snap = (cam.snap ?? 0.03) * Math.exp(-14 * Math.max(0, S.clock.since(S.t))) * (S.clock.inBar(S.t) === 0 ? 1 : 0.35);
     const R = cam.reframe ?? 1, half = n => Math.floor(n / 2), bar = half(S.clock.beat(S.t)) - half(S.clock.beat(S.shot.t0)), seed = S.shot.t0 * 100 | 0;
-    const off = n => (n <= 0 ? [0, 0, 0] : [Z.rnds(seed, n, 1) * 150, Z.rnds(seed, n, 2) * 90, Z.rnds(seed, n, 3) * 0.12]);
+    const off = n => (n <= 0 ? [0, 0, 0] : [Z.rnds(seed, n, 1) * 70, Z.rnds(seed, n, 2) * 45, Z.rnds(seed, n, 3) * 0.06]);   // small: words near the edge must stay in frame
     const q = Z.ease.outExpo(Z.clamp((S.t - S.clock.at(half(S.clock.beat(S.t)) * 2)) / 0.35)), o0 = off(bar - 1), o1 = off(bar);
     const rf = [0, 1, 2].map(i => R * Z.lerp(o0[i], o1[i], q));
     const z = Z.lerp(a.zoom ?? 1, b.zoom ?? 1, k) * (1 + snap) * (1 + rf[2]);
@@ -224,5 +224,5 @@
     c.translate(-960 - Z.lerp(Z.lerp(a.x || 0, b.x || 0, k), fx, fk) - rf[0], -540 - Z.lerp(Z.lerp(a.y || 0, b.y || 0, k), fy, fk) - rf[1]);
   };
   // the engine's post: glow only on the signal colour (bright orange), crisp bone type, fine grain
-  TR.post = { boil: 0, bloom: 0.35, bloomThreshold: 0.86, grain: 0.05, vignette: 0.22, lutMix: 0, ca: 0 };
+  TR.post = { boil: 0, bloom: 0.35, bloomThreshold: 0.95, grain: 0.05, vignette: 0.22, lutMix: 0, ca: 0 };
 })();

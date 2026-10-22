@@ -32,7 +32,9 @@
  *                                      sway, swayF }
  *
  * Model sheets (references/10 §8): a timeline in engine/sheets/<name>.js whose shot uses the 'sheet' scene:
- *   { scene: 'sheet', args: { cols, title, cells: [{ label, draw(g, t, box) }] } }   box = { x, y, w, h, cx, ground }
+ *   { scene: 'sheet', args: { cols, title, bg, ink, cells: [{ label, draw(g, t, box) }] }, post: Z.rig.SHEET_POST }
+ *                                      box = { x, y, w, h, cx, cy, ground }; labels are light on a dark `bg`
+ *   A cell that draws a style's scene (stShow, pcWorld ...) needs that style's post on the shot (ST.post ...), or it blows out.
  *   node tools/stills.mjs --url "engine/index.html?tl=sheets/<name>.js" --times 0.5,1.7 --out render/sheets/<name>
  *
  * mv-studio (MIT). Written for this engine; the rig method (joint tables, keyed actions, phase from distance, two-bone
@@ -368,11 +370,13 @@
   Z.sheetGrid = (g, S, cells, o = {}) => {
     const cols = o.cols || 6, rows = Math.ceil(cells.length / cols), top = o.title ? 70 : 20, pad = 20;
     const cw = (1920 - pad * 2) / cols, ch = (1080 - top - pad) / rows;
+    // labels and frames follow the ground: dark ink on a light sheet, light ink on a dark one (a night film's sheet)
+    const [br, bg2, bb] = Z.hex(o.bg || '#F3EEE4'), dark = 0.2126 * br + 0.7152 * bg2 + 0.0722 * bb < 110, inkCol = o.ink || (dark ? '#F3EEE4' : '#2C2233');
     g.save(); g.fillStyle = o.bg || '#F3EEE4'; g.fillRect(0, 0, 1920, 1080);
-    if (o.title) { g.fillStyle = '#2C2233'; g.font = '600 34px "Inter", "Noto Sans JP", sans-serif'; g.textBaseline = 'middle'; g.fillText(o.title, pad + 6, 38); }
+    if (o.title) { g.fillStyle = inkCol; g.font = '600 34px "Inter", "Noto Sans JP", sans-serif'; g.textBaseline = 'middle'; g.fillText(o.title, pad + 6, 38); }
     cells.forEach((c, i) => {
-      const x = pad + (i % cols) * cw, y = top + Math.floor(i / cols) * ch, box = { x, y, w: cw, h: ch, cx: x + cw / 2, ground: y + ch - 34 };
-      g.save(); g.strokeStyle = 'rgba(44,34,51,0.18)'; g.lineWidth = 1; g.strokeRect(x + 3, y + 3, cw - 6, ch - 6);
+      const x = pad + (i % cols) * cw, y = top + Math.floor(i / cols) * ch, box = { x, y, w: cw, h: ch, cx: x + cw / 2, cy: y + ch / 2, ground: y + ch - 34 };
+      g.save(); g.strokeStyle = dark ? 'rgba(243,238,228,0.22)' : 'rgba(44,34,51,0.18)'; g.lineWidth = 1; g.strokeRect(x + 3, y + 3, cw - 6, ch - 6);
       if (o.groundLine !== false) { g.beginPath(); g.moveTo(x + 10, box.ground); g.lineTo(x + cw - 10, box.ground); g.stroke(); }
       g.beginPath(); g.rect(x + 3, y + 3, cw - 6, ch - 6); g.clip();
       try { c.draw(g, S.t, box); } catch (err) {               // a cell that throws mid-draw may leave saves open: reset, then report it
@@ -380,7 +384,7 @@
         g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#D8473D'; g.font = '16px monospace'; g.fillText('ERROR ' + String(err && err.message || err).slice(0, 50), x + 10, y + 24);
       }
       g.restore();
-      g.fillStyle = '#2C2233'; g.font = '500 18px "Inter", monospace'; g.textBaseline = 'alphabetic'; g.fillText(c.label || '', x + 10, y + ch - 10);
+      g.fillStyle = inkCol; g.font = '500 18px "Inter", monospace'; g.textBaseline = 'alphabetic'; g.fillText(c.label || '', x + 10, y + ch - 10);
     });
     g.restore();
   };

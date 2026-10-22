@@ -84,11 +84,12 @@
     if (!secs.length) shot('s01', open, END, 'stShow', { cast: [Object.assign({ x: 960, y: 900, u: 46, move: 'mix' }, LEAD)] }, { line: linesIn(open, END), moment: 'the lead dances on the stage' });
 
     // ---- the end: the whole troupe takes a bow and the curtain closes
-    shot('s99', END, END + 3, 'stShow', { curtain: [[END, 0], [END + 1.2, 1]], spots: [[960, PAL.cream]],
+    const TAIL = Math.min(END + 3, Math.max(END + 1.5, audio.duration || END + 3));   // the curtain closes by END + 1.2; end with the audio
+    shot('s99', END, TAIL, 'stShow', { curtain: [[END, 0], [END + 1.2, 1]], spots: [[960, PAL.cream]],
       cast: [Object.assign({ x: 960, y: 900, u: 46, move: 'bow' }, LEAD)].concat(TROUPE.map((m, j) => Object.assign({ x: 960 + (j % 2 ? 1 : -1) * (330 + 200 * Math.floor(j / 2)), y: 860, u: 28, move: 'bow' }, m))),
       camera: { from: { zoom: 1.12 }, to: { zoom: 1.0 } } }, { moment: 'curtain call: the troupe bows, the curtain closes', cue: Z.CUES.end ? 'end' : null });
     Z.SHOTS = S;
     Z.VERTICAL_CFG = { full: [], planMap: {}, quiet: S.map(s => s.id), title: Z.TITLE, sub: Z.TITLE_SUB, artist: Z.ARTIST, credits: [0, END], ambience: [236, 226, 208] };   // paper-tinted surround, this film's header; quiet: no karaoke ghost in the blurred bands
-    window.__zankoMeta.duration = END + 3;
+    window.__zankoMeta.duration = TAIL;
   };
 })();

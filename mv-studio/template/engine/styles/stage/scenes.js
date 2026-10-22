@@ -2,8 +2,8 @@
  * Every time is song time; a list [[t, value], ...] means "value from t on" (eased over 0.4 s for numbers).
  * Lyric text never appears here: the karaoke bar reads Z.LYR (set `text: Z.ST.karaoke` on the shot).
  *
- * 'stShow'  the stage: { backdrop: { a, b, spin, wall } | { paint(t) }, floor, spots: [[x, col], ...] | (S) => [...],
- *            curtain: k | [[t, k], ...] (curtains: false = no side curtains or valance: full-width set), alarm: k | [[t, k], ...], cast, props(S, ST), front(S, ST),
+ * 'stShow'  the stage: { backdrop: { a, b, spin, wall } | { paint(t) }, floor, spots: [[x, col, k 0..1], ...] | (S) => [...],
+ *            curtain: k | [[t, k], ...] (curtains: false = no side curtains or valance: full-width set), alarm: k | [[t, k], ...], cast, props(S, ST), front(S, ST), over(S, ST) (in front of the curtains),
  *            confetti: [t0, ...], sfx: [{ text, at, x, y, size, col, rot, life }], camera, flash: [[t, k], ...] }
  * 'stSet'   a painted place: { sky: 'day' | 'dusk' | 'night' | 'sea' | 'room' | [top, bottom], ground: { y, col } | false,
  *            sun: { x, y, r, col }, stars: n, clouds: n (drifting; default 3, 0 at night), img: 'assets/bg/x.png' (your painted background under a light wash),
@@ -67,12 +67,13 @@
       camera(S, a.camera);
       ST.backdrop(S.t, a.backdrop || {});
       ST.floor({ floor: a.floor });
-      for (const [x, col] of (typeof a.spots === 'function' ? a.spots(S) : a.spots || [])) ST.spot(x, col);
+      for (const [x, col, k] of (typeof a.spots === 'function' ? a.spots(S) : a.spots || [])) ST.spot(x, col, { k: k ?? 1 });
       if (a.props) a.props(S, ST);
       drawCast(S, a.cast);
       if (a.front) a.front(S, ST);
       extras(S, a);
       if (a.curtains !== false) ST.curtains(S.t, at(a.curtain, S.t, 1.2));
+      if (a.over) a.over(S, ST);                                          // in front of the curtains (a peek, a banner)
       ST.camEnd();
       ST.alarm(at(a.alarm, S.t));
       if (a.flash) ST.flash(at(a.flash, S.t, 0.15));

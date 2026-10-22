@@ -14,6 +14,7 @@ Then LOOK at <out-dir>/_check_novelai.jpg (every image, with its id).
 
 Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; tools/grokgen.py: aspect) plus:
   "negative": "..."            extra negative prompt (added to the default one)
+  "size": "1472x704"           width x height (or "width" + "height"; else "aspect"); snapped to 64 px, capped by max_pixels
   "seed": 1234                 fixed seed (default: derived from id + prompt, so a re-run gives the same image;
                                change the seed or the prompt for another take)
   "ref_mode": "character" | "img2img" | "inpaint" | "vibe"
@@ -86,6 +87,8 @@ def config() -> dict:
 def size_for(job: dict, cfg: dict) -> tuple[int, int]:
     if job.get("width") and job.get("height"):
         w, h = int(job["width"]), int(job["height"])
+    elif job.get("size"):                                             # "1472x704" (gen_table rows, imagegen jobs)
+        w, h = (int(x) for x in str(job["size"]).lower().split("x"))
     else:
         aspect = job.get("aspect") or ("2:3" if job.get("transparent") else "16:9")
         if aspect not in SIZES:

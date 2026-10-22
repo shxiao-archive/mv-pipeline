@@ -55,7 +55,7 @@ What it does for determinism and quality:
 node tools/render_final.mjs --name mv                                  # 16:9 master, end = page duration (~4 min)
 node tools/render_final.mjs --name mv --preview                        # half-res check of the whole film
 node tools/render_final.mjs --name mv_vertical --url engine/vertical.html --selector canvas#vout --width 1080 --height 1920
-node tools/render_final.mjs --name mv --codec x264                     # no NVIDIA GPU
+node tools/render_final.mjs --name mv --codec x264                     # no NVIDIA GPU (master --crf 18 default; 15 = near-lossless, large)
 node tools/render_final.mjs --name mv --shutter 6                      # shutter motion blur, 6 sub-frames per frame
 ```
 **Motion blur** (optional): `project.json` → `"render": { "shutter": { "samples": 6, "angle": 180 } }` (or `--shutter N`

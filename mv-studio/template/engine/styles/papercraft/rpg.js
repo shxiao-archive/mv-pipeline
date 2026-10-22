@@ -71,9 +71,13 @@
     if (o.speaker) PC.nameTab(g, o.speaker, R.x + 36, R.y + 2, { size: 32 });
     const chars = [...L.text], n = Z.charsAt(line, S.t, { lead: 0 });
     let size = o.size ?? 60; while (size > 30 && PC.measure(g, L.text, size) > tw * 2) size -= 4;
-    // wrap into at most two rows
+    // wrap into at most two rows: at spaces for Latin text (a word never splits), per character for CJK
     const rows = [[]]; let w = 0;
-    for (const ch of chars) { const cw = PC.measure(g, ch, size); if (w + cw > tw && rows[rows.length - 1].length) { rows.push([]); w = 0; } rows[rows.length - 1].push(ch); w += cw; }
+    for (const tok of /\s/.test(L.text) ? L.text.split(/(?<=\s)/) : chars) {
+      const tc = [...tok], ww = PC.measure(g, tok.trimEnd(), size);
+      if (w + ww > tw && rows[rows.length - 1].length) { rows.push([]); w = 0; }
+      for (const ch of tc) { rows[rows.length - 1].push(ch); w += PC.measure(g, ch, size); }
+    }
     let k = 0; const y0 = R.y + R.h / 2 - (rows.length - 1) * size * 0.6;
     rows.forEach((row, r) => {
       let x = tx;

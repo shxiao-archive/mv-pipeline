@@ -119,7 +119,11 @@ fi
 step "Python packages"
 if [ "$SKIP_PIP" = 1 ]; then note "skipped (--skip-pip)"
 else
-  run "${PY[@]}" -m pip install --disable-pip-version-check -r requirements.txt
+  # already installed (e.g. a uv / distro Python that refuses pip: PEP 668)? then pip is not needed at all
+  if "${PY[@]}" tools/reqs_ok.py requirements.txt >/dev/null; then ok "requirements already installed (pip skipped)"
+  elif ! "${PY[@]}" -m pip install --disable-pip-version-check -r requirements.txt; then
+    echo "pip install failed. If it says 'externally-managed-environment' (uv / distro Python): install the requirements with that manager (uv pip install -r requirements.txt) or into a venv, then re-run with --skip-pip" >&2; exit 1
+  fi
   if [ "$LYRICS" = 1 ]; then
     OPT="$(sed -n 's/^#[[:space:]]*\[lyrics\][[:space:]]\{1,\}\([^[:space:]]\{1,\}\).*/\1/p' requirements.txt)"
     # shellcheck disable=SC2086

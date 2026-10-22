@@ -73,6 +73,10 @@ add pop-up clutter with ink edges. Run `motion_check.py` on renders: static stre
 
 ## 5. Asset library and density (what dalabengba-mv built before its scenes; method: references/10, team: 11)
 
+New scenes: name them `pcXxx` (the paper grain and vignette are applied only to scenes whose name matches `/^pc[A-Z]/`,
+`PC.isPaper`), and add the file to `engine/index.html` **and** `engine/vertical.html` (references/05 §9). The doll's
+arms do not reach above its head: hold or hang things at shoulder height, or draw a raised prop on its own.
+
 Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `sheets/papercraft_doll.js`),
 before writing shots:
 - **The cast on `PC.doll`** (34 poses and 19 expressions built in, `pose: { from, to, k }` blending, `act` actions,

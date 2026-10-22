@@ -285,6 +285,8 @@ The library was written for 残光; before reusing a scene with new assets, chec
   `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/*.js`:
   `biped`, `papercraft_doll`, `stage_person`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage).
   Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
+- **Preloading:** a scene preloads only the images its args name (`illust`: bg / chars / layers). An image a custom
+  `fx` or `text` hook draws needs `await Z.preload([...])` in `Z.setup`, or it is missing on the first frames.
 - **Living faces on cut-outs** (`scenes/scenes.js` `chars[].anim`): a still character with face patches from one
   expression sheet (`tools/gen_table.py`): `blink` on a seeded clock, `mouth` on the sung characters, `expr` +
   `exprAt` on cues; optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states`.
@@ -302,8 +304,10 @@ The library was written for 残光; before reusing a scene with new assets, chec
   distances, `smin`, `lineAA`, the ENGRAVING set (`hatch`, `hatchD`, `engrave`, `slice` / `slice2` = burin lines that
   wrap a 3D form, `stipple`), `lambert`, `rim`, `camRay`; `#include <raymarch>` after your `map()` adds `march`,
   `normal`, `softShadow`, `ao`. `Z.lineBatch(cap)`: tens of thousands of anti-aliased capsule hairlines per frame on
-  the GPU (`seg`, `poly`, `draw(ctx, { blend: 'add' })`). Without a GPU Chrome uses SwiftShader: correct, slower
-  (measured here: a raymarched 1400×840 plate ~0.3 s/frame, 57k hairlines ~0.4 s/frame); keep `rect` tight.
+  the GPU (`seg`, `poly`, `draw(ctx, { blend: 'add' })`). An integrated GPU is enough (measured on
+  an Intel iGPU, ANGLE D3D11: a raymarched 1400×840 plate ~0.3 s/frame in stills, a 34 s film in ~3 min with 3
+  workers, where readback and encoding cost more than the shaders). With no GPU at all Chrome uses SwiftShader:
+  correct, several times slower; keep `rect` tight.
 - **Single-stroke fonts** (`core/stroke.js`, fonts in `engine/fonts/stroke`: `sans script serif` Hershey, `readable
   allure` EMS, OFL): `await Z.stroke.load([...])` in a scene `init`, `Z.stroke.layout(text, font, capPx, o)`,
   `Z.stroke.draw(ctx, st, x, y, { len })` → the pen head, `Z.stroke.at(st, len)`, `Z.stroke.lenAt(st, i, t)` (written as

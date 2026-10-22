@@ -40,6 +40,36 @@
         "fixtures/test_song.wav",
         "fixtures/lyrics_en.lrc"
       ]
+    },
+    {
+      "id": 5,
+      "name": "treatise-en-plates",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make a deadpan lyric video that looks like the plates of an old technical treatise or instruction manual: charts, diagrams, engraved illustrations, the words set into each plate. No image generator. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the interface style's treatise treatment: ink and bone plates with one signal colour, a different plate idiom per line (chart, scope, form, map, engraved 3D form, hairline field), per-word lyrics set into each plate, at least one shader-drawn engraved plate and a line written by the pen, a running number raised by the hooks; cuts on the beat; no lyric text in code.",
+      "files": [
+        "fixtures/test_song.wav",
+        "fixtures/lyrics_en.lrc"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "papercraft-en-quest",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make a lyric video that is a pop-up paper storybook told as a retro RPG quest: a little paper hero travels, meets something, fights it and wins. No image generator, just draw it. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the papercraft style: cut paper with a multiplane camera, an original paper hero on the rig with many poses (walk, run, jump, attack, cheer), a quest map with a red route, a battle with LV UP, dialogue-box lyrics typed as sung, model sheets rendered and looked at; cuts on the beat; no lyric text in code.",
+      "files": [
+        "fixtures/test_song.wav",
+        "fixtures/lyrics_en.lrc"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "vocaloid-en-singer",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make an illustrated anime lyric video with an original girl who sings it, by a river at dusk with paper lanterns on the water. She stays mostly still, but she blinks, sings and smiles. Use NovelAI for the art. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the vocaloid style: an original character generated with NovelAI, her expressions (blink, open mouth, smile) from ONE expression sheet split into face patches, the mouth flapping on the sung characters, a dusk river with lanterns sitting on the water, JIZURA or code lyrics; cuts on the beat; no lyric text in code.",
+      "files": [
+        "fixtures/test_song.wav",
+        "fixtures/lyrics_en.lrc"
+      ]
     }
   ]
 }

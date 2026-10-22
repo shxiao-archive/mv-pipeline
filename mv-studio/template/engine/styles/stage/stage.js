@@ -39,10 +39,11 @@
     for (let i = -9; i <= 9; i++) ST.ink([[960 + i * 150, y + 2], [960 + i * 255, 1500]], 0.55, pal.woodDk);
     for (const yy of [y + 80, y + 190]) ST.ink([[-400, yy], [W + 400, yy]], 0.45, pal.woodDk);
   };
-  ST.spot = (x, col = P().cream, o = {}) => {
-    const top = o.top ?? -60, fy = o.y ?? 860;
-    ST.paint([[x - 90, top], [x + 90, top], [x + 260, fy], [x - 260, fy]], { fill: col, fillOp: 0.22, bleed: 0.05, tex: 0.2, border: 0.1, ink: null });
-    ST.paint(ST.ell(x, fy, 270, 55, 24), { fill: col, fillOp: 0.38, bleed: 0.1, tex: 0.2, ink: null });
+  ST.spot = (x, col = P().cream, o = {}) => {                             // o.k 0..1: fade a spot on (several at once flash)
+    const top = o.top ?? -60, fy = o.y ?? 860, k = Z.clamp(o.k ?? 1);
+    if (k <= 0.003) return;
+    ST.paint([[x - 90, top], [x + 90, top], [x + 260, fy], [x - 260, fy]], { fill: col, fillOp: 0.22 * k, bleed: 0.05, tex: 0.2, border: 0.1, ink: null });
+    ST.paint(ST.ell(x, fy, 270, 55, 24), { fill: col, fillOp: 0.38 * k, bleed: 0.1, tex: 0.2, ink: null });
   };
   ST.curtains = (t, k = 0, o = {}) => {
     const pal = P(), cur = o.col || pal.crimson, dk = o.dk || pal.crimsonDk, gold = pal.gold;
