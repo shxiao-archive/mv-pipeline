@@ -9,7 +9,8 @@
  *          allowBlack: true or it is within 0.5 s of the film's start or end (fades) · the scene is not registered
  *   WARN   a FLAT frame (one colour, no detail) · a font face that failed to load
  *          · SPRITE PING-PONG: the main character sprite (the largest one drawn) goes A -> B -> A within 2 s, or changes
- *            3+ times in 3 s (inside a shot or across short shots); sampled at --sprite-fps (default 4, 0 = off)
+ *            3+ times in 3 s (inside a shot or across short shots); sampled at --sprite-fps (default 4, 0 = off);
+ *            an ERROR with --strict
  * Exit 1 on any ERROR.
  *
  * mv-studio (MIT).
@@ -20,7 +21,7 @@ import { ROOT, cliArg as arg, cliFlag as flag, handleHelp } from './kit_env.mjs'
 import { openEngine } from './engine_page.mjs';
 
 handleHelp(`check_shots.mjs -- render samples of every shot; report errors, black / flat frames, failed fonts
-  node tools/check_shots.mjs [--url engine/index.html] [--samples 3] [--only id1,id2] [--json FILE] [--sprite-fps 4] [--selftest]`);
+  node tools/check_shots.mjs [--url engine/index.html] [--samples 3] [--only id1,id2] [--json FILE] [--sprite-fps 4] [--strict] [--selftest]`);
 
 // samples [{ t, p (main sprite path or null), id }] -> [{ id, t, kind, msg }]
 export function spriteFlips(samples) {
@@ -97,7 +98,7 @@ if (spriteFps > 0) {                                           // which sprite i
       samples.push({ t, p, id: s.id });
     }
   }
-  for (const f of spriteFlips(samples)) warns.push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
+  for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
 }
 const badFonts = await E.page.evaluate(() => [...document.fonts].filter(f => f.status === 'error').map(f => `${f.family} ${f.weight}`));
 badFonts.forEach(f => warns.push(`font failed to load: ${f}`));

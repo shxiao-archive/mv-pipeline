@@ -170,7 +170,8 @@ from ONE generation (an **expression sheet**), so every expression has exactly t
 3. In the shot, paste the snippet: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { blink: '…CH03_blink.png',
    mouth: '…CH03_open.png', expr: { smile: '…CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]], seed } }]`.
    Blinks run on a seeded clock (give each character its own seed), the mouth opens on each sung character of the
-   lyric (closed on silence; `sings: false` for a listener), expressions change on cues (`exprAt`).
+   lyric (closed on silence; `sings: false` for a listener), expressions change on cues (`exprAt`). `motion_check.py`
+   counts a living face under a slow push (≥ 40 % of its threshold) as motion, read from plan/shots.json `animFaces`.
 4. Do not ask the generator for a changed version of a finished picture (a turned head, another pose): tested, it
    either drifts in style or does not change. Other poses are other pictures (their own sheets), cut to, not morphed.
    (`anim.tilt` / `anim.hair` mesh warps and `states` exist but are rarely needed.)

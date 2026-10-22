@@ -197,6 +197,7 @@
       DENY.trans += ' uncover whipPan flashCross';
       DENY.layout += ' marquee diag filmstrip contour knZoomDive knTypeSlam sliceStack';
       DENY.treat += ' ransom monoGrid';
+      DENY.layout += ' huge gloss zoomRepeat';                         // the noir / mono plans: giant type over 40 % of the frame
       // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
       // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only
       // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.

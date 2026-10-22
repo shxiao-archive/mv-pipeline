@@ -76,7 +76,7 @@ thesis (one sentence about what the song is *about* visually), logline, emotiona
 Read `references/04-asset-generation.md`, starting at §0: every image of the film is a row of ONE generation table,
 `assets/gen/table.json` (`tools/gen_table.py`).
 1. Character bible `docs/CHARACTER.md` (hair/eyes/outfit/signature item/motion prop/palette), then the table's
-   **locks**: `STYLE`, `CHAR` (the character sentence), `CHAR_BACK` (her from behind, no face words), `WORLD`, `ISO`,
+   **locks**: `STYLE`, `CHAR` (the character sentence), `CHAR_BACK` (her from behind, no face words; back-view rows say `"view": "back"`), `WORLD`, `ISO`,
    `EMPTY`.
 2. Three master rows → generate → pick one with the user → the table's `refs.char`. **Checkpoint:** contact sheet.
 3. The rest of the rows, from the storyboard's needs:

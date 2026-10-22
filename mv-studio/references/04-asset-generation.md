@@ -22,15 +22,17 @@ behind the locks (§5–7) and the generators' own fields.
     { "id": "CH10", "kind": "char", "subject": "bust, singing into a microphone, facing the viewer", "transparent": true,
       "size": "1472x704", "sheet": { "cells": ["neutral", "blink", "open", "smile"], "cols": 4 } },
     { "id": "CH20", "kind": "char", "subject": "full body seen from behind, looking up at the sky", "transparent": true,
-      "locks": ["STYLE", "CHAR_BACK"], "negative": "face, eyes, looking at viewer" },
+      "view": "back" },
     { "id": "BG01", "kind": "world", "subject": "a rooftop at dusk, a radio mast on the left ...", "aspect": "16:9" },
     { "id": "OBJ01", "kind": "world", "subject": "a porcelain locket, closed", "transparent": true } ] }
 ```
 1. **Locks.** `STYLE` (medium, line, shading, palette), `CHAR` (the character sentence, §5), `WORLD` (the background
    style block, §6), `ISO` (a cut-out: the subject alone on the key colour), `EMPTY` (no people, no text). Rows get
    `STYLE + CHAR` (char) or `STYLE + WORLD` (world) unless they list their own `"locks"`.
-   **`CHAR_BACK`** is the character from behind: hair as seen from behind, outfit, signature items, and no eye, bang,
-   face or expression words. A back view prompted with the full `CHAR` comes back with eyes on the back of her head.
+   **Back views:** a row with `"view": "back"` gets the `CHAR_BACK` lock (the character from behind: hair as seen
+   from behind, outfit, signature items) or, without one, `CHAR` with every comma-separated part that names the face
+   (eyes, bangs, mouth, expression …) left out, a "seen from behind" lead-in and a `face, eyes, looking at viewer`
+   negative. A back view prompted with the full `CHAR` comes back with eyes on the back of her head.
 2. **Masters first:** three char rows with no `refs.char`; `jobs` → generate → `post`; pick one with the user; then
    `"refs": { "char": ["assets/gen/CH00b.png"] }` carries her face into every later char row (Codex, Grok). On
    NovelAI a character reference costs Anlas: leave `refs.char` empty there and lean on `CHAR` plus takes (§12).

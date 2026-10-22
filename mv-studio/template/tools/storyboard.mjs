@@ -20,7 +20,7 @@
  *   WARN   a shot without `moment` (ERROR with --strict) · a line no shot declares it answers · a line too short to read
  *          (< max(0.7 s, 0.09 s per character)) · line cues without a picture hint (analysis/cues.json)
  *          · a vocaloid film whose characters never blink or sing (no `chars[].anim`; ERROR with --strict)
- *          · characters placed the same way: over half of the character shots centred (|u - 0.5| < 0.08), or a third
+ *          · characters placed the same way (ERROR with --strict): over half of the character shots centred (|u - 0.5| < 0.08), or a third
  *            of the frame never used (u < 0.4 / u > 0.6), with 4+ character shots (args.chars x or pin)
  * Tolerances from project.json -> review: { cutTolerance: 0.04, cueTolerance: 0.15, grid: 'half' | 'beat', minShotFrames: 3 }.
  *
@@ -88,7 +88,7 @@ const placed = shots.filter(s => s.place && s.place.length).map(s => s.place[0])
 if (placed.length >= 4) {
   const centred = placed.filter(u => Math.abs(u - 0.5) < 0.08).length, left = placed.filter(u => u < 0.4).length, right = placed.filter(u => u > 0.6).length;
   if (centred > placed.length / 2 || !left || !right)
-    warn('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
+    (strict ? err : warn)('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
 }
 if (/^(vocaloid|tegaki|signal)/.test((P.project && P.project.style) || '') && withFaces.length && !withFaces.some(s => s.animFaces))
   (strict ? err : warn)('faces', `${withFaces.length} shot(s) show characters but none blinks or sings: make an expression sheet (references/04 §0) and give chars an anim (styles/vocaloid/STYLE.md, Characters with a living face)`);
@@ -97,7 +97,7 @@ if (/^(vocaloid|tegaki|signal)/.test((P.project && P.project.style) || '') && wi
 const rows = shots.map((s, k) => {
   const end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
   return { n: k + 1, id: s.id, t0: s.t0, t1: end, dur: +(end - s.t0).toFixed(3), scene: s.scene,
-    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined };
+    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined, animFaces: s.animFaces || undefined };
 });
 fs.mkdirSync(path.join(ROOT, 'plan'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'plan', 'shots.json'), JSON.stringify({ generator: 'tools/storyboard.mjs', duration: P.duration, fps, shots: rows }, null, 1) + '\n');

@@ -23,7 +23,7 @@ Table (JSON):
       { "id": "OBJ10a", "kind": "world", "subject": "A swallow, wings spread", "transparent": true },
       { "id": "CH01_blink", "variant_of": "CH01", "edit": "her eyes closed", "mode": "patch", "region": [0.3, 0.05, 0.75, 0.3], "takes": 3 },
       { "id": "CH02", "kind": "char", "subject": "Full body seen from behind ...", "transparent": true,
-        "locks": ["STYLE", "CHAR_BACK"], "negative": "face, eyes, looking at viewer" },   # CHAR_BACK: no face words (else eyes on the back of the head)
+        "view": "back" },   # the CHAR_BACK lock if the table has one, else CHAR without its face words; + a face negative
       { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full" },
       { "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view", "size": "1024x1024", "transparent": true,
         "sheet": { "cells": ["neutral", "blink", "open", "smile"] } } ] }
@@ -103,6 +103,23 @@ def final_path(t: dict, rid: str) -> Path:
     return rp(t.get("out", "assets/gen")) / f"{rid}.png"
 
 
+# a back view must not name the face: with the eyes in the prompt the model draws eyes on the back of the head
+FACE_WORDS = re.compile(r"\b(eyes?|eyelash\w*|bangs|fringe|face|facial|mouth|lips|smil\w*|expression|gaze|looking|pupils?|blush\w*|cheeks?|freckles?)\b", re.I)
+BACK_NEGATIVE = "face, eyes, looking at viewer, front view"
+
+
+def back_of(text: str) -> str:
+    """A character lock with every comma-separated part that names the face left out."""
+    return ", ".join(x for x in re.split(r",\s*", text) if not FACE_WORDS.search(x))
+
+
+def lock_text(t: dict, r: dict, name: str) -> str:
+    locks = t.get("locks", {})
+    if r.get("view") == "back" and name == "CHAR":
+        return locks["CHAR_BACK"] if "CHAR_BACK" in locks else back_of(locks["CHAR"])
+    return locks[name]
+
+
 def prompt_of(t: dict, r: dict) -> str:
     locks = t.get("locks", {})
     names = r.get("locks") or list(DEFAULT_LOCKS.get(r.get("kind", "world"), ["STYLE"]))
@@ -114,6 +131,8 @@ def prompt_of(t: dict, r: dict) -> str:
     if missing:
         sys.exit(f"{r['id']}: locks {missing} are not defined in the table")
     subject = r["subject"]
+    if r.get("view") == "back" and "behind" not in subject.lower():
+        subject = "seen from behind, back view, facing away from the viewer, " + subject
     if r.get("sheet"):                                                  # an expression sheet: one image, one style
         cells = r["sheet"]["cells"]; cols = r["sheet"].get("cols", 2 if len(cells) == 4 else len(cells))
         desc = {"neutral": "neutral, mouth closed, eyes open", "blink": "eyes closed, mouth closed", "closed": "eyes closed",
@@ -122,7 +141,7 @@ def prompt_of(t: dict, r: dict) -> str:
         subject = (f"expression sheet of ONE character: {len(cells)} identical copies of the same picture of her in a grid of {cols} "
                    f"columns, evenly spaced, not touching, exactly the same pose, framing, size, hair and clothes in every copy; only the "
                    f"facial expression changes, in reading order: {order}. The picture: {subject}")
-    return "\n".join(locks[n] for n in names) + "\n\nNew image: " + subject
+    return "\n".join(lock_text(t, r, n) for n in names) + "\n\nNew image: " + subject
 
 
 def char_of(t: dict, r: dict) -> str | None:
@@ -130,7 +149,7 @@ def char_of(t: dict, r: dict) -> str | None:
     if r.get("kind") != "char":
         return None
     names = r.get("locks") or DEFAULT_LOCKS["char"]
-    return next((t.get("locks", {})[n] for n in names if n.startswith("CHAR") and n in t.get("locks", {})), None)
+    return next((lock_text(t, r, n) for n in names if n.startswith("CHAR") and n in t.get("locks", {})), None)
 
 
 def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
@@ -168,6 +187,8 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
         for k in ("size", "aspect", "seed", "negative"):                 # passed through to the generator wrapper
             if k in r:
                 job[k] = r[k]
+        if r.get("view") == "back":
+            job["negative"] = ", ".join(x for x in (job.get("negative"), BACK_NEGATIVE) if x)
         base_row = next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {})
         if r.get("key") or base_row.get("key"):
             job["key"] = r.get("key") or base_row["key"]                 # a variant keeps its base's screen colour
@@ -695,6 +716,12 @@ def selftest() -> int:
         {"id": "CH01", "kind": "char"}, {"id": "CH02", "kind": "char", "locks": ["STYLE", "CHAR_BACK"]}, {"id": "BG01", "kind": "world"}]}
     if [char_of(tb, r) for r in tb["rows"]] != ["front", "back", None] or "front" in prompt_of(tb, dict(tb["rows"][1], subject="x")):
         print("FAIL character caption / CHAR_BACK lock"); bad += 1
+    tv = {"locks": {"STYLE": "s", "CHAR": "1girl, white bob hair, blunt bangs, red eyes, black jacket"},
+          "rows": [{"id": "CH05", "kind": "char", "view": "back", "subject": "full body"}]}
+    pb = prompt_of(tv, tv["rows"][0])
+    if "eyes" in pb or "bangs" in pb or "black jacket" not in pb or "seen from behind" not in pb \
+            or char_of(tv, tv["rows"][0]) != "1girl, white bob hair, black jacket":
+        print("FAIL automatic back view:", pb); bad += 1
     print("align:", info, f"patch {frac:.2%} of the canvas; sheet face region {reg}")
     print("gen_table self-test: " + ("ok" if not bad else f"{bad} failed"))
     return 1 if bad else 0

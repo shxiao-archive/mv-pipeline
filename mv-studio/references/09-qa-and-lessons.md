@@ -77,7 +77,7 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 Run on every full render (and on clips of fast sections while building):
 ```bash
 python tools/check_flash.py render/mv.mp4        # WCAG 2.3.1 approximation: general + red flashes <= 3/s -> PASS / FAIL (exit 1)
-python tools/motion_check.py render/mv.mp4       # stretches where nothing moves (< 0.006 for >= 1.5 s); FAIL above 10 % (not counting the song's stops, the tail, `hold: true` shots)
+python tools/motion_check.py render/mv.mp4       # stretches where nothing moves (< 0.006 for >= 1.5 s); FAIL above 10 % (not counting the song's stops, the tail, `hold: true` shots; a slow push over a living face passes)
 node tools/check_no_lyrics.mjs                   # lyric text only in analysis/ (code clean; --strict: docs too)
 ```
 What reviewers flagged in films that passed every automatic check — look for these in the contact sheets:
@@ -105,7 +105,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 |---|---|---|---|
 | 1 | `node tools/lint.mjs` | syntax errors, U+FFFD (CJK text lost in a write), `Math.random` / `Date.now` in engine code, lyric text in code | every change |
 | 2 | `node tools/storyboard.mjs` | unknown scenes, black gaps, cuts off the grid, cuts far from their cue, sung lines no shot shows, shots without `moment`, unreadably short lines, line cues without hints; writes STORYBOARD.md | every edit of the timeline |
-| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth (4 samples/s; `--sprite-fps 0` skips it) | every edit |
+| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth (4 samples/s; `--sprite-fps 0` skips it; errors with `--strict`) | every edit |
 | 4 | `node tools/cues_sheet.mjs` | the wrong picture for a line (look at it) | after the plan, after big changes |
 | 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back) | before a full render |
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |

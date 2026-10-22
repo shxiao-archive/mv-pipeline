@@ -1,7 +1,9 @@
 """Find the stretches of an export where (almost) nothing moves: the "it looks like a slideshow" problem.
 
 Per frame: mean absolute change from the previous frame on a 96x54 grey copy (0..1). Smoothed over 0.5 s.
-A stretch is STATIC when that level stays under --threshold for at least --min seconds. Cuts are excluded (they
+A stretch is STATIC when that level stays under --threshold for at least --min seconds. Inside shots with a living
+face (plan/shots.json `animFaces`: chars[].anim blinks and sings) 40 % of the threshold is enough, so a singer under a
+slow push passes while a still picture does not. Cuts are excluded (they
 are change, not motion). Very low-contrast frames (frame std < 0.07: a dark UI, a night sky) get a proportionally lower
 threshold (down to 40 %): on them a clear camera move (~130 px/s) changes few grey levels. Above that floor nothing
 changes, so the calibration on reviewed films holds (a fully contrast-relative measure was tried and let slow crossfades
@@ -52,7 +54,18 @@ def main():
     k = max(1, int(round(fps * 0.5)))
     lvl = np.convolve(d, np.ones(k) / k, mode="same")
     sd = np.convolve(g.std(axis=1)[1:], np.ones(k) / k, mode="same")
-    static = lvl < a.threshold * np.clip(sd / 0.07, 0.4, 1.0)
+    thr = a.threshold * np.clip(sd / 0.07, 0.4, 1.0)
+    t = np.arange(len(d)) / fps + start                    # song time of each frame step
+    shots = read_json(ROOT / "plan" / "shots.json").get("shots") or []
+    faces = np.zeros(len(d), bool)
+    for s in shots:
+        if s.get("animFaces"):
+            faces |= (t >= s["t0"]) & (t < s["t1"])
+    # a living face (chars[].anim: blinks, a singing mouth) is motion too, over a frame that also drifts (>= 40 % of the
+    # threshold). Read from the plan, not the pixels: a top-cells measure scored held stills with animated lyrics and
+    # petals (0.008-0.03) above a singing mouth (0.006), so it cannot tell them apart
+    rescued = faces & (lvl < thr) & (lvl >= 0.4 * thr)
+    static = (lvl < thr) & ~rescued
     runs, i = [], 0
     while i < len(static):
         if static[i]:
@@ -65,7 +78,6 @@ def main():
         else:
             i += 1
     total = len(d) / fps
-    t = np.arange(len(d)) / fps + start                    # song time of each frame step
     silent, held, inrun = (np.zeros(len(d), bool) for _ in range(3))
     for i, j in runs:
         inrun[i:j] = True
@@ -75,7 +87,7 @@ def main():
             silent |= (t >= s["start"] - 0.3) & (t <= s["end"] + 0.3)
     if au.get("music_cut"):
         silent |= t >= au["music_cut"]
-    for s in read_json(ROOT / "plan" / "shots.json").get("shots") or []:
+    for s in shots:
         if s.get("hold"):
             held |= (t >= s["t0"]) & (t < s["t1"])
     n_silent = int((inrun & silent).sum())
@@ -84,7 +96,8 @@ def main():
     st = lambda f: f / fps + start
     print(f"[motion] {Path(a.mp4).name}: {total:.1f} s, mean motion {d.mean():.4f}, static stretches (< {a.threshold} for >= {a.min} s): "
           f"{len(runs)} totalling {inrun.sum() / fps:.1f} s; counted {still:.1f} s ({100 * still / total:.0f} %)"
-          + (f", not counted: {n_silent / fps:.1f} s in the song's stops / after the cut, {n_hold / fps:.1f} s in hold shots" if n_silent or n_hold else ""))
+          + (f", not counted: {n_silent / fps:.1f} s in the song's stops / after the cut, {n_hold / fps:.1f} s in hold shots" if n_silent or n_hold else "")
+          + (f"; {rescued.sum() / fps:.1f} s of slow drift in shots with a living face (chars[].anim): counted as motion" if rescued.sum() >= a.min * fps else ""))
     for i, j in runs:
         print(f"  STATIC  song {st(i):7.2f} - {st(j):7.2f} s  ({(j - i) / fps:.1f} s, level {lvl[i:j].mean():.4f})")
     if not a.quiet:
