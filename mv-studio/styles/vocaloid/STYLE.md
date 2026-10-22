@@ -152,10 +152,10 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ---
 
-## Characters with a living face (both treatments)
+## Characters with a living face (optional, both treatments)
 
-Characters stay **mostly still**. Now and then they blink, open the mouth or change expression: a swap of the face,
-not an animation and not lip-sync (a viewer who watched the eval film: the mouth flapping on every syllable looked
+A character may stay completely still; that is fine. If the film wants more, now and then she blinks, opens the mouth
+or changes expression: a swap of the face, not an animation and not lip-sync (a viewer who watched the eval film: the mouth flapping on every syllable looked
 wrong, and the pasted eye / mouth areas showed their edges). The engine does the timing; you supply the faces.
 
 **The faces: pictures that differ only in the eyes or the mouth.** Best: repaint just that area of the approved picture
@@ -211,8 +211,8 @@ either drifts in style or does not change. Other poses are other pictures, cut t
 ## Signature features (the jury judges against these; references/09 §8)
 
 Tegaki:
-- One original character, on-model in every shot, with a **living face** (blinks, sings, changes expression) and
-  **varied framing**: left and right thirds, close-ups and long shots, back views; never the same centred figure.
+- One original character, on-model in every shot (a face that blinks or sings is optional), with **varied
+  framing**: left and right thirds, close-ups and long shots, back views; never the same centred figure.
 - A **colour script**: the light changes with the story (time of day, mood per section); light sources are painted and
   pinned, the grade (gradient-map LUTs) pulls the shots together.
 - **Grounded compositing**: characters stand on their plates with contact shadows, take the plate's light; three depth

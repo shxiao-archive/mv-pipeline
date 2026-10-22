@@ -130,12 +130,6 @@ def style_checks(proj, add, style):
         add(">= 8 distinct rig poses named in the project's own code", len(poses) >= 8, f"{len(poses)}: {poses[:20]}")
         sheets = list((proj / "render" / "sheets").rglob("*.png")) + list((proj / "render" / "sheets").rglob("*.jpg")) if (proj / "render" / "sheets").is_dir() else []
         add("model sheets were rendered (render/sheets)", bool(sheets), f"{len(sheets)} images")
-    if style == "vocaloid":
-        anims = [json.loads(f.read_text(encoding="utf-8")) for f in proj.rglob("*.anim.json") if "node_modules" not in f.parts]
-        patches = max((len([k for k in a.get("anim", {}) if k != "expr"]) + len(a.get("anim", {}).get("expr", {})) for a in anims), default=0)
-        add("an expression sheet was split into >= 3 face patches (*.anim.json)", patches >= 3, f"{len(anims)} anim.json, most patches {patches}")
-        live = re.search(r"anim\s*:", text) and re.search(r"blink", text) and re.search(r"mouth", text)
-        add("a character has a living face in the timeline (anim with blink and mouth)", bool(live), "yes" if live else "no anim / blink / mouth in the project's code")
 
 
 TRUTH = [4.25, 8.25, 12.25, 16.25, 20.25, 22.25, 26.25, 28.25]   # sung line onsets of the fixture song (all three lyric files)
@@ -328,7 +322,7 @@ def main():
     # motion: the template's motion check (calibrated on the iteration-1 human review: <= ~25 % static felt alive)
     if v:
         r = subprocess.run([PY, str(TOOLS / "motion_check.py"), str(mp4), "--quiet"], capture_output=True, text=True)
-        m = re.search(r"totalling ([0-9.]+) s \(([0-9]+) %\)", r.stdout)
+        m = re.search(r"counted ([0-9.]+) s \(([0-9]+) %\)", r.stdout)   # motion_check: "totalling X s; counted Y s (Z %)"
         pct = int(m.group(2)) if m else 100
         add("the picture keeps moving: static stretches (>= 1.5 s with almost no motion) are at most 15 % of the video",
             m and pct <= 15, f"{pct} % static ({m.group(1) if m else '?'} s)")

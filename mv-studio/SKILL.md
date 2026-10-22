@@ -97,7 +97,7 @@ STYLE.md; the check order: `references/09` §7. Commit the project at the end of
    from the grid (`B(n)`, `nb(t)`, `Z.cue('L07')`, `Z.SIG.cuts`). `node tools/storyboard.mjs` writes
    `docs/STORYBOARD.md` + `plan/shots.json` and must PASS (every sung line shown, cuts on the grid / their cue, no gaps).
 4. **Assets** — build the library before the shots, each asset checked on a model sheet (`engine/sheets/`, `references/10`).
-   Generated art: one table (`tools/gen_table.py`); a character's expressions from one expression sheet (vocaloid STYLE.md).
+   Generated art: one table (`tools/gen_table.py`); optional face changes (blink, mouth, expression) as variants of one picture (vocaloid STYLE.md).
    The style's list (STYLE.md): vocaloid = character bible + master + poses + backgrounds (tegaki), neutral
    images for full / crop / silhouette framings (signal); interface = code-drawn (screen: write the user's lines and
    system copy; treatise: write the deadpan copy and the number); stage = code-painted (design the

@@ -80,8 +80,8 @@ Read `references/04-asset-generation.md`, starting at §0: every image of the fi
    `EMPTY`.
 2. Three master rows → generate → pick one with the user → the table's `refs.char`. **Checkpoint:** contact sheet.
 3. The rest of the rows, from the storyboard's needs:
-   - per framing the faces use (bust, half body): **face variants** that repaint only her eyes or mouth (blink,
-     open, smile …) for `chars[].anim` (styles/vocaloid/STYLE.md, Characters with a living face);
+   - optional: **face variants** that repaint only her eyes or mouth (blink, open, smile …) for `chars[].anim`, if
+     the film wants her to blink or sing (styles/vocaloid/STYLE.md, Characters with a living face);
    - poses (close-ups, back view, hands, signature props, dynamic poses, emotional beats; two takes for hard poses);
    - locations from the lyrics' imagery and the colour script, with the time-of-day variants your colour script needs
      for the 2–3 key locations (a LUT can shift a plate's mood, but light sources must be painted);
@@ -95,7 +95,7 @@ python tools/gen_table.py post assets/gen/table.json                            
 python tools/gen_table.py status assets/gen/table.json
 ```
 Acceptance: every image viewed (`_review_*.jpg`, `_<id>_figures.jpg`); character recognisably identical across poses;
-no green fringes; nothing imitates an existing character; each singing framing has its `.anim.json`.
+no green fringes; nothing imitates an existing character.
 
 ## 4. Storyboard & timeline
 

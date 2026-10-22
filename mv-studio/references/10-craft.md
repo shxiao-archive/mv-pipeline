@@ -112,8 +112,8 @@ the height line, and trial placements in two of the film's sets (this is where a
    ISO ("single isolated subject, transparent background"), EMPTY ("no people").
 4. **Neutral colour, grade later:** generate natural colours at mid contrast; the film's colour comes from the grade in
    the engine (one palette for everything, see the signal treatment's heat ramps).
-5. **Expressions from one sheet:** blink, mouth open, smile … drawn in ONE generation, cut to face patches
-   (`gen_table.py` sheet rows): the character stays still and the face lives. Never ask for an edited copy of a
+5. **Expressions, if wanted:** blink, mouth open, smile … as variants that repaint only the eyes or the mouth, or
+   from one sheet (`gen_table.py`): the character stays still and the face changes now and then (optional). Never ask for an edited copy of a
    finished picture for a bigger change (it drifts in style).
 6. **Motion as separate images:** a bird in three wing positions (`OBJ10a/b/c`), hands clean and dirty (`H2a/H2b`), an
    object whole and broken. Animate by switching on the beat, plus the engine's drift and squash.
