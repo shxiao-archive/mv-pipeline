@@ -120,6 +120,21 @@ def main():
     else:
         print("  single-frame pops: none")
 
+    # overexposed: 40 % of the frame or more near white (every channel >= 0.9) for 0.1 s or more: a full-strength flash
+    # under bloom, a blown sky or glow. Safe by WCAG, still a burnt picture: a warning, not a failure
+    white = (rgb.min(axis=2) >= 0.9).mean(axis=1) >= 0.4
+    burns, i = [], 0
+    while i < n:
+        j = i
+        while j < n and white[j]:
+            j += 1
+        if j - i >= max(2, round(0.1 * fps)):
+            burns.append([round(i / fps + start, 2), round(j / fps + start, 2)])
+        i = j + 1
+    res["overexposed"] = burns
+    print("  overexposed (>= 40 % of the frame near white for >= 0.1 s): " + (", ".join(f"{a:.2f}-{b:.2f}s" for a, b in burns) +
+          "  -> lower the flash (trans peak), bloom or exposure there" if burns else "none"))
+
     # warning ranges: 1 s windows with >= WARN_FLASHES flashes or >= WARN_CUTS hard cuts, merged when < 1 s apart
     win = int(round(fps))
     cut_ps = np.convolve(np.r_[0, (d1 > 0.12)].astype(int), np.ones(win, int), mode="valid")[1:][: len(gen_ps)]

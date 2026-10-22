@@ -7,10 +7,11 @@
 
   T('cut', (ctx, A, B) => ctx.drawImage(B, 0, 0));
   T('xfade', (ctx, A, B, k) => { ctx.drawImage(A, 0, 0); ctx.globalAlpha = E.inOutSine(k); ctx.drawImage(B, 0, 0); ctx.globalAlpha = 1; });
-  // white/colour flash: A brightens to flash, B emerges
+  // white/colour flash: A brightens to flash, B emerges. peak 0.7: at full strength, under bloom, the frame burns white
+  // for several frames (a jury and a viewer both called it overexposed); peak: 1 for a real white-out
   T('flash', (ctx, A, B, k, o) => {
     ctx.drawImage(k < 0.5 ? A : B, 0, 0);
-    ctx.fillStyle = o.color || '#FFF4DC'; ctx.globalAlpha = k < 0.5 ? E.inQuad(k * 2) : 1 - E.outQuad((k - 0.5) * 2); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    ctx.fillStyle = o.color || '#FFF4DC'; ctx.globalAlpha = (o.peak ?? 0.7) * (k < 0.5 ? E.inQuad(k * 2) : 1 - E.outQuad((k - 0.5) * 2)); ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
   });
   T('black', (ctx, A, B, k) => {
     ctx.drawImage(k < 0.5 ? A : B, 0, 0);

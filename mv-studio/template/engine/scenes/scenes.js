@@ -88,8 +88,12 @@
   //     expr: { smile: 'p.png', ... }, exprAt: [[t, 'smile'], [t2, null]]   expression changes on cues (null = neutral)
   //     blink: 'patch.png' (eyes closed) | { base: 'p.png', <state>: 'p2.png' }   closes on a seeded clock (Z.rig.blink)
   //     seed, period                    the blink clock (cast members get different seeds)
-  //     mouth: 'open.png' | ['half.png', 'open.png'] (or per state as blink)   opens on each sung character (lyric
-  //                                     timing, 12 fps), only inside talk: [[t0, t1], ...] when given; sings: false = never
+  //     mouth: 'open.png' | ['half.png', 'open.png'] (or per state as blink)   opens now and then while a line is sung
+  //                                     (about 0.5 s every 1.1-1.7 s, seeded per line; a viewer reads singing, not
+  //                                     speech), only inside talk: [[t0, t1], ...] when given; sings: false = never;
+  //                                     lipsync: true = open on each sung character (12 fps), rarely wanted
+  //     whole: true                     blink / mouth / expr are WHOLE pictures (gen_table `faces: 'whole'`): the
+  //                                     current one replaces the picture (mouth over blink over expression), no patches
   //   Optional, rarely needed (keep characters mostly still):
   //     states: { turn: 'full.png', ... }, state: [[t, 'turn'], [t2, 'base']]   swap the whole picture on a cut
   //     tilt:{ pivot: [u, v] (the neck), deg 2.5 (sway amplitude), rate 0.3 Hz, keys: [[t, deg], ...] (acted tilts) }
@@ -121,6 +125,12 @@
     const next = ct[k + 1] ?? L.end, f = (t - ct[k]) / Math.max(0.05, next - ct[k]);
     return f < 0.1 ? 0.5 : f < 0.7 ? 1 : 0;
   }
+  // the calm mouth: open for ~0.5 s every 1.1-1.7 s while a line is sung (seeded per line), closed between lines
+  function mouthCalm(t, seed) {
+    const i = Z.lineAt(t, 0); if (i < 0) return 0;
+    const L = Z.line(i), u = t - L.t, p = 1.1 + 0.6 * Z.rnd(i, seed);
+    return u >= 0 && t < L.end - 0.15 && (u % p) < 0.5 ? 1 : 0;
+  }
   function animOf(S, c, t, img) {
     const A = c.anim;
     let state = 'base';
@@ -136,7 +146,7 @@
     if (bl && Z.rig.blink(t, A.seed || 0, A.period || 3.7) > 0.4) { const p = Z.imgSync(bl); if (p) parts.push([bl, p]); }
     const mo = pick(A.mouth);
     if (mo && (!A.talk || A.talk.some(([a, b]) => t >= a && t < b)) && (A.sings ?? true)) {
-      const v = mouthOpen(S, Z.quant(t, 12)), list = Array.isArray(mo) ? mo : [mo];
+      const v = A.lipsync ? mouthOpen(S, Z.quant(t, 12)) : mouthCalm(t, A.seed || 0), list = Array.isArray(mo) ? mo : [mo];
       const k = list.length > 1 ? (v > 0.75 ? list.length - 1 : v > 0.25 ? 0 : -1) : (v > 0.5 ? 0 : -1);   // half open, then open
       if (k >= 0) { const p = Z.imgSync(list[k]); if (p) parts.push([list[k], p]); }
     }
@@ -162,6 +172,7 @@
         return [dx, dy];
       };
     }
+    if (A.whole) return { img: parts.length ? parts[parts.length - 1][1] : baseImg, field };   // one whole picture, no seams
     return { img: composed(baseImg, baseKey, parts), field };
   }
   function drawChar(ctx, S, c) {
@@ -182,12 +193,12 @@
     }
     if (c.pin && S.bgImg) { const q = pinPt(S, c, k); x = q[0] + (x - c.x || 0); y = q[1] + (y - c.y || 0); h *= q[2]; }
     if (alpha <= 0.001) return;
-    if (Z.onSprite) Z.onSprite(c.img, h);                    // set only by tools/check_shots.mjs (sprite pass)
     if (c.water) {                                             // afloat: sunk into the waterline at its pin, reflected below
       D.onWater(ctx, img, x, y, h, S.t, Object.assign({ alpha, seed: c.phase || 0, tint: c.tint }, c.water)); return;
     }
     if (c.ground) { const g = c.ground === true ? {} : c.ground; D.contactShadow(ctx, x, y, h * (g.w ?? 0.55), { a: (g.a ?? 0.45) * alpha, squash: g.squash }); }
     if (c.beatBump) h *= 1 + c.beatBump * S.clock.pulse(S.t, 10);
+    if (Z.onSprite) Z.onSprite(c.img, h);                    // the base picture (a face swap is not a new sprite): check_shots
     const anim = c.anim ? animOf(S, c, t, img) : null;
     if (anim) img = anim.img;
     const opt = { tint: c.tint, anchor: c.anchor || [0.5, 1], rot, flip: c.flip, sway: c.sway ?? 0.012, breathe: c.breathe ?? 1, t, alpha, phase: c.phase || 0,

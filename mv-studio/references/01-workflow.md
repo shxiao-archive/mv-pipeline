@@ -80,8 +80,8 @@ Read `references/04-asset-generation.md`, starting at §0: every image of the fi
    `EMPTY`.
 2. Three master rows → generate → pick one with the user → the table's `refs.char`. **Checkpoint:** contact sheet.
 3. The rest of the rows, from the storyboard's needs:
-   - one **expression-sheet row** per framing the faces use (bust, half body): her blink, singing mouth and
-     expressions for `chars[].anim` (styles/vocaloid/STYLE.md, Characters with a living face);
+   - per framing the faces use (bust, half body): **face variants** that repaint only her eyes or mouth (blink,
+     open, smile …) for `chars[].anim` (styles/vocaloid/STYLE.md, Characters with a living face);
    - poses (close-ups, back view, hands, signature props, dynamic poses, emotional beats; two takes for hard poses);
    - locations from the lyrics' imagery and the colour script, with the time-of-day variants your colour script needs
      for the 2–3 key locations (a LUT can shift a plate's mood, but light sources must be painted);

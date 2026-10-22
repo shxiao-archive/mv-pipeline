@@ -146,7 +146,8 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
     gen = model_gen(model)
     v4 = gen >= 4                                                  # V4 caption format (v4_prompt)
     prompt = job["prompt"].strip()
-    if job.get("transparent"):
+    # an inpaint repaints a box inside the figure: background tags there paint the key colour into the face
+    if job.get("transparent") and job.get("ref_mode") != "inpaint":
         key = job_key(job)
         tag = KEY_TAGS.get(key, f"plain {key} background")
         if v4:   # tags only: the Codex key sentence and "no shadow" flatten V4 poses and shading (Gemini old/new runs)
@@ -195,7 +196,7 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
             from PIL import Image, ImageDraw
             src = Image.open(refs[0])
             if src.mode in ("RGBA", "LA", "P"):                      # a cut-out: flatten onto the key colour, so the result keys again
-                rgba = src.convert("RGBA"); flat = Image.new("RGB", rgba.size, job_key(job) if job.get("transparent") else "#FFFFFF")
+                rgba = src.convert("RGBA"); flat = Image.new("RGB", rgba.size, "#808080" if mode == "inpaint" else job_key(job) if job.get("transparent") else "#FFFFFF")
                 flat.paste(rgba, mask=rgba.getchannel("A")); src = flat
             init = src.convert("RGB").resize((w, h), Image.LANCZOS)
             p.update({"image": b64_png(init) if data else f"<{refs[0].name} {w}x{h}>",

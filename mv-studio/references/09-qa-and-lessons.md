@@ -126,6 +126,7 @@ refined; P2 = nice to have. Delivery needs P0 empty.
 | `lines N start INSIDE a sung phrase` | check_sync (`--lyrics-only` before rendering) | those lines are probably on the wrong phrase (bars counted wrong in an estimate): listen, move them in tools/lyric_editor |
 | `lyrics best shift +150 ms` | check_sync | the LRC is early against the voice: estimated timing, or set timing.lyricOffset after checking by ear |
 | changed frames outside the shots you edited | compare_sheets | the shared-file change leaked: fix it or scope it to the shots that need it |
+| `overexposed ... s` | check_flash | most of the frame burnt white: a flash transition (`peak`, default 0.7), a light or glow that swells to fill the frame, bloom on bright type; lower it there |
 
 ## 8. The jury: an independent review in two rounds
 

@@ -41,7 +41,9 @@ Table (JSON):
   the prompt says to change only the edit); `post` aligns it to the base (scale + offset, refuses a misfit) and writes
     patch  only the pixels that changed (the blobs centred in `region`, if given), on the base's canvas: drawn over the base
   "takes": 3 generates three seeds of a variant and keeps the one that changed least outside its region.
-    full   the whole aligned variant on the base's canvas: swapped for the base (pose / turn / big changes)
+    full   the whole aligned variant on the base's canvas: swapped for the base (pose / turn / big changes); with
+           "ref_mode": "inpaint" and a region (a face variant): the repainted box blended into the base with a soft
+           edge inside the figure, the base everywhere else (engine chars[].anim whole: true swaps it in)
 
 mv-studio (MIT). Standard library + numpy, scipy, Pillow.
 """
@@ -313,10 +315,15 @@ def save(a: np.ndarray, p: Path) -> None:
     Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8), "RGBA").save(p)
 
 
-def do_align(base_p: Path, var_p: Path, out_p: Path, mode: str, region=None, max_err=0.12, min_iou=0.85) -> dict:
+def do_align(base_p: Path, var_p: Path, out_p: Path, mode: str, region=None, max_err=0.12, min_iou=0.85, inpaint=False) -> dict:
     base, var = _rgba(base_p), _rgba(var_p)
-    v, info = align(base, var)
-    ok = info["colour_err"] <= max_err and info["shape_iou"] >= (min_iou if mode == "patch" else min_iou - 0.15)
+    if inpaint and region:                                            # same canvas by construction: resize, no keying or search
+        im = Image.fromarray((var * 255).astype(np.uint8), "RGBA").resize((base.shape[1], base.shape[0]), Image.LANCZOS)
+        v = np.asarray(im, np.float32) / 255; v[..., 3] = 1.0
+        info, ok = {"scale": round(base.shape[1] / var.shape[1], 4), "dx": 0.0, "dy": 0.0, "colour_err": "-", "inpaint": True}, True
+    else:
+        v, info = align(base, var)
+        ok = info["colour_err"] <= max_err and info["shape_iou"] >= (min_iou if mode == "patch" else min_iou - 0.15)
     info["mode"] = mode
     if not ok:
         info["refused"] = f"the variant does not line up with its base (colour_err {info['colour_err']} > {max_err} or shape_iou {info['shape_iou']} too low): regenerate it"
@@ -328,9 +335,34 @@ def do_align(base_p: Path, var_p: Path, out_p: Path, mode: str, region=None, max
             info["refused"] = "nothing changed inside the region: the generator ignored the edit"
             return info
         save(p, out_p)
+    elif region:
+        # a repainted box (inpaint) comes back re-shaded, with the key colour where the box leaves the figure: blend it
+        # into the base with a soft edge inside the figure, so everything outside the face is the base, pixel for pixel
+        out, inside = feather_in(base, v, region)
+        info["changed"] = round(inside, 4)
+        if inside < 0.01:
+            info["refused"] = "nothing changed inside the region: the generator ignored the edit"
+            return info
+        save(out, out_p)
     else:
         save(v, out_p)
     return info
+
+
+def feather_in(base: np.ndarray, v: np.ndarray, region) -> tuple[np.ndarray, float]:
+    """The variant inside region [u0, v0, u1, v1] and inside the base figure, blended with a soft edge; the base elsewhere."""
+    from scipy import ndimage
+    H, W = base.shape[:2]
+    u0, v0, u1, v1 = region
+    box = np.zeros((H, W), np.float32)
+    box[int(v0 * H):int(np.ceil(v1 * H)), int(u0 * W):int(np.ceil(u1 * W))] = 1
+    sig = max(1.5, 0.06 * min((u1 - u0) * W, (v1 - v0) * H))
+    figure = ndimage.binary_erosion(base[..., 3] > 0.5, iterations=max(1, int(sig)))
+    m = ndimage.gaussian_filter(ndimage.binary_erosion(box > 0, iterations=int(sig)).astype(np.float32), sig) * figure * (v[..., 3] > 0.5)
+    out = base.copy()
+    out[..., :3] = base[..., :3] * (1 - m[..., None]) + v[..., :3] * m[..., None]
+    inside = float((np.abs(base[..., :3] - v[..., :3]).mean(axis=2) * m).sum() / max(1.0, m.sum()))
+    return out, inside
 
 
 
@@ -543,23 +575,25 @@ def split_sheet(t: dict, r: dict, raw: Path) -> dict:
     cells = cells_of(img, boxes=boxes)
     base = cells[0]
     grid_image(base, out / f"_{rid}_grid.jpg")                       # measure the eyes / mouth on the neutral figure
-    if not (sh.get("eyes") and sh.get("mouth")):
+    whole = sh.get("faces", "patch") == "whole"
+    if not whole and not (sh.get("eyes") and sh.get("mouth")):
         raise ValueError(f"set sheet.eyes and sheet.mouth ([u0, v0, u1, v1] of the neutral figure; measure on _{rid}_grid.jpg)")
     aligned = [base] + [align(base, c)[0] for c in cells[1:]]
-    region = [min(sh["eyes"][0], sh["mouth"][0]), sh["eyes"][1], max(sh["eyes"][2], sh["mouth"][2]), sh["mouth"][3]]
+    region = [min(sh["eyes"][0], sh["mouth"][0]), sh["eyes"][1], max(sh["eyes"][2], sh["mouth"][2]), sh["mouth"][3]] if sh.get("eyes") and sh.get("mouth") else None
     save(base, out / f"{rid}.png")
     rel = lambda p: p.relative_to(ROOT).as_posix()
-    anim: dict = {}
+    anim: dict = {"whole": True} if whole else {}
     info = {"face": region, "cells": {}}
     for name, v in zip(names[1:], aligned[1:]):
         both = (base[..., 3] > 0.5) & (v[..., 3] > 0.5)
         err = float(np.abs(base[..., :3] - v[..., :3]).mean(axis=2)[both].mean()) if both.any() else 1.0
         role = ROLE.get(name)
-        # a blink takes the eye area, a mouth the mouth area, any other expression both
-        p = paste_of(base, v, [sh["eyes"]] if role == "blink" else [sh["mouth"]] if role == "mouth" else [sh["eyes"], sh["mouth"]])
+        # whole: the aligned copy itself, swapped for the picture (no seams, but a copy is redrawn: only for copies that
+        # match outside the face). patch (default): a blink takes the eye area, a mouth the mouth area
+        p = v if whole else paste_of(base, v, [sh["eyes"]] if role == "blink" else [sh["mouth"]] if role == "mouth" else [sh["eyes"], sh["mouth"]])
         frac = float((p[..., 3] > 0.5).mean())
         dst = out / f"{rid}_{name}.png"; save(p, dst)
-        info["cells"][name] = {"colour_err": round(err, 4), "changed": round(frac, 4), "outside_face": round(drift(base, v, region), 4)}
+        info["cells"][name] = {"colour_err": round(err, 4), "changed": round(frac, 4), "outside_face": round(drift(base, v, region), 4) if region else None}
         if role == "blink":
             anim["blink"] = rel(dst)
         elif role == "mouth":
@@ -583,7 +617,13 @@ def cmd_post(table: Path) -> int:
         takes = [p for p in takes if not p.name.endswith(".raw.png")]
         if takes and final_path(t, r["variant_of"]).is_file():        # pick the take that changed least outside its region
             b = _rgba(final_path(t, r["variant_of"]))
-            scored = sorted((drift(b, align(b, _rgba(p))[0], r.get("region")), p) for p in takes)
+            if r.get("ref_mode") == "inpaint" and r.get("region"):     # outside is the base anyway: keep the take that changed most inside
+                def inside(p):
+                    v = np.asarray(Image.open(p).convert("RGBA").resize((b.shape[1], b.shape[0]), Image.LANCZOS), np.float32) / 255
+                    return -feather_in(b, np.dstack([v[..., :3], np.ones(v.shape[:2], np.float32)]), r["region"])[1]
+                scored = sorted((inside(p), p) for p in takes)
+            else:
+                scored = sorted((drift(b, align(b, _rgba(p))[0], r.get("region")), p) for p in takes)
             raw = scored[0][1]
             print(f"  {r['id']}: takes " + ", ".join(f"{p.stem.split('__')[-1]} {d:.4f}" for d, p in scored) + f" -> {raw.stem.split('__')[-1]}")
         if not raw.is_file():
@@ -606,7 +646,7 @@ def cmd_post(table: Path) -> int:
         base = final_path(t, r["variant_of"])
         if not base.is_file():
             continue
-        info = do_align(base, raw, fin, r.get("mode", "patch"), r.get("region"))
+        info = do_align(base, raw, fin, r.get("mode", "patch"), r.get("region"), inpaint=r.get("ref_mode") == "inpaint")
         report[r["id"]] = info
         if info.get("refused"):
             bad += 1

@@ -36,9 +36,10 @@ behind the locks (§5–7) and the generators' own fields.
 2. **Masters first:** three char rows with no `refs.char`; `jobs` → generate → `post`; pick one with the user; then
    `"refs": { "char": ["assets/gen/CH00b.png"] }` carries her face into every later char row (Codex, Grok). On
    NovelAI a character reference costs Anlas: leave `refs.char` empty there and lean on `CHAR` plus takes (§12).
-3. **Faces that live:** one sheet row per framing the film's faces use (bust, half body). A character who sings or
-   reacts in a shot is drawn from a sheet framing, so she can blink and sing (`chars[].anim`; styles/vocaloid/STYLE.md,
-   Characters with a living face). `tools/storyboard.mjs` warns when a vocaloid film's characters never move a face.
+3. **Faces that live:** per framing the film's faces use (bust, half body), the approved picture plus variant rows
+   that repaint only its eye or mouth box (`"ref_mode": "inpaint", "mode": "full"`), swapped whole by the engine
+   (`anim.whole`); an expression sheet is the fallback (styles/vocaloid/STYLE.md, Characters with a living face). A
+   character who sings or reacts in a shot is drawn from such a framing. `tools/storyboard.mjs` warns when a vocaloid film's characters never move a face.
 4. **The rest** from the storyboard (§1): poses, the eye close-up (opaque 16:9), backgrounds with their time-of-day
    variants, props. Look at every `_review_<category>.jpg`; line them up with
    `python tools/lineup.py assets/gen/CH*.png --bg assets/gen/BG01.png` (§5.9).

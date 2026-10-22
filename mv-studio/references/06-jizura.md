@@ -96,6 +96,12 @@ The 残光 deny-lists (adapt per film):
 | enter / exit | bubbles, stickerPeel, crumple, loadingBar, tokoroten / balloonOff, crumpleOut, peelOff | comic motion |
 | bg (only `full` mode) | argyle, tartan, polka, checker, retroGrid, kaleidoscope, fireworks, sunburst, seigaiha, asanoha, … | pattern backgrounds clash with illustrated shots |
 
+**JIZURA's own transitions between lyric cuts are off by default** (`TEXT_TRANS = false` in `timeline.js`): they
+drew the outgoing and the incoming line on top of each other for a few frames, which a viewer read as overlapping
+text. Each line now leaves by its exit and the next arrives by its enter; shot transitions are the engine's. Many
+layouts also set the whole line small next to the words of a cut when a line is split with `/`: split a line only
+where the picture should change, and look at the stills of split lines.
+
 **Captions and stacked repeats are off by default** (a jury round read them as a debug layer and as garbled text):
 `fx.hideNo` / `fx.hideTime` drop the small "No.06 — 0:26.00" captions under the lines; the parts that still draw
 digits (index numbers, timecodes, rulers, reticles, dimension marks: 25 decors, 5 layouts) and the layouts that draw

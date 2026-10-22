@@ -154,27 +154,45 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ## Characters with a living face (both treatments)
 
-Characters stay **mostly still**: they blink, sing and change expression — no other motion is needed. The faces come
-from ONE generation (an **expression sheet**), so every expression has exactly the master's style (tested on NovelAI):
+Characters stay **mostly still**. Now and then they blink, open the mouth or change expression: a swap of the face,
+not an animation and not lip-sync (a viewer who watched the eval film: the mouth flapping on every syllable looked
+wrong, and the pasted eye / mouth areas showed their edges). The engine does the timing; you supply the faces.
 
-1. One sheet row in the generation table (`tools/gen_table.py`; `assets/gen/table.json`):
-   `{ "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view facing right", "size":
-   "1024x1024", "transparent": true, "key": "#FF00FF", "sheet": { "cells": ["neutral", "blink", "open", "smile"] } }`
-   (add `sad`, `surprised` … as the song needs; one sheet per framing the film uses: bust, half body).
-2. `gen_table.py jobs` → generate → `post`. Look at `_CH03_figures.jpg`: generators often add a figure (a full body)
-   or reorder them — set `"pick": { "neutral": 2, "blink": 4, "open": 5, "smile": 3 }` by number. Look at
-   `_CH03_grid.jpg` (the neutral figure with a grid) and set `"eyes"` and `"mouth"` [u0, v0, u1, v1] a little larger
-   than the features (keep the eye area off the hair edge). `post` again: it aligns each copy to the neutral one and
-   pastes its eye / mouth area (a blink takes only the eyes, a mouth only the mouth, other expressions both), and
-   writes `CH03.anim.json`. Look at each patch over the neutral face.
-3. In the shot, paste the snippet: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { blink: '…CH03_blink.png',
-   mouth: '…CH03_open.png', expr: { smile: '…CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]], seed } }]`.
-   Blinks run on a seeded clock (give each character its own seed), the mouth opens on each sung character of the
-   lyric (closed on silence; `sings: false` for a listener), expressions change on cues (`exprAt`). `motion_check.py`
-   counts a living face under a slow push (≥ 40 % of its threshold) as motion, read from plan/shots.json `animFaces`.
-4. Do not ask the generator for a changed version of a finished picture (a turned head, another pose): tested, it
-   either drifts in style or does not change. Other poses are other pictures (their own sheets), cut to, not morphed.
-   (`anim.tilt` / `anim.hair` mesh warps and `states` exist but are rarely needed.)
+**The faces: pictures that differ only in the eyes or the mouth.** Best: repaint just that area of the approved picture
+with the generator, so everything else stays identical and the whole picture can be swapped without a seam:
+1. The base: the approved bust or half-body picture of the character (a char row, e.g. `CH03`, or the neutral figure
+   of a sheet). Measure the eye box and the mouth box on it with `python tools/art_grid.py assets/gen/CH03.png`.
+2. One variant row per face, repainting only its box (NovelAI infill: the pixels outside the box come back
+   unchanged; inpainting costs Anlas):
+   `{ "id": "CH03_blink", "variant_of": "CH03", "edit": "her eyes closed", "region": [0.30, 0.24, 0.62, 0.36],
+   "ref_mode": "inpaint", "mode": "full", "takes": 3 }` — likewise `CH03_open` (the mouth box, "her mouth open, singing")
+   and `CH03_smile`. `gen_table.py jobs --pass variants` → generate → `post`; `post` keeps the take that changed most
+   inside the box and blends it into the base with a soft edge inside the figure (outside the face the picture is the
+   base, pixel for pixel). Look at every final over the base. From the first test (16 inpaints of one bust):
+   - keep each box **inside the face**: a box that crosses the chin or the face outline got key-coloured smudges;
+   - an eye box must take in the upper lid line: one that stopped short of the fringe came back with the eyes open in
+     4 of 4 takes; one that took in some fringe closed them and softened that bit of fringe;
+   - takes differ a lot: `"takes": 3`, and look at all of them (`assets/gen/raw/<id>__t*.png`);
+   - the open mouth and the smile came out clean on the first good box; the blink was the hard one.
+3. In the shot: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { whole: true, blink: 'assets/gen/CH03_blink.png',
+   mouth: 'assets/gen/CH03_open.png', expr: { smile: 'assets/gen/CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]],
+   seed } }]`. `whole: true` swaps the whole picture (mouth over blink over expression), with no pasting.
+
+Fallback, **an expression sheet** (one generation of all faces, `"sheet": { "cells": ["neutral", "blink", "open",
+"smile"], "cols": 4 }`, references/04 §0): the copies on a sheet are each redrawn (head angle, crop and collar move), so
+`post` pastes only their eye / mouth boxes onto the neutral figure (`"eyes"`, `"mouth"` boxes measured on
+`_CH03_grid.jpg`; set `"pick"` from `_CH03_figures.jpg`). Look at every patch at full size: where its edge shows, use
+the variant rows above instead. `"faces": "whole"` writes the aligned copies whole, only for a sheet whose copies really
+match outside the face (swapping redrawn copies reads as a jump cut).
+
+Timing (engine): blinks on a seeded clock (`seed` per character, `period` 3.7 s); the mouth opens for about half a second
+every 1.1–1.7 s while a line is sung and stays closed between lines (`sings: false` for a listener; `lipsync: true`
+opens it on every sung character, rarely wanted); expressions change on cues (`exprAt`). `motion_check.py` counts a
+living face under a slow push (≥ 40 % of its threshold) as motion, read from plan/shots.json `animFaces`.
+
+Do not ask the generator for a changed version of a whole finished picture (a turned head, another pose): tested, it
+either drifts in style or does not change. Other poses are other pictures, cut to, not morphed. (`anim.tilt` /
+`anim.hair` mesh warps and `states` exist but are rarely needed.)
 
 ## Asset library and density (method: references/10 §3, team: 11)
 

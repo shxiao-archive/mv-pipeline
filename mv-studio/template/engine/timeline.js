@@ -209,6 +209,10 @@
       // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.
       // night / ballad film ['emotional', 'calm', 'editorial', 'glitch'], bright / upbeat film ['pop', 'emotional', 'graphic', 'calm'].
       const MOODS = null;
+      // JIZURA's own transitions between lyric cuts draw the old and the new line on top of each other for a few frames
+      // (a viewer saw 'hums below' over 'my window'); off, each line leaves by its exit and the next comes in by its
+      // enter. The engine's shot transitions (shot.trans) are not affected. true = JIZURA picks its transitions again
+      const TEXT_TRANS = false;
       const enabled = {};
       for (const g of J.GROUP_KEYS) {
         enabled[g] = {}; const deny = new Set((DENY[g] || '').split(/\s+/).filter(Boolean));
@@ -217,6 +221,7 @@
           // horror set: hr* keys / set 'horror' (not the 'horror' tag: JIZURA also puts it on core parts like center, blur)
           let ok = !deny.has(k) && !/^hr[A-Z]/.test(k) && d.set !== 'horror';
           if (ok && MOODS && tags && !tags.some(m => MOODS.includes(m))) ok = false;
+          if (g === 'trans' && !TEXT_TRANS) ok = false;
           if (k === 'none') ok = true;
           enabled[g][k] = ok;
         }
