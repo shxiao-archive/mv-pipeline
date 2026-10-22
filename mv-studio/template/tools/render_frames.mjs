@@ -25,6 +25,7 @@ import { browserChannel, gpuArgs, launchBrowser, FFMPEG } from './kit_env.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT = path.resolve(__dirname, '..');
+const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json)$/;   // as tools/engine_page.mjs
 
 // ------------------------------------------------------------------ args
 const HELP = `
@@ -360,7 +361,11 @@ async function main() {
     await ctx.addInitScript(initScript, cfg);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => console.error(`[w${w} pageerror]`, e.message));
-    page.on('console', (m) => { if (a.verbose || m.type() === 'error') console.log(`[w${w} ${m.type()}]`, m.text()); });
+    page.on('console', (m) => {
+      // a 404 for an optional data file the engine probes for (lyric_timing.json ...) is not an error
+      if (/^Failed to load resource/.test(m.text()) && OPTIONAL.test((m.location() || {}).url || '')) return;
+      if (a.verbose || m.type() === 'error') console.log(`[w${w} ${m.type()}]`, m.text());
+    });
     const tl = performance.now();
     await page.goto(url, { waitUntil: 'load', timeout: a.timeoutReady });
     const info = await page.evaluate(async () => { const r = await window.ready; return (r && typeof r === 'object') ? r : null; }, null, { timeout: a.timeoutReady });

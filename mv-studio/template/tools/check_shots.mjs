@@ -11,6 +11,8 @@
  *          · SPRITE PING-PONG: the main character sprite (the largest one drawn) goes A -> B -> A within 2 s, or changes
  *            3+ times in 3 s (inside a shot or across short shots); sampled at --sprite-fps (default 4, 0 = off);
  *            an ERROR with --strict
+ *          · LYRICS OUTSIDE THE SAFE AREA: lyric-layer pixels (JIZURA + shot.text, not the HUD) in the outer 5 % of the frame,
+ *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen.
  * Exit 1 on any ERROR.
  *
  * mv-studio (MIT).
@@ -85,19 +87,28 @@ for (let k = 0; k < shots.length; k++) {
 }
 const spriteFps = +arg('sprite-fps', 4);
 if (spriteFps > 0) {                                           // which sprite is the main one, every 1/spriteFps s
-  const samples = [];
+  const samples = [], unsafe = new Map();
   for (let k = 0; k < shots.length; k++) {
     const s = shots[k], end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
     if (only && !only.has(s.id)) continue;
     for (let t = s.t0 + 0.5 / fps; t < end; t += 1 / spriteFps) {
-      const p = await E.page.evaluate(async t => {
-        let best = null; window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
-        try { await window.renderFrame(t); } finally { window.Z.onSprite = null; }
-        return best && best.p;
+      const { p, out, all } = await E.page.evaluate(async t => {
+        let best = null, out = 0, all = 0;
+        window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
+        window.Z.onText = c => {                                   // lyric pixels outside the 90 % title-safe box
+          const s = window.__safe || (window.__safe = Object.assign(document.createElement('canvas'), { width: 192, height: 108 }));
+          const x = s.getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, 192, 108); x.drawImage(c, 0, 0, 192, 108);
+          const a = x.getImageData(0, 0, 192, 108).data;
+          for (let i = 3, n = 0; i < a.length; i += 4, n++) if (a[i] > 127) { all++; const u = n % 192, v = (n / 192) | 0; if (u < 10 || u >= 182 || v < 5 || v >= 103) out++; }
+        };
+        try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; }
+        return { p: best && best.p, out, all };
       }, t);
       samples.push({ t, p, id: s.id });
+      if (out >= 6 && out > 0.02 * all && !unsafe.has(s.id)) unsafe.set(s.id, { t, share: out / all });
     }
   }
+  for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words: pick a calmer plan or reframe)`);
   for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
 }
 const badFonts = await E.page.evaluate(() => [...document.fonts].filter(f => f.status === 'error').map(f => `${f.family} ${f.weight}`));

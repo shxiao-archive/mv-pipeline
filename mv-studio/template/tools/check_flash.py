@@ -136,7 +136,8 @@ def main():
     fmt = lambda t: f"{int(t // 60)}:{t % 60:04.1f}"
     print("  warning ranges (>= %d flashes or >= %d cuts per second): " % (WARN_FLASHES, WARN_CUTS)
           + (", ".join(f"{fmt(a)}-{fmt(b)}" for a, b in ranges) + "  -> python tools/preroll.py" if ranges else "none"))
-    out = mp4.with_name(mp4.stem + "_flash.json")
+    out = ROOT / "render" / (mp4.stem + "_flash.json")         # the project's render/, wherever the video is
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=1), encoding="utf-8")
     print(f"  -> {out}")
     sys.exit(1 if failed else 0)

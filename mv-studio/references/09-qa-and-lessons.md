@@ -105,7 +105,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 |---|---|---|---|
 | 1 | `node tools/lint.mjs` | syntax errors, U+FFFD (CJK text lost in a write), `Math.random` / `Date.now` in engine code, lyric text in code | every change |
 | 2 | `node tools/storyboard.mjs` | unknown scenes, black gaps, cuts off the grid, cuts far from their cue, sung lines no shot shows, shots without `moment`, unreadably short lines, line cues without hints; writes STORYBOARD.md | every edit of the timeline |
-| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth (4 samples/s; `--sprite-fps 0` skips it; errors with `--strict`) | every edit |
+| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, lyrics outside the 90 % safe area (4 samples/s; `--sprite-fps 0` skips it; errors with `--strict`) | every edit |
 | 4 | `node tools/cues_sheet.mjs` | the wrong picture for a line (look at it) | after the plan, after big changes |
 | 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back) | before a full render |
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |

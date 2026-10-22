@@ -187,7 +187,7 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="copy into an existing non-empty folder (template files are overwritten)")
     for _s in (sys.stdout, sys.stderr):  # help texts contain 残光 / ō / ：; never crash on a cp1252 / cp932 console
         try:
-            _s.reconfigure(errors="replace")
+            _s.reconfigure(errors="replace", **({} if _s.isatty() else {"encoding": "utf-8"}))  # a pipe (an agent's shell) reads UTF-8
         except Exception:  # noqa: BLE001
             pass
     a = ap.parse_args()

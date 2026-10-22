@@ -100,7 +100,7 @@ def parse_args(defaults, doc=None):
     if doc is not None and wants_help():
         for _s in (sys.stdout, sys.stderr):  # shot docstrings may hold 残光 / ：; never crash on a cp1252 / cp932 console
             try:
-                _s.reconfigure(errors="replace")
+                _s.reconfigure(errors="replace", **({} if _s.isatty() else {"encoding": "utf-8"}))  # a pipe (an agent's shell) reads UTF-8
             except Exception:  # noqa: BLE001
                 pass
         print_help(doc, defaults)

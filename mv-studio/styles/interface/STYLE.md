@@ -261,7 +261,8 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
 - **Motion on paper:** a bone-paper chart under a 75 px/s camera move measured as static (`motion_check.py`). The
   screen budget (§A.5) holds here too: ≥ 110 px/s of travel, a slide-in, or something drawn moving in every 1.5 s.
 - **Lyrics stay in frame:** cameras push and reframe; keep set words inside the central 90 % at the shot's widest
-  zoom, and look at the stills for cropped words (no tool checks it). `TR.write` lines in the GPU plates are drawn in
+  zoom, and look at the stills for cropped words (`check_shots.mjs` warns for the lyric layer and `shot.text`; words a scene
+  draws itself are not seen). `TR.write` lines in the GPU plates are drawn in
   screen space for this reason.
 - **No GPU:** an integrated GPU runs these plates fine; with no GPU at all Chrome falls back to SwiftShader and everything renders, slower. Give `Z.shade` a `rect` and keep marches ≤ 96
   steps; check the frame time in `stills.mjs` output.

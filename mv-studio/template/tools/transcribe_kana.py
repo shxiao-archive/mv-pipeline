@@ -117,7 +117,7 @@ if __name__ == "__main__":
     import sys
     for _s in (sys.stdout, sys.stderr):  # help texts contain 残光 / ō / ：; never crash on a cp1252 / cp932 console
         try:
-            _s.reconfigure(errors="replace")
+            _s.reconfigure(errors="replace", **({} if _s.isatty() else {"encoding": "utf-8"}))  # a pipe (an agent's shell) reads UTF-8
         except Exception:  # noqa: BLE001
             pass
     argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
