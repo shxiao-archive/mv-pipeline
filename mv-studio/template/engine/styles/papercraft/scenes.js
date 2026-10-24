@@ -232,7 +232,7 @@
       if (prev) prev(L, t);
       if (!PC.isPaper(L.shot)) return;
       const g = L.scene; g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = g.createPattern(PC.texture(), 'repeat'); g.fillRect(0, 0, W, H);
-      const v = g.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, H * 1.05); v.addColorStop(0, 'rgba(255,255,255,0)'); v.addColorStop(1, 'rgba(120,95,70,.35)'); g.fillStyle = v; g.fillRect(0, 0, W, H); g.restore();
+      g.translate(W / 2, H / 2); g.scale(1.35, 1); const v = g.createRadialGradient(0, -40, H * 0.3, 0, 0, H * 0.82); v.addColorStop(0, 'rgba(255,255,255,0)'); v.addColorStop(0.7, 'rgba(205,190,170,.25)'); v.addColorStop(1, 'rgba(96,80,64,.42)'); g.fillStyle = v; g.fillRect(-W, -H, 2 * W, 2 * H); g.restore();
     };
     PC.installed = true;
   };

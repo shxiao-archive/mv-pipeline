@@ -83,6 +83,7 @@
 
   // ================================================================ ifChat
   Z.scene('ifChat', {
+    history: true,                                                    // the thread keeps earlier lines (check_shots)
     preload: a => [a.backdrop && (a.backdrop.img || a.backdrop)].filter(x => typeof x === 'string'),
     init: loadFonts,
     draw(ctx, S) {

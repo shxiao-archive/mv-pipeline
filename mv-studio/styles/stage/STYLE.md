@@ -39,7 +39,7 @@ bigger than the last. Often there is a twist at the end ("it was all a play": th
 
 ## 3. The troupe (design yours)
 
-`ST.puppet(x, y, u, o)` is the default rig: a round bean body with a top (`sprout | ears | antenna | none`), a face
+`ST.puppet(x, y, u, o)` is the default rig: an original gumdrop-shaped felt puppet (narrow crown, wide seated base, stub legs) with a top (`sprout | ears | antenna | none`), a face
 library (`eyes`: normal, look, happy, closed, wink, star, heart, swirl, x, dot, scared, angry, sleepy; `mouth`: smile,
 grin, o, O, flat, wobble, cat; `blush`), hats (`party crown top halo bow flower`), emotes (`sweat heart spark anger
 music ! ? zzz`), arms with hand hooks for props (`armL / armR`), and a `draw` hook for accessories.
@@ -78,7 +78,7 @@ S.push({ id: 'c1', t0: B(10), t1: B(12), scene: 'stShow', text: ST.karaoke, lyri
 - **Timing:** `ST.move(style, t)` locks dances to the beat grid (`bounce hop sway spin wave roof stomp shimmy walk bow
   mix`). Put hits on beats: `Z.clock.pulse(t)` for squash and pushes, `B(n)` / `Z.cue('L07')` for events.
 - **Lyrics:** `text: ST.karaoke` on every shot: a painted ink band at the bottom whose sung part turns ochre, never ahead
-  of the voice (per-character times from `lyric_timing.json` when present). Keep faces and key action above y ≈ 960.
+  of the voice (per-character times from `lyric_timing.json` when present). Keep faces and key action above y ≈ 930 (the ribbon sits at y 946–1018).
   Chinese lyrics: `ST.useChinese()`.
 - **Performance:** a frame costs about 0.3 s at 1080p in the starter. Cost grows with the number of `fill` shapes, so
   prefer fewer, bigger ones; use `wash` for small or numerous shapes.

@@ -157,7 +157,11 @@ if (spriteFps > 0) {                                           // which sprite i
       const L = window.__lyr; L.jz.clear(); L.code.clear(); L.on = true;
       window.Z.onText = () => { L.on = false; };                   // the HUD comes after the lyrics: not counted
       try { await window.renderFrame(t); } finally { L.on = false; window.Z.onText = null; }
-      return { jz: [...L.jz], code: [...L.code] };
+      // a scene that keeps earlier lines on screen as history (a chat thread: Z.scene(name, { history: true })) reads
+      // several lines by design; only its newest one counts against the other lyric sources
+      const sh = (window.Z.SHOTS || []).filter(x => x.t0 <= t).pop(), hist = sh && (window.Z.SCENES[sh.scene] || {}).history;
+      const code = [...L.code];
+      return { jz: [...L.jz], code: hist ? code.sort((x, y) => x - y).slice(-1) : code };
     }, t);
     frames.push({ id: s.id, t, ...r });
   }
