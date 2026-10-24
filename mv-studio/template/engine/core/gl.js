@@ -24,6 +24,9 @@
     glitchSeed: 0,
     zoomBlur: 0, zoomCenter: [0.5, 0.5],
     bloom: 0.35, bloomThreshold: 0.72,
+    bloomSat: 0,          // 0..1: bloom only what is saturated (cream / white type stays crisp, the accent glows)
+    shoulder: 0,          // 0..1: a film shoulder that rolls bright values to white instead of clipping
+    halation: 0, halationColor: [1, 0.36, 0.16],   // a warm glow bleeding round the highlights (film halation)
     flash: 0, flashColor: [1, 1, 1],
     invert: 0,
     vignette: 0.35,
@@ -118,8 +121,9 @@
   }`;
 
   const FS_BRIGHT = COMMON + `
-  uniform sampler2D src; uniform float thr;
-  void main(){ vec3 c = texture(src, uv).rgb; float l = max(max(c.r,c.g),c.b); o = vec4(c * smoothstep(thr, thr+0.25, l), 1.); }`;
+  uniform sampler2D src; uniform float thr, bloomSat;
+  void main(){ vec3 c = texture(src, uv).rgb; float l = max(max(c.r,c.g),c.b), s = (l - min(min(c.r,c.g),c.b)) / max(l, 1e-4);
+    o = vec4(c * smoothstep(thr, thr+0.25, l) * mix(1., smoothstep(0.25, 0.6, s), bloomSat), 1.); }`;
 
   const FS_BLUR = COMMON + `
   uniform sampler2D src; uniform vec2 dir;
@@ -133,8 +137,8 @@
   const FS_FINAL = COMMON + `
   uniform sampler2D comp, b1, b2, b3;
   uniform vec2 res;
-  uniform float bloom, flash, invert, vignette, grain, grainSeed, letterbox, fade, rays, streak;
-  uniform vec3 flashColor; uniform vec2 raysAt;
+  uniform float bloom, flash, invert, vignette, grain, grainSeed, letterbox, fade, rays, streak, shoulder, halation;
+  uniform vec3 flashColor, halationColor; uniform vec2 raysAt;
   // per-pixel white noise on the integer pixel lattice (Dave Hoskins' hash12). h21 on raw uv*res aliases into
   // visible vertical stripes at grain strength, so grain and dither use this one; h21 stays for boil / glitch.
   float hpx(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
@@ -142,6 +146,7 @@
     vec3 c = texture(comp, uv).rgb;
     vec3 bl = texture(b1, uv).rgb*0.5 + texture(b2, uv).rgb*0.8 + texture(b3, uv).rgb*1.1;
     c += bl * bloom;
+    if (halation > 0.){ vec3 h = texture(b3, uv).rgb + texture(b2, uv).rgb * 0.5; c += dot(h, vec3(0.3, 0.5, 0.2)) * halationColor * halation; }
     // rays and streak light what is DARK: only as far as the brightest channel has room left (a flat orange keeps its hue)
     if (rays > 0.){
       vec2 dir = raysAt - uv; vec3 r = vec3(0.); float w = 1., ws = 0.;
@@ -153,6 +158,7 @@
       for (int i = -8; i <= 8; i++){ float w = 1. - abs(float(i))/9.; s += texture(b3, uv + vec2(float(i)*0.03, 0.)).rgb*w; ws += w; }
       c += s/ws * streak * clamp(1. - max(c.r, max(c.g, c.b)), 0., 1.);
     }
+    if (shoulder > 0.) c = mix(c, (1. - exp(-c * 1.8)) / (1. - exp(-1.8)), shoulder);
     c = mix(c, 1.-c, invert);
     c = mix(c, flashColor, flash);
     vec2 d = uv - 0.5; d.x *= res.x/res.y;
@@ -260,8 +266,8 @@
         exposure: P.exposure, contrast: P.contrast, saturation: P.saturation, lift: P.lift, gain: P.gain,
         shake: [P.shake[0], -P.shake[1]], textOpacity: P.textOpacity,
       }, { scene: texScene, text: texText, lut: texLut, fg: texFg });
-      if (P.bloom > 0 || P.rays > 0 || P.streak > 0) {
-        draw(progs.bright, fbo.b1, { thr: P.bloomThreshold }, { src: fbo.comp.t });
+      if (P.bloom > 0 || P.rays > 0 || P.streak > 0 || P.halation > 0) {
+        draw(progs.bright, fbo.b1, { thr: P.bloomThreshold, bloomSat: P.bloomSat || 0 }, { src: fbo.comp.t });
         const blur = (a, b) => { draw(progs.blur, b, { dir: [1 / a.w, 0] }, { src: a.t }); draw(progs.blur, a, { dir: [0, 1 / a.h] }, { src: b.t }); };
         blur(fbo.b1, fbo.b1b);
         draw(progs.blur, fbo.b2, { dir: [0.5 / fbo.b1.w, 0.5 / fbo.b1.h] }, { src: fbo.b1.t }); blur(fbo.b2, fbo.b2b); blur(fbo.b2, fbo.b2b);
@@ -273,6 +279,7 @@
         res: [W, H], bloom: P.bloom, flash: P.flash, flashColor: P.flashColor, invert: P.invert, vignette: P.vignette,
         grain: P.grain, grainSeed: P.grainSeed, letterbox: P.letterbox, fade: P.fade,
         rays: P.rays || 0, raysAt: [P.raysAt[0] / W, 1 - P.raysAt[1] / H], streak: P.streak || 0,
+        shoulder: P.shoulder || 0, halation: P.halation || 0, halationColor: P.halationColor || [1, 0.36, 0.16],
       }, { comp: fbo.comp.t, b1: fbo.b1.t, b2: fbo.b2.t, b3: fbo.b3.t });
       if (acc) {
         if (sub.i === 0) { gl.bindFramebuffer(gl.FRAMEBUFFER, fbo.acc.f); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }

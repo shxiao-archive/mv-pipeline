@@ -349,7 +349,8 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   0–1, default 0.6: re-framing a plate, a variant of a pose), `"vibe"` (V3 models). Character reference is the way to
   keep a master consistent across poses, and it costs Anlas. The reference request format is the least stable part of
   NovelAI's API: run one job first; on HTTP 400 try `img2img`, or go without and lean on the verbatim character
-  sentence plus several takes (§9).
+  sentence plus several takes (§9). On `nai-diffusion-5-full` the character reference returned HTTP 500 on every
+  retry (iteration 6, 2026-10-24): with V5, leave `refs.char` empty and hold the design with `"char"` tags.
 - **Model / settings:** `art.config.json` → `novelai` (`model`, `steps`, `scale`, `sampler`, `noise_schedule`,
   `max_pixels`, `negative`, `upscale_model`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-curated`,
   `nai-diffusion-4-full`, `nai-diffusion-3`. `NOVELAI_API_URL` overrides the endpoint (a proxy or a local mock).

@@ -13,7 +13,8 @@
  *            an ERROR with --strict
  *          · LYRICS OUTSIDE THE SAFE AREA: lyric-layer pixels (JIZURA + shot.text, not the HUD) in the outer 5 % of the frame,
  *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen; a
- *            JIZURA cut is judged while its words hold (glyphs flying off the frame in an enter / exit are motion)
+ *            JIZURA cut is judged while its words hold (glyphs flying off the frame in an enter / exit are motion).
+ *            Fix: lyric: { mode, safe: 0.9 } scales the layer into the box; a shot with crop: true crops on purpose
  *          · LYRIC OVERLAP: more than one lyric drawn in one frame, recorded while the frame is drawn (the JIZURA cuts
  *            the renderer draws, and the lines the film's own code reads with Z.line(i).text before the HUD), on every
  *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
@@ -119,6 +120,7 @@ if (spriteFps > 0) {                                           // which sprite i
         let best = null, out = 0, all = 0;
         window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
         window.Z.onText = (c, shot) => {                           // lyric pixels outside the 90 % title-safe box
+          if (shot && shot.crop) return;                          // a deliberate 見切れ: the shot says the frame crops its words
           const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main');
           const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
           if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion

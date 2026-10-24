@@ -179,14 +179,32 @@
       // in the kit repo); adapt them per film -- references/06 §5.
       // Any change here (or to `seed`, MOODS) re-rolls every cut of the plan: re-render the stills afterwards.
       const DENY = {
-        layout: 'scatter ring wave labels pill knSeesaw knGearWords knTumble knPadGrid knPathRide zigzag arcTop gridCells bubble ticker searchBar chat notification ticket hanging wordCloud bounceLine elastic stickerBomb keycaps bubbles slotMachine flipBoard dotMatrix equalizer tape contents numbered poster ema ransom newspaper vinyl cassette bookSpine stampSheet calendar chochin routeMap stationSign noren tanzaku omikuji kakejiku shoji clapper warningLabel priceTag nameTag stickyNotes karuta cube flipCards accordion pile blocks balloons magnets tiles bulbs ledScroll billboard crowdBubbles crossword wordSearch puzzle dominoes burst fisheye origami zipper mosaicTiles stencil tyIndexTable tyStatCount typeSpecimen dictionary proofread magazine headlineDeck footnote ribbon flag pendulum knCollide knSlamStack halftoneBig tySquare tyRotBlock subtitleBar tile kaleido polaroid postcard letterPaper genkou panels splitScreen splitHalves wall cylinder cube',
-        fx: 'panelWipe irisTrans doors blindsTrans splitSlide gridRepeat whiteFrame blackFrame strobe colorBars mirrorFlash starGlint focusLines speedLines halftone duotone kaleido bulge squash snapshot loopScroll crtOff tvStatic zoomStutter negativeRing edgeDetect hueShift posterize ditherBit rotateSnap invert bandInvert flash bloomFlash',
-        decor: 'dots arrows shapes qrBlock triangleSpin checkerStrip confetti petals heartsStars kamon seigaiha asanoha hanabi chochin shimenawa sensu momiji namiGashira memphis zigzagRibbon polkaPatch stripeCircle starburst cursorClick windowChrome progressBar toggleSwitch notifBell likeCounter mediaControls volumeBars musicNotes bubbles dandelion vines cloudPuffs tapePieces highlightMark staple paperClip indexTabs punchHoles swatches spinner tally qrBlock bracketsJP loopArrows halfCircles decoCorners tyColophon dateStamp tyTypeScale tyTextRule',
+        layout: 'scatter ring wave labels pill knSeesaw knGearWords knTumble knPadGrid knPathRide zigzag arcTop ' +
+                'gridCells bubble ticker searchBar chat notification ticket hanging wordCloud bounceLine elastic ' +
+                'stickerBomb keycaps bubbles slotMachine flipBoard dotMatrix equalizer tape contents numbered poster ' +
+                'ema ransom newspaper vinyl cassette bookSpine stampSheet calendar chochin routeMap stationSign noren ' +
+                'tanzaku omikuji kakejiku shoji clapper warningLabel priceTag nameTag stickyNotes karuta cube ' +
+                'flipCards accordion pile blocks balloons magnets tiles bulbs ledScroll billboard crowdBubbles ' +
+                'crossword wordSearch puzzle dominoes burst fisheye origami zipper mosaicTiles stencil tyIndexTable ' +
+                'tyStatCount typeSpecimen dictionary proofread magazine headlineDeck footnote ribbon flag pendulum ' +
+                'knCollide knSlamStack halftoneBig tySquare tyRotBlock subtitleBar tile kaleido polaroid postcard ' +
+                'letterPaper genkou panels splitScreen splitHalves wall cylinder cube',
+        fx: 'panelWipe irisTrans doors blindsTrans splitSlide gridRepeat whiteFrame blackFrame strobe colorBars ' +
+            'mirrorFlash starGlint focusLines speedLines halftone duotone kaleido bulge squash snapshot ' +
+            'loopScroll crtOff tvStatic zoomStutter negativeRing edgeDetect hueShift posterize ditherBit ' +
+            'rotateSnap invert bandInvert flash bloomFlash',
+        decor: 'dots arrows shapes qrBlock triangleSpin checkerStrip confetti petals heartsStars kamon seigaiha ' +
+               'asanoha hanabi chochin shimenawa sensu momiji namiGashira memphis zigzagRibbon polkaPatch ' +
+               'stripeCircle starburst cursorClick windowChrome progressBar toggleSwitch notifBell likeCounter ' +
+               'mediaControls volumeBars musicNotes bubbles dandelion vines cloudPuffs tapePieces highlightMark ' +
+               'staple paperClip indexTabs punchHoles swatches spinner tally qrBlock bracketsJP loopArrows ' +
+               'halfCircles decoCorners tyColophon dateStamp tyTypeScale tyTextRule',
         cam: 'knCardFlip jelly bounce knJumpCut knTiltKick knReadPan knShearKick knRushIn',
         treat: 'boxed marker knWordPlate circled sticker splitColor rainbow chrome',
         enter: 'bubbles stickerPeel crumple loadingBar tokoroten',
         exit: 'balloonOff crumpleOut peelOff',
-        bg: 'argyle tartan chevron houndstooth herringbone polka checker retroGrid eqBars kaleidoscope fireworks sunburst bigStripes isoCubes seigaiha asanoha tvBars splitDiag spiralArms squareTunnel moire',
+        bg: 'argyle tartan chevron houndstooth herringbone polka checker retroGrid eqBars kaleidoscope fireworks ' +
+            'sunburst bigStripes isoCubes seigaiha asanoha tvBars splitDiag spiralArms squareTunnel moire',
         trans: 'knCornerSwing knStripSlam checker cubeTurn spinOut doorsOpen pixelate',
       };
       DENY.decor += ' dataColumns timecodeBar rainStreaks';           // this film: no data tables / timecodes (the HUD has them), no rain

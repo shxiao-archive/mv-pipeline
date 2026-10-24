@@ -1,4 +1,4 @@
-/* engine/timeline.js — STARTER for the PAPERCRAFT style (styles/papercraft; read <skill>/styles/papercraft/STYLE.md first).
+/* engine/timeline.js — STARTER for the PAPERCRAFT style (styles/papercraft; read <skill>/styles/papercraft/BRIEF.md, then its STYLE.md).
  * A pop-up paper storybook told as a retro RPG: every object is cut paper with a soft shadow, the camera is a multiplane
  * rig, the RPG interface (dialogue box, name tabs, coins, LV UP, a battle menu, the map with its red route) is made of
  * card, and the lyric lines are the dialogue, typed as they are sung.

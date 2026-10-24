@@ -1,5 +1,9 @@
 # Style: INTERFACE — the song set on a screen or a page: a conversation, or plates from a treatise
 
+**Technical manual of this style pack** (API, building, assets, safety). The creative brief — what the film is, its
+elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
+that the build needs.
+
 One code-drawn, typography-led style with two treatments that a film can switch between by section. In both, the words
 are part of the picture, the pictures are drawn in code (no generated art needed), and the copy around the lyric (system
 messages, form titles, stamps, axis labels) is your own, written per film.
@@ -88,7 +92,8 @@ shot('s08', B(22), B(23), 'ifPlate', { layers: [{ kind: 'keyword', line: 8, maxS
   characters from an image or a draw function; `reveal`, `decode` spans), `print` (a cut-out as a flat-ink silhouette
   with its shadow plate; `in` entrance), `inks` (a three-ink cut-paper figure printed from its own plates, each in a
   palette role, each with its wipe-in and misregistration: §A.4), `limp` (a word that sags), `custom`; `misreg` (px of
-  out-of-register jitter at 12 fps), `ground` options. `band` and `ifChat` 'me' messages take `words: true` (word by word).
+  out-of-register offset: fixed per plate, growing in a broken reprise, kicked apart on a hit and sprung back over
+  0.25 s; never random per-frame jitter), `ground` options. `band` and `ifChat` 'me' messages take `words: true` (word by word).
 - `ifCode` — `listing` (strings you write for the moment, or a lyric index as a quoted string), `current` steps,
   `terminal` entries (`text` or `line`), `odometer`.
 - Helpers for your own scenes: `Z.IF.ink(ctx, state)` (role-coloured drawing), `Z.IF.chatLayout`, `drawThread`,
@@ -105,7 +110,6 @@ for (const s of Z.withInserts({ id: 's07', t0: B(20), t1: B(22), scene: 'ifChat'
 { kind: 'inks', img: 'assets/char/bust.png', h: 860, roles: ['text', 'me', 'panel'],
   reveal: [[B(8), B(8) + 0.5], [B(8) + 0.5, B(9), 'up'], [B(9), B(9) + 0.4, 'right']], keyline: { color: 'line', width: 3 } }
 { kind: 'limp', line: 9, sag: [B(30), B(31)], amount: 0.8, side: 'right' }      // the word goes soft
-shot.fps = 8;                                                                      // the picture stutters, the lyric does not
 post: S => Object.assign({}, Z.IF.post, Z.tear(S.t, B(40)), { rays: 0.8, raysAt: [960, 400], streak: 0.3 })
 ```
 - **Cut-aways keep time.** A plate is a word; when it ends, the conversation has gone on without you (`Z.withInserts`).
@@ -116,10 +120,10 @@ post: S => Object.assign({}, Z.IF.post, Z.tear(S.t, B(40)), { rays: 0.8, raysAt:
   red with the state like the UI. A plate can come in alone, be missing (a dashed ring where it should be), slip out of
   register in the broken reprise. `IF.inkClip` (a glyph field only inside the dark ink) and `IF.part(img, [u, v])` (one
   connected patch: her hand, an ear, cut out of the art, never drawn as a polygon) build on it.
-- **Time effects:** `fps` (dropped frames on one-way moves), `Z.replayMap` (the same gesture again from each start: a
-  stuck loop), `Z.tear` (ONE tear whose pattern holds 0.1 s; a seed per frame strobes), a trail (`ink.trail`).
-- **Light:** `bloom` + low `bloomThreshold` (cream and hot accent bloom), `rays` from a point, `streak`, `zoomBlur`
-  for a push. Build the light of a climax as a ratchet: it only rises inside a shot and falls on cuts. None is capped:
+- **Time effects:** `Z.replayMap` (the same gesture again from each start: a stuck loop), `Z.tear` (ONE tear whose pattern holds 0.1 s; a seed per frame strobes), a trail (`ink.trail`).
+- **Light:** raise it as exposure (the picture gets lighter); bloom only on saturated colour (a high `bloomThreshold`,
+  so cream type stays crisp); `streak`, `zoomBlur` for a push; no radiating wedge rays (they read as a flag). Dropped
+  frames (`shot.fps`) read as a low frame rate, not as style: the reference film removed them. Build the light of a climax as a ratchet: it only rises inside a shot and falls on cuts. None is capped:
   `check_flash.py` on the render.
 - **Type as a window:** `IF.masked(ink, content, mask)` (the picture seen through the letters).
 
@@ -290,47 +294,3 @@ arguments of the starter's scenes in `timeline.js`: Screen, the conversation's b
 word, the cursor that hesitates, an error that spreads, a plate that lands and is struck by the next event); Treatise,
 one drawing module per plate with its own camera. In the acceptance test the screen film kept everything in
 `timeline.js` (9 own lines per shot) and the treatise film had too thin a plate file (22): the bar is 30.
-
-## Signature features (the jury judges against these; references/09 §8)
-
-Screen:
-- **One session on a screen** with three fixed voices: me (accent, serif), you (never shown: cursor, typing, presence),
-  system (mono); a conversation arc from the song (starts, warms, is interrupted, goes wrong, ends).
-- **Colour = state**: it changes only on events; red only after the first error, then it spreads.
-- **Plates** from three flat inks with an out-of-register shadow plate and big keyword type; each lands on a beat and is
-  ended by an event.
-- **The v4 tools**: lines arriving word by word, cut-aways that come back in state, dropped frames and replays, ink-plate
-  silhouettes, sagging type, light; code (`ifCode`) kept for a rare section.
-
-Treatise:
-- **Each plate its own idiom** (chart, scope, form, prompt, map, engraving …) with a visual pun and deadpan copy of your
-  own; never a literal illustration.
-- **The spark and the running number** tie the plates together; **the hook** escalates each time; **bookends**: the
-  last frame matches the first.
-- **Palette and type held**: only signal / ember glow, one acid accent at most, a light / dark rhythm; Archivo with its
-  width animated, mono annotations, Swiss-grid layouts.
-- **Words in the picture**: per-word karaoke set into each plate its own way; engraved GPU plates, hairline fields and
-  pen-written lines; a camera that tracks the action and snaps on half bars.
-- Not slop: no neon, glowing brains, code rain, lens flares or stock "AI" imagery.
-
-## Review checks (in addition to references/09)
-
-Screen shots:
-- [ ] Every sung line readable for its whole sung duration (thread lines ≥ 40 px on screen after camera zoom).
-- [ ] Each `ifPlate`: which word, which beat it lands on, what ends it. No plate fades in/out unmotivated.
-- [ ] Colour states change only on events; no red before the first error.
-- [ ] The user is never shown (no face, no avatar picture): cursor, typing, bubbles, presence only.
-
-Treatise plates:
-- [ ] Each plate has its own idiom and a visual pun on its line; the spark and the running number tie them together.
-- [ ] Every word lights at its start, never ahead; lines readable, inside title-safe, never cropped by the camera.
-- [ ] Palette held: only signal / ember glow; the acid accent used once at most; light / dark rhythm across the edit.
-- [ ] The hook escalates each time; the number rises in steps you can read; first frame = last frame.
-
-Every film:
-- [ ] A mixed film shares one palette and one look per treatment; the switch between screen and plates is an event.
-- [ ] `motion_check.py` PASS (camera moves, tracking and snaps, not slow drifts); `check_flash.py` PASS (the prompt's
-      return flash and full-frame hits are single events).
-- [ ] `pops.mjs`: the hook's word slams and the prompt's return rush show as JUMPs — they are the planned hits; any
-      other JUMP is a bug.
-- [ ] No mascots, faces, logos, real product branding or exact UIs; window `brand` empty or invented for the film.

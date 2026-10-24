@@ -70,6 +70,16 @@
         "fixtures/test_song.wav",
         "fixtures/lyrics_en.lrc"
       ]
+    },
+    {
+      "id": 8,
+      "name": "own-en-film",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make a music video for it, whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in a style the film designs for itself (no preset was asked for): docs/CONCEPT.md defines it (a Reads-as line, 6-10 traits, palette system, type roles, shape grammar, motion feel), the film's own scene file draws it, library techniques are borrowed but no preset's look; cuts on the beat; every line shown; no lyric text in code.",
+      "files": [
+        "fixtures/test_song.wav",
+        "fixtures/lyrics_en.lrc"
+      ]
     }
   ]
 }

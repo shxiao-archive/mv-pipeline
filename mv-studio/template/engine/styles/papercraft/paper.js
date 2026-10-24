@@ -7,7 +7,8 @@
  *   PC.poly(pts, o)                  a hand-cut polygon (Path2D); o: { seed, amp 1.6 px, step 26, round 0..1, closed }
  *   PC.smooth(pts, o) / PC.ribbon(pts, widths)   Catmull-Rom curve; a strip whose width varies (hair, flames, scarves)
  *   PC.cut(g, path, fill, o)         fill as cut paper: o: { shadow (height above the page, px), shadowAlpha, stroke, lw,
- *                                    rim (lit cut edge colour), rimW, alpha }
+ *                                    rim (lit cut edge colour), rimW, alpha, ui }; the ink `stroke` is drawn only with ui: true
+ *                                    (RPG cards) or PC.OUTLINE = true: cut paper has no outline
  *   PC.shade(g, path, col, x0, y0, x1, y1, a0, a1)   a gradient shade inside a path (lit / shaded side)
  *   PC.lin / PC.rad                  gradients;  PC.glow / PC.rays / PC.sparkle   light (screen blend)
  *   PC.line(g, pts, o)               a hand-drawn line (route, speed lines): o: { seed, amp, lw, color, dash, p 0..1 drawn }
@@ -99,13 +100,14 @@
 
   // ---------------------------------------------------------------- cut paper
   const scaleOf = g => { const m = g.getTransform(); return Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)) || 1; };
+  PC.OUTLINE = false;                                                          // true brings ink outlines back on every piece
   PC.cut = (g, path, fill, o = {}) => {
     const { shadow = 0, shadowAlpha = 0.3, stroke = null, lw = 3, rim = null, rimW = 3, alpha = 1 } = o;
     g.save(); if (alpha !== 1) g.globalAlpha *= alpha;
     if (shadow > 0) { const s = scaleOf(g); g.shadowColor = PC.rgba(P.shadow, shadowAlpha); g.shadowBlur = shadow * 1.5 * s; g.shadowOffsetX = shadow * 0.35 * s; g.shadowOffsetY = shadow * 0.85 * s; }
     g.fillStyle = fill; g.fill(path); g.shadowColor = 'transparent';
     if (rim) { g.save(); g.clip(path); g.translate(0, rimW * 0.9); g.lineWidth = rimW * 1.6; g.strokeStyle = rim; g.globalAlpha *= 0.7; g.stroke(path); g.restore(); }
-    if (stroke) { g.lineWidth = lw; g.strokeStyle = stroke; g.lineJoin = 'round'; g.lineCap = 'round'; g.stroke(path); }
+    if (stroke && (PC.OUTLINE || o.ui)) { g.lineWidth = lw; g.strokeStyle = stroke; g.lineJoin = 'round'; g.lineCap = 'round'; g.stroke(path); }   // cut paper has no ink line; the RPG cards do
     g.restore();
   };
   PC.shade = (g, path, color, x0, y0, x1, y1, a0 = 0.35, a1 = 0) => {

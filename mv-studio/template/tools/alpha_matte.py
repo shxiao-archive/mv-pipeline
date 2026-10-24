@@ -338,7 +338,9 @@ def _key_chroma(rgb8, C, K, src_alpha, *, tol_bg, despill, contract, feather, mi
     # magenta-like keys have two strong channels; treat the pair as the key "channel"
     # (a generator's "magenta" is often hot pink, e.g. (255, 0, 144): still a two-channel screen. Keyed as a pure red
     # screen it would eat every red, brown, skin and amber colour of the subject.)
-    two = K[order[1]] > 0.4 * K[order[0]] and K[order[1]] - K[order[2]] > 60
+    # only when green is the weakest channel: NovelAI's lime "green" (148, 255, 0) passed the old test as a red+green
+    # screen and keyed out every yellow and amber of the subject (iteration 6)
+    two = int(order[2]) == 1 and K[order[1]] > 0.4 * K[order[0]] and K[order[1]] - K[order[2]] > 60
     if two:
         kcs = [int(order[0]), int(order[1])]
         oth = [int(order[2])]
@@ -572,6 +574,10 @@ def selftest() -> None:
         raise AssertionError("a shifted redraw must be refused")
     except ValueError:
         pass
+    lime = np.where((r < 40)[..., None], np.array([250, 200, 30], np.uint8), np.array([148, 255, 0], np.uint8)).astype(np.uint8)
+    keyed, _ = key_out(Image.fromarray(lime))                 # a yellow subject on NovelAI's lime "green" screen
+    assert (np.asarray(keyed)[..., 3][r < 34] == 255).all(), "a lime screen must not key out yellow"
+    assert (np.asarray(keyed)[..., 3][r > 46] == 0).all(), "the lime screen must still go"
     print("alpha_matte selftest: ok")
 
 # ----------------------------------------------------------------------------------------

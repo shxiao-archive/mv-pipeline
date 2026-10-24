@@ -13,7 +13,8 @@
                     | { follow: true, zoom, move, beat, focus: [[t, { x, y, zoom }], ...] } | { from:{x,y,zoom,rot}, to:{...}, ease },
             fx(ink, S, L, items) (extra drawing on top) }
  *     'me' lines type out with the voice (Z.charsAt; `words: true`: word by word, Z.wordsAt); a 'you' message in msgs simply arrives at `at`.
- * 'ifPlate' a full-frame print: { state ('paper'), ground:{...IF.ground options}, camera, misreg (px of out-of-register jitter),
+ * 'ifPlate' a full-frame print: { state ('paper'), ground:{...IF.ground options}, camera, misreg (px, or [dx, dy]: the plates' fixed
+ *            slip, growing in a broken reprise), misregKick: [t, ...] (kicked apart, springs back),
  *            layers:[ { kind:'keyword', line|text, at, step, x, y, maxW, maxSize, color, off, font }
  *                    | { kind:'band', line|text, x, y, size, align, color }
  *                    | { kind:'glyph', img, rect:[x,y,w,h], cell, reveal:[t0,t1], decode:[t0,t1], inks, ramp }
@@ -146,7 +147,11 @@
       const a = S.args, t = S.t, ink = IF.ink(ctx, stateOf(a.state || 'paper', t));
       ctx.save(); camera(ctx, a.camera || { from: { zoom: 1.0, x: -90 }, to: { zoom: 1.12, x: 90 }, ease: 'linear' }, S);   // default: a steady slide + push (a still plate reads as a slide)
       IF.ground(ink, a.ground || {});
-      const mis = a.misreg ? [Z.rnds(Math.floor(t * 12), 3) * a.misreg, Z.rnds(Math.floor(t * 12), 5) * a.misreg] : [0, 0];
+      // misregistration: a fixed slip per plate (misreg px, or [dx, dy]) with a slow drift; kicks (misregKick: [t, ...]) knock
+      // the plates apart and they spring back over ~0.25 s. Never a random jitter per frame (it reads as noise, not print)
+      const m0 = Array.isArray(a.misreg) ? a.misreg : a.misreg ? [a.misreg, a.misreg * 0.6] : [0, 0];
+      const kick = (a.misregKick || []).reduce((k, tk) => (t >= tk ? Math.max(k, Math.exp(-(t - tk) / 0.08) * Math.cos((t - tk) * 26)) : k), 0);
+      const drift = 0.12 * Math.sin(t * 0.7), mis = [m0[0] * (1 + drift + 1.6 * kick), m0[1] * (1 - drift + 1.6 * kick)];
       for (const l of a.layers || []) {
         if (l.from != null && t < l.from) continue; if (l.until != null && t >= l.until) continue;
         if (l.kind === 'keyword') {

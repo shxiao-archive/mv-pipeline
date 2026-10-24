@@ -96,6 +96,8 @@
     night: { sky: [P.skyNightHigh, P.skyNight], far: P.mountainDark, mid: P.forest, ground: P.grassDark, tree: P.forest, moon: true },
     cave: { sky: [P.purple, P.skyNightHigh], far: P.purple, mid: P.mountainDark, ground: P.stoneDark, tree: null, crystals: true },
   };
+  let pcSheets = null;
+  const sheets = () => pcSheets || (pcSheets = [Z.canvas(W, H), Z.canvas(W, H), Z.canvas(W / 4, H / 4)]);
   Z.scene('pcWorld', Object.assign({}, fonts, {
     draw(g, S) {
       const a = S.args, B = BIOMES[a.biome || 'meadow'] || BIOMES.meadow, k = E.inOutSine(S.p);
@@ -103,10 +105,38 @@
       const C = a.cam ? PC.lerpCam(a.cam.from || PC.cam(), a.cam.to || a.cam.from || PC.cam(), k) : PC.lerpCam(PC.cam(860, 540, 1.0), PC.cam(1080, 520, 1.12), k);
       const fm = a.cam && a.cam.follow != null ? cast[a.cam.follow] : null;      // track an actor: x follows it, a little ahead
       if (fm) C.x = (fm.walkTo ? walkAt(fm, S.t) : fm.x) + (a.cam.lead ?? 160);
-      C.zoom *= 1 + (a.cam && a.cam.step != null ? a.cam.step : 0.02) * S.clock.pulse(S.t, 8); C.y -= 8 * S.clock.pulse(S.t, 8);   // a step on every beat
-      const fibre = g.createPattern(PC.texture(), 'repeat');
-      // each layer is a sheet of paper: its fibre is printed on it and travels with it (not fixed to the screen)
-      const layer = (depth, fn, paper = true) => { g.save(); PC.applyCam(g, C, depth); fn(); if (paper) { g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.9; g.fillStyle = fibre; g.fillRect(-1600, -600, 5200, 2400); } g.restore(); };
+      const step = a.cam && a.cam.step != null ? a.cam.step : 0;                 // opt-in beat step: cue-lock accents instead
+      C.zoom *= 1 + step * S.clock.pulse(S.t, 8); C.y -= 400 * step * S.clock.pulse(S.t, 8);
+      C.x += 5 * Math.sin(S.t * 0.35 * Z.TAU); C.y += 4 * Math.cos(S.t * 0.27 * Z.TAU);    // the camera always drifts a little
+      // each layer is a sheet of paper drawn on its own canvas: its fibre is printed only where the sheet has content and
+      // travels with it; the sheet then takes its tint, saturation, shadow and (foreground) softness as one piece.
+      // a.layers: { [depth]: { shadow px, tint, tintA, sat 0..1, blur px } } overrides the defaults per depth.
+      const main = g;
+      const layer = (depth, fn, paper = true) => {
+        const [A, F, small] = sheets(), x = A.getContext('2d'), f = F.getContext('2d');
+        const o = Object.assign({ shadow: 0, blur: depth > 1 ? 4 : 0 }, (a.layers || {})[depth]);
+        for (const c of [x, f]) { c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over'; c.clearRect(0, 0, W, H); }
+        g = x; x.save(); PC.applyCam(x, C, depth); fn(); x.restore(); g = main;     // the layer bodies draw through `g`
+        if (o.tint) { x.globalCompositeOperation = 'source-atop'; x.globalAlpha = o.tintA ?? 0.35; x.fillStyle = o.tint; x.fillRect(0, 0, W, H); }
+        if (paper) {
+          f.save(); PC.applyCam(f, C, depth); f.fillStyle = f.createPattern(PC.texture(), 'repeat'); f.fillRect(-1600, -600, 5200, 2400); f.restore();
+          f.globalCompositeOperation = 'destination-in'; f.drawImage(A, 0, 0);
+          x.globalCompositeOperation = 'multiply'; x.globalAlpha = 0.9; x.drawImage(F, 0, 0);
+        }
+        if (o.sat != null && o.sat < 1) {
+          f.globalCompositeOperation = 'copy'; f.globalAlpha = 1; f.drawImage(A, 0, 0);
+          x.globalCompositeOperation = 'saturation'; x.globalAlpha = 1 - o.sat; x.fillStyle = '#808080'; x.fillRect(0, 0, W, H);
+          x.globalCompositeOperation = 'destination-in'; x.globalAlpha = 1; x.drawImage(F, 0, 0);
+        }
+        main.save(); main.setTransform(1, 0, 0, 1, 0, 0);
+        if (o.shadow > 0) { main.shadowColor = PC.rgba(P.shadow, 0.3); main.shadowBlur = o.shadow * 1.5; main.shadowOffsetX = o.shadow * 0.35; main.shadowOffsetY = o.shadow * 0.85; }
+        if (o.blur > 0) {                                                       // soft foreground: down and up again
+          const k = Math.max(1, Math.min(8, o.blur)), sc = small.getContext('2d');
+          small.width = Math.ceil(W / k); small.height = Math.ceil(H / k); sc.imageSmoothingEnabled = true; sc.drawImage(A, 0, 0, small.width, small.height);
+          main.imageSmoothingEnabled = true; main.drawImage(small, 0, 0, W, H);
+        } else main.drawImage(A, 0, 0);
+        main.restore();
+      };
       g.fillStyle = PC.lin(g, 0, 0, 0, H, B.sky); g.fillRect(0, 0, W, H);
       layer(0.15, () => {
         if (B.moon) { PC.glow(g, 1450, 220, 260, P.moon, 0.6); PC.cut(g, PC.blob(1450, 220, 90, 90, { seed: 3 }), P.moon, { shadow: 6, rim: P.white }); }
@@ -231,7 +261,8 @@
     Z.layerFX = (L, t) => {
       if (prev) prev(L, t);
       if (!PC.isPaper(L.shot)) return;
-      const g = L.scene; g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = g.createPattern(PC.texture(), 'repeat'); g.fillRect(0, 0, W, H);
+      const g = L.scene; g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'multiply';
+      if (L.shot.scene !== 'pcWorld') { g.fillStyle = g.createPattern(PC.texture(), 'repeat'); g.fillRect(0, 0, W, H); }   // pcWorld prints fibre per sheet
       g.translate(W / 2, H / 2); g.scale(1.35, 1); const v = g.createRadialGradient(0, -40, H * 0.3, 0, 0, H * 0.82); v.addColorStop(0, 'rgba(255,255,255,0)'); v.addColorStop(0.7, 'rgba(205,190,170,.25)'); v.addColorStop(1, 'rgba(96,80,64,.42)'); g.fillStyle = v; g.fillRect(-W, -H, 2 * W, 2 * H); g.restore();
     };
     PC.installed = true;

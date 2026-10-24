@@ -19,6 +19,7 @@ SPEC = {
     "treatise-en-plates": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="treatise"),
     "papercraft-en-quest": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="papercraft"),
     "vocaloid-en-singer": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="vocaloid"),
+    "own-en-film": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="own"),   # no preset asked for
 }
 SPEC["interface-en-chat"]["style"] = "screen"
 STARTER = Path(__file__).resolve().parents[1] / "template" / "engine" / "starters" / "stage.js"
@@ -57,7 +58,10 @@ STYLE = {
     "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
     "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
     "vocaloid": dict(scene=None, starter="timeline.js"),
+    "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
 }
+# the presets' signature scenes: an own-style film may borrow techniques, not a preset's look (SKILL.md)
+PRESET_SCENES = r"^(if|tr|pc|st)[A-Z]|^sig(Shot|Term|Frag|Abs)$"
 V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"kind\s*:\s*['\"]inks", "limp": r"kind\s*:\s*['\"]limp",
       "fps": r"\bfps\s*:\s*\d", "replay": r"replay(Map)?\(", "tear": r"Z\.tear\(", "rays": r"\brays\s*:"}
 
@@ -102,6 +106,19 @@ def style_checks(proj, add, style):
     else:
         add("every lyric line 0-7 is declared by a shot", shots and set(range(len(TRUTH))) <= declared,
             f"lines declared {sorted(declared)}" if shots else "no plan/shots.json (run tools/storyboard.mjs)")
+    if style == "own":
+        cp = proj / "docs" / "CONCEPT.md"
+        concept = cp.read_text(encoding="utf-8", errors="ignore") if cp.is_file() else ""
+        head = "## The film's style"
+        block = concept.split(head, 1)[1].split("\n## ", 1)[0] if head in concept else ""
+        field = lambda k: ((re.search(r"\*\*" + k + r"\*\*[^:\n]*:(.*)", block) or [None, ""])[1] or "").strip()
+        tail = block.split("**Traits**", 1)[-1].split("**Palette", 1)[0].splitlines()[1:] if "**Traits**" in block else []
+        traits = [l for l in tail if re.match(r"\s*([-*]|\d+[.)])\s+\S", l)] or [t for t in re.split(r"[;,]", field("Traits")) if t.strip()]
+        add("docs/CONCEPT.md defines the film's own style: a Reads-as line and >= 6 traits", bool(field("Reads as")) and len(traits) >= 6,
+            f"reads as: {field('Reads as')[:60]!r}; {len(traits)} traits" if block else "no 'The film's style' block")
+        borrowed = [x for x in shots if re.search(PRESET_SCENES, x.get("scene") or "")]
+        add("no preset look adopted: <= 25% of the shots are a preset's signature scenes", shots and len(borrowed) <= 0.25 * len(shots),
+            f"{len(borrowed)}/{len(shots)} preset scenes: {sorted({x.get('scene') for x in borrowed})[:6]}")
     moments = [s.get("moment") or "" for s in shots]
     left = sum("REPLACE" in m for m in moments)
     add("the starter was replaced: no placeholder moments left and >= 80% of the moments are distinct",

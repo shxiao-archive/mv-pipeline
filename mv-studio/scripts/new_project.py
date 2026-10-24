@@ -18,9 +18,9 @@ What it does
   * --title / --title-sub / --artist / --credit set Z.TITLE / Z.TITLE_SUB / Z.ARTIST / Z.CREDIT in engine/timeline.js
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
-  * --style  vocaloid (default: the tegaki demo timeline 「蛍火」) | vocaloid:signal | interface | interface:treatise | stage |
-                papercraft: engine/timeline.js starts from the style's starter in engine/starters/ (the demo is kept as
-                engine/starters/tegaki_demo.js); the names before the merge (tegaki, signal, treatise) still work
+  * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
+                asked for: vocaloid (the tegaki demo timeline) | vocaloid:signal | interface | interface:treatise |
+                stage | papercraft (engine/starters/; the demo is kept as engine/starters/tegaki_demo.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -54,10 +54,10 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
 # --style -> starter in engine/starters (None: the tegaki demo timeline); <style>:<treatment> picks a treatment
-STYLES = {"vocaloid": None, "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
+STYLES = {"own": "blank", "vocaloid": None, "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
           "stage": "stage", "papercraft": "papercraft"}
 STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
-                 "interface:screen": "interface", "treatise": "interface:treatise"}  # incl. the names before the merge
+                 "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
 
 
@@ -175,8 +175,8 @@ def main() -> int:
     ap.add_argument("--title-sub", help="small Latin line under the title for Z.TITLE_SUB (default with --title: none)")
     ap.add_argument("--artist", help="artist name for Z.ARTIST (9:16 header; default: the name after --credit's colon)")
     ap.add_argument("--credit", help="credit line for Z.CREDIT, e.g. 'Music / Lyrics / Movie：Artist'")
-    ap.add_argument("--style", default="vocaloid", choices=[*STYLES, *STYLE_ALIASES],
-                    help="style (and treatment) the timeline starts from (see <skill>/styles/<style>/STYLE.md)")
+    ap.add_argument("--style", default="own", choices=[*STYLES, *STYLE_ALIASES],
+                    help="own (default: the film designs its own style, a blank starter) or a preset the user asked for (<skill>/styles/<preset>/BRIEF.md)")
     ap.add_argument("--mode", default="solo", choices=["solo", "team"],
                     help="solo: one agent builds the film; team: a lead + parallel builders (references/11-team.md)")
     ap.add_argument("--no-git", action="store_true", help="do not git init the project (default: init, if git exists)")
@@ -213,7 +213,10 @@ def main() -> int:
         shutil.copy2(tl, starters / "tegaki_demo.js")
     if starter:
         shutil.copy2(starters / f"{starter}.js", tl)
-        print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (read styles/{a.style.split(':')[0]}/STYLE.md in the skill)")
+        print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (an example to rewrite: read "
+              + ("<skill>/design-a-style.md" if a.style == "own" else f"<skill>/styles/{a.style.split(':')[0]}/BRIEF.md") + ")")
+    else:
+        print(f"  style  : {a.style} -> engine/timeline.js is the illustrated demo (an example to rewrite: read <skill>/styles/vocaloid/BRIEF.md)")
     pj = dst / "project.json"
     proj = json.loads(pj.read_text(encoding="utf-8")) if pj.is_file() else {}
     proj.update({"mode": a.mode, "style": a.style})

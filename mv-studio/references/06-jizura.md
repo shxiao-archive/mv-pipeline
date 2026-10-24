@@ -117,9 +117,14 @@ of outline copies), the `tyToIndex` exit (letters turned into index numbers) and
 with a **recap** cut showing the whole line again when it has a spare cut (the adapter plans that line again with
 its cut count fixed, `overrides[line].cuts`; a project that wants the recap sets `recap: true`), and its chroma
 ghost passes, which lag a frame or two, are off on the frames where they would draw the previous line. The adapter
-keeps the centre-free bands inside the 90 % title-safe box; `tools/check_shots.mjs` measures that box while a cut's
-words hold, and records which lyrics every frame around each cut draws (LYRIC OVERLAP): the JIZURA cuts and the
-lines the film's own type reads with `Z.line(i).text`. The deny lists were found on the demo's Japanese lines; an
+keeps the centre-free bands inside the 90 % title-safe box. Other plans can run to the edge; `tools/check_shots.mjs`
+measures that box while a cut's words hold. Two ways out:
+- `lyric: { mode: 'front', plan, safe: 0.9 }` scales that shot's lyric layer into the box;
+- `crop: true` on a shot that crops on purpose (a monument kanji, 見切れ).
+
+Never shrink every shot's lyrics to pass: the big cropped type is the style. The check also records which lyrics
+every frame around each cut draws (LYRIC OVERLAP): the JIZURA cuts and the lines the film's own type reads with
+`Z.line(i).text`. The deny lists were found on the demo's Japanese lines; an
 English film may meet more parts that split or repeat words: look at the cut strips.
 
 **Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample

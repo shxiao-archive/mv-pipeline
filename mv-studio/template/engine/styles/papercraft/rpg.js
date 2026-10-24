@@ -32,7 +32,7 @@
 
   const corner = (g, x, y, dir, size) => {                 // a gold paper corner + a rivet
     const sx = dir === 1 || dir === 2 ? -1 : 1, sy = dir >= 2 ? -1 : 1;
-    PC.cut(g, PC.poly([[x, y], [x + sx * size, y], [x, y + sy * size]], { seed: 70 + dir, amp: 0.6 }), P.gold, { stroke: P.ink, lw: 2.5, rim: P.goldLight });
+    PC.cut(g, PC.poly([[x, y], [x + sx * size, y], [x, y + sy * size]], { seed: 70 + dir, amp: 0.6 }), P.gold, { ui: true, stroke: P.ink, lw: 2.5, rim: P.goldLight });
     g.save(); g.fillStyle = P.goldDark; g.beginPath(); g.arc(x + sx * size * 0.28, y + sy * size * 0.28, 3.2, 0, TAU); g.fill(); g.restore();
   };
   PC.panel = (g, R, o = {}) => {
@@ -67,7 +67,7 @@
     const cx = R.x + R.w / 2, by = R.y + R.h; g.translate(cx, by); g.scale(Z.lerp(0.9, 1, Math.min(1, pop)), Math.min(1.2, pop)); g.translate(-cx, -by);
     PC.panel(g, R, { seed: o.seed ?? 11 });
     let tx = R.x + 60, tw = R.w - 120;
-    if (o.portrait) { g.save(); PC.cut(g, PC.blob(R.x + 110, R.y + R.h / 2, 74, 74, { seed: 5 }), P.skyDayLow, { stroke: P.ink, lw: 4 }); g.clip(PC.blob(R.x + 110, R.y + R.h / 2, 72, 72, { seed: 5 })); o.portrait(g, R.x + 110, R.y + R.h / 2 + 10, 72); g.restore(); tx = R.x + 220; tw = R.w - 280; }
+    if (o.portrait) { g.save(); PC.cut(g, PC.blob(R.x + 110, R.y + R.h / 2, 74, 74, { seed: 5 }), P.skyDayLow, { ui: true, stroke: P.ink, lw: 4 }); g.clip(PC.blob(R.x + 110, R.y + R.h / 2, 72, 72, { seed: 5 })); o.portrait(g, R.x + 110, R.y + R.h / 2 + 10, 72); g.restore(); tx = R.x + 220; tw = R.w - 280; }
     if (o.speaker) PC.nameTab(g, o.speaker, R.x + 36, R.y + 2, { size: 32 });
     const chars = [...L.text], n = Z.charsAt(line, S.t, { lead: 0 });
     let size = o.size ?? 60; while (size > 30 && PC.measure(g, L.text, size) > tw * 2) size -= 4;
@@ -96,7 +96,7 @@
     const h = o.h ?? 26, col = o.col || P.heart;
     if (o.label) PC.text(g, o.label, x - 10, y + h / 2, h * 0.95, { family: 'latin', weight: 700, align: 'right' });
     const R = PC.poly([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], { seed: 41, amp: 0.6 });
-    PC.cut(g, R, P.paper2, { stroke: P.ink, lw: 3 });
+    PC.cut(g, R, P.paper2, { ui: true, stroke: P.ink, lw: 3 });
     g.save(); g.clip(R); g.fillStyle = col; g.fillRect(x, y, w * clamp(v), h); g.fillStyle = PC.rgba(P.white, 0.35); g.fillRect(x, y + 3, w * clamp(v), h * 0.25); g.restore();
   };
   PC.lvUp = (g, x, y, k, o = {}) => {
@@ -110,7 +110,7 @@
   };
   PC.coins = (g, x, y, n, k = 1) => {
     g.save(); g.translate(x, y);
-    PC.cut(g, PC.blob(0, 0, 24, 24, { seed: 61 }), P.coin, { stroke: P.coinDark, lw: 3, rim: P.goldLight, shadow: 6 });
+    PC.cut(g, PC.blob(0, 0, 24, 24, { seed: 61 }), P.coin, { ui: true, stroke: P.coinDark, lw: 3, rim: P.goldLight, shadow: 6 });
     PC.text(g, '× ' + n, 40, 2, 44 * (1 + 0.25 * Math.max(0, 1 - k * 4)), { family: 'latin', weight: 700, stroke: P.paper, strokeW: 7 });
     g.restore();
   };
@@ -132,11 +132,11 @@
   // ---------------------------------------------------------------- the parchment map with its route
   const icon = (g, kind, x, y, s) => {
     g.save(); g.translate(x, y); g.scale(s, s);
-    if (kind === 'castle') { PC.cut(g, PC.poly([[-40, 20], [40, 20], [40, -20], [28, -20], [28, -40], [14, -40], [14, -20], [-14, -20], [-14, -40], [-28, -40], [-28, -20], [-40, -20]], { seed: 91 }), P.stone, { stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.poly([[-6, -40], [6, -40], [0, -62]], { seed: 92 }), P.roofRed, { stroke: P.ink, lw: 2.5 }); }
-    else if (kind === 'tree') { PC.cut(g, PC.poly([[0, -44], [26, 10], [-26, 10]], { seed: 93, round: 0.3 }), P.forest, { stroke: P.ink, lw: 3, shadow: 4 }); }
-    else if (kind === 'peak') { PC.cut(g, PC.poly([[-46, 18], [0, -46], [46, 18]], { seed: 94 }), P.mountain, { stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.poly([[-14, -26], [0, -46], [14, -26], [0, -20]], { seed: 95 }), P.snow, {}); }
-    else if (kind === 'cave') { PC.cut(g, PC.blob(0, 0, 44, 32, { seed: 96 }), P.stoneDark, { stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.blob(0, 8, 20, 18, { seed: 97 }), P.ink, {}); }
-    else { PC.cut(g, PC.poly([[-24, 18], [24, 18], [24, -8], [0, -30], [-24, -8]], { seed: 98 }), P.sand, { stroke: P.ink, lw: 3, shadow: 4 }); }
+    if (kind === 'castle') { PC.cut(g, PC.poly([[-40, 20], [40, 20], [40, -20], [28, -20], [28, -40], [14, -40], [14, -20], [-14, -20], [-14, -40], [-28, -40], [-28, -20], [-40, -20]], { seed: 91 }), P.stone, { ui: true, stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.poly([[-6, -40], [6, -40], [0, -62]], { seed: 92 }), P.roofRed, { ui: true, stroke: P.ink, lw: 2.5 }); }
+    else if (kind === 'tree') { PC.cut(g, PC.poly([[0, -44], [26, 10], [-26, 10]], { seed: 93, round: 0.3 }), P.forest, { ui: true, stroke: P.ink, lw: 3, shadow: 4 }); }
+    else if (kind === 'peak') { PC.cut(g, PC.poly([[-46, 18], [0, -46], [46, 18]], { seed: 94 }), P.mountain, { ui: true, stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.poly([[-14, -26], [0, -46], [14, -26], [0, -20]], { seed: 95 }), P.snow, {}); }
+    else if (kind === 'cave') { PC.cut(g, PC.blob(0, 0, 44, 32, { seed: 96 }), P.stoneDark, { ui: true, stroke: P.ink, lw: 3, shadow: 4 }); PC.cut(g, PC.blob(0, 8, 20, 18, { seed: 97 }), P.ink, {}); }
+    else { PC.cut(g, PC.poly([[-24, 18], [24, 18], [24, -8], [0, -30], [-24, -8]], { seed: 98 }), P.sand, { ui: true, stroke: P.ink, lw: 3, shadow: 4 }); }
     g.restore();
   };
   PC.map = (g, R, route, p, o = {}) => {
@@ -149,10 +149,10 @@
     PC.line(g, pts, { dash: [18, 14], lw: 7, color: P.red, p: clamp(p), seed: 7 });
     if (p > 0 && pts.length > 1) {
       const k = Math.min(pts.length - 1, Math.max(1, Math.ceil(pts.length * clamp(p)))), [hx, hy] = pts[k - 1];
-      PC.cut(g, PC.poly([[hx, hy], [hx - 14, hy - 34], [hx + 14, hy - 34]], { seed: 111, round: 0.4 }), P.red, { stroke: P.ink, lw: 3, shadow: 6 });
+      PC.cut(g, PC.poly([[hx, hy], [hx - 14, hy - 34], [hx + 14, hy - 34]], { seed: 111, round: 0.4 }), P.red, { ui: true, stroke: P.ink, lw: 3, shadow: 6 });
       g.save(); g.fillStyle = P.paper; g.beginPath(); g.arc(hx, hy - 34, 7, 0, TAU); g.fill(); g.restore();
     }
     // compass rose
-    g.save(); g.translate(R.x + R.w - 90, R.y + 90); PC.cut(g, PC.poly([[0, -50], [10, -10], [50, 0], [10, 10], [0, 50], [-10, 10], [-50, 0], [-10, -10]], { seed: 121 }), P.paper, { stroke: P.woodDark, lw: 3 }); g.restore();
+    g.save(); g.translate(R.x + R.w - 90, R.y + 90); PC.cut(g, PC.poly([[0, -50], [10, -10], [50, 0], [10, 10], [0, 50], [-10, 10], [-50, 0], [-10, -10]], { seed: 121 }), P.paper, { ui: true, stroke: P.woodDark, lw: 3 }); g.restore();
   };
 })();

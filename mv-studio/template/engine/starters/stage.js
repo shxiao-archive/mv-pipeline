@@ -1,4 +1,4 @@
-/* engine/timeline.js — STARTER for the STAGE style (styles/stage; read <skill>/styles/stage/STYLE.md first).
+/* engine/timeline.js — STARTER for the STAGE style (styles/stage; read <skill>/styles/stage/BRIEF.md, then its STYLE.md).
  * A picture-book show on a painted theatre stage: watercolour + boiling ink on paper, an original puppet troupe acting
  * the song out, choruses back on the SAME stage escalating each time, brush wipes between chapters, a karaoke bar.
  *

@@ -57,7 +57,7 @@
       for (const L of a.layers || []) {
         const img = Z.imgSync(L.img); const k = ease(L.ease)(p);
         let x = Z.lerp(L.x, L.x2 ?? L.x, k), y = Z.lerp(L.y, L.y2 ?? L.y, k), h = Z.lerp(L.h, L.h2 ?? L.h, k);
-        if (L.pin && S.bgImg) { const q = pinPt(S, L, k); x = q[0]; y = q[1]; h *= q[2]; }
+        if (L.pin) { const q = pinPt(S, L, k); x = q[0]; y = q[1]; h *= q[2]; }
         D.sprite(ctx, img, x, y, h, { anchor: L.anchor || [0.5, 0.5], alpha: L.alpha ?? 1, rot: L.rot || 0, t });
       }
       // fx behind characters
@@ -77,6 +77,8 @@
   // a pinned point: [x, y, scale] of bg image point pin (-> pin2 over the shot) under the current bg camera
   function pinPt(S, c, k) {
     const u = Z.lerp(c.pin[0], (c.pin2 || c.pin)[0], k), v = Z.lerp(c.pin[1], (c.pin2 || c.pin)[1], k);
+    // a scene that drew its plate without setting S.bgImg / S.bgView: the pin is a point of the screen (it used to be NaN)
+    if (!S.bgImg) return [u * Z.W, v * Z.H, 1];
     const [x, y] = D.coverPt(S.bgImg, S.bgView, u, v);
     return [x, y, S.bgView.zoom ?? 1];
   }
@@ -191,7 +193,7 @@
       x += (c.out.dx || 0) * e; y += (c.out.dy || 0) * e; h *= 1 + (c.out.ds || 0) * e;
       if (c.out.alpha !== false) alpha *= 1 - e;
     }
-    if (c.pin && S.bgImg) { const q = pinPt(S, c, k); x = q[0] + (x - c.x || 0); y = q[1] + (y - c.y || 0); h *= q[2]; }
+    if (c.pin) { const q = pinPt(S, c, k); x = q[0] + (x - c.x || 0); y = q[1] + (y - c.y || 0); h *= q[2]; }
     if (alpha <= 0.001) return;
     if (c.water) {                                             // afloat: sunk into the waterline at its pin, reflected below
       D.onWater(ctx, img, x, y, h, S.t, Object.assign({ alpha, seed: c.phase || 0, tint: c.tint }, c.water)); return;

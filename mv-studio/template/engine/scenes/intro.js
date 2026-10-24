@@ -1036,8 +1036,14 @@
     x.beginPath(); x.arc(LK.x, LK.y, LK.r, 0, TAU); x.fill();
     const img = Z.imgSync(a.char || 'assets/char/REF_master.png');
     if (img) { x.save(); x.globalCompositeOperation = 'destination-out'; D.sprite(x, img, LK.x, LK.y + LK.r * 1.02, LK.r * 1.86, { anchor: [0.46, 1] }); x.restore(); }
-    glyph(x, chars[0], LK.x - LK.gdx, LK.y, LK.gsize, { fill: '#fff' });
-    if (chars[1]) glyph(x, chars[1], LK.x + LK.gdx, LK.y, LK.gsize, { fill: '#fff' });
+    if (chars.length <= 2) {                                   // two monument glyphs either side of the disc
+      glyph(x, chars[0], LK.x - LK.gdx, LK.y, LK.gsize, { fill: '#fff' });
+      if (chars[1]) glyph(x, chars[1], LK.x + LK.gdx, LK.y, LK.gsize, { fill: '#fff' });
+    } else {                                                   // a longer title: one line between the disc and the sub
+      const size = Math.min(96, W * 0.84 / chars.length);
+      D.font(x, size, 'serif', 600); x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(a.text, LK.x, (LK.y + LK.r + LK.subY) / 2 - 6);
+    }
     D.font(x, LK.subSize, 'serif', 300); x.letterSpacing = '14px'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.globalAlpha = 0.8;
     x.fillText(a.sub || 'afterglow', LK.x + 7, LK.subY);
     texCache.set(key, c); return c;

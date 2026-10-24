@@ -16,7 +16,7 @@ Lyric lines are referred to by number (analysis/lyrics_mv.lrc): never copy lyric
 
 ## 2. Style
 
-One paragraph on the look (the style pack: `styles/<style>/STYLE.md`), then what is specific to this film:
+One paragraph on the look (the style block of docs/CONCEPT.md), then what is specific to this film:
 materials, line, light direction, texture, grain.
 
 ## 3. Cast, places, objects

@@ -325,7 +325,9 @@ The library was written for 残光; before reusing a scene with new assets, chec
   `D.travel(t, t0, t1, p0, p2, { arc, via, anticipate, overshoot })` (a move with weight); `D.sprite(..., { tint })`
   (multiply by the scene's light colour).
 - **`illust` grounding:** chars / layers take `pin: [u, v]` (+ `pin2`, eased over the shot) = a point of the bg image;
-  they stand on it, move and scale with the bg camera (`x`, `y` become offsets). Chars: `ground: true | { a, w }` (contact
+  they stand on it, move and scale with the bg camera (`x`, `y` become offsets). A scene of your own that draws its
+  plate with `D.cover(ctx, img, view)` sets `S.bgImg = img; S.bgView = view` for pins to follow it; without them a pin
+  is a point of the screen. Chars: `ground: true | { a, w }` (contact
   shadow), `water: { sink, reflect, bob }` (afloat at the pin), `tint: { color, a }`. Fx `{ type: 'light', pin, core,
   color, spread, flicker, beat }`. `Z.pinPt(S, spec, k)` for custom fx.
 - **Tools:** `estimate_lrc.py` (plain text → estimated LRC), `art_grid.py` (labelled grid over a plate to read u, v),

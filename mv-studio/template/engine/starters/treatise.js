@@ -1,4 +1,4 @@
-/* engine/timeline.js — STARTER for the INTERFACE style, treatise treatment (styles/treatise; read <skill>/styles/interface/STYLE.md §B first).
+/* engine/timeline.js — STARTER for the INTERFACE style, treatise treatment (styles/treatise; read <skill>/styles/interface/BRIEF.md, then STYLE.md §B).
  * The song as plates from an illustrated technical treatise: ink and bone with one signal orange, a spark that drags a
  * line through every plate, each plate its own drawing idiom (chart, oscilloscope, form, survey map, prompt), every
  * lyric line set into the picture word by word, and one running number that the hooks raise.

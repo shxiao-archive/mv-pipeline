@@ -118,6 +118,12 @@
     const tl = lyricT(t);
     if (spec.mode === 'backfront') { JZ.drawPlan(plan, textX, tl, 'back'); const c = Z.scratch[2], x = c.getContext('2d'); JZ.drawPlan(plan, x, tl, 'front'); textX.drawImage(c, 0, 0); }
     else JZ.drawPlan(plan, textX, tl, spec.mode === 'full' ? 'normal' : spec.mode);
+    if (spec.safe) {   // lyric: { safe: 0.9 }: the lyric layer scaled into the title-safe box, for big layouts not meant to crop
+      const k = typeof spec.safe === 'number' ? spec.safe : 0.9, c = Z.scratch[1], x = c.getContext('2d');
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'copy'; x.drawImage(textC, 0, 0);
+      x.globalCompositeOperation = 'source-over';
+      textX.clearRect(0, 0, W, H); textX.drawImage(c, W * (1 - k) / 2, H * (1 - k) / 2, W * k, H * k);
+    }
   }
   // project.json timing.lyricOffset moves the JIZURA layer too (code-drawn type gets it in core/lyrics.js)
   const lyricT = t => t - (Z.LYRIC_OFFSET || 0);

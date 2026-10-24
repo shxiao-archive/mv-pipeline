@@ -29,6 +29,11 @@ for (const row of text.split(/\r?\n/)) {
   const han = [...t].filter(c => CJK.test(c)).join('');
   for (let i = 0; i + 6 <= han.length; i++) frags.add('c:' + han.slice(i, i + 6));
 }
+// the song's title is public metadata, not lyric text: a title sung in the chorus may stand in Z.TITLE / Z.TITLE_SUB
+// (engine/timeline.js), and its occurrences are blanked before a row is matched
+const TL = path.join(ROOT, 'engine', 'timeline.js');
+const titles = fs.existsSync(TL) ? [...fs.readFileSync(TL, 'utf8').matchAll(/Z\.TITLE(?:_SUB)?\s*=\s*(['"`])(.+?)\1/g)].map(m => norm(m[2]).trim()).filter(x => x.length > 1) : [];
+const untitle = t => titles.reduce((s, x) => s.split(x).join(' '), t);
 const SKIP_DIRS = new Set(['node_modules', 'vendor', 'render', '.git', '.venv', '__pycache__', 'analysis', 'audio', 'lyrics', 'fonts', '_grok', 'demo']);
 const EXT = new Set(['.js', '.mjs', '.cjs', '.ts', '.json', '.jsonl', '.md', '.html', '.css', '.py', '.txt', '.lrc', '.srt', '.yml', '.yaml']);
 const errors = [], warnings = [];
@@ -44,7 +49,7 @@ function walk(dir) {
     const bucket = isDoc(rel) && !strict ? warnings : errors;
     if (ext === '.lrc' || ext === '.srt') { bucket.push(`${rel}: a lyric file outside analysis/ (move it to analysis/ or audio/)`); continue; }
     fs.readFileSync(p, 'utf8').split(/\r?\n/).some((row, n) => {
-      const t = norm(row), words = t.match(/[\p{L}\p{N}']+/gu) ?? [];
+      const t = untitle(norm(row)), words = t.match(/[\p{L}\p{N}']+/gu) ?? [];
       for (let i = 0; i + 4 <= words.length; i++) if (frags.has('w:' + words.slice(i, i + 4).join(' '))) { bucket.push(`${rel}:${n + 1}`); return true; }
       const han = [...t].filter(c => CJK.test(c)).join('');
       for (let i = 0; i + 6 <= han.length; i++) if (frags.has('c:' + han.slice(i, i + 6))) { bucket.push(`${rel}:${n + 1}`); return true; }

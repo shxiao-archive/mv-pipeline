@@ -107,7 +107,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 | 2 | `node tools/storyboard.mjs` | unknown scenes, black gaps, cuts off the grid, cuts far from their cue, sung lines no shot shows, shots without `moment`, unreadably short lines, line cues without hints; writes STORYBOARD.md | every edit of the timeline |
 | 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, lyrics outside the 90 % safe area while a cut's words hold, a JIZURA transition drawing two lines at once (LYRIC OVERLAP) (4 samples/s; `--sprite-fps 0` skips them; errors with `--strict`) | every edit |
 | 4 | `node tools/cues_sheet.mjs` | the wrong picture for a line (look at it) | after the plan, after big changes |
-| 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back) | before a full render |
+| 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back); a change on a beat, lyric cut or cue is a HIT, listed and allowed: never soften a hit to pass | before a full render |
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |
 | 7 | render → `check_flash.py`, `motion_check.py`, `check_sync.py` | flashes, stillness, picture / audio / lyric offsets | every render |
 | 8 | contact / review sheets, read by the lead | everything else | every render |
@@ -140,11 +140,13 @@ or a subagent started with no history. Never the builder judging its own film: i
    every frame of 1 s at every chorus / hook and at `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
    cut and each flagged pop or flash, full-resolution stills, motion per second in `index.md`). Run
    `node tools/storyboard.mjs` first: it writes the lyric cut times to `plan/shots.json`. Add
-   `docs/CONCEPT.md`, the style's **Signature features** (its STYLE.md) and the output of the step-7 checks.
+   `docs/CONCEPT.md`, the film's style (the style block of `docs/CONCEPT.md`; for a preset also its `styles/<preset>/BRIEF.md`) and the output of
+   the step-7 checks.
 3. The jury prompt below → its answer saved as `docs/review/jury-1.md` and its JSON block as `docs/review/jury-1.json`.
-4. The revise prompt below, in the building session. Then steps 1–8 again, render, pack, jury round 2, revise.
-5. Stop after round 2, or earlier when every dimension is ≥ 8. Critical issues map to P0 (§7: delivery needs them
-   gone), the fix list to P1, nitpicks to P2. Log both rounds in `docs/PROGRESS.md`.
+4. The revise prompt below, in the building session. Then steps 1–8 again and render.
+5. One round is the default: in the eval rounds a second jury round cost a full pack and review and did not raise the
+   scores. Run a second only when the user asks for it. Critical issues map to P0 (§7: delivery needs them
+   gone), the fix list to P1, nitpicks to P2. Log the rounds in `docs/PROGRESS.md`.
 
 **The jury prompt** (paste with the paths filled in):
 ```text
@@ -153,8 +155,8 @@ of an animation studio, a top ボカロP / MV director for the Japanese and Chin
 Judge it harshly and precisely so it can reach award level. Kindness is useless here; specificity is everything.
 
 The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index.md> (contact sheet per section,
-filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept: <docs/CONCEPT.md>. The style and its signature features, which the
-film is judged against: <styles/<style>/STYLE.md, Signature features>. Automatic checks: <paste the check outputs>.
+filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept, which the film is judged against: <docs/CONCEPT.md>. What its style
+should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as line of styles/<preset>/BRIEF.md>. Automatic checks: <paste the check outputs>.
 
 1. Look properly: every contact sheet, every filmstrip (motion: easing, spacing, overlap, holds), every cut strip
    (18 frames around a shot or lyric cut: two lines on top of each other, a pop, a flash, a transition that stutters,
@@ -164,7 +166,10 @@ film is judged against: <styles/<style>/STYLE.md, Signature features>. Automatic
 2. Score 1-10 per dimension (5 = competent student work; 6 = decent template; 7 = solid professional; 8 = high-end
    studio work; 9 = award shortlist; 10 = best in the world). Most first passes of a full song deserve 5-7. Do not
    inflate. Score the weakest section, not only the opening.
-   - style_fidelity: an expert names the style at once; every signature feature is present and done right
+   - style_fidelity: the film has a visual identity of its own, carried through every shot with finish (the style
+     block of the concept: palette, type, shapes, motion feel); for a preset the user asked for, an expert names the
+     tradition at once. Judge the identity, not a checklist: a departure the concept argues for is not a fault; a
+     preset's look adopted without being asked for is
    - concept_story: a visual idea about what the song is about; each line answered by a picture (not a literal
      illustration); a hook in the first 5 s; unmistakable hero moments; choruses that escalate; an ending, not a stop
    - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; no dead or

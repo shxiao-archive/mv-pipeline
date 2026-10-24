@@ -1,5 +1,9 @@
 # Style: VOCALOID — the ボカロPV tradition: an illustrated story, or a recording device failing
 
+**Technical manual of this style pack** (API, building, assets, safety). The creative brief — what the film is, its
+elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
+that the build needs.
+
 One style with two treatments that share a cast, a lyric voice and an engine, and that a film can switch between by
 section:
 
@@ -51,11 +55,12 @@ Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline,
   cut from her small on the left third to a close-up on the right reads as a cut; the same spot twice reads as a
   jump), move her across the frame with `x2` / `pin2`, and give two-character shots both thirds. `tools/storyboard.mjs`
   warns when over half the character shots are centred or a third is never used (a Gemini film had 10 of 16 at u = 0.5).
-- **One pose per shot.** Inside a shot a character keeps one picture; her face lives through `chars[].anim` (blink,
-  mouth, expressions), not by swapping whole sprites. A new pose comes with a cut to a new framing, at most every
-  1.5–2 s, and never back and forth: A → B → A reads as a glitch, not as animation (a Gemini film stepped three poses
-  on each band stop of its outro). Stepping through pictures is only for a real drawn sequence of ONE action, in order,
-  each held ≥ 0.3 s; `burst` (a mini-shot per beat) stays ≤ 2 bars and gives every cut its own framing and place.
+- **Poses: an acting shot or a drawn beat sequence.** In an acting shot a character keeps one picture and her face
+  lives through `chars[].anim` (blink, mouth, expressions); a new pose comes with a cut to a new framing. The tegaki
+  idiom of a new pose per beat is also right: a drawn sequence of ONE action, in order, stepped on twos or threes, or
+  a 2–3 frame loop (hair, a breath, a sway) — the drawn layer steps while the camera, light and grain run on ones.
+  What reads as a glitch is going back and forth: A → B → A (a Gemini film stepped three poses on each band stop of its
+  outro); `burst` (a mini-shot per beat) stays ≤ 2 bars and gives every cut its own framing and place.
   `tools/check_shots.mjs` warns on SPRITE PING-PONG (A → B → A within 2 s) and RAPID SWAPS (3+ changes in 3 s).
 - **Composition:** subject on a third, three depth layers (a blurred foreground element sells depth cheaply), the lyric
   in a quiet zone (centre-free JIZURA plan `cf` when the subject is central); the final shot is a composed picture with
@@ -210,46 +215,3 @@ either drifts in style or does not change. Other poses are other pictures, cut t
 - Both: prompts name what each reference image is for ("the first image is style only; the others are this character's
   design"); missing pictures go to `docs/WANTED_ART.md`; per lyric line 2–5 motif variants (signal), a composed picture
   per line (tegaki).
-
-## Signature features (the jury judges against these; references/09 §8)
-
-Tegaki:
-- One original character, on-model in every shot (a face that blinks or sings is optional), with **varied
-  framing**: left and right thirds, close-ups and long shots, back views; never the same centred figure.
-- A **colour script**: the light changes with the story (time of day, mood per section); light sources are painted and
-  pinned, the grade (gradient-map LUTs) pulls the shots together.
-- **Grounded compositing**: characters stand on their plates with contact shadows, take the plate's light; three depth
-  layers.
-- **JIZURA kinetic lyrics** in at least three plans, the lyric passing behind the character in hero shots, the キメ lines
-  in their own typographic scenes (`kanjiSlam`, `typeCard` or your own).
-- **Set pieces for the song's own metaphors** (custom scenes), one or two instrumental showcases (Blender toon 3D or 2.5D).
-- **Beat-locked editing**: cuts on lyric onsets and downbeats; quiet verses with chosen holds, choruses that hit.
-- An **ending**: a composed last picture with a subject, depth and light.
-- **Drawn depth, not only arguments**: the film's own `engine/scenes/<film>.js` (references/10 §7) draws its set pieces
-  and the 3–6 events of each shot: props and light that react on their cues, things that cross the painted plates
-  (pinned with `D.coverPt`), a foreground layer, the lead's reactions. 30+ own lines per shot.
-
-Signal:
-- **Speed is editing**: motifs, fillers and 1–2 frame inserts on a beat grid; the tiers (T1 sprint, T2, T3 slow, hold)
-  follow the song's sections.
-- **Heat** grades the whole film from one curve: cold → hot → drained.
-- **Decay**: tear bands, chroma, interference, hot pixels that accumulate and never heal; never over the subject or a
-  lyric for more than a frame.
-- **The device's type**: vertical mincho, beat-stamped lines, big WORD frames; the song's stops as held NO SIGNAL frames.
-
-## Review checks (in addition to references/09)
-
-Tegaki shots:
-- [ ] Characters grounded on their plates, lit by the plate's light; light sources are halos; props move with weight.
-- [ ] Story actions the lyric names get time and a before / after; at least three JIZURA plans plus custom キメ scenes.
-
-Signal shots:
-- [ ] T2 / T3 images are readable (anchor returns); T1 overload builds and releases with the song, not constantly.
-- [ ] Heat curve visible in the contact sheets (cold → hot → drained); hot pixels accumulate, never reset.
-- [ ] Distortion never covers a face or a lyric for more than a frame; lyrics stay legible through tears.
-- [ ] Every repeated line changes something per repeat.
-
-Every film:
-- [ ] A mixed film's switch is motivated (set up before, felt after), and one cast reads as the same characters in both.
-- [ ] `check_flash.py` PASS; `motion_check.py` PASS (T3 sections still drift).
-- [ ] No existing character, logo or song material imitated; LOG / TERM copy is your own.

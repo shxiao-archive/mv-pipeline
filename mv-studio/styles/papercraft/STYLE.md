@@ -1,5 +1,9 @@
 # Style: PAPERCRAFT — a pop-up paper storybook told as a retro RPG
 
+**Technical manual of this style pack** (API, building, assets, safety). The creative brief — what the film is, its
+elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
+that the build needs.
+
 Engine code: `template/engine/styles/papercraft/` (`paper.js`, `rpg.js`, `scenes.js`). Starter:
 `engine/starters/papercraft.js` (`new_project.py --style papercraft`). After *dalabengba-mv* (ISC, see
 `licenses/LICENSE-dalabengba-mv.txt`): its paper primitives are adapted, its pop-up book, multiplane camera, paper RPG
@@ -36,7 +40,8 @@ closes on the last frame.
   (`core/rig.js`): design your own cast with its options (hair style and colour, outfit, hat, scarf) and act with
   `pose`, `act`, `expr`, `emote`, `ik`, `hold`; or write your own rig in the same paper language. Never an existing
   character. Keep scale consistent (full shot ~260 px, medium ~420, close-up head ~360).
-- **Text in the picture:** the lyric only in the dialogue box; otherwise only your own short UI words (menu items, name
+- **Text in the picture:** the lyric in the dialogue box (the default) or built into the world as a physical object
+  (the reference film's way; then no dialogue box); otherwise only your own short UI words (menu items, name
   tabs, LV UP, coin counts), ≤ 5 characters of sound effects, and the credits.
 
 ## 3. Building it
@@ -68,8 +73,9 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcWorld', lyric: 'none', hud: fa
 ## 4. Motion (it is a quiet, flat medium: make it move)
 
 Flat paper colour changes few pixels when the camera drifts. Track the action (`cam.follow`), walk at a steady pace on
-long tracks (`walkEase: 'linear'`), step the camera on beats, let the paper fibre travel with each layer (the scenes do),
-add pop-up clutter with ink edges. Run `motion_check.py` on renders: static stretches ≤ 10 %.
+long tracks (`walkEase: 'linear'`), keep a gentle drift, bump the camera on steps and hits (not on every beat: cue-lock
+the accents), let the paper fibre travel with each layer (the scenes do), and add pop-up clutter that rises piece by
+piece. No ink outlines: edges come from the cut, the rim and the shadow. Run `motion_check.py` on renders: static stretches ≤ 10 %.
 
 ## 5. Asset library and density (what dalabengba-mv built before its scenes; method: references/10, team: 11)
 
@@ -99,23 +105,3 @@ before writing shots:
 
 Targets: 3–6 events per shot; the lead acts every cue (a pose change, an expression, a reaction); the running gag
 escalates every repeat; bookends (the book opens / closes) match.
-
-## Signature features (the jury judges against these; references/09 §8)
-
-- **A moving pop-up book**: everything is cut paper (wavy hand-cut edge, a shadow that grows with height, a lit rim,
-  fibre), light from the top left; the book opens on the first frame and closes on the last.
-- **Multiplane depth** with a camera that tracks the hero, pushes on emotion and bumps on steps and hits.
-- **The RPG interface in paper**: the dialogue box with the lyric typed as sung, name tabs, HP / EXP bars, LV UP, a
-  battle menu, damage numbers, coins; **the map with a red dashed route** as the film's navigation prop.
-- **A quest**: outbound left → right, lands with their own colour script, a fight, a level-up, home right → left.
-- **An original jointed paper cast**, on-model, at a consistent scale, acting with poses, expressions and emotes.
-- **Running gags** that escalate each chorus and pay off.
-
-## 6. Review checks (in addition to references/09)
-
-- [ ] Every object reads as cut paper (edge, shadow, rim); light from the top left; one palette.
-- [ ] The map / route and the running gags pay off; outbound left → right, home right → left.
-- [ ] The lyric only in the dialogue box, typed as sung, never ahead; boxes never hide the actors.
-- [ ] Cast original and on-model; scale consistent.
-- [ ] `motion_check.py` PASS; `check_flash.py` PASS (impact flashes 1–2 frames, rare); `pops.mjs`: the book cover's
-      swing at the bookends shows as JUMPs — they are planned.
