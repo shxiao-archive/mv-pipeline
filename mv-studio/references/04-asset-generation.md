@@ -351,9 +351,26 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   NovelAI's API: run one job first; on HTTP 400 try `img2img`, or go without and lean on the verbatim character
   sentence plus several takes (§9).
 - **Model / settings:** `art.config.json` → `novelai` (`model`, `steps`, `scale`, `sampler`, `noise_schedule`,
-  `max_pixels`, `negative`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-curated`,
+  `max_pixels`, `negative`, `upscale_model`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-curated`,
   `nai-diffusion-4-full`, `nai-diffusion-3`. `NOVELAI_API_URL` overrides the endpoint (a proxy or a local mock).
 - The returned PNG is re-encoded on save (NovelAI's metadata chunks with the prompt are not kept).
+- **Edit jobs** (`"op"`, the source in `"images"`, no prompt; same jobs file, same one-at-a-time queue, all cost Anlas):
+  - `"upscale"`: 2× (an 832×1216 master becomes 1664×2432, for close-ups and the 9:16 crop; run it twice for 4×).
+    Only the V5 line upscales (`novelai.upscale_model`, default `nai-diffusion-5-full`); a cut-out keeps its own
+    matte, scaled up. Crisper lines than a plain resize, not new detail: it can't rescue a blurry source.
+  - `"bg-removal"`: cuts the subject out of a full picture, e.g. a character from a generation that kept its
+    scenery, or a pose that only works with a background. Gives a native-alpha cut-out, trimmed like the rest; check
+    hair and loose edges on the check sheet.
+  - `"lineart"`, `"sketch"`, `"declutter"`, `"colorize"`, `"emotion"`: the other Director tools, with `"prompt"` and
+    `"defry"` as NovelAI takes them (emotion: `"prompt": "happy;;"`, `"defry"` 0–5).
+  ```json
+  {"id": "master_a_2x", "op": "upscale", "images": ["assets/char/master_a.png"], "out": "master_a_2x.png"}
+  {"id": "pose_run_cut", "op": "bg-removal", "images": ["assets/char/pose_run_scene.png"], "out": "pose_run.png"}
+  ```
+  Generate first, then edit in a second jobs file (an edit job needs its source to exist). `--dry-run` shows these
+  requests too. The API centre-crops sources off its size grid, so the tool pads them and cuts the padding off again
+  (any source size is fine). Upscale and bg-removal were checked live on 2026-10-24; the other Director tools only
+  share the request format, so run ONE job first.
 
 ## 13. Choosing the generator (`tools/artgen.py`)
 

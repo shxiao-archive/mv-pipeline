@@ -27,10 +27,17 @@ Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; 
                                "vibe" = vibe transfer (V3 models only). A cut-out is flattened on the key colour first
   "ref_strength": 1.0          character / vibe reference strength;  "fidelity": 1.0 (character reference)
   "nai": {...}                 raw overrides of the request "parameters" (steps, scale, sampler, ...) -- rarely needed
+Edit jobs (no generation; "images": [<the source>], no "prompt" needed) -- "op":
+  "upscale"                    2x with NovelAI's upscaler (a V5 model: art.config.json -> novelai.upscale_model);
+                               a cut-out keeps its own matte, scaled up
+  "bg-removal"                 cut the subject out of a picture (a native-alpha cut-out, trimmed like any other)
+  "lineart" | "sketch" | "declutter" | "colorize" | "emotion"
+                               the other Director tools, with "prompt" and "defry" passed as they are
+                               (emotion: "prompt": "happy;;", "defry": 0..5)
 Project defaults (model, steps, scale, size cap, negative prompt) come from art.config.json -> "novelai".
 
 Costs: on an Opus subscription a plain generation up to 1024x1024 px area and 28 steps is free; larger images, more
-steps, img2img and character references cost Anlas. NovelAI runs ONE generation per account at a time, so jobs run
+steps, img2img, character references, upscales and Director tools cost Anlas. NovelAI runs ONE generation per account at a time, so jobs run
 one after another (HTTP 429 -> wait and retry).
 
 mv-studio (MIT).
@@ -72,7 +79,9 @@ DEFAULTS = {
     "negative": "nsfw, lowres, bad anatomy, bad hands, extra digits, fewer digits, text, logo, watermark, signature, "
                 "username, artist name, speech bubble, jpeg artifacts, blurry",
     "max_pixels": 1024 * 1024,
+    "upscale_model": "nai-diffusion-5-full",   # the standalone upscaler refuses V3 / V4 / V4.5 models
 }
+DIRECTOR_OPS = ("bg-removal", "lineart", "sketch", "declutter", "colorize", "emotion")
 KEY_TAGS = {"#00FF00": "green background", "#FF00FF": "magenta background", "#0000FF": "blue background"}
 # character-reference images must be padded to one of these canvases
 CHAR_REF_CANVAS = [(1024, 1536), (1536, 1024), (1472, 1472)]
@@ -231,31 +240,82 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
     return {"input": prompt, "model": model, "action": action, "parameters": p}
 
 
-def first_image(body: bytes):
-    """The response is a zip with image_0.png (or, from some endpoints, the PNG itself)."""
+def op_canvas(size: tuple[int, int]) -> tuple[int, int]:
+    """The source padded to the 64 px grid: the API centre-crops other sizes (256x315 came back as 2x 256x304), so
+    the edit pads at the bottom right and edited_image cuts the padding off again."""
+    return -(-size[0] // 64) * 64, -(-size[1] // 64) * 64
+
+
+def op_request(job: dict, cfg: dict, data: bool = True) -> tuple[str, dict]:
+    """(path, JSON body) of an edit job: "op" upscale -> POST /ai/upscale, a Director tool -> POST /ai/augment-image."""
+    from PIL import Image
+    op = job["op"]
+    if op != "upscale" and op not in DIRECTOR_OPS:
+        raise ValueError(f"job {job['id']}: op {op!r} is not upscale / {' / '.join(DIRECTOR_OPS)}")
+    refs = [ref_path(r) for r in job.get("images") or []]
+    if not refs or not refs[0].is_file():
+        raise FileNotFoundError(f"job {job['id']}: op {op!r} needs \"images\": [<an existing source image>]")
+    src = Image.open(refs[0]).convert("RGBA")
+    pw, ph = op_canvas(src.size)
+    flat = Image.new("RGB", (pw, ph), "#808080" if op == "upscale" else "#FFFFFF")   # grey: the least spill on a matte edge
+    flat.paste(src, (0, 0), mask=src.getchannel("A"))
+    img = b64_png(flat) if data else f"<{refs[0].name} {src.width}x{src.height} padded to {pw}x{ph}>"
+    if op == "upscale":
+        return "/ai/upscale", {"image": img, "model": job.get("model") or cfg["upscale_model"], "declared_blur_sigma": 0}
+    return "/ai/augment-image", {"req_type": op, "width": pw, "height": ph, "image": img,
+                                 "prompt": job.get("prompt", ""), "defry": int(job.get("defry", 0))}
+
+
+def all_images(body: bytes) -> list:
+    """The response is a zip with image_0.png, ... (or, from some endpoints, the PNG itself)."""
     from PIL import Image
     if body[:4] == b"PK\x03\x04":
         with zipfile.ZipFile(io.BytesIO(body)) as z:
-            names = [n for n in z.namelist() if n.lower().endswith((".png", ".jpg", ".webp"))]
+            names = sorted(n for n in z.namelist() if n.lower().endswith((".png", ".jpg", ".webp")))
             if not names:
                 raise RuntimeError("the response zip has no image")
-            return Image.open(io.BytesIO(z.read(sorted(names)[0])))
-    return Image.open(io.BytesIO(body))
+            return [Image.open(io.BytesIO(z.read(n))) for n in names]
+    return [Image.open(io.BytesIO(body))]
+
+
+def first_image(body: bytes):
+    return all_images(body)[0]
+
+
+def edited_image(job: dict, body: bytes):
+    """The result of an edit job, with the grid padding cut off: bg-removal -> the returned image with the most
+    transparency; an upscaled cut-out gets its source matte back, scaled to the new size."""
+    from PIL import Image
+    imgs = all_images(body)
+    clear = lambda im: im.convert("RGBA").getchannel("A").histogram()[0]
+    img = max(imgs, key=clear) if job["op"] == "bg-removal" else imgs[0]
+    alpha = Image.open(ref_path(job["images"][0])).convert("RGBA").getchannel("A")
+    k = img.width / op_canvas(alpha.size)[0]                         # 2 for an upscale, 1 for the Director tools
+    img = img.crop((0, 0, round(alpha.width * k), round(alpha.height * k)))
+    if job["op"] == "upscale":
+        if alpha.getextrema()[0] < 255:
+            img = img.convert("RGB"); img.putalpha(alpha.resize(img.size, Image.LANCZOS))
+    return img
+
+
+def request_for(job: dict, cfg: dict, data: bool = True) -> tuple[str, dict]:
+    return op_request(job, cfg, data) if job.get("op") else ("/ai/generate-image", build_request(job, cfg, data))
 
 
 HTTP_HINTS = {
     400: "the request was rejected (a field NovelAI does not accept: try another ref_mode, or check 'nai' overrides)",
     401: f"the key in {KEY_ENV} was refused: create a new persistent API token in NovelAI's account settings",
-    402: "this needs an active subscription or more Anlas (size > 1 MP, > 28 steps, img2img and references cost Anlas)",
+    402: "this needs an active subscription or more Anlas (size > 1 MP, > 28 steps, img2img, references, upscales and "
+         "Director tools cost Anlas)",
     403: "forbidden (subscription tier or model access; an HTML page with 'error code: 1010' is Cloudflare blocking the client)",
 }
 
 
-def post(body: dict, key: str, timeout: float, attempts: int) -> bytes:
+def post(path: str, body: dict, key: str, timeout: float, attempts: int) -> bytes:
     data = json.dumps(body).encode("utf-8")
     wait = 8.0
     for attempt in range(1, attempts + 1):
-        req = urllib.request.Request(API + "/ai/generate-image", data=data, method="POST", headers={
+        req = urllib.request.Request(API + path, data=data, method="POST", headers={
             "Authorization": "Bearer " + key, "Content-Type": "application/json", "Accept": "application/zip, image/png",
             "User-Agent": "mv-studio/1.0 (tools/novelaigen.py)"})   # Cloudflare blocks the default Python-urllib agent (error 1010)
         try:
@@ -304,8 +364,9 @@ def main() -> int:
     if a.dry_run:
         d = ROOT / "_novelai"; d.mkdir(exist_ok=True)
         for j in todo:
-            (d / f"{j['id']}.request.json").write_text(json.dumps(build_request(j, cfg, data=False), ensure_ascii=False,
-                                                                  indent=1), encoding="utf-8")
+            path, body = request_for(j, cfg, data=False)
+            (d / f"{j['id']}.request.json").write_text(json.dumps(dict(body, _path=path), ensure_ascii=False, indent=1),
+                                                       encoding="utf-8")
         print(f"[novelai] dry run: {len(todo)} request(s) in _novelai/ (model {cfg['model']}); nothing was sent")
         return 0
     manifest_path = out_dir / "manifest.json"
@@ -317,7 +378,8 @@ def main() -> int:
         dst = target(j)
         t0 = time.time()
         try:
-            img = first_image(post(build_request(j, cfg), key, a.timeout, a.attempts))
+            resp = post(*request_for(j, cfg), key, a.timeout, a.attempts)
+            img = edited_image(j, resp) if j.get("op") else first_image(resp)
         except Exception as e:  # noqa: BLE001
             failed.append(j["id"])
             print(f"[  failed] {j['id']}: {e}", flush=True)
@@ -329,21 +391,24 @@ def main() -> int:
             continue
         dst.parent.mkdir(parents=True, exist_ok=True)
         raw = dst.with_suffix(".raw.png")
-        img.convert("RGB").save(raw)                     # re-encoded: NovelAI's PNG text chunks are not kept
+        cut = j.get("transparent") or j.get("op") == "bg-removal" or (j.get("op") and img.mode in ("RGBA", "LA"))
+        (img.convert("RGBA") if cut and j.get("op") else img.convert("RGB")).save(raw)   # re-encoded: NovelAI's PNG text chunks are not kept
         info: dict = {"alpha_method": "none"}
-        if j.get("transparent"):
+        if cut:
             info = postprocess_alpha(raw, dst, j.get("trim", True))
             if (info.get("transparent_pct") or 0) < 3:
                 print(f"  WARN {j['id']}: the cut-out came back as a full rectangle (no key colour around the subject)")
         else:
             shutil.copyfile(raw, dst); raw.unlink()
-        req = build_request(j, cfg, data=False)
-        manifest[j["id"]] = dict(info, status="complete", out=kit_env.rel(dst), prompt=j["prompt"], generator="novelai",
-                                 model=req["model"], seed=req["parameters"]["seed"], action=req["action"], raw_size=list(img.size),
+        _, req = request_for(j, cfg, data=False)
+        seed = None if j.get("op") else req["parameters"]["seed"]
+        manifest[j["id"]] = dict(info, status="complete", out=kit_env.rel(dst), prompt=j.get("prompt", ""), generator="novelai",
+                                 model=req.get("model"), seed=seed, action=j.get("op") or req["action"],
+                                 source=(j.get("images") or [None])[0] if j.get("op") else None, raw_size=list(img.size),
                                  elapsed=round(time.time() - t0, 1))
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
         done.append((j["id"], dst))
-        print(f"[complete] {j['id']} ({manifest[j['id']]['elapsed']} s, seed {req['parameters']['seed']})", flush=True)
+        print(f"[complete] {j['id']} ({manifest[j['id']]['elapsed']} s, " + (j["op"] if j.get("op") else f"seed {seed}") + ")", flush=True)
         if i + 1 < len(todo):
             time.sleep(a.delay)
     sheet = out_dir / "_check_novelai.jpg"
