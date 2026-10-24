@@ -76,7 +76,7 @@ Findings from 残光 (night-heavy film): **gold** (金夜: ivory/gold mincho) = 
 
 Light-background schemes at the pinned JIZURA (fc16bfe; style, scheme indices, text colour): ocean 2 navy · sakura 0, 3 plum · sunset 1, 3 violet · forest 1, 3 dark green · vapor 1, 2 indigo · candy 0–2 violet / plum · kraft 0, 1 · sumi 0, 3 ink · gold 1 (black on gold) · specimen 1 · noir 1 · newsprint 0 · paper 0 navy · rouge 0 · caution 0 (black on yellow) · mint 2 · acid 1 · blueprint 2 (blue) · magenta 1 (magenta). No light scheme: crimson, hud, mono, synth80. Avoid transit with `'light'`: its scheme 2 (grey `#9C9A94`, luminance 0.60) passes the test but keeps white text.
 
-Keep one dark plan for night or shadowed shots and choose the plan per shot from the luminance behind the text. Where white cloud meets deep sea, use the centre-free plan or a 20–35 % `grad` fx that darkens or lightens the band the text sits in.
+Keep one dark plan for night or shadowed shots and choose the plan per shot from the luminance behind the text; `check_shots.mjs` reports LYRICS LOW CONTRAST (under 3:1 against the picture around the words). Where white cloud meets deep sea, use the centre-free plan or a 20–35 % `grad` fx that darkens or lightens the band the text sits in.
 
 ## 5. Curation (deny-lists)
 
@@ -139,7 +139,7 @@ Dump the registry with `node tools/jizura_parts.mjs` → `jizura/parts.json` (pe
 ## 6. Character shots & text-behind
 
 - **Centre-free plan** (`centerFree: true`, JIZURA 中央を空ける): lyrics split into left/right bands (or top/bottom on tall frames) — use for any shot where the character's face/action is the point (kneeling and gathering, bust shots, singing).
-- **Text behind the character**: put the character in the foreground layer (`illust` char `front: true`; custom scenes draw into `S.fg` with the same transform). The lyric passes behind her; this was one of the strongest looks (hero chorus shots, the run in front of a giant 「わたしは行くよ」).
+- **The character in front of the type** (`illust` char `front: true`; custom scenes draw into `S.fg` with the same transform): only where the words stay whole. A giant line she stands beside, or a monument glyph that isn't the sung word. `check_shots.mjs` flags a lyric more than 5 % under the foreground (LYRICS HIDDEN, an ERROR with `--strict`). Users read covered lyrics as a mistake, not depth.
 - Shots whose scene *is* the typography (kanji slams, type cards, tunnels, title/end cards) use `lyric: 'none'`.
 
 ## 7. Debugging

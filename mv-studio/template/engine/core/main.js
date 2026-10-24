@@ -161,7 +161,7 @@
       sceneX.drawImage(layerA, 0, 0);
       drawLyrics(act[0].shot, t);
       if (act[0].shot.text) { textX.save(); act[0].shot.text(textX, stateFor(act[0].shot, t)); textX.restore(); }
-      if (Z.onText) Z.onText(textC, act[0].shot);                // the lyrics before the HUD (tools/check_shots.mjs)
+      if (Z.onText) Z.onText(textC, act[0].shot, fgC, sceneC);   // the lyrics before the HUD (tools/check_shots.mjs)
       if (Z.hud && !Z.VERTICAL && act[0].shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(act[0].shot, t)); textX.restore(); }
       P = postFor(act[0].shot, t);
     } else if (act.length === 2) {
@@ -173,7 +173,7 @@
       // lyric layer follows the incoming shot (JIZURA already handles its own cut changes)
       drawLyrics(b.shot, t);
       if (b.shot.text) { textX.save(); b.shot.text(textX, stateFor(b.shot, t)); textX.restore(); }
-      if (Z.onText) Z.onText(textC, b.shot);
+      if (Z.onText) Z.onText(textC, b.shot, fgC, sceneC);
       if (Z.hud && !Z.VERTICAL && b.shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(b.shot, t)); textX.restore(); }
       const Pa = postFor(a.shot, t), Pb = postFor(b.shot, t), k = Z.ease.inOutSine(Z.clamp(b.k));
       P = Object.assign({}, Pb);

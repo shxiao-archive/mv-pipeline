@@ -40,9 +40,11 @@ visible signs, not parameters.
 **Type roles:**
 - At most 3 families, each with one job: the lyric voice, the impact or monument face, the machine or system voice, a
   hand. A scale and a grid to set them on.
-- **Type as material.** It can be the subject (monument kanji, a word full frame), sit inside the world (behind the
-  character, on a surface, a name built from stone or fire), or carry pressure (a width axis that condenses on each
+- **Type as material.** It can be the subject (monument kanji, a word full frame), sit inside the world (on a surface,
+  a name built from stone or fire), or carry pressure (a width axis that condenses on each
   kick).
+- **The sung word stays readable:** whole (never under the character) and at least 3:1 against the picture around
+  it, whatever the style. `check_shots.mjs` measures both: LYRICS HIDDEN and LYRICS LOW CONTRAST.
 - **Craft is the quality bar:** kerning, no faux bold on CJK, punctuation used as graphics, symbols drawn rather than
   substituted, ruby as a second voice where it means something.
 

@@ -11,7 +11,7 @@ limited animation; one visual idea about the song runs through it all.
 ## 1. The feel
 
 1. **The lyrics are the subject** (文字PV). Text isn't a subtitle. It rotates, scales, bounces, stacks, shatters,
-   passes behind the character and fills the frame as one monument kanji, in time with the beat. *Why:* ボカロ
+   stands huge beside the character and fills the frame as one monument kanji, in time with the beat. *Why:* ボカロ
    audiences read the song; the typography *is* the performance. *Shows as:*
    - a word slammed on the chorus downbeat;
    - a line cascading down vertically on 8th notes;
@@ -20,7 +20,7 @@ limited animation; one visual idea about the song runs through it all.
    - ruby as a second voice.
 
    **Size is the point.** Every section has at least one frame where the type *is* the picture: a word or a line that
-   fills half the frame or more, cropped by the edge, with the character behind it or gone. Every chorus has several,
+   fills half the frame or more, cropped by the edge, the character small beside it or gone. Every chorus has several,
    and the chorus downbeat is one. Lyrics at caption size beside a centred girl, shot after shot, is the commonest
    failure. In iteration 6, two of three films did exactly that and read as an illustrated karaoke. The film that
    felt like a ボカロPV filled the frame with `kanjiSlam`, `titleRiff` and full-frame JIZURA layouts.
@@ -90,7 +90,7 @@ limited animation; one visual idea about the song runs through it all.
 - **In signal passages:** tear bands, chroma split, multipath ghost, a rolling band, vertical-hold jumps; sensor
   sparkles and hot pixels that accumulate over the song and never heal; scanlines; a vignette.
 - **Composition:**
-  - The subject on a third, facing the open side, the lyric in the other two thirds, text passing behind her.
+  - The subject on a third, facing the open side, the lyric in the other two thirds, clear of her.
   - A shot vocabulary for fast sections: full / crop (eye, mouth, hand, neck) / cut-out / silhouette / split panels /
     the word full frame. Each cut re-rolls its framing.
   - Scale and place change from shot to shot. The same standing pose in the middle of the same plate, with a caption
@@ -162,6 +162,12 @@ Many films travel along these ranges, and the travel is the story.
 ## 6. Craft notes
 
 - Lyrics are readable for ≥ max(0.7 s, 0.09 s × characters).
+- **Every sung word is whole and stands apart from the picture.**
+  - The character never covers the words (`check_shots.mjs`: LYRICS HIDDEN, ≤ 5 %). Only decoration and monument
+    shapes go behind her.
+  - Contrast is at least 3:1 against what surrounds the words (LYRICS LOW CONTRAST). On a busy or same-hue picture,
+    give them an outline, a shadow or a plate, or a value from the other end of the palette. In iteration 6, purple
+    and gold type on purple neon read as texture, not words.
 - One lyric system on screen at a time.
 - Full-frame white flashes only at 3–6 key points, never twice within a second; inserts stay dark; `check_flash.py`
   on every render.

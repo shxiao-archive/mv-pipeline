@@ -15,6 +15,10 @@
  *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen; a
  *            JIZURA cut is judged while its words hold (glyphs flying off the frame in an enter / exit are motion).
  *            Fix: lyric: { mode, safe: 0.9 } scales the layer into the box; a shot with crop: true crops on purpose
+ *          · LYRICS HIDDEN: over 5 % of the lyric's pixels under the foreground layer (a character drawn in front of the
+ *            words), while the words hold (an ERROR with --strict)
+ *          · LYRICS LOW CONTRAST: the glyphs against the ring of picture around them below 3:1 (WCAG, large text),
+ *            while the words hold (an ERROR with --strict). Both are measured on the lyric layer (JIZURA + shot.text)
  *          · LYRIC OVERLAP: more than one lyric drawn in one frame, recorded while the frame is drawn (the JIZURA cuts
  *            the renderer draws, and the lines the film's own code reads with Z.line(i).text before the HUD), on every
  *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
@@ -31,6 +35,42 @@ import { openEngine } from './engine_page.mjs';
 
 handleHelp(`check_shots.mjs -- render samples of every shot; report errors, black / flat frames, failed fonts
   node tools/check_shots.mjs [--url engine/index.html] [--samples 3] [--only id1,id2] [--json FILE] [--sprite-fps 4] [--strict] [--selftest]`);
+
+// One frame's lyric legibility from RGBA arrays (w x h): the lyric layer, the foreground layer (drawn over the lyrics)
+// and the picture the viewer sees (scene + lyrics + foreground). -> { px: glyph pixels, hidden: share of them under the
+// foreground, contrast: WCAG ratio between the glyphs (their light or dark end, so an outline doesn't count against a
+// fill) and the median of the ring of picture within r px around them, or inside the lyric's own plate / outline; null when too few pixels to judge }.
+// Runs in node (selftest) and in the page (its source is sent there).
+export function legibility(text, fg, comp, w, h, r = 3) {
+  const n = w * h, G = new Uint8Array(n);
+  let px = 0, hid = 0;
+  // covered = under a near-opaque foreground (a character); a translucent overlay dims the words: that is contrast
+  for (let i = 0; i < n; i++) if (text[4 * i + 3] > 200) { G[i] = 1; px++; if (fg && fg[4 * i + 3] >= 230) hid++; }
+  if (!px) return { px: 0, hidden: 0, contrast: null };
+  const dil = (src, horiz) => {                                // box dilation by r along one axis (prefix sums)
+    const out = new Uint8Array(n), len = horiz ? w : h, lines = horiz ? h : w, cs = new Int32Array(len + 1);
+    for (let a = 0; a < lines; a++) {
+      const at = k => (horiz ? a * w + k : k * w + a);
+      for (let k = 0; k < len; k++) cs[k + 1] = cs[k] + src[at(k)];
+      for (let k = 0; k < len; k++) out[at(k)] = cs[Math.min(len, k + r + 1)] - cs[Math.max(0, k - r)] > 0 ? 1 : 0;
+    }
+    return out;
+  };
+  const near = dil(dil(G, true), false);
+  const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const lum = i => 0.2126 * lin(comp[4 * i]) + 0.7152 * lin(comp[4 * i + 1]) + 0.0722 * lin(comp[4 * i + 2]);
+  const g = [], b = [];
+  for (let i = 0; i < n; i++) {
+    if (G[i]) { if (!(fg && fg[4 * i + 3] >= 230)) g.push(lum(i)); }
+    else if (near[i]) b.push(lum(i));
+  }
+  if (g.length < 50 || b.length < 50) return { px, hidden: hid / px, contrast: null };
+  g.sort((x, y) => x - y); b.sort((x, y) => x - y);
+  const q = (xs, f) => xs[Math.min(xs.length - 1, Math.floor(f * xs.length))], bg = q(b, 0.5);
+  const ratio = (x, y) => (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  // a lyric that carries its own plate, outline or shadow reads against that: its light end against its dark end
+  return { px, hidden: hid / px, contrast: Math.max(ratio(q(g, 0.85), bg), ratio(q(g, 0.15), bg), ratio(q(g, 0.85), q(g, 0.15))) };
+}
 
 // samples [{ t, p (main sprite path or null), id }] -> [{ id, t, kind, msg }]
 export function spriteFlips(samples) {
@@ -75,6 +115,20 @@ if (flag('selftest')) {
     drawnOverlaps([{ id: 's2', t: 1, jz: ['4:c'], code: [] }, { id: 's3', t: 2, jz: [], code: [5] }]).length === 0,
     moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.7) && !moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.0),
   ];
+  {                                                             // legibility: a 20x10 glyph block on a 60x40 picture
+    const w = 60, h = 40, img = (f) => { const a = new Uint8ClampedArray(w * h * 4); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) a.set(f(x, y), 4 * (y * w + x)); return a; };
+    const inG = (x, y) => x >= 20 && x < 40 && y >= 15 && y < 25;
+    const text = img((x, y) => inG(x, y) ? [235, 235, 235, 255] : [0, 0, 0, 0]);
+    const none = img(() => [0, 0, 0, 0]), half = img((x, y) => x < 30 ? [10, 10, 10, 255] : [0, 0, 0, 0]);
+    const clear = legibility(text, none, img((x, y) => inG(x, y) ? [235, 235, 235, 255] : [25, 20, 40, 255]), w, h);
+    const muddy = legibility(text, none, img((x, y) => inG(x, y) ? [70, 50, 90, 255] : [55, 40, 75, 255]), w, h);
+    const covered = legibility(text, half, img((x, y) => inG(x, y) ? [235, 235, 235, 255] : [25, 20, 40, 255]), w, h);
+    // gold words on their own navy ribbon (both in the lyric layer) over an olive field: legible
+    const inRib = (x, y) => x >= 14 && x < 46 && y >= 11 && y < 29, gold = [224, 168, 74, 255], navy = [40, 40, 80, 255];
+    const rib = (x, y) => inG(x, y) && (x + y) % 3 ? gold : inRib(x, y) ? navy : null;
+    const ribbon = legibility(img((x, y) => rib(x, y) || [0, 0, 0, 0]), none, img((x, y) => rib(x, y) || [95, 100, 60, 255]), w, h);
+    ok.push(clear.contrast > 7 && clear.hidden === 0, muddy.contrast < 1.5, Math.abs(covered.hidden - 0.5) < 0.01, ribbon.contrast > 3);
+  }
   console.log(`[check_shots] selftest ${ok.every(Boolean) ? 'ok' : 'FAIL ' + JSON.stringify(ok)}`); process.exit(ok.every(Boolean) ? 0 : 1);
 }
 
@@ -110,33 +164,46 @@ for (let k = 0; k < shots.length; k++) {
   report.push(row);
 }
 const spriteFps = +arg('sprite-fps', 4);
+const LEG = { hidden: 0.05, contrast: 3 };                     // the lyric: <= 5 % covered; WCAG 3:1 (large text)
 if (spriteFps > 0) {                                           // which sprite is the main one, every 1/spriteFps s
-  const samples = [], unsafe = new Map();
+  const samples = [], unsafe = new Map(), hidden = new Map(), dim = new Map();
+  await E.page.evaluate(src => { window.__legib = (0, eval)('(' + src + ')'); }, legibility.toString());
   for (let k = 0; k < shots.length; k++) {
     const s = shots[k], end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
     if (only && !only.has(s.id)) continue;
     for (let t = s.t0 + 0.5 / fps; t < end; t += 1 / spriteFps) {
-      const { p, out, all } = await E.page.evaluate(async t => {
-        let best = null, out = 0, all = 0;
+      const { p, out, all, leg } = await E.page.evaluate(async t => {
+        let best = null, out = 0, all = 0, leg = null;
         window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
-        window.Z.onText = (c, shot) => {                           // lyric pixels outside the 90 % title-safe box
-          if (shot && shot.crop) return;                          // a deliberate 見切れ: the shot says the frame crops its words
+        window.Z.onText = (c, shot, fgc, scene) => {
           const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main');
           const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
           if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion
+          // legibility: the words uncovered and apart from the picture around them (480 x 270)
+          const w = 480, h = 270, cv = k => window['__lg' + k] || (window['__lg' + k] = Object.assign(document.createElement('canvas'), { width: w, height: h }));
+          const rd = (k, ...src) => { const x = cv(k).getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, w, h); for (const q of src) if (q) x.drawImage(q, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
+          leg = window.__legib(rd(0, c), fgc ? rd(1, fgc) : null, rd(2, scene, c, fgc), w, h);
+          if (shot && shot.crop) return;                          // a deliberate 見切れ: the shot says the frame crops its words
+          // lyric pixels outside the 90 % title-safe box
           const s = window.__safe || (window.__safe = Object.assign(document.createElement('canvas'), { width: 192, height: 108 }));
           const x = s.getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, 192, 108); x.drawImage(c, 0, 0, 192, 108);
           const a = x.getImageData(0, 0, 192, 108).data;
           for (let i = 3, n = 0; i < a.length; i += 4, n++) if (a[i] > 127) { all++; const u = n % 192, v = (n / 192) | 0; if (u < 10 || u >= 182 || v < 5 || v >= 103) out++; }
         };
         try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; }
-        return { p: best && best.p, out, all };
+        return { p: best && best.p, out, all, leg };
       }, t);
       samples.push({ t, p, id: s.id });
       if (out >= 6 && out > 0.02 * all && !unsafe.has(s.id)) unsafe.set(s.id, { t, share: out / all });
+      if (leg && leg.px >= 150) {
+        if (leg.hidden > LEG.hidden && !(hidden.get(s.id)?.v >= leg.hidden)) hidden.set(s.id, { t, v: leg.hidden });
+        if (leg.contrast != null && leg.contrast < LEG.contrast && !(dim.get(s.id)?.v <= leg.contrast)) dim.set(s.id, { t, v: leg.contrast });
+      }
     }
   }
   for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words: pick a calmer plan or reframe)`);
+  for (const [id, u] of hidden) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS HIDDEN (${(u.v * 100).toFixed(0)} % of the lyric under the foreground: the character covers the words; move the words or the character, or put the lyric in front)`);
+  for (const [id, u] of dim) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS LOW CONTRAST (${u.v.toFixed(1)}:1 against the picture around them, needs ${LEG.contrast}:1; a lighter or darker colour, an outline, a shadow or a plate)`);
   for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
 }
 {                                                              // which lyrics each frame draws, around every cut
