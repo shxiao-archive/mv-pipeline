@@ -51,6 +51,7 @@ const fmt = t => { const m = Math.floor(t / 60), s = t - m * 60; return `${m}:${
 // the grid: beats (+ half beats), every cue, every line onset, the start and the end
 const grid = [0, P.duration];
 P.beats.forEach((b, k) => { grid.push(b); if (R.grid === 'half' && k + 1 < P.beats.length) grid.push((b + P.beats[k + 1]) / 2); });
+grid.push(...(P.groupStarts || []));                     // odd-metre beat groups (analysis/meter.json) are cut points too
 cues.forEach(c => grid.push(c.t)); lines.forEach(L => grid.push(L.t));
 grid.sort((a, b) => a - b);
 const nearest = t => { let best = Infinity; for (const g of grid) { const d = Math.abs(g - t); if (d < best) best = d; } return best; };

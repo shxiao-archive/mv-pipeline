@@ -57,11 +57,12 @@ STYLE = {
     "treatise": dict(scene=r"^tr[A-Z]", starter="starters/treatise.js", use=r"\bTR\.|['\"]tr[A-Z]"),
     "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
     "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
+    "magazine": dict(scene=r"^mz[A-Z]", starter="starters/magazine.js", use=r"\bMZ\.|['\"]mz[A-Z]"),
     "vocaloid": dict(scene=None, starter="timeline.js"),
     "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
 }
 # the presets' signature scenes: an own-style film may borrow techniques, not a preset's look (SKILL.md)
-PRESET_SCENES = r"^(if|tr|pc|st)[A-Z]|^sig(Shot|Term|Frag|Abs)$"
+PRESET_SCENES = r"^(if|tr|pc|st|mz)[A-Z]|^sig(Shot|Term|Frag|Abs)$"
 V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"kind\s*:\s*['\"]inks", "limp": r"kind\s*:\s*['\"]limp",
       "fps": r"\bfps\s*:\s*\d", "replay": r"replay(Map)?\(", "tear": r"Z\.tear\(", "rays": r"\brays\s*:"}
 

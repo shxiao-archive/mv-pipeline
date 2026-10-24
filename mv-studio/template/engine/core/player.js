@@ -28,12 +28,20 @@
   const film = () => t - (Z.OFFSET || 0);                       // shots are in film time (project.json timing.offset)
   const current = () => { let k = -1; shots().forEach((s, i) => { if (s.t0 <= film() + 1e-6) k = i; }); return k; };
   const span = k => { const s = shots(), a = s[k]; return [a.t0 + (Z.OFFSET || 0), (s[k + 1] ? s[k + 1].t0 : a.t1) + (Z.OFFSET || 0)]; };
+  // where the music is: bar (metre) and beat group, the section, and the drums (core/util.js clock and hits)
+  const music = () => {
+    if (!Z.clock) return '';
+    const m = Z.clock.meter(t), sec = ((Z.audio && Z.audio.sections) || []).filter(x => x.start <= t + 1e-6).pop();
+    const d = Z.hit ? ['kick', 'snare', 'hat'].map(k => `${k} ${Z.hit(k, t).toFixed(2)}`).join(' ') : '';
+    return `bar ${m.bar + 1} (${m.meter}) group ${m.group + 1}/${m.groups.length}  ${sec ? sec.name || sec.label : '-'}  ${d}`;
+  };
   function info() {
     if (!hudOn) { hud.style.display = 'none'; return; }
     const k = current(), s = shots()[k];
     hud.style.display = '';
     hud.textContent = `${fmt(t)}  f${Math.round(t * FPS)}  ${audio.paused ? 'paused' : 'playing'}${loop ? '  LOOP' : ''}  draw ${ms.toFixed(0)} ms\n` +
       (s ? `shot ${k + 1}/${shots().length}  ${s.id || ''}  ${s.scene}${s.moment ? '  - ' + s.moment : ''}\n` : '\n') +
+      music() + '\n' +
       'space play  ←→ frame (shift 1 s)  [ ] shot  L loop  Home start  H hud';
   }
   async function show(nt) {

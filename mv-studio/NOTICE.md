@@ -57,6 +57,9 @@ their films. All tools listed above were written for this skill.
   non-determinism and lost characters, P0 / P1 / P2 independent review, progress written before polish, git
   checkpoints; one short guide for every builder, a frame that returns, a motif that escalates each chorus, a
   line-up of all characters at one scale (`lineup.py`).
+- **he-drowns-mv-v2** (longruizhi2-beep, MIT): a bar map with changing metre and beat groups checked against the
+  spectrogram (`analysis/meter.json`, `Z.clock.meter`), per-drum hit envelopes driving the picture (`Z.hit`), a debug
+  readout of the musical position in the preview player, an intensity chart with three escalating climaxes.
 - **netsu-ijou-pv** (CC BY-NC 4.0, ideas only): per-character timing from the UTAU score, a local lyric-timing editor,
   cut-outs masked from a green redraw and a keyer for light-on-light subjects (`alpha_matte.py redraw`, `--seal`),
   reference images labelled as style or design.
@@ -92,6 +95,18 @@ paper doll is a generic original rig. `template/engine/core/rig.js` (joint table
 distance, two-bone IK, ground contact, time-lagged trails) and `core/blocks.js` follow its rig and block methods; the
 team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
 documents of all six study films (methods only; none of their characters, songs, copy or art).
+
+## The magazine style: adapted from he-drowns-mv-v2 — © 2026 ATRAXI (longruizhi2-beep), code MIT
+
+https://github.com/longruizhi2-beep/he-drowns-mv-v2 (licence text in `licenses/LICENSE-he-drowns-mv-v2.txt`).
+`template/engine/styles/magazine/press.js` adapts its print press (`js/print.js`: density separation into spot inks,
+euclidean / line / grain screens with a tone LUT, plate offsets, riso paper, ink as light, negative and copier
+streaks), rewritten for `core/shade.js` without its frame feedback; `layout.js` adapts its type and editorial marks
+(`js/draw.js`, `js/scenes/common.js`: vertical type, ruby, crop and registration marks, proof rings, manuscript grid,
+EAN-13, metre glyphs, ruler, gauge, ink drops, torn edges); `scenes.js` follows its page idioms (metre-as-layout strips
+and grids, contents page, slam montage, burn holes, torn page, contact sheet, character decomposition, subliminal
+frames). `tools/meter_probe.py` follows its `tools/tatum.py` and `tools/meter.py` (period / phase search, tatum
+autocorrelation). Its song, lyrics, photographs, 3D sea and story are not used.
 
 ## Review process
 

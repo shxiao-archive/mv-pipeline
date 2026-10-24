@@ -65,6 +65,7 @@ AUDIO = str(kit_env.SONG)
 VOCAL_STEM = os.path.join(ROOT, "analysis", "stems", "vocals_kim.wav")
 INST_STEM = os.path.join(ROOT, "analysis", "stems", "instrumental_kim.wav")
 SECTIONS_FILE = os.path.join(ROOT, "analysis", "sections.json")
+METER_FILE = os.path.join(ROOT, "analysis", "meter.json")   # curated bar map (odd / changing metre), tools/meter_probe.py
 OUT_AUDIO = os.path.join(ROOT, "analysis", "audio.json")
 OUT_ENV = os.path.join(ROOT, "analysis", "envelope_30fps.json")
 OUT_PNG = os.path.join(ROOT, "analysis", "overview.png")
@@ -637,6 +638,39 @@ def aligned_sim(C, a0, a1, b0, b1):
     return best
 
 
+def meter_bars(M, beats, cut):
+    """analysis/meter.json {"tatum": s, "t0": s, "bars": [[count, "5/8", [3, 2]], ...]} (groups in tatums, usually
+    16ths) -> (downbeats, bars, group_starts). Replaces the beats / 4 bars when a song changes metre or groups its bars
+    unevenly. shortcut: one fixed tatum (constant tempo); a song that also changes tempo needs a tatum per row."""
+    tat, t = float(M["tatum"]), float(M["t0"])
+    bars, starts, gstarts = [], [], []
+    if beats[0] < t - 0.05:
+        bars.append({"index": 0, "start": r3(beats[0]), "end": r3(t), "pickup": True,
+                     "beats": int(np.sum(beats < t - 0.05)), "_k0": 0})
+    for count, meter, groups in M["bars"]:
+        L = int(sum(groups))
+        if L <= 0 or any(int(g) <= 0 for g in groups):
+            raise ValueError(f"meter.json: bad groups {groups} for {meter}")
+        for _ in range(int(count)):
+            if t >= cut - 0.25:
+                break
+            b = {"index": len(bars) + (0 if bars and bars[0].get("pickup") else 1), "start": r3(t),
+                 "end": r3(min(t + L * tat, cut)), "meter": meter, "groups": [int(g) for g in groups], "tatum": tat,
+                 "bpm": r3(60.0 / (tat * 4)), "_k0": int(np.argmin(np.abs(beats - t)))}
+            if t + L * tat > cut + 0.25:
+                b["partial"] = True
+            g0 = t
+            for g in groups:
+                gstarts.append(r3(g0))
+                g0 += int(g) * tat
+            starts.append(t)
+            bars.append(b)
+            t += L * tat
+    if not starts:
+        raise ValueError("meter.json: no bar starts before the music cut")
+    return np.array(starts), bars, gstarts
+
+
 SECTION_KEYS = ("first_bar", "last_bar", "label", "group", "name", "character", "notable")
 
 
@@ -1009,7 +1043,7 @@ def envelope_30fps(y48, F, beats, downbeats, duration, music_start, cut, vocal_s
 # 10. plots
 # ================================================================================================================
 def plot_overview(path, y48, duration, env, envraw, tt, beats, downbeats, sections, impacts, vocal, onsets, bpm_bars,
-                  phase=1, title="song"):
+                  phase=1, title="song", bars_meter=None):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -1087,7 +1121,9 @@ def plot_overview(path, y48, duration, env, envraw, tt, beats, downbeats, sectio
     ax = axes[3]
     ax.plot(tt, envraw["onset"], color="#b58cff", lw=0.6, alpha=0.9)
     ax.vlines(beats, 0, 0.12, color="#aab2bf", lw=0.5, alpha=0.7)
-    ax.vlines(downbeats, 0, 0.3, color="#ffffff", lw=1.0, alpha=0.9)
+    mcol = {"3/8": "#ff5ad1", "5/8": "#5ad8ff", "6/8": "#7dff6a", "7/8": "#ffb13b", "2/4": "#ffe95a", "3/4": "#b58cff"}
+    ax.vlines(downbeats, 0, 0.3, color=[mcol.get(b.get("meter"), "#ffffff") for b in bars_meter[:len(downbeats)]]
+              if bars_meter else "#ffffff", lw=1.0, alpha=0.9)    # odd-metre bars (meter.json) coloured
     for j, d in enumerate(downbeats):
         if j % 4 == 0:
             ax.text(d, 0.32, str(j + 1), color="#dde3ea", fontsize=7, ha="center")
@@ -1330,8 +1366,22 @@ def write_md_generic(path, A, secs, impacts, bars_full, stops, title):
     L.append("- Estimators: " + ", ".join(f"{k} {v:.2f}" for k, v in t["estimators"].items()) +
              f". Search range {rng[0]:.1f}-{rng[1]:.1f} BPM. Tempo confidence **{t['confidence']:.2f}** - if the "
              "clicks in `analysis/click_preview.m4a` run at double / half speed, re-run with `--bpm-range LO,HI`.")
-    L.append(f"- **Meter 4/4** (assumed). Downbeat = `beats[k]` with `k % 4 == {di['winning_phase']}` "
-             f"(confidence **{di['confidence']:.2f}**; if the bar starts sound wrong, curate sections by ear).")
+    if A.get("meter_map"):
+        runs = []
+        for b in A["bars"]:
+            if b.get("meter") and (not runs or runs[-1][0] != (b["meter"], tuple(b["groups"]))):
+                runs.append([(b["meter"], tuple(b["groups"])), 1])
+            elif b.get("meter"):
+                runs[-1][1] += 1
+        L.append("- **Metre from `analysis/meter.json`** (curated bar map, tatum "
+                 f"{A['meter_map']['tatum'] * 1000:.1f} ms): " + ", ".join(
+                     f"{m} ({'+'.join(map(str, g))}) x{n}" for (m, g), n in runs) +
+                 ". `downbeats[]` / `bars[]` follow it; `group_starts[]` are the beat-group starts (cut on these); "
+                 "in the engine `Z.clock.meter(t)` gives bar, metre, group and phase.")
+    else:
+        L.append(f"- **Meter 4/4** (assumed). Downbeat = `beats[k]` with `k % 4 == {di['winning_phase']}` "
+                 f"(confidence **{di['confidence']:.2f}**; if the bar starts sound wrong, curate sections by ear; "
+                 "odd or changing metre: `python tools/meter_probe.py`, then curate `analysis/meter.json`).")
     pick = [b for b in A["bars"] if b.get("pickup")]
     L.append(f"- **{len(A['beats'])} beats, {len(bars_full)} full bars**" +
              (f" (+ {pick[0]['beats']} pickup beat(s) from {pick[0]['start']:.2f} s = bar 0)" if pick else "") +
@@ -1567,7 +1617,16 @@ def main():
     if cut > downbeats[-1] + 0.25:
         bars.append({"index": len(down_idx), "start": r3(downbeats[-1]), "end": r3(cut),
                      "partial": True, "beats": int(len(beats) - down_idx[-1]), "_k0": int(down_idx[-1])})
-    fullbars = [b for b in bars if not b.get("pickup") and not b.get("partial")]
+    meter_map, group_starts = None, []
+    if os.path.exists(METER_FILE):
+        with open(METER_FILE, encoding="utf-8") as f:
+            meter_map = json.load(f)
+        try:
+            downbeats, bars, group_starts = meter_bars(meter_map, beats, cut)
+        except (ValueError, KeyError, TypeError) as ex:
+            sys.exit(f"error: analysis/meter.json: {ex}")
+        log(f"meter map: {len(bars)} bars from analysis/meter.json ({len(group_starts)} beat groups)")
+    fullbars =[b for b in bars if not b.get("pickup") and not b.get("partial")]
     log(f"beats {len(beats)}, downbeats {len(downbeats)}, full bars {len(fullbars)}; last downbeat "
         f"{downbeats[-1]:.3f} vs cut {cut:.3f}")
 
@@ -1628,7 +1687,9 @@ def main():
                   "estimators": {k: r3(v) for k, v in est.items()}, "octave_check": octave,
                   "estimator_agreement(within 2.5%, octave-folded)": r3(agree), "confidence": r3(tempo_conf),
                   "search_range_bpm": [r3(BPM_RANGE[0]), r3(BPM_RANGE[1])]},
-        "meter": "4/4",
+        "meter": "mixed" if meter_map else "4/4",
+        **({"meter_map": {"source": "analysis/meter.json", "tatum": meter_map["tatum"], "t0": meter_map["t0"]},
+            "group_starts": group_starts} if meter_map else {}),
         "beat_tracking": dict(bstats, note="beats = onset-snapped (use for hits); beats_smooth = jitter-free spline "
                                            "grid (same indices; use for continuous motion)"),
         "grid_fit": gfit,
@@ -1666,7 +1727,8 @@ def main():
     log("wrote", OUT_MD)
     if not args.no_plot:
         plot_overview(OUT_PNG, y48, duration, env, envraw, tt, beats, downbeats, secs, impacts, vsegs, onsets,
-                      bpm_bars, win, title=title)
+                      bpm_bars, win, title=title,
+                      bars_meter=[x for x in bars if not x.get("pickup")] if meter_map else None)
         plot_ssm(OUT_SSM, ev, secs, fullbars)
         log("wrote plots")
     if not args.no_click:

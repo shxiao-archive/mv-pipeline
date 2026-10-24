@@ -50,7 +50,8 @@ Method in one paragraph: onset envelope at 100 fps (log-mel flux at 24 kHz); tem
 | `beats_smooth` | same indices, jitter-free spline grid | continuous motion (camera speed, loops) |
 | `downbeat_info.winning_phase` | 1 → downbeat = `beats[k]` with `k % 4 == 1` | the engine's bar numbering (`Z.makeClock(…, winning_phase)`) |
 | `downbeat_info` (rest) | `phase_scores`, `per_feature_phase_means`, `confidence 0.82`, `top_repeat_lags` | auditing the downbeat choice |
-| `downbeats` | 122 times | bar hits |
+| `downbeats` | 122 times | bar hits (from `analysis/meter.json` when it exists, §6b) |
+| `meter`, `meter_map`, `group_starts` | `"4/4"`; with a bar map `"mixed"`, `{source, tatum, t0}` and every beat-group start | odd / changing metre: cut on `group_starts`; `bars[].meter / groups / tatum` |
 | `bars[]` | `{index, start, end, bpm}`; `index 0` is a **pickup** bar (`pickup:true, beats:n`) when the song starts off the downbeat | `B(n)` = `start` of the bar whose `index` is n (array position ≠ bar number when there is no pickup); per-bar tempo |
 | `sections[]` | `{index, name, start, end, label, group, bars:[first,last], bar_count, energy, vocal_fraction, boundary_novelty(_rank), nearest_auto_boundary_bars, repeat_similarity{section_k: sim}, vocal_entry, confidence, occurrence, character, notable, notes}` | palette/look per section, HUD, escalation plan |
 | `auto_boundary_candidates_bars` | bar numbers | where the automatic novelty says sections change (input for §6) |
@@ -82,7 +83,9 @@ The master is usually compressed: `rms` varies little between verse and chorus (
 The engine loads both files at boot (`engine/core/main.js`) and exposes:
 ```js
 Z.audio                       // the whole audio.json
-Z.clock = Z.makeClock(audio.beats, audio.bpm, audio.downbeat_info.winning_phase)
+Z.clock = Z.makeClock(audio.beats, audio.bpm, audio.downbeat_info.winning_phase, audio.bars)   // bars: the meter.json map (§6b)
+Z.hit(kind, t, tau=0.12)      // drums: strongest recent onsets[kind] ('kick'|'snare'|'hat'|'vocal'), decaying exp(-dt/tau)
+Z.lastHit(kind, t, thr) / Z.hitCount(kind, from, t, thr)   // last strong hit time; strong hits since `from` (accent montages)
 Z.env   = Z.makeEnv(envelope)  // linear interpolation between frames
 // inside a scene: S.clock === Z.clock, S.env === Z.env
 S.clock.pulse(t, k=10)   // exp(-k · seconds since last beat): 1 on the beat, decays
@@ -90,6 +93,8 @@ S.clock.downPulse(t, k=6) // same, downbeats only
 S.clock.phase(t) / barPhase(t)        // 0..1
 S.clock.beat(t) / bar(t) / inBar(t)   // beat number (0 = first downbeat), bar number, 0..3 within the bar
 S.clock.since(t) / nearest(t) / at(n) // seconds since beat, nearest beat time, time of beat n (extrapolates with spb)
+S.clock.meter(t)                      // { bar, meter, len, q (tatum in the bar), group, groups, gq, gPhase, tatum }; 4/4 from beats without a map
+S.clock.groupPulse(t, k=10)           // 1 at every beat-group start (= the beat in 4/4)
 S.clock.beats / spb                   // raw list, 60/bpm (only for extrapolation past the end)
 S.env.rms(t) low(t) mid(t) high(t) onset(t) vocal(t); S.env.get('bar_phase', t)
 ```
@@ -125,6 +130,40 @@ Procedure for a new song:
 3. Read the evidence: `overview.png` (energy, bass in/out, vocals), `ssm.png` (repeats show as diagonals), `auto_boundary_candidates_bars`, `stops`, `drop`/`breakdown` impacts, and the lyric line starts (lines start 0.2–1.5 s *before* section downbeats — pickups).
 4. Write `analysis/sections.json`: whole bars, every bar covered once in order, last row ends at the final bar (the script ends it at `music_cut` and appends a `tail` section automatically). Use the label vocabulary `intro, verse, pre-chorus, break, chorus, post-chorus, interlude, bridge, last-chorus, outro` (HUD, overview colours and the style docs use it); `group` names material that repeats (`chorus`, `verse`, `riff`…) — `repeat_similarity` is measured within a group. Put mood and notable events in the last two fields: they flow into `AUDIO_MAP.md` and brief every later agent.
 5. Re-run (the file is picked up by default). Check each section's `confidence` (残光: lowest 0.44–0.55 on arrangement-only boundaries — fine if your ears agree) and that `docs/AUDIO_MAP.md` reads right.
+
+## 6b. Odd or changing metre (`analysis/meter.json`)
+
+The analysis assumes 4/4: four beats to a bar. A song in 3/8, 5/8 or 7/8, one that changes metre (a 3/8 stab, a 2/4
+fill, a math-rock 5-5-5-6 cycle), or one whose bars group unevenly (3+3+3+3+4) needs a curated bar map. A song that
+stays in 4/4 needs none.
+
+1. `python tools/meter_probe.py` locks a tatum grid (16ths of the analysed tempo; `--div`, `--bpm` to change) and writes
+   `analysis/meter_probe.png`, which holds four panels:
+   - the period search;
+   - onset residuals against the grid (a flat band means the band plays to a click);
+   - an autocorrelation map in tatum lags (a bright row at 16 is 4/4, 10 is 5/8, 14 is 7/8, 6 is 3/8);
+   - the bar map on the spectrogram.
+
+   It also writes a draft, `analysis/meter_auto.json`.
+2. Copy the draft to `analysis/meter.json` and fix it by ear and against the plot:
+   ```json
+   {"tatum": 0.164835, "t0": 0.4085, "bars": [[12, "4/4", [3, 3, 3, 3, 4]], [1, "3/8", [6]], [9, "5/8", [4, 6]]]}
+   ```
+   - each row is `[count, metre, groups in tatums]`;
+   - `t0` is the first downbeat;
+   - the tatum is fixed (constant tempo).
+
+   The draft is rough: votes smear over about 4 bars, and breaks and stops vote oddly.
+3. Re-run `tools/analyze_audio.py`. Then:
+   - `downbeats`, `bars` (with `meter`, `groups`, `tatum`) and the sections follow the map;
+   - `group_starts` lists every beat group;
+   - `overview.png` colours odd bars;
+   - re-run the probe to see the curated map drawn on the spectrogram.
+4. **In the engine:**
+   - `Z.clock.meter(t)` returns `{ bar, meter, len, q, group, groups, gq, gPhase, tatum }`;
+   - `Z.clock.bar / inBar / barPhase / downPulse` follow the map, and `Z.clock.groupPulse(t)` gives 1 at every group
+     start;
+   - `pops.mjs` and `storyboard.mjs` count group starts as cut points.
 
 ## 7. Verify by eye and ear
 

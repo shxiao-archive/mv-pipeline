@@ -277,7 +277,10 @@ The library was written for 残光; before reusing a scene with new assets, chec
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
   and the GPU plates `trEngrave trField`, `TR.write` (a line written by the pen),
   per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
-  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
+  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`) and `styles/magazine/*`
+  (`Z.MZ`: the press `MZ.begin / print / react` with spot separation, screens and misregistration, type and furniture
+  `MZ.lyricV / folio / ruler / proofCircle ...`, scenes `mzSpread mzContents mzStrips mzGrid mzSlam mzBurn mzTear
+  mzContact mzDecon mzFlash`; self-test `node tools/press_selftest.mjs`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
 - **Rigs, particles, model sheets** (`core/rig.js`, method in `references/10`): `Z.rig` (joint-table blending
   `mix`, keyed actions `keyed`, `cycle` from distance, `ik2`, `squash`, `trail`, `blink`, `take` for expression
   changes), `Z.rig.biped` (a generic skeleton: 34 poses incl. walk / run / jump / fall / dance moves, 19 expressions,

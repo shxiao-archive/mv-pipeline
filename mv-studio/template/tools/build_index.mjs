@@ -11,7 +11,7 @@ import { join, relative, dirname, basename } from 'node:path';
 
 const args = process.argv.slice(2), opt = k => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
 const STOCK = new Set(['scenes.js', 'intro.js', 'typo.js', 'glass.js', 'dark.js', 'night.js', 'memory.js', 'meta.js']);
-const PACK = { signal: 'vocaloid', interface: 'interface', treatise: 'interface', stage: 'stage', papercraft: 'papercraft' };
+const PACK = { signal: 'vocaloid', interface: 'interface', treatise: 'interface', stage: 'stage', papercraft: 'papercraft', magazine: 'magazine' };
 
 function fitsOf(path) {
   const m = path.match(/engine\/styles\/(\w+)\//);

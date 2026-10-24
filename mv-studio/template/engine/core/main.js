@@ -193,7 +193,8 @@
     const rendererName = Z.post.init(out);
     const audio = await loadJSON('analysis/audio.json');
     Z.audio = audio;
-    Z.clock = Z.makeClock(audio.beats, audio.bpm, (audio.downbeat_info && audio.downbeat_info.winning_phase) || 0);
+    Z.clock = Z.makeClock(audio.beats, audio.bpm, (audio.downbeat_info && audio.downbeat_info.winning_phase) || 0, audio.bars);
+    Object.assign(Z, Z.makeHits(audio.onsets));                 // Z.hit / Z.lastHit / Z.hitCount ('kick' | 'snare' | 'hat' | 'vocal')
     try { Z.env = Z.makeEnv(await loadJSON('analysis/envelope_30fps.json')); } catch (e) { console.warn('no envelope', e); Z.env = Z.makeEnv(null); }
     await buildLutAtlas();
     try { Z.setProject(await loadJSON('project.json')); } catch (e) { Z.setProject({}); }   // core/cues.js: timing offsets

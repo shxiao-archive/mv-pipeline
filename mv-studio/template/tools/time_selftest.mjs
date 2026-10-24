@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Self-test of the time and word helpers (no browser): Z.withInserts, Z.replay / replayMap / passOf, Z.dropFrames,
- * Z.tear, Z.wordsAt / wordIndex (engine/core/util.js, engine/core/lyrics.js).
+ * Z.tear, Z.wordsAt / wordIndex, the metre clock (Z.makeClock with a bar map) and Z.makeHits (engine/core/util.js,
+ * engine/core/lyrics.js).
  *   node tools/time_selftest.mjs        exit 1 on a failed check
  * mv-studio (MIT).
  */
@@ -45,6 +46,27 @@ check(n > 0 && n < 4 && Z.wordsAt(0, 10.15, { lead: 0 }) === 3, `wordsAt finishe
 check(Z.wordsAt(0, 9, { lead: 0 }) === 0 && Z.wordsAt(0, 13.9, { lead: 0 }) === 20, 'wordsAt before / after');
 check(Z.wordsAt(1, 20.1, { lead: 0 }) === Z.charsAt(1, 20.1, { lead: 0 }), 'a line without spaces types per character');
 check(Z.wordIndex(0, 'Train') === 2 && Z.wordIndex(0, 'bus') === -1, 'wordIndex');
+
+// the metre clock: 4/4 from beats; a bar map (analysis/meter.json -> audio.bars) of 4/4, 3/8, 5/8 at a 0.1 s tatum
+const beats = Array.from({ length: 64 }, (_, i) => 1 + i * 0.4);
+const C4 = Z.makeClock(beats, 150, 0);
+const m4 = C4.meter(1 + 4 * 0.4 + 0.4 * 2.5);
+check(m4.bar === 1 && m4.group === 2 && Math.abs(m4.gPhase - 0.5) < 1e-9 && m4.meter === '4/4', 'meter() in 4/4 ' + JSON.stringify(m4));
+const map = [{ start: 1, end: 2.6, meter: '4/4', groups: [4, 4, 4, 4], tatum: 0.1 }, { start: 2.6, end: 3.2, meter: '3/8', groups: [6], tatum: 0.1 },
+  { start: 3.2, end: 4.2, meter: '5/8', groups: [6, 4], tatum: 0.1 }, { start: 4.2, end: 5.2, meter: '5/8', groups: [6, 4], tatum: 0.1 }];
+const CM = Z.makeClock(beats, 150, 0, [{ start: 0.6, end: 1, pickup: true }, ...map]);
+const m5 = CM.meter(3.2 + 0.75);
+check(m5.bar === 2 && m5.meter === '5/8' && m5.group === 1 && Math.abs(m5.gq - 1.5) < 1e-9, 'meter() in 5/8 ' + JSON.stringify(m5));
+check(CM.bar(2.7) === 1 && CM.inBar(4.85) === 1 && Math.abs(CM.barPhase(2.9) - 0.5) < 1e-9, 'bar / inBar / barPhase follow the map');
+check(Math.abs(CM.downPulse(3.2) - 1) < 1e-9 && CM.downPulse(3.85) < 0.1 && Math.abs(CM.groupPulse(3.8) - 1) < 1e-9, 'downPulse / groupPulse');
+check(CM.meter(0.5).bar === -1 && CM.downPulse(0.5) === 0, 'before the first bar');
+
+// drum hits: the strongest recent onset, decaying
+const H = Z.makeHits({ kick: [[1, 1], [2, 0.4], [2.05, 0.9]], snare: [] });
+check(Math.abs(H.hit('kick', 1) - 1) < 1e-9 && Math.abs(H.hit('kick', 1.12) - Math.exp(-1)) < 1e-9, 'hit decays exp(-dt / tau)');
+check(H.hit('kick', 0.5) === 0 && H.hit('snare', 3) === 0 && H.hit('hat', 3) === 0, 'no onset, no hit');
+check(Math.abs(H.hit('kick', 2.06) - 0.9 * Math.exp(-0.01 / 0.12)) < 1e-9, 'the strongest recent onset wins');
+check(H.lastHit('kick', 2.03, 0.5) === 1 && H.hitCount('kick', 0, 3, 0.5) === 2, 'lastHit / hitCount');
 
 console.log(bad ? `[time_selftest] ${bad} FAILED` : '[time_selftest] ok');
 process.exit(bad ? 1 : 0);

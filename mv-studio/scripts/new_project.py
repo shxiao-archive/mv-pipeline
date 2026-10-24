@@ -2,7 +2,7 @@
 """new_project.py -- scaffold an mv-studio (lyric-MV) project from the skill's template (base: vocaloid-style-mv).
 
   python scripts/new_project.py <target_dir> [--song song.wav] [--lyrics lyrics.lrc] [--title NAME] [--title-sub LATIN]
-                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid[:signal]|interface[:treatise]|stage|papercraft]
+                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid[:signal]|interface[:treatise]|stage|papercraft|magazine]
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
@@ -20,7 +20,7 @@ What it does
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
                 asked for: vocaloid (the tegaki demo timeline) | vocaloid:signal | interface | interface:treatise |
-                stage | papercraft (engine/starters/; the demo is kept as engine/starters/tegaki_demo.js)
+                stage | papercraft | magazine (engine/starters/; the demo is kept as engine/starters/tegaki_demo.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -55,9 +55,10 @@ KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
 # --style -> starter in engine/starters (None: the tegaki demo timeline); <style>:<treatment> picks a treatment
 STYLES = {"own": "blank", "vocaloid": None, "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
-          "stage": "stage", "papercraft": "papercraft"}
+          "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
 STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
-                 "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own"}  # incl. the names before the merge
+                 "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own",
+                 "zine": "magazine", "print": "magazine", "riso": "magazine", "雑誌": "magazine"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
 
 

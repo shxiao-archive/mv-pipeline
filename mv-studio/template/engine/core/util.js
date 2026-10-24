@@ -88,7 +88,7 @@
   Z.fbm1 = (x, seed = 0, oct = 3) => { let s = 0, a = 0.5, fr = 1; for (let o = 0; o < oct; o++) { s += a * Z.noise1(x * fr, seed + o * 17); a *= 0.5; fr *= 2; } return s; };
 
   // ---------------------------------------------------------------- beat clock
-  Z.makeClock = (beats, bpm, downbeatIndex0 = 0) => {
+  Z.makeClock = (beats, bpm, downbeatIndex0 = 0, bars = null) => {
     const spb = 60 / bpm;
     const idx = t => {
       if (!beats.length || t < beats[0]) return -1;
@@ -110,8 +110,45 @@
       downPulse: (t, k = 6) => (C.inBar(t) === 0 ? Math.exp(-k * since(t)) : 0),
       nearest: t => { const i = idx(t); if (i < 0) return beats[0] || 0; const a = beats[i], b = beats[i + 1]; return b != null && b - t < t - a ? b : a; },
       at: n => beats[n + downbeatIndex0] ?? (beats[beats.length - 1] + (n + downbeatIndex0 - beats.length + 1) * spb),
+      // musical position: bar, metre, tatum (16th) q in the bar, the beat group it is in and the phase through it
+      meter: t => { const b = beatNo(t), ib = ((b % 4) + 4) % 4, ph = phase(t);
+        return { bar: Math.floor(b / 4), meter: '4/4', len: 16, q: ib * 4 + ph * 4, group: ib, groups: [4, 4, 4, 4], gq: ph * 4, gPhase: ph, tatum: spb / 4 }; },
+      groupPulse: (t, k = 10) => C.pulse(t, k),                                    // 1 at a group start (= the beat in 4/4)
     };
+    // a curated bar map (analysis/meter.json -> bars[].meter / groups / tatum, tools/analyze_audio.py): bars and groups
+    // follow it instead of beats / 4 -- odd metres (3/8, 5/8, 7/8), changing metre, 3-3-2 groupings
+    const map = (bars || []).filter(b => b.groups && b.groups.length);
+    if (map.length) {
+      const bi = t => { if (t < map[0].start) return -1; let lo = 0, hi = map.length - 1;
+        while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (map[mid].start <= t) lo = mid; else hi = mid - 1; } return lo; };
+      C.meter = t => {
+        const i = bi(t); if (i < 0) return { bar: -1, meter: '', len: 0, q: 0, group: 0, groups: [], gq: 0, gPhase: 0, tatum: map[0].tatum };
+        const b = map[i], q = (t - b.start) / b.tatum;
+        let g = 0, s = 0; while (g < b.groups.length - 1 && q + 1e-6 >= s + b.groups[g]) s += b.groups[g++];   // (a group start exactly on t is in)
+        const gq = Math.max(0, q - s);
+        return { bar: i, meter: b.meter, len: b.groups.reduce((a, x) => a + x, 0), q, group: g, groups: b.groups, gq, gPhase: Z.clamp(gq / b.groups[g]), tatum: b.tatum };
+      };
+      C.bar = t => C.meter(t).bar;
+      C.inBar = t => C.meter(t).group;                                             // the group plays the part of the beat
+      C.barPhase = t => { const m = C.meter(t); return m.len ? Z.clamp(m.q / m.len) : 0; };
+      C.downPulse = (t, k = 6) => { const m = C.meter(t); return m.bar < 0 ? 0 : Math.exp(-k * m.q * m.tatum); };
+      C.groupPulse = (t, k = 10) => { const m = C.meter(t); return m.bar < 0 ? 0 : Math.exp(-k * m.gq * m.tatum); };
+    }
     return C;
+  };
+
+  // ---------------------------------------------------------------- drum hits (audio.onsets: [t, strength 0..1] per kind)
+  // Z.hit('kick', t, tau): the strongest recent onset, decaying exp(-dt / tau) -- a punch that answers the drum
+  Z.makeHits = (onsets) => {
+    const T = {}, V = {};
+    for (const k in onsets || {}) { T[k] = onsets[k].map(o => o[0]); V[k] = onsets[k].map(o => o[1]); }
+    const last = (k, t) => { const a = T[k]; if (!a || !a.length || t < a[0]) return -1; let lo = 0, hi = a.length - 1;
+      while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (a[mid] <= t) lo = mid; else hi = mid - 1; } return lo; };
+    return {
+      hit: (k, t, tau = 0.12) => { let v = 0; for (let i = last(k, t); i >= 0 && t - T[k][i] < tau * 6; i--) v = Math.max(v, V[k][i] * Math.exp(-(t - T[k][i]) / tau)); return v; },
+      lastHit: (k, t, thr = 0.5) => { for (let i = last(k, t); i >= 0; i--) if (V[k][i] >= thr) return T[k][i]; return -1; },
+      hitCount: (k, from, t, thr = 0.5) => { let n = 0; for (let i = last(k, t); i >= 0 && T[k][i] >= from; i--) if (V[k][i] >= thr) n++; return n; },
+    };
   };
 
   // ---------------------------------------------------------------- audio envelope (analysis/envelope_30fps.json)

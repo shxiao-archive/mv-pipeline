@@ -30,7 +30,7 @@ const fps = +arg('fps', P.fps || 30), thresh = +arg('thresh', 0.06);
 const from = +arg('from', 0), to = Math.min(+arg('to', P.duration), P.duration);
 const cuts = P.shots.map(s => s.t0), trans = P.shots.filter(s => s.trans && s.trans.dur > 0).map(s => [s.t0, s.t0 + s.trans.dur]);
 const planned = t => cuts.some(c => Math.abs(c - t) <= 1.01 / fps) || trans.some(([a, b]) => t >= a - 1 / fps && t <= b + 1 / fps);
-const hits = [...(P.beats || []), ...(P.lyricCuts || []), ...P.lines.flatMap(L => [L.t, L.end]), ...P.cues.map(c => c.t)].filter(Number.isFinite);
+const hits = [...(P.beats || []), ...(P.groupStarts || []), ...(P.lyricCuts || []), ...P.lines.flatMap(L => [L.t, L.end]), ...P.cues.map(c => c.t)].filter(Number.isFinite);
 const onHit = t => hits.some(h => Math.abs(h - t) <= 1.01 / fps);
 const shotAt = t => { let s = null; for (const x of P.shots) if (x.t0 <= t + 1e-6) s = x; return s; };
 const frames = [];

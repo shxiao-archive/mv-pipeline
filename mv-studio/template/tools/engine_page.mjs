@@ -89,7 +89,8 @@ export async function openEngine({ url = 'engine/index.html', width = 1920, heig
           const L = s.lyric === undefined ? 'front' : s.lyric, P = L && L !== 'none' && window.JZ.plans[typeof L === 'object' ? L.plan || 'main' : s.plan || 'main'];
           if (P) for (const c of P.plan.cuts) { const t = c.start + (Z.LYRIC_OFFSET || 0); if (c.index > 0 && t > s.t0 && t < s.t1) lyricCuts.add(+t.toFixed(3)); }
         }
-        return { shots, lines, cues, lyricCuts: [...lyricCuts].sort((a, b) => a - b), beats: (Z.audio && Z.audio.beats) || [], duration: window.__zankoMeta.duration,
+        return { shots, lines, cues, lyricCuts: [...lyricCuts].sort((a, b) => a - b), beats: (Z.audio && Z.audio.beats) || [],
+          groupStarts: (Z.audio && Z.audio.group_starts) || [], duration: window.__zankoMeta.duration,
           fps: window.__zankoMeta.fps || 30, project: Z.PROJECT || {}, offset: Z.OFFSET || 0 };
       });
     },

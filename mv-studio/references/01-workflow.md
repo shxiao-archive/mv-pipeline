@@ -60,7 +60,7 @@ estimated); sections labelled; every line cue has a hint.
 
 ## 1b. Style (mv-studio)
 
-Pick vocaloid (tegaki / signal) / interface (screen / treatise) / stage / papercraft (SKILL.md table; `styles/<style>/STYLE.md`)
+Pick vocaloid (tegaki / signal) / interface (screen / treatise) / stage / papercraft / magazine (SKILL.md table; `styles/<style>/STYLE.md`)
 before the concept: it decides the starter timeline (`new_project.py --style`), the asset list and how lyrics are set.
 Styles and treatments can be mixed by section.
 

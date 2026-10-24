@@ -159,6 +159,7 @@ visible signs, not parameters.
   - the treatise's spark-and-number plates;
   - the puppet troupe on its painted stage;
   - the paper RPG interface;
+  - the three-ink magazine press with its folios, proof marks and vertical lyric columns;
   - the heat-grade recording device.
 
   If the song seems to want one of these, offer the preset to the user instead of drifting into it.

@@ -4,8 +4,8 @@ description: >-
   Make an original music video (MV / PV / lyric video) for a song from its audio and lyrics, rendered by a
   deterministic Canvas2D/WebGL2 engine. Strongest in the ボカロPV tradition — 手書き illustrated stories with an original
   character, JIZURA kinetic lyrics (文字PV, V家手书), signal-decay / glitch cutting (疾走感, 故障风) — and also screen /
-  chat lyric videos, technical-treatise kinetic typography, watercolour picture-book stage shows (绘本风) and pop-up
-  papercraft RPG storybooks; styles combine freely. Beat-locked editing, art from Codex / Grok / NovelAI or the
+  chat lyric videos, technical-treatise kinetic typography, watercolour picture-book stage shows (绘本风), pop-up
+  papercraft RPG storybooks and experimental print magazines (riso / 雑誌); styles combine freely. Beat-locked editing, art from Codex / Grok / NovelAI or the
   user's own, optional toon 3D, 9:16 version. Use whenever the user wants an MV, PV, lyric video or beat-synced
   animation for a song ("make an MV for my song", "给这首歌做个MV", "この曲のMVを作って", "a lyric video like a chat
   log"), even with only a .wav/.mp3. Not for editing existing footage.
@@ -37,6 +37,7 @@ merely sounds like a preset is not a request for it.
      | interface | a digital-tech look: the song on an AI chat screen and on high-precision technical plates | `interface`, `interface:treatise` |
      | stage | a watercolour picture-book show by an original puppet troupe | `stage` |
      | papercraft | a pop-up paper storybook told as a retro RPG quest | `papercraft` |
+     | magazine | a Japanese experimental print magazine: three-ink press, vertical type, editorial marks that keep time, the page's fate | `magazine` |
 
    **Techniques yes, looks no.** Any film may use single modules from the library (a transition, the lyric layer, a
    camera helper, the decay layer, a shape kit). A film that designs its own style never adopts a preset's look —
