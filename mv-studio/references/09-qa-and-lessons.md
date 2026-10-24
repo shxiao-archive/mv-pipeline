@@ -136,8 +136,8 @@ session that **did not make the film**: another model if the user has one (Gemin
 or a subagent started with no history. Never the builder judging its own film: it no longer sees what the film lacks.
 
 1. Steps 1–8 of §7 green; `git commit` and `git tag review-1`; keep the render as `render/mv_r1.mp4`.
-2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, 2 s filmstrips
-   at every chorus / hook and at `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
+2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, filmstrips of
+   every frame of 1 s at every chorus / hook and at `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
    cut and each flagged pop or flash, full-resolution stills, motion per second in `index.md`). Run
    `node tools/storyboard.mjs` first: it writes the lyric cut times to `plan/shots.json`. Add
    `docs/CONCEPT.md`, the style's **Signature features** (its STYLE.md) and the output of the step-7 checks.
@@ -197,7 +197,8 @@ Raise the film to award level (target >= 8 in every dimension, 9 where the style
   weakest section. Do not regress anything the jury listed as a strength.
 - Run the checks of references/09 §7 again, re-render, build a new pack and look at the frames until the fixes have
   truly landed.
-- Write docs/REVIEW.md: each fix applied or skipped, and why.
+- Write docs/REVIEW.md: each fix applied or skipped, and why. Name lyric lines by number (L05), never quote them:
+  tools/check_no_lyrics.mjs scans docs/ (only the jury's own files in docs/review/ are skipped).
 ```
 The jury's scores are a model's opinion, not a measurement: use them to find and rank problems and to compare rounds of
 the same film, not as proof of quality. A judge from another model family sees more of the builder's blind spots.

@@ -205,7 +205,9 @@
       // stacked repeats: the line drawn 4x more often than a plain layout draws it (a wall of copies, echoes, rings)
       DENY.layout += ' circleWords credits edgeFrame justified mirror orbit rain tunnel tyBandHide vcols'; DENY.hold = 'shadowSway';   // vcols: three columns of the same words (seen after fullLine went off)
       DENY.layout += ' circle';   // words set on a dark disc that hides them in the centre-free side bands
-      DENY.layout += ' stack perspective tyCross';   // the line again: four stacked copies, copies receding, the line crossing itself
+      DENY.layout += ' condensed'; DENY.exit = (DENY.exit || '') + ' tyToIndex';   // a short word repeated to fill the width; letters turned into index numbers
+      DENY.layout += ' tyCropGiant sideways knQuarterTurn';   // words set against the frame edge or thrown off it while they hold (check_shots safe area)
+      DENY.layout += ' stack perspective tyCross knFlowSnap';   // the line again: four stacked copies, copies receding, the line crossing itself, a cascade of outline copies
       DENY.decor += ' romajiLine watermarkKanji';   // codepoints (U+591C ...) under kanji lines; one of the line's glyphs huge behind it, cut by the frame
       // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
       // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only

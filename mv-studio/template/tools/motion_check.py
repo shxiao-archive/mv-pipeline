@@ -3,7 +3,7 @@
 Per frame: mean absolute change from the previous frame on a 96x54 grey copy (0..1). Smoothed over 0.5 s.
 A stretch is STATIC when that level stays under --threshold for at least --min seconds. Inside shots with a living
 face (plan/shots.json `animFaces`: chars[].anim blinks and sings) 40 % of the threshold is enough, so a singer under a
-slow push passes while a still picture does not. Cuts are excluded (they
+slow push passes while a still picture does not, up to 8 % of the export. Cuts are excluded (they
 are change, not motion). Very low-contrast frames (frame std < 0.07: a dark UI, a night sky) get a proportionally lower
 threshold (down to 40 %): on them a clear camera move (~130 px/s) changes few grey levels. Above that floor nothing
 changes, so the calibration on reviewed films holds (a fully contrast-relative measure was tried and let slow crossfades
@@ -65,6 +65,10 @@ def main():
     # threshold). Read from the plan, not the pixels: a top-cells measure scored held stills with animated lyrics and
     # petals (0.008-0.03) above a singing mouth (0.006), so it cannot tell them apart
     rescued = faces & (lvl < thr) & (lvl >= 0.4 * thr)
+    # capped at 8 % of the export, like holds: beyond it a held picture where only the face changes is static again
+    # (iteration 5: ~8 s of such shots passed here while two juries scored the motion 4-5)
+    idx = np.flatnonzero(rescued)
+    rescued[idx[int(0.08 * len(d)):]] = False
     static = (lvl < thr) & ~rescued
     runs, i = [], 0
     while i < len(static):

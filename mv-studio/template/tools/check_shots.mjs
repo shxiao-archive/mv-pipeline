@@ -14,8 +14,11 @@
  *          · LYRICS OUTSIDE THE SAFE AREA: lyric-layer pixels (JIZURA + shot.text, not the HUD) in the outer 5 % of the frame,
  *            over 2 % of them, in the same pass (an ERROR with --strict). Words a scene draws itself are not seen; a
  *            JIZURA cut is judged while its words hold (glyphs flying off the frame in an enter / exit are motion)
- *          · LYRIC OVERLAP: a JIZURA cut comes in by one of JIZURA's own transitions, which draws the outgoing and the
- *            incoming line on top of each other (TEXT_TRANS in timeline.js); an ERROR with --strict
+ *          · LYRIC OVERLAP: more than one lyric drawn in one frame, recorded while the frame is drawn (the JIZURA cuts
+ *            the renderer draws, and the lines the film's own code reads with Z.line(i).text before the HUD), on every
+ *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
+ *            cut's exit running into the next shot, the same line set by JIZURA and by the film's own type; an ERROR
+ *            with --strict
  * Exit 1 on any ERROR.
  *
  * mv-studio (MIT).
@@ -46,12 +49,15 @@ export function spriteFlips(samples) {
 }
 const short = p => p.split('/').pop().replace(/\.\w+$/, '');
 
-// shots [{ id, t0, t1, plan }] (plan null = no JIZURA lyrics), cuts { plan: [{ index, start, trans }] } (trans = a
-// registered JIZURA transition or null) -> [{ id, t, msg }]
-export function lyricOverlaps(shots, cuts) {
-  const out = [];
-  for (const s of shots) for (const c of (s.plan && cuts[s.plan]) || [])
-    if (c.trans && c.index > 0 && c.start >= s.t0 && c.start < s.t1) out.push({ id: s.id, t: c.start, msg: `cut ${c.index} comes in by the JIZURA transition '${c.trans}' over the previous line` });
+// frames [{ id, t, jz: ['<line>:<words>' per JIZURA cut drawn], code: [line indices the film's code read] }]
+// -> [{ id, t, msg }]: the first frame per shot that draws more than one lyric (line numbers only, never the words)
+export function drawnOverlaps(frames) {
+  const out = [], seen = new Set();
+  for (const f of frames)
+    if (f.jz.length + f.code.length > 1 && !seen.has(f.id)) {
+      seen.add(f.id);
+      out.push({ id: f.id, t: f.t, msg: [...f.jz.map(k => `JIZURA line ${k.split(':')[0]}`), ...f.code.map(i => `own type line ${i}`)].join(' + ') });
+    }
   return out;
 }
 // a cut's words come in or go out (enter / exit, plus a frame or two of ghost lag)
@@ -64,8 +70,8 @@ if (flag('selftest')) {
     spriteFlips(seq(['a', null, null, 'a', 'b'])).length === 0,                                          // a gap is not a change
     spriteFlips(seq(['a', 'b', 'c', 'd'], 's1', 0.6)).some(f => f.kind === 'rapid'),                  // 4 sprites in 1.8 s
     spriteFlips(seq(['a', 'b', 'a'], 's1', 3)).length === 0,                                             // a return after 3 s is a motif
-    lyricOverlaps([{ id: 's1', t0: 0, t1: 4, plan: 'main' }], { main: [{ index: 0, start: 0, trans: 'x' }, { index: 1, start: 2, trans: 'x' }] }).length === 1,
-    lyricOverlaps([{ id: 's1', t0: 0, t1: 4, plan: null }], { main: [{ index: 1, start: 2, trans: 'x' }] }).length === 0,
+    drawnOverlaps([{ id: 's1', t: 1, jz: ['2:a'], code: [] }, { id: 's1', t: 2, jz: ['2:a', '3:b'], code: [] }, { id: 's1', t: 3, jz: ['3:b'], code: [3] }]).length === 1,
+    drawnOverlaps([{ id: 's2', t: 1, jz: ['4:c'], code: [] }, { id: 's3', t: 2, jz: [], code: [5] }]).length === 0,
     moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.7) && !moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.0),
   ];
   console.log(`[check_shots] selftest ${ok.every(Boolean) ? 'ok' : 'FAIL ' + JSON.stringify(ok)}`); process.exit(ok.every(Boolean) ? 0 : 1);
@@ -129,19 +135,33 @@ if (spriteFps > 0) {                                           // which sprite i
     }
   }
   for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words: pick a calmer plan or reframe)`);
-  const jz = await E.page.evaluate(() => {
-    const Z = window.Z, JZ = window.JZ, out = { shots: [], cuts: {} };
-    if (!JZ || !JZ.plans) return out;
-    for (const [name, P] of Object.entries(JZ.plans))
-      out.cuts[name] = P.plan.cuts.map(c => ({ index: c.index, start: c.start + (Z.LYRIC_OFFSET || 0), trans: c.trans && window.J.TRANS[c.trans] ? c.trans : null }));
-    for (const s of Z.SHOTS || []) {
-      const L = s.lyric === undefined ? 'front' : s.lyric;
-      out.shots.push({ id: s.id, t0: s.t0, t1: s.t1, plan: !L || L === 'none' ? null : typeof L === 'object' ? L.plan || 'main' : s.plan || 'main' });
-    }
-    return out;
-  });
-  for (const o of lyricOverlaps(jz.shots.filter(s => !only || only.has(s.id)), jz.cuts)) (flag('strict') ? errors : warns).push(`${o.id} @${o.t.toFixed(2)}: LYRIC OVERLAP ${o.msg} (TEXT_TRANS = false in timeline.js; references/06)`);
   for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
+}
+{                                                              // which lyrics each frame draws, around every cut
+  await E.page.evaluate(() => {
+    const L = window.__lyr = { on: false, jz: new Set(), code: new Set() };
+    const R = window.J && window.J.Renderer && window.J.Renderer.prototype;
+    if (R) { const d = R.drawCut; R.drawCut = function (env) { const c = env.cut; if (L.on && c && c.text && !c.companion) L.jz.add(c.line + ':' + c.text); return d.call(this, env); }; }
+    // shortcut: code that kept its own reference to Z.line before this hook is not seen; scenes call Z.line(i) per frame
+    const line = window.Z.line;
+    window.Z.line = i => { const o = line(i); return L.on && o && o.text ? new Proxy(o, { get: (x, k) => { if (k === 'text') L.code.add(i); return x[k]; } }) : o; };
+  });
+  const times = new Set();
+  for (const b of [...shots.map(s => s.t0), ...(P.lyricCuts || [])]) for (let k = -3; k <= 3; k++) times.add(+(b + k / fps).toFixed(4));
+  for (let t = 0.25; t < P.duration; t += 0.5) times.add(+t.toFixed(4));
+  const frames = [];
+  for (const t of [...times].filter(t => t >= 0 && t < P.duration).sort((a, b) => a - b)) {
+    const k = shots.findLastIndex(s => s.t0 <= t), s = shots[k];
+    if (!s || (only && !only.has(s.id))) continue;
+    const r = await E.page.evaluate(async t => {
+      const L = window.__lyr; L.jz.clear(); L.code.clear(); L.on = true;
+      window.Z.onText = () => { L.on = false; };                   // the HUD comes after the lyrics: not counted
+      try { await window.renderFrame(t); } finally { L.on = false; window.Z.onText = null; }
+      return { jz: [...L.jz], code: [...L.code] };
+    }, t);
+    frames.push({ id: s.id, t, ...r });
+  }
+  for (const o of drawnOverlaps(frames)) (flag('strict') ? errors : warns).push(`${o.id} @${o.t.toFixed(2)}: LYRIC OVERLAP ${o.msg} drawn in one frame (a transition, an exit running into the next shot, or one line set twice; references/06)`);
 }
 const badFonts = await E.page.evaluate(() => [...document.fonts].filter(f => f.status === 'error').map(f => `${f.family} ${f.weight}`));
 badFonts.forEach(f => warns.push(`font failed to load: ${f}`));

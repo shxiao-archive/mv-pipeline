@@ -45,6 +45,29 @@
     return plan;
   }
 
+  // When a split line has a spare cut, JIZURA ends it with a cut that shows the WHOLE line again (a recap,
+  // 08_planner.js): the words appear twice. Unless the project asks for it (recap: true), plan again with that line's
+  // cut count fixed, which the planner reads as "no recap" (overrides[line].cuts).
+  function planOf(project) {
+    const plan = J.plan(project, S.audio);
+    if (project.recap) return plan;
+    const overrides = Object.assign({}, project.overrides);
+    let again = false;
+    for (const c of plan.cuts) if (c.recap) {
+      overrides[c.line] = Object.assign({}, overrides[c.line], { cuts: plan.cuts.filter(x => x.line === c.line && !x.recap).length });
+      again = true;
+    }
+    return again ? J.plan(Object.assign({}, project, { overrides }), S.audio) : plan;
+  }
+
+  // The chroma ghost passes draw the frame 0.8 / 1.6 frames-of-24 late: for a frame or two after a cut changes they
+  // paint the previous line over the new one (09_render.js passes). No ghost on those frames only.
+  function frameOpts(plan, t, o) {
+    const sd = J.stepDur(plan.fx, plan.fps), tq = Math.floor(t / sd + 1e-6) * sd;
+    if (J.cutAt(plan, tq) !== J.cutAt(plan, Math.max(0, tq - 1.6 / 24))) o.noGhost = true;
+    return o;
+  }
+
   const JZ = {
     state: S,
 
@@ -61,7 +84,7 @@
 
     async setProject(p) {
       S.project = mergeProject(p);
-      S.plan = ownWords(J.plan(S.project, S.audio), p);
+      S.plan = ownWords(planOf(S.project), p);
       const [w, h] = J.outputSize(S.project);
       if (!S.canvas) S.canvas = mkCanvas(w, h);
       if (S.canvas.width !== w || S.canvas.height !== h) { S.canvas.width = w; S.canvas.height = h; }
@@ -99,19 +122,19 @@
 
     renderAt(t, { mode = 'normal' } = {}) {
       const t0 = performance.now();
-      S.R.frame(S.ctx, S.plan, t, JZ.optsFor(mode, S.canvas.width / S.plan.W));
+      S.R.frame(S.ctx, S.plan, t, frameOpts(S.plan, t, JZ.optsFor(mode, S.canvas.width / S.plan.W)));
       return { canvas: S.canvas, ms: performance.now() - t0 };
     },
 
     drawInto(ctx, t, mode = 'front') {
-      S.R.frame(ctx, S.plan, t, JZ.optsFor(mode, ctx.canvas.width / S.plan.W));
+      S.R.frame(ctx, S.plan, t, frameOpts(S.plan, t, JZ.optsFor(mode, ctx.canvas.width / S.plan.W)));
     },
 
     // ---- several independent plans (one per look), rendered by name
     plans: {},
     async addPlan(name, p) {
       const project = mergeProject(p);
-      const plan = ownWords(J.plan(project, S.audio), p);
+      const plan = ownWords(planOf(project), p);
       // p.schemes: which of the style's colour schemes the cuts may use (each cut's scheme is remapped into that set)
       //   'dark'   schemes with a dark background (luminance < 0.25): light text, for night / dusk films
       //            (light-background schemes draw dark text that vanishes over night scenes)
@@ -132,7 +155,7 @@
     },
     drawPlan(name, ctx, t, mode = 'front') {
       const P = JZ.plans[name]; if (!P) throw new Error('no JIZURA plan ' + name);
-      P.R.frame(ctx, P.plan, t, JZ.optsFor(mode, ctx.canvas.width / P.plan.W));
+      P.R.frame(ctx, P.plan, t, frameOpts(P.plan, t, JZ.optsFor(mode, ctx.canvas.width / P.plan.W)));
     },
     cutsOf(name) {
       return JZ.plans[name].plan.cuts.map(c => ({ i: c.index, line: c.line, start: +c.start.toFixed(3), end: +c.end.toFixed(3), text: c.text, layout: c.layout, enter: c.enter, hold: c.hold, exit: c.exit, bg: c.bg, cam: c.cam, trans: c.trans || null }));

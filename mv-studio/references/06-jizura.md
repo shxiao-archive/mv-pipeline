@@ -111,8 +111,16 @@ denied in `timeline.js`. Both lists were measured by planning each part alone an
 sample words had no digits). An editorial or HUD film can switch them back on. After the whole-line copy went off, a look at the demo's
 stills found more copies of the line and denied them too: `stack`, `perspective`, `tyCross`, `vcols` (stacked, receding,
 crossing and column copies), `circle` (words on a dark disc), the `romajiLine` decor (codepoints under kanji) and
-`watermarkKanji` (one glyph huge behind the line). The adapter keeps the centre-free bands inside the 90 % title-safe
-box; `tools/check_shots.mjs` measures that box while a cut's words hold, and flags a JIZURA transition (LYRIC OVERLAP).
+`watermarkKanji` (one glyph huge behind the line), then `condensed` (a short word repeated), `knFlowSnap` (a cascade
+of outline copies), the `tyToIndex` exit (letters turned into index numbers) and the edge layouts `tyCropGiant`,
+`sideways`, `knQuarterTurn`. Two more sources of doubled words are handled in the adapter: JIZURA ends a split line
+with a **recap** cut showing the whole line again when it has a spare cut (the adapter plans that line again with
+its cut count fixed, `overrides[line].cuts`; a project that wants the recap sets `recap: true`), and its chroma
+ghost passes, which lag a frame or two, are off on the frames where they would draw the previous line. The adapter
+keeps the centre-free bands inside the 90 % title-safe box; `tools/check_shots.mjs` measures that box while a cut's
+words hold, and records which lyrics every frame around each cut draws (LYRIC OVERLAP): the JIZURA cuts and the
+lines the film's own type reads with `Z.line(i).text`. The deny lists were found on the demo's Japanese lines; an
+English film may meet more parts that split or repeat words: look at the cut strips.
 
 **Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample
 words with one part at a time (every other group pinned to its plain part), renders front mode where that part is used

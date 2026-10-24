@@ -51,10 +51,11 @@ def stage_checks(proj, add):
 ENGINE = Path(__file__).resolve().parents[1] / "template" / "engine"
 # per style: its scenes (None = the scene library), its starter timeline, and what its depth work looks like in code
 STYLE = {
-    "screen": dict(scene=r"^if[A-Z]", starter="starters/interface.js"),
-    "treatise": dict(scene=r"^tr[A-Z]", starter="starters/treatise.js"),
-    "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js"),
-    "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js"),
+    # use: a film's own scene file that builds on the style (its scenes or its kit) counts as the style's scenes
+    "screen": dict(scene=r"^if[A-Z]", starter="starters/interface.js", use=r"\bIF\.|['\"]if[A-Z]"),
+    "treatise": dict(scene=r"^tr[A-Z]", starter="starters/treatise.js", use=r"\bTR\.|['\"]tr[A-Z]"),
+    "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
+    "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
     "vocaloid": dict(scene=None, starter="timeline.js"),
 }
 V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"kind\s*:\s*['\"]inks", "limp": r"kind\s*:\s*['\"]limp",
@@ -90,7 +91,11 @@ def style_checks(proj, add, style):
     shots = json.loads(sj.read_text(encoding="utf-8"))["shots"] if sj.is_file() else []
     declared = {i for s in shots for i in (s.get("line") if isinstance(s.get("line"), list) else [s.get("line")]) if isinstance(i, int)}
     if cfg["scene"]:
-        mine = [s for s in shots if re.match(cfg["scene"], s.get("scene", ""))]
+        own = set()                                                  # scenes the film registers in its own files on the style
+        for name, ls in own_files(proj):
+            if name.startswith("scenes/") and re.search(cfg["use"], "\n".join(ls)):
+                own |= set(re.findall(r"Z\.scene\(\s*['\"](\w+)", "\n".join(ls)))
+        mine = [s for s in shots if re.match(cfg["scene"], s.get("scene", "")) or s.get("scene") in own]
         add(f"uses the {style} style: >= 80% of the shots are its scenes and every lyric line 0-7 is declared by a shot",
             shots and len(mine) >= 0.8 * len(shots) and set(range(len(TRUTH))) <= declared,
             f"{len(mine)}/{len(shots)} style shots; lines declared {sorted(declared)}" if shots else "no plan/shots.json (run tools/storyboard.mjs)")
@@ -183,6 +188,8 @@ def lyric_hits(project, fr):
         return hits
     for p in project.rglob("*"):
         parts = set(p.parts)
+        if p.parent.name == "review" and p.parent.parent.name == "docs":    # the jury's reviews quote lines (09 §8)
+            continue
         if not p.is_file() or parts & {"node_modules", "media", "out", ".git", "__pycache__", "data", "analysis", "audio", "vendor", "render", "fonts", "_grok"} or p.name == "jizura_engine.js":
             continue
         if p.suffix.lower() not in {".js", ".mjs", ".html", ".json", ".py", ".ts", ".css", ".md"} or p.name.lower() == "summary.md":
@@ -319,9 +326,11 @@ def main():
     if sp.get("estimated"):
         sm = (out / "summary.md").read_text(encoding="utf-8", errors="ignore") if (out / "summary.md").exists() else ""
         add("summary tells the user the lyric timing is estimated / approximate", re.search(r"estimat|approximat|rough", sm, re.I), "found" if re.search(r"estimat|approximat|rough", sm, re.I) else "not mentioned")
-    # motion: the template's motion check (calibrated on the iteration-1 human review: <= ~25 % static felt alive)
+    # motion: the project's own motion check, which reads its plan and audio (the song's stops, declared holds, living
+    # faces); the template's copy would see none of them (calibrated on the iteration-1 human review: <= ~25 % felt alive)
     if v:
-        r = subprocess.run([PY, str(TOOLS / "motion_check.py"), str(mp4), "--quiet"], capture_output=True, text=True)
+        mc = out / "project" / "tools" / "motion_check.py"
+        r = subprocess.run([PY, str(mc if mc.is_file() else TOOLS / "motion_check.py"), str(mp4), "--quiet"], capture_output=True, text=True)
         m = re.search(r"counted ([0-9.]+) s \(([0-9]+) %\)", r.stdout)   # motion_check: "totalling X s; counted Y s (Z %)"
         pct = int(m.group(2)) if m else 100
         add("the picture keeps moving: static stretches (>= 1.5 s with almost no motion) are at most 15 % of the video",
