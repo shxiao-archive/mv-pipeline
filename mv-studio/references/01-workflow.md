@@ -18,7 +18,7 @@ git commit`) at the end of every phase: `new_project.py` runs `git init`.
 | 4 assets | images, `docs/WANTED_ART.md`, `render/lineup.jpg` (2+ characters) | every check sheet looked at |
 | 5 build | scenes, timeline | `node tools/lint.mjs`, `node tools/check_shots.mjs` PASS |
 | 6 review | sheets, reports, the jury's two rounds (`docs/review/jury-{1,2}.*`), `docs/REVIEW.md`, `docs/PROGRESS.md` | 09 §7 order; P0 empty; jury round 2 done |
-| 7 deliver | master, share (+ preroll card when `check_flash` lists warning ranges), 9:16, credits | `check_flash`, `motion_check`, `check_sync` PASS on the final file |
+| 7 deliver | master, share (+ preroll card when `check_flash` lists warning ranges), 9:16, credits | `check_flash`, `check_sync` PASS on the final file (`motion_check` is information) |
 
 ---
 
@@ -69,7 +69,7 @@ the starter.
 
 Read `direction.md`, then `design-a-style.md` (or the preset's BRIEF.md and, for vocaloid, `styles/vocaloid/DIRECTION.md`).
 Produce `docs/CONCEPT.md` (≈1 page): thesis (one sentence about what the song is *about* visually), logline, arc per
-section, the style block (`design-a-style.md` §2 slots and the §4 distance table), signature moments mapped to times,
+section, the style block (`design-a-style.md` §2 slots and the §4 marker check on the look sheet), signature moments mapped to times,
 ending idea. A cast summary only if the film has a cast.
 
 **Checkpoint:** summarise to the user in a few lines.
@@ -129,7 +129,7 @@ node tools/stills.mjs --times <midpoints of all shots> --out render/stills/pass1
 node tools/render_final.mjs --name mv                       # full render + audio (≈4 min on RTX 3080)
 python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/review1
 ```
-Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboard.mjs`, `node tools/check_shots.mjs`, `node tools/pops.mjs`; after it: `python tools/check_flash.py render/mv.mp4`, `python tools/motion_check.py render/mv.mp4`, `python tools/check_sync.py render/mv.mp4` (the full order and what each catches: 09 §7). Before changing a shared file, `node tools/regress.mjs snap before`; after it, `snap after` and `python tools/compare_sheets.py before after`. Write problems into `docs/REVIEW.md` (P0 / P1 / P2) and the round into `docs/PROGRESS.md`. Use `references/09-qa-and-lessons.md` (checklist + failure modes). Query JIZURA when a lyric frame looks wrong: `node tools/jz_cuts_at.mjs 196.8,203.5 main`. Fix → re-render → re-review. Two or three passes is normal.
+Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboard.mjs`, `node tools/check_shots.mjs`, `node tools/pops.mjs`; after it: `python tools/check_flash.py render/mv.mp4`, `python tools/motion_check.py render/mv.mp4`, `python tools/check_sync.py render/mv.mp4` (the full order and what each catches: 09 §7). Before changing a shared file, `node tools/regress.mjs snap before`; after it, `snap after` and `python tools/compare_sheets.py before after`. Write problems into `docs/REVIEW.md` (P0 / P1 / P2) and the round into `docs/PROGRESS.md`. Use `references/09-qa-and-lessons.md` (checklist + failure modes). Query JIZURA when a lyric frame looks wrong: `node tools/jz_cuts_at.mjs 196.8,203.5 main`. Render the whole film once; after that, fix in ranges: check each with stills and `pops.mjs --from --to`, then `render_final.mjs --patch <a>:<b>` (09 §1).
 
 **The jury, two rounds, before delivery** (09 §8): `git tag review-1`, `python tools/jury_pack.py render/mv.mp4`, then a
 session that did not make the film (another model if the user has one, else a fresh session or a subagent with no

@@ -19,6 +19,11 @@
  *            words), while the words hold (an ERROR with --strict)
  *          · LYRICS LOW CONTRAST: the glyphs against the ring of picture around them below 3:1 (WCAG, large text),
  *            while the words hold (an ERROR with --strict). Both are measured on the lyric layer (JIZURA + shot.text)
+ *          · FIGURE CUT BY THE FRAME: the main character sprite (D.sprite) has over 10 % of its height (the head) above
+ *            the top edge, or over 30 % of its width past a side, after the camera; FIGURE CUT IN ITS IMAGE: an edge of its
+ *            picture is opaque along over 15 % of its length (a cut-out cropped by its own canvas, a background left in)
+ *            while that edge is inside the frame: the figure ends in a straight line. An ERROR with --strict; a shot with
+ *            crop: true crops on purpose. The frame's bottom edge is not judged (a waist shot)
  *          · LYRIC OVERLAP: more than one lyric drawn in one frame, recorded while the frame is drawn (the JIZURA cuts
  *            the renderer draws, and the lines the film's own code reads with Z.line(i).text before the HUD), on every
  *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
@@ -72,6 +77,19 @@ export function legibility(text, fg, comp, w, h, r = 3) {
   return { px, hidden: hid / px, contrast: Math.max(ratio(q(g, 0.85), bg), ratio(q(g, 0.15), bg), ratio(q(g, 0.85), q(g, 0.15))) };
 }
 
+// a figure on screen { x0, y0, x1, y1 (its opaque box), W, H, edges: { top|left|right|bottom: opaque share of that edge
+// of its picture, for the edges that land inside the frame } } -> what cuts it, or null
+export function figureCut(b) {
+  const w = b.x1 - b.x0, h = b.y1 - b.y0;
+  if (w <= 0 || h <= 0) return null;
+  const top = Math.max(0, -b.y0) / h, side = Math.max(0, -b.x0, b.x1 - b.W) / w;
+  if (top > 0.1) return `FIGURE CUT BY THE FRAME (the top ${(top * 100).toFixed(0)} % of the figure is above the frame)`;
+  if (side > 0.3) return `FIGURE CUT BY THE FRAME (${(side * 100).toFixed(0)} % of the figure's width is past a side)`;
+  const e = Object.entries(b.edges || {}).filter(([, v]) => v > 0.15).map(([k, v]) => `${k} ${(v * 100).toFixed(0)} %`);
+  if (e.length) return `FIGURE CUT IN ITS IMAGE (opaque along its picture's ${e.join(', ')}, inside the frame: the figure ends in a straight line; generate it with room around the figure, or frame that edge off the screen)`;
+  return null;
+}
+
 // samples [{ t, p (main sprite path or null), id }] -> [{ id, t, kind, msg }]
 export function spriteFlips(samples) {
   const runs = [];
@@ -114,6 +132,9 @@ if (flag('selftest')) {
     drawnOverlaps([{ id: 's1', t: 1, jz: ['2:a'], code: [] }, { id: 's1', t: 2, jz: ['2:a', '3:b'], code: [] }, { id: 's1', t: 3, jz: ['3:b'], code: [3] }]).length === 1,
     drawnOverlaps([{ id: 's2', t: 1, jz: ['4:c'], code: [] }, { id: 's3', t: 2, jz: [], code: [5] }]).length === 0,
     moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.7) && !moving({ start: 0, end: 2, inDur: 0.3, outDur: 0.4 }, 1.0),
+    /above/.test(figureCut({ x0: 600, y0: -200, x1: 1300, y1: 1200, W: 1920, H: 1080 })),                   // head off the top
+    figureCut({ x0: 600, y0: 40, x1: 1300, y1: 1500, W: 1920, H: 1080, edges: { top: 0.05 } }) === null,    // a waist shot
+    /left 60/.test(figureCut({ x0: 600, y0: 40, x1: 1300, y1: 1080, W: 1920, H: 1080, edges: { left: 0.6 } })),  // a cropped cut-out
   ];
   {                                                             // legibility: a 20x10 glyph block on a 60x40 picture
     const w = 60, h = 40, img = (f) => { const a = new Uint8ClampedArray(w * h * 4); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) a.set(f(x, y), 4 * (y * w + x)); return a; };
@@ -166,15 +187,43 @@ for (let k = 0; k < shots.length; k++) {
 const spriteFps = +arg('sprite-fps', 4);
 const LEG = { hidden: 0.05, contrast: 3 };                     // the lyric: <= 5 % covered; WCAG 3:1 (large text)
 if (spriteFps > 0) {                                           // which sprite is the main one, every 1/spriteFps s
-  const samples = [], unsafe = new Map(), hidden = new Map(), dim = new Map();
+  const samples = [], unsafe = new Map(), hidden = new Map(), dim = new Map(), cut = new Map();
   await E.page.evaluate(src => { window.__legib = (0, eval)('(' + src + ')'); }, legibility.toString());
+  await E.page.evaluate(() => {                                 // a picture's opaque box in 0..1, and each edge's opaque share
+    const C = new WeakMap();
+    window.__abox = img => {
+      if (C.has(img)) return C.get(img);
+      const w = 96, h = Math.max(1, Math.round(96 * img.height / img.width)), x = Object.assign(document.createElement('canvas'), { width: w, height: h }).getContext('2d', { willReadFrequently: true });
+      x.drawImage(img, 0, 0, w, h);
+      const d = x.getImageData(0, 0, w, h).data, A = (i, j) => d[4 * (j * w + i) + 3] > 64; let u0 = w, v0 = h, u1 = -1, v1 = -1;
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) if (A(i, j)) { u0 = Math.min(u0, i); u1 = Math.max(u1, i); v0 = Math.min(v0, j); v1 = j; }
+      // an edge band 3 px deep (a feathered crop is still a straight line)
+      const band = (n, at) => { let k = 0; for (let q = 0; q < n; q++) if ([0, 1, 2].some(z => at(q, z))) k++; return k / n; };
+      const edges = { top: band(w, (q, z) => A(q, z)), bottom: band(w, (q, z) => A(q, h - 1 - z)), left: band(h, (q, z) => A(z, q)), right: band(h, (q, z) => A(w - 1 - z, q)) };
+      const r = u1 < 0 ? null : { u0: u0 / w, u1: (u1 + 1) / w, v0: v0 / h, v1: (v1 + 1) / h, edges };
+      C.set(img, r); return r;
+    };
+  });
   for (let k = 0; k < shots.length; k++) {
     const s = shots[k], end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
     if (only && !only.has(s.id)) continue;
     for (let t = s.t0 + 0.5 / fps; t < end; t += 1 / spriteFps) {
-      const { p, out, all, leg } = await E.page.evaluate(async t => {
-        let best = null, out = 0, all = 0, leg = null;
+      const { p, out, all, leg, fig } = await E.page.evaluate(async t => {
+        let best = null, out = 0, all = 0, leg = null, fig = null;
         window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
+        // shortcut: a layer the scene scales after drawing the sprite into it (a camera on a whole canvas) is not seen
+        window.Z.onSpriteBox = (img, c, x0, y0, w, h) => {
+          const a = window.__abox(img); if (!a) return;
+          const m = c.getTransform(), xs = [], ys = [];
+          for (const [u, v] of [[a.u0, a.v0], [a.u1, a.v0], [a.u0, a.v1], [a.u1, a.v1]]) { const px = x0 + u * w, py = y0 + v * h; xs.push(m.a * px + m.c * py + m.e); ys.push(m.b * px + m.d * py + m.f); }
+          const W = c.canvas.width, H = c.canvas.height, edges = {};
+          for (const [k, u, v] of [['top', 0.5, 0], ['bottom', 0.5, 1], ['left', 0, 0.5], ['right', 1, 0.5]]) {   // an edge whose middle is on screen shows
+            const px = x0 + u * w, py = y0 + v * h, X = m.a * px + m.c * py + m.e, Y = m.b * px + m.d * py + m.f;
+            if (X > 2 && X < W - 2 && Y > 2 && Y < H - 2) edges[k] = a.edges[k];
+          }
+          const b = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), W, H, edges };
+          if (!fig || b.y1 - b.y0 > fig.y1 - fig.y0) fig = b;
+        };
         window.Z.onText = (c, shot, fgc, scene) => {
           const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main');
           const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
@@ -190,10 +239,13 @@ if (spriteFps > 0) {                                           // which sprite i
           const a = x.getImageData(0, 0, 192, 108).data;
           for (let i = 3, n = 0; i < a.length; i += 4, n++) if (a[i] > 127) { all++; const u = n % 192, v = (n / 192) | 0; if (u < 10 || u >= 182 || v < 5 || v >= 103) out++; }
         };
-        try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; }
-        return { p: best && best.p, out, all, leg };
+        try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; window.Z.onSpriteBox = null; }
+        const sh = (window.Z.SHOTS || []).filter(x => x.t0 <= t).pop();
+        return { p: best && best.p, out, all, leg, fig: sh && sh.crop ? null : fig };
       }, t);
       samples.push({ t, p, id: s.id });
+      const fc = fig && figureCut(fig);
+      if (fc && !cut.has(s.id)) cut.set(s.id, { t, msg: fc });
       if (out >= 6 && out > 0.02 * all && !unsafe.has(s.id)) unsafe.set(s.id, { t, share: out / all });
       if (leg && leg.px >= 150) {
         if (leg.hidden > LEG.hidden && !(hidden.get(s.id)?.v >= leg.hidden)) hidden.set(s.id, { t, v: leg.hidden });
@@ -204,6 +256,7 @@ if (spriteFps > 0) {                                           // which sprite i
   for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words there)`);
   for (const [id, u] of hidden) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS HIDDEN (${(u.v * 100).toFixed(0)} % of the lyric under the foreground: the foreground covers the words there)`);
   for (const [id, u] of dim) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS LOW CONTRAST (${u.v.toFixed(1)}:1 against the picture around them, needs ${LEG.contrast}:1 there; how the words reach it is the film's choice)`);
+  for (const [id, u] of cut) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: ${u.msg}; crop: true on the shot if it is meant`);
   for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (sprites swap back and forth inside one shot; faces change with chars[].anim)`);
 }
 {                                                              // which lyrics each frame draws, around every cut

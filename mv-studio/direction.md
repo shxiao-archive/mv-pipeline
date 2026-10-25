@@ -85,7 +85,7 @@ transition grammar, ending, pacing (some songs want long takes), type density (s
 
 Half a page; lyric lines by number only. The jury reads it and judges the film against it, so it says what the film
 is trying to do, not what the style usually does:
-- thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its distance table §4, or
+- thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its §4 marker check on the look sheet, or
   the preset named by the user), and per section the methods the song asks for, and why;
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;

@@ -79,6 +79,7 @@
     const br = 1 + (opt.breathe || 0) * 0.012 * Math.sin(t * 2.1 + (opt.phase || 0));
     ctx.scale(opt.flip ? -1 : 1, br);
     const x0 = -w * ax, y0 = -h * ay;
+    if (Z.onSpriteBox) Z.onSpriteBox(img, ctx, x0, y0, w, h);         // where it lands on screen: tools/check_shots.mjs
     if (opt.field) {                                         // a mesh warp: field(u, v) -> [dx, dy] px (head tilt, hair sway: chars[].anim)
       D.meshDraw(ctx, img, x0, y0, w, h, opt.field, opt.mesh);
       if (opt.tint) { ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha *= opt.tint.a ?? 0.5; D.meshDraw(ctx, Z.tinted(img, opt.tint.color, 'tint' + imgId(img)), x0, y0, w, h, opt.field, opt.mesh); }
@@ -108,6 +109,7 @@
     return D.sprite(ctx, c, x, y, h, opt);
   };
   // rim light: draw a tinted copy offset behind
+  // @index fits: vocaloid
   D.rim = (ctx, img, x, y, h, color, off = [6, -4], opt = {}) => {
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.filter = 'blur(3px)';
     D.silhouette(ctx, img, x + off[0], y + off[1], h, color, opt);
@@ -138,6 +140,7 @@
   };
   D.disc = (ctx, x, y, r, color, a = 1) => { ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Z.TAU); ctx.fill(); ctx.restore(); };
   // crepuscular rays from (x,y)
+  // @index fits: vocaloid
   D.rays = (ctx, x, y, n, len, color, a, t, seed = 3) => {
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (let i = 0; i < n; i++) {
@@ -153,6 +156,7 @@
   };
 
   // ---------------------------------------------------------------- particles (closed-form, deterministic)
+  // @index fits: vocaloid
   // embers rising: n particles, each with a lifetime loop; area = [x0,y0,x1,y1]
   D.embers = (ctx, t, o = {}) => {
     const n = o.n ?? 80, seed = o.seed ?? 11, [x0, y0, x1, y1] = o.area || [0, 0, W, H];
@@ -174,6 +178,7 @@
     ctx.restore();
   };
   // fireflies: slow wander, blinking
+  // @index fits: vocaloid
   D.fireflies = (ctx, t, o = {}) => {
     const n = o.n ?? 40, seed = o.seed ?? 21, [x0, y0, x1, y1] = o.area || [0, H * 0.3, W, H];
     const col = o.color || '#DDFF7A';
@@ -217,6 +222,7 @@
     ctx.restore();
   };
   // falling feathers (simple drawn shapes)
+  // @index fits: vocaloid
   D.feathers = (ctx, t, o = {}) => {
     const n = o.n ?? 14, seed = o.seed ?? 51;
     ctx.save();
@@ -236,6 +242,8 @@
   // ---------------------------------------------------------------- glass cracks (voronoi-ish network grown from impact points)
   // returns a cached list of polylines for (seed, cx, cy); draw with D.cracks(ctx, lines, progress, style)
   const crackCache = new Map();
+  // glass crack web from (cx,cy): radial cracks plus ring connectors, as polylines (cached)
+  // @index fits: vocaloid
   D.crackNet = (seed, cx, cy, n = 22, reach = 1100) => {
     const key = seed + '|' + cx + '|' + cy + '|' + n;
     if (crackCache.has(key)) return crackCache.get(key);
@@ -257,6 +265,8 @@
     }
     crackCache.set(key, lines); return lines;
   };
+  // draw a crack web (D.crackNet) grown to prog 0..1, a glow pass and a core pass
+  // @index fits: vocaloid
   D.cracks = (ctx, lines, prog, o = {}) => {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     for (const pass of [{ c: o.glow || '#FFA552', w: 5, a: 0.55, comp: 'lighter', blur: 'blur(4px)' }, { c: o.core || '#FFF3D6', w: 1, a: 1, comp: 'source-over', blur: 'none' }]) {

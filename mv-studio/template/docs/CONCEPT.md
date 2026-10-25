@@ -29,11 +29,15 @@ Each slot answered from the song (design-a-style.md §2):
 - **Ending** (the last idea the film leaves):
 - **Borrowed techniques** (library modules used, none of them a preset's look):
 
-Distance check (design-a-style.md §4): "same" / "different" per slot.
+Distance check (design-a-style.md §4), judged on the look sheet's frames: the markers of each preset they show.
 
-| slot | vocaloid | interface | stage | papercraft | magazine |
-|---|---|---|---|---|---|
-|  |  |  |  |  |  |
+| preset | markers seen (frame) | count |
+|---|---|---|
+| vocaloid |  |  |
+| interface |  |  |
+| stage |  |  |
+| papercraft |  |  |
+| magazine |  |  |
 
 ## Frame and arc
 

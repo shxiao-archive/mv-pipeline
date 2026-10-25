@@ -57,13 +57,18 @@ node tools/render_final.mjs --name mv --preview                        # half-re
 node tools/render_final.mjs --name mv_vertical --url engine/vertical.html --selector canvas#vout --width 1080 --height 1920
 node tools/render_final.mjs --name mv --codec x264                     # no NVIDIA GPU (master --crf 18 default; 15 = near-lossless, large)
 node tools/render_final.mjs --name mv --shutter 6                      # shutter motion blur, 6 sub-frames per frame
+node tools/render_final.mjs --name mv --patch 62.4:66,120:121.5        # re-render only these ranges into the master
 ```
+**Patching** (`--patch A:B[,C:D]`): re-renders the ranges (widened to the keyframes of `render/<name>_video.mp4`, every
+2 s), copies every other frame of that file across unchanged, then muxes the audio again. Pass the same `--start`,
+`--codec`, `--preview`, `--shutter` and size as that render. Use it for fixes local to some shots; render the whole film
+after a change to shared code, the timeline's timing or a JIZURA part pool (09 §1).
 **Motion blur** (optional): `project.json` → `"render": { "shutter": { "samples": 6, "angle": 180 } }` (or `--shutter N`
 for one render; `--preview` renders with 1). The engine draws N sub-frames across the open shutter and averages them in
 a float buffer (`core/gl.js`), so fast pans, whip moves and spinning type smear like film. The shutter opens AT the frame
 time, so a cut on a frame boundary never mixes two shots. Cost: N times the render time; stills and checks show the
 same blur as the export. Use it for camera-heavy films; skip it for the signal treatment (its point is crisp frames).
-(`powershell -File tools\render_final.ps1 …` forwards to the same script; old `-Workers 3 -Preview` spellings are accepted.) Options: `--workers 3 --start 0 --end <s> --name mv --preview --url --selector canvas#out --width --height --fps 30 --codec nvenc --cq 16 --audio audio/song.wav --no-audio`.
+(`powershell -File tools\render_final.ps1 …` forwards to the same script; old `-Workers 3 -Preview` spellings are accepted.) Options: `--workers 3 --start 0 --end <s> --name mv --preview --url --selector canvas#out --width --height --fps 30 --codec nvenc --cq 16 --audio audio/song.wav --no-audio --patch A:B`.
 
 Steps: `render_frames.mjs --mode blob --codec nvenc --cq 16 --stats render/<name>_stats.json` → `render/<name>_video.mp4` (picture only) → mux, equivalent to:
 ```bash
@@ -131,7 +136,7 @@ To adapt: set `Z.VERTICAL_CFG = { full, planMap, title, sub, artist, credits: [t
 | `python tools/jury_pack.py render/mv.mp4` | the jury's pack: a contact sheet per section, filmstrips at the hooks, every frame around each shot and lyric cut, full-resolution stills, motion per second (09 §8) |
 | `ffmpeg -ss 62.4 -i render/mv.mp4 -frames:v 12 render/check/f_%02d.png` | a burst of consecutive frames to check motion, seams, flashes |
 
-Review order that worked: stills at every shot midpoint (pacing, composition) → fix → `--preview` full render → review sheets → fix → full master → review sheets (16:9 and vertical) → spot-check the worker seams (frames at 1/3 and 2/3 of the duration, e.g. `ffmpeg -ss <t>` around them) and every flash for the photosensitivity rule (≤ 3 full-frame flashes per second).
+Review order that worked: stills at every shot midpoint (pacing, composition), `check_shots`, `pops` → fix → one full master → review sheets (16:9 and vertical) → fix, check the ranges with stills and `pops --from --to`, `--patch` them → spot-check the worker seams (frames at 1/3 and 2/3 of the duration, e.g. `ffmpeg -ss <t>` around them) and every flash for the photosensitivity rule (≤ 3 full-frame flashes per second).
 
 ## 7. Optional upload (`tools/gigafile_upload.mjs`)
 

@@ -84,6 +84,10 @@ Math/easing: `Z.clamp lerp inv remap smooth fract quant hex rgba mix3 TAU`, `Z.t
 
 ## 5. Drawing toolkit (`Z.draw`, alias `D`)
 
+The rays, embers, fireflies, feathers, glass cracks and rim light were built for the vocaloid demo 「残光」 and carry
+its look (amber and cream defaults, its cracked sky); the index lists them under `vocaloid`. In a film with its own
+style they are that preset's devices, not neutral techniques (`design-a-style.md` §5).
+
 - Framing: `D.cover(ctx, img, {zoom, x, y, rot}, alpha)` (x/y in −1..1 of the spare margin), `D.viewLerp(a, b, k)`, `D.shake(t, amp, fps=24, seed)`.
 - Characters: `D.sprite(ctx, img, x, y, h, {anchor:[.5,1], rot, flip, sway, breathe, t, phase, alpha, wave:{amp, freq 2.2, speed 3.2, from .25, q}})` — `wave` is a hair-wind strip warp (keep `from` 0.25–0.4 so the face doesn't bend); `D.silhouette(…, color)`, `D.rim(…, color, [dx,dy])`.
 - Light: `D.glow(ctx, x, y, r, color, a)` (additive radial), `D.disc`, `D.rays(ctx, x, y, n, len, color, a, t, seed)`.
@@ -337,7 +341,7 @@ The stock scenes were written for 残光; before reusing one (in a vocaloid film
   color, spread, flicker, beat }`. `Z.pinPt(S, spec, k)` for custom fx.
 - **Tools:** `estimate_lrc.py` (plain text → estimated LRC), `art_grid.py` (labelled grid over a plate to read u, v),
   `grokgen.py` + `grok_run.sh` (Grok images), `check_flash.py` (WCAG 2.3.1 approximation; exit 1 on FAIL),
-  `motion_check.py` (static stretches; exit 1 above 10 %), `check_no_lyrics.mjs` (lyric text outside `analysis/`).
+  `motion_check.py` (static stretches; exit 1 above 10 %, which verify lists as information), `check_no_lyrics.mjs` (lyric text outside `analysis/`).
 
 ---
 Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT) · §12: mv-studio (MIT)
@@ -351,7 +355,8 @@ Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT) · §12: mv-studio (MIT
   lyric line number(s) it answers), `cue` (the cue its cut sits on; checked within `review.cueTolerance`), `offgrid:
   'reason'` (a deliberate off-grid cut), `insert: true` (1-2 frame inserts), `allowBlack: true` (a deliberately black
   shot), `hold: true` (a deliberate still: motion_check.py leaves it out, up to 8 % of the film; the song's own stops
-  and the tail after `music_cut` are left out without it). Line indices inside `args` (`line`, `lines`) count as "this shot shows that line".
+  and the tail after `music_cut` are left out without it), `crop: true` (the frame or the picture's edge cuts the figure on
+  purpose: check_shots.mjs leaves out FIGURE CUT). Line indices inside `args` (`line`, `lines`) count as "this shot shows that line".
 - **Offsets** (`project.json` → `timing`): `offset` delays every picture (applied in `window.renderFrame`),
   `lyricOffset` delays the lyrics only (Z.LYR, line cues, the JIZURA layer). Scenes never add them.
 - **Per-character times:** `Z.charTimes(i)`; `Z.charsAt(i, t)` uses them when `analysis/lyric_timing.json` has them

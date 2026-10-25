@@ -33,7 +33,9 @@ section, the mechanism). "None" is a valid answer wherever it fits.
 
 Answer them in this order of dependency: the mechanism and medium first, then palette, type and shapes, then motion,
 editing and lyrics. Don't fill a slot with what the engine or a starter already happens to do: the starters are API
-examples, and their values are placeholders.
+examples, and their values are placeholders. The generator the user names (an anime model, say) and the song's
+language decide neither the cast nor the look: a generator draws whatever the slots ask for (places, objects,
+textures, no one at all), and the cast slot is answered from the song like the others.
 
 ## 3. The look sheet ◆
 
@@ -42,16 +44,21 @@ a texture or material swatch. Show it to the user with the concept, and change t
 
 ## 4. The distance check
 
-Before the look sheet goes to the user, compare your slots with each preset (`styles/<preset>/BRIEF.md`): one row per
-slot, "same" or "different".
+Slot answers in words pass too easily: "an anime art-film" is not "a ボカロPV" on paper and can be one on screen.
+So judge the look sheet's frames, not the text. For each preset, list which of its markers the frames show; a marker is
+a thing you can point at in a frame.
 
-| slot | vocaloid | interface | stage | papercraft | magazine |
-|---|---|---|---|---|---|
-| reads as | | | | | |
-| … one row per slot of §2 | | | | | |
+| preset | markers |
+|---|---|
+| vocaloid | an illustrated (anime) character as the subject of most frames · the lyric line over the picture on a band, box or plate, in columns beside the subject, or as one monument kanji · HUD readouts, brackets or frame lines · kanji title slams · glowing line effects (crack webs, rays, sparks, embers, a rim light on the figure) · a dark ground lit by a few glowing accents |
+| interface | a chat or app screen (bubbles, a cursor, typing) · technical plates (charts, oscilloscopes, forms, prompts, maps) · a mono "system" voice · colour states for who speaks |
+| stage | puppets or a troupe acting · painted sets, a proscenium or a curtain · gags that escalate |
+| papercraft | cut paper in multiplane depth · RPG menus, dialogue boxes, stat bars · a book that opens and closes |
+| magazine | vertical mincho lyric columns · pictures separated into a few inks on paper · folios, proof or register marks · a page with a fate |
 
-If more than 3 rows match one preset, the film is drifting into it. Either offer the user that preset by name, or go
-back and answer those slots again from the song. Record the table in `docs/CONCEPT.md`.
+Three or more markers of one preset in the frames means the film is drifting into it: offer the user that preset by
+name, or redesign those slots from the song and render the sheet again. Record in `docs/CONCEPT.md` the markers each
+preset scores, with the frames that show them.
 
 ## 5. Borrowing: techniques yes, looks no
 
@@ -62,7 +69,9 @@ back and answer those slots again from the song. Record the table in `docs/CONCE
 - **Not borrowable without the user asking for that preset:** a preset's look as a whole, meaning its palette, type
   system, cast and signature devices:
   - the ボカロPV look: an illustrated original singer at the centre of the frame, lyric columns flanking the subject,
-    the PV HUD, kanji slams, the 残光 palettes (P1–P5);
+    a band or plate behind the lyric line, the PV HUD, kanji slams, the 残光 palettes (P1–P5), and its light devices
+    (`D.crackNet`/`D.cracks`, `D.rays`, `D.embers`, `D.fireflies`, `D.feathers`, `D.rim`: the index lists them
+    under `vocaloid`);
   - the AI-chat voices and colour states;
   - the treatise's spark-and-number plates;
   - the puppet troupe on its painted stage;

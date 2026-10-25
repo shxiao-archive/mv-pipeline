@@ -6,9 +6,15 @@ Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pip
 
 1. **Stills at shot midpoints** (fast, minutes): `node tools/stills.mjs --times <list> --out render/stills/passN --sheet passN`, then read the sheet image. For vertical: `--url engine/vertical.html --canvas vout` (the sheet keeps the 9:16 aspect).
 2. **Dense stills where something moves** (transitions, stops, beat cuts): `--range 200:203.5:0.25`.
-3. **Full render** (~4 min): `node tools/render_final.mjs --name mv`.
-4. **Review sheets** from the MP4: `python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/reviewN` (5×5 timestamped frames per sheet). Portrait videos work the same (216×384 thumbnails): `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.8 --out render/reviewN_v`.
-5. Fix → re-render → re-review. Expect 2–3 full passes. Any change to a JIZURA plan's part pool re-rolls all its cuts, so re-check the whole film after curation edits.
+3. **The checks that need no video, on what changed:** `check_shots.mjs`, and `pops.mjs --from <a> --to <b>` on the
+   changed ranges. A defect found here costs seconds; found in a render it costs a render.
+4. **One full render** (~4 min on NVENC, much longer on x264): `node tools/render_final.mjs --name mv`.
+5. **Review sheets** from the MP4: `python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/reviewN` (5×5 timestamped frames per sheet). Portrait videos work the same (216×384 thumbnails): `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.8 --out render/reviewN_v`.
+6. **Fix in ranges, not in passes.** Check each fix with stills and `pops.mjs --from --to` over its range, then
+   `node tools/render_final.mjs --name mv --patch <a>:<b>[,<c>:<d>]` re-renders only those ranges into the master
+   (widened to its keyframes) and copies every other frame across. Render the whole film again only after a change that
+   reaches beyond the ranges: shared code (a palette, a helper many shots use, the engine, `globalFX`), the timeline's
+   timing, or a JIZURA plan's part pool (it re-rolls all its cuts).
 
 A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め black before the riff). Before "fixing", render dense stills around it.
 
@@ -77,7 +83,7 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 Run on every full render (and on clips of fast sections while building):
 ```bash
 python tools/check_flash.py render/mv.mp4        # WCAG 2.3.1 approximation: general + red flashes <= 3/s -> PASS / FAIL (exit 1)
-python tools/motion_check.py render/mv.mp4       # stretches where nothing moves (< 0.006 for >= 1.5 s); FAIL above 10 % (not counting the song's stops, the tail, `hold: true` shots; a slow push over a living face passes)
+python tools/motion_check.py render/mv.mp4       # stretches where nothing moves (< 0.006 for >= 1.5 s), with their times (not counting the song's stops, the tail, `hold: true` shots); verify lists it as INFO: a stillness the film means stays, one it doesn't is fixed in that shot
 node tools/check_no_lyrics.mjs                   # lyric text only in analysis/ (code clean; --strict: docs too)
 ```
 What reviewers flagged in films that passed every automatic check — look for these in the contact sheets:
@@ -105,11 +111,11 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 |---|---|---|---|
 | 1 | `node tools/lint.mjs` | syntax errors, U+FFFD (CJK text lost in a write), `Math.random` / `Date.now` in engine code, lyric text in code | every change |
 | 2 | `node tools/storyboard.mjs` | unknown scenes, black gaps, cuts off the grid, cuts far from their cue, sung lines no shot shows, shots without `moment`, unreadably short lines, line cues without hints; writes STORYBOARD.md | every edit of the timeline |
-| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, lyrics outside the 90 % safe area, under the character (LYRICS HIDDEN) or below 3:1 contrast (LYRICS LOW CONTRAST) while a cut's words hold, a JIZURA transition drawing two lines at once (LYRIC OVERLAP) (4 samples/s; `--sprite-fps 0` skips them; errors with `--strict`) | every edit |
+| 3 | `node tools/check_shots.mjs` | page errors per shot, black / flat frames, fonts that failed, character sprites swapped back and forth, a figure cut by the frame or by its own image's edge (FIGURE CUT; `crop: true` on a shot that crops on purpose), lyrics outside the 90 % safe area, under the character (LYRICS HIDDEN) or below 3:1 contrast (LYRICS LOW CONTRAST) while a cut's words hold, a JIZURA transition drawing two lines at once (LYRIC OVERLAP) (4 samples/s; `--sprite-fps 0` skips them; errors with `--strict`) | every edit |
 | 4 | `node tools/cues_sheet.mjs` | the wrong picture for a line (look at it) | after the plan, after big changes |
-| 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back); a change on a beat, lyric cut or cue is a HIT, listed and allowed: never soften a hit to pass | before a full render |
+| 5 | `node tools/pops.mjs` | JUMPs (an abrupt change inside a shot) and POPs (1-3 frames that flash and come back); a change on a beat, a lyric cut, a cue, or a frame whose code reads a drum hit (`Z.hit`) is a HIT, listed and allowed: never soften a hit to pass; needs no render, so run it with `--from --to` on each changed range | before any render |
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |
-| 7 | render → `check_flash.py`, `motion_check.py`, `check_sync.py` | flashes, stillness, picture / audio / lyric offsets | every render |
+| 7 | render → `check_flash.py`, `check_sync.py`, `motion_check.py` (information) | flashes, picture / audio / lyric offsets, stillness | every render (after `--patch`, on the patched master) |
 | 8 | contact / review sheets, read by the lead | everything else | every render |
 | 9 | the jury, two rounds (§8): `tools/jury_pack.py`, an independent session scores and lists fixes → revise → back to 1 | what the builder no longer sees; film quality, not only correctness | before delivery |
 
@@ -201,8 +207,8 @@ Raise the film to award level (target >= 8 in every dimension, 9 where the style
 - Implement every critical issue and every high-impact fix. You may replace a listed fix with a better solution if you
   are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
   weakest section. Do not regress anything the jury listed as a strength.
-- Run the checks of references/09 §7 again, re-render, build a new pack and look at the frames until the fixes have
-  truly landed.
+- Run the checks of references/09 §7 again, re-render (`render_final.mjs --patch` for fixes local to some shots; the
+  whole film after a shared change, 09 §1), build a new pack and look at the frames until the fixes have truly landed.
 - Write docs/REVIEW.md: each fix applied or skipped, and why. Name lyric lines by number (L05), never quote them:
   tools/check_no_lyrics.mjs scans docs/ (only the jury's own files in docs/review/ are skipped).
 ```
