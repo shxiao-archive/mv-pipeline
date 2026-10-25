@@ -238,6 +238,11 @@ def main() -> int:
     if lyrics:
         out, kind = import_lyrics(lyrics, dst)
         print(f"  lyrics : {lyrics.name} -> {out.relative_to(dst).as_posix()} ({kind})")
+        if lyrics.parent == dst:   # a lyric file left in the project root fails check_no_lyrics: keep the source in audio/
+            (dst / "audio").mkdir(exist_ok=True)
+            shutil.move(str(lyrics), str(dst / "audio" / lyrics.name))
+            print(f"           moved the source {lyrics.name} -> audio/")
+            lyrics = dst / "audio" / lyrics.name
         if out.name == "lyrics_official.txt":
             print("           quick timings: python tools/estimate_lrc.py analysis/lyrics_official.txt --start <first sung line, s>"
                   "  (ESTIMATED: tell the user)\n"

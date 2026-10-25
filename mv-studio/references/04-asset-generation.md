@@ -108,7 +108,14 @@ and the size of the colour areas must match the drawn puppets.
 
 ## 1. What to generate (derive it from the storyboard)
 
-Do not generate a generic pose library. Go through `docs/STORYBOARD.md` shot by shot and list what each shot needs; merge duplicates. 残光 ended with **17 poses (+6 alternates), 14 backgrounds, 1 prop** for ~70 shots — roughly one asset per 3–4 shots, because the engine re-frames, re-grades and re-lights the same images many times (`illust` camera moves, LUTs, silhouettes, rims, panels, bursts).
+Do not generate a generic pose library. Go through `docs/STORYBOARD.md` shot by shot and list what each shot needs; merge duplicates. 残光 ended with **17 poses (+6 alternates), 14 backgrounds, 1 prop** for ~70 shots, about one asset per 2 shots. The engine re-frames, re-grades and re-lights the same images (`illust` camera moves, LUTs, silhouettes, rims, panels, bursts), but a return is a new treatment, not the same shot again.
+
+**The picture budget:** count it from the shot list, never from a habit.
+- A film cut from pictures needs at least one per 2–3 pictured shots, and no picture in more than 4 shots.
+- A fast song cuts more, so it needs more.
+- Iteration 7 made 15–16 for 64–81 shots, so one background appeared in 21 shots and the films felt repetitive.
+- `storyboard.mjs` warns about both, counting the image paths in the shots' args.
+- NovelAI at 1 MP or less costs no Anlas on Opus, so generate in batches by section until the budget is met.
 
 | need | 残光 example | typical shots |
 |---|---|---|

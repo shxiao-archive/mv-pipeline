@@ -144,7 +144,7 @@
       if (p.schemes === 'dark' || p.schemes === 'light' || Array.isArray(p.schemes)) {
         const pick = test => plan.style.schemes.map((s, i) => (test(J.lum(s.bg)) ? i : -1)).filter(i => i >= 0);
         const ok = Array.isArray(p.schemes) ? p.schemes : p.schemes === 'dark' ? pick(l => l < 0.25) : pick(l => l > 0.6);
-        if (ok.length) for (const c of plan.cuts) c.scheme = ok[(c.scheme | 0) % ok.length];
+        if (ok.length) for (const c of plan.cuts) for (const x of [c, c.companion]) if (x && typeof x === 'object') x.scheme = ok[(x.scheme | 0) % ok.length];   // the second half of a '/' split too
       }
       const R = new J.Renderer();
       JZ.plans[name] = { project, plan, R };
