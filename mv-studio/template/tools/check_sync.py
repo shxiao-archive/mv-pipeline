@@ -17,8 +17,10 @@
                on the wrong phrase (a correct onset of the wrong line). Run it before rendering:
                    python tools/check_sync.py --lyrics-only
 Times are song times; --start is the song time of the file's first frame (render_final.mjs --start).
-Exit 1 when 1 or 2 fails; a doubtful step 3 makes the result WARN (exit 0: onset detection on a full mix is noisy, so
-listen to the listed lines before trusting or changing them).
+Exit 1 when 1 or 2 fails or cannot run (no song, no audio stream in the file, no plan/shots.json), and with
+--lyrics-only when there is no LRC. A doubtful step 3 makes the result WARN (exit 0: onset detection on a full mix is
+noisy, so listen to the listed lines before trusting or changing them). A film without an LRC (no lyrics) skips step 3
+and says so in the result line.
 
 Method after world-execute-me-lyric-mv's tools/check_sync.py (Nyankomint, MIT); rewritten for mv-studio (MIT).
 """
@@ -78,6 +80,10 @@ def main() -> int:
     offset, loff = float(tm.get("offset", 0) or 0), float(tm.get("lyricOffset", 0) or 0)
     res: dict = {"video": kit_env.rel(mp4) if mp4 else None, "start": a.start, "offset": offset, "lyricOffset": loff}
     fail = warn = False
+    skipped = []
+    if not song.is_file():
+        print(f"[check_sync] FAIL: no song at {a.audio} (pass --audio)")
+        return 1
 
     if mp4:
         fps = video_fps(mp4)
@@ -98,7 +104,8 @@ def main() -> int:
             res["audio_mux_ms"] = round(lag_ms, 1)
             print(f"[1] audio mux   {lag_ms:+7.1f} ms   {'PASS' if ok else 'FAIL'} ({'in step with' if abs(lag_ms) < 0.5 else 'late against' if lag_ms > 0 else 'early against'} audio/song.wav)")
         except subprocess.CalledProcessError:
-            print("[1] audio mux   no audio stream in the file: skipped")
+            fail = True
+            print("[1] audio mux   no audio stream in the file   FAIL (render with audio to check sync)")
 
         # ---- 2. cuts
         shots_p = kit_env.resolve(a.shots)
@@ -134,7 +141,8 @@ def main() -> int:
             else:
                 print("[2] cuts        no measurable hard cuts")
         else:
-            print(f"[2] cuts        no {a.shots}: run node tools/storyboard.mjs first")
+            fail = True
+            print(f"[2] cuts        no {a.shots}   FAIL (run node tools/storyboard.mjs first)")
 
     # ---- 3. lyrics vs voice
     if LRC.is_file():
@@ -186,11 +194,16 @@ def main() -> int:
             if off:
                 print(f"      lines whose nearest voice onset is > 120 ms away: {', '.join(map(str, off[:30]))}"
                       " (check them by ear: tools/lyric_editor)")
+    else:
+        fail |= a.lyrics_only
+        skipped.append("lyrics")
+        print(f"[3] lyrics      no {kit_env.rel(LRC)}   {'FAIL' if a.lyrics_only else 'SKIPPED (a film without lyrics)'}")
+    res["skipped"] = skipped
     res["result"] = "FAIL" if fail else "WARN" if warn else "PASS"     # WARN: the lyric timing needs a listen
     out = kit_env.resolve(a.json)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(res, indent=1), encoding="utf-8")
-    print(f"[check_sync] {res['result']} -> {kit_env.rel(out)}")
+    print(f"[check_sync] {res['result']}{' (not checked: ' + ', '.join(skipped) + ')' if skipped else ''} -> {kit_env.rel(out)}")
     return 1 if fail else 0
 
 

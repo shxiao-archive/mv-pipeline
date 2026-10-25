@@ -1,6 +1,6 @@
 # 09 — QA: review loop, checklist, failure modes we hit
 
-Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pipeline & tooling pitfalls · 5 Working with agents · 6 mv-studio checks · 7 Review order · 8 The jury (two rounds)
+Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pipeline & tooling pitfalls · 5 Working with agents · 6 mv-studio checks · 7 Review order · 8 The jury (one round)
 
 ## 1. The loop
 
@@ -117,7 +117,7 @@ Automated first (cheap, catches the boring errors), then eyes, then an independe
 | 6 | `node tools/regress.mjs snap a` / `snap b` + `python tools/compare_sheets.py a b` | a change to a shared file that altered finished shots | around every shared-file change |
 | 7 | render → `check_flash.py`, `check_sync.py`, `motion_check.py` (information) | flashes, picture / audio / lyric offsets, stillness | every render (after `--patch`, on the patched master) |
 | 8 | contact / review sheets, read by the lead | everything else | every render |
-| 9 | the jury, two rounds (§8): `tools/jury_pack.py`, an independent session scores and lists fixes → revise → back to 1 | what the builder no longer sees; film quality, not only correctness | before delivery |
+| 9 | the jury, one round (§8): `tools/jury_pack.py`, an independent session scores and lists fixes → revise → back to 1 | what the builder no longer sees; film quality, not only correctness | before delivery |
 
 P0 = wrong picture for its line, wrong time, a failing check, a page error, a broken brief rule or seam; P1 = not
 refined; P2 = nice to have. Delivery needs P0 empty.
@@ -134,10 +134,10 @@ refined; P2 = nice to have. Delivery needs P0 empty.
 | changed frames outside the shots you edited | compare_sheets | the shared-file change leaked: fix it or scope it to the shots that need it |
 | `overexposed ... s` | check_flash | most of the frame burnt white: a flash transition (`peak`, default 0.7), a light or glow that swells to fill the frame, bloom on bright type; lower it there |
 
-## 8. The jury: an independent review in two rounds
+## 8. The jury: an independent review
 
 The automatic checks prove a film is correct; they cannot say whether it is good. Before delivery the film goes through
-**build → jury → revise → jury → revise** (the process of mg-styles-15, MIT, adapted to music videos). The jury is a
+**build → jury → revise** (the process of mg-styles-15, MIT, adapted to music videos). The jury is a
 session that **did not make the film**: another model if the user has one (Gemini, GPT …), else a fresh Claude session
 or a subagent started with no history. Never the builder judging its own film: it no longer sees what the film lacks.
 

@@ -269,7 +269,7 @@ def main() -> int:
     if song and not lyrics:
         steps.append("# add the official lyrics with timings as analysis/lyrics_mv.lrc (references/03-audio-and-lyrics.md)")
     if lyrics and not song:
-        steps.append("# copy the song to audio/song.wav (WAV; or re-run new_project.py --force --song FILE)")
+        steps.append("# copy the song to audio/song.wav (a WAV; convert others: ffmpeg -i FILE -vn -c:a pcm_s24le audio/song.wav)")
     demo = not song and not lyrics
     if demo:
         steps += [f"{py} demo/make_demo_song.py          # smoke test without a song (or copy yours to audio/song.wav)",
