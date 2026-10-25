@@ -30,18 +30,24 @@ if (mp4) {
   );
 } else if (!args.includes('--quick')) console.log('[verify] no render given: build checks and pops only (pass render/mv.mp4 for the rest)');
 
-let failed = 0, warned = 0;
+let failed = 0, warned = 0, partial = 0;
 for (const [name, cmd, a, see, info] of steps) {
   const r = spawnSync(cmd, a, { encoding: 'utf8', maxBuffer: 64 << 20 });
   if (info) { console.log(`INFO  ${name}  ${`${r.stdout || ''}`.trim().split('\n').filter(l => /^\[/.test(l)).pop() || '(no summary)'}`); continue; }
   const out = `${r.stdout || ''}${r.stderr || ''}${r.error ? r.error.message : ''}`.trim().split('\n');
   const warn = r.status === 0 && out.some(l => /\bWARN\b/.test(l));
-  if (r.status === 0 && !warn) { console.log(`PASS  ${name}`); continue; }
+  const skip = out.filter(l => /SKIPPED|not checked/.test(l));
+  if (r.status === 0 && !warn) {
+    if (skip.length) partial++;
+    console.log(`PASS  ${name}${skip.length ? '  (partly: a step did not run)' : ''}`);
+    for (const l of skip) console.log(`      ${l}`);
+    continue;
+  }
   if (warn) warned++; else failed++;
   console.log(`${warn ? 'WARN' : 'FAIL'}  ${name}  (${cmd} ${a.join(' ')}; see ${see})`);
   for (const l of out.slice(-20)) console.log(`      ${l}`);
 }
 const n = steps.filter(s => !s[4]).length;
-const w = warned ? `, ${warned} with warnings to review (above)` : '';
-console.log(failed ? `[verify] ${failed} of ${n} checks failed${w}` : warned ? `[verify] no check failed${w}` : `[verify] all ${n} checks pass`);
+const w = (warned ? `, ${warned} with warnings to review (above)` : '') + (partial ? `, ${partial} with steps not run (above)` : '');
+console.log(failed ? `[verify] ${failed} of ${n} checks failed${w}` : w ? `[verify] no check failed${w}` : `[verify] all ${n} checks pass`);
 process.exit(failed ? 1 : 0);
