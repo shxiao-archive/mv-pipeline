@@ -9,7 +9,7 @@ section:
 
 | treatment | the film IS | pictures | lyrics | starter |
 |---|---|---|---|---|
-| **tegaki** (default) | an illustrated 手書き story with an original character: light, colour script, signature set pieces | generated character + backgrounds (+ Blender toon 3D), `engine/scenes/*.js` | JIZURA plans + custom type scenes | the demo 「蛍火」 (`--style vocaloid`) |
+| **tegaki** (default) | an illustrated 手書き story with an original character: light, colour script, signature set pieces | generated character + backgrounds (+ Blender toon 3D), `engine/styles/vocaloid/*.js` | JIZURA plans + custom type scenes | the demo 「蛍火」 (`--style vocaloid`) |
 | **signal** | footage from a device being destroyed while it records: speed is editing, heat colours everything, the signal decays | generated NEUTRAL images + code fillers, `engine/styles/signal/` | the device's type: vertical mincho, beat-stamped lines, big WORD frames | `engine/starters/signal.js` (`--style vocaloid:signal`) |
 
 Pick by the song: a story or a ballad → tegaki; a frantic, high-BPM song → signal. Mixing is the point of the merge:
@@ -268,3 +268,72 @@ shadows, bright paper white, no dusk or night tones…
 | locations (8–14) | `bg_crossing`, `_night`, `_dawn`, `bg_platform`, `bg_embankment`, `bg_train`, `_night`, `bg_rooftop`, `bg_sky` (sky only), `bg_fireflies`, `bg_classroom`, `bg_vending`, `bg_door`, `bg_wetstreet` | every `illust` shot |
 | props | `prop_heart` (cracked glass heart, RGBA) | the song's central metaphor |
 
+## Scene catalogue (the tegaki scenes, `engine/styles/vocaloid/*.js`)
+
+Written for the demo film 残光: their look (dusk colours, a singer, kanji, HUD) belongs to this preset. The shared
+scenes `illust`, `solid` and `jz` are documented in references/05 §8.
+
+Shot ids refer to 残光's `examples/zanko/timeline.js`. The case study is in the kit repo only, not in the installed skill folder — online: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/tree/main/examples/zanko (raw file: https://raw.githubusercontent.com/EGSECDA/vocaloid-style-mv-pipeline/main/examples/zanko/timeline.js). Reuse classes:
+- **generic (args only)**: `illust`, `solid`, `jz`, `panels` (`gutterColor`, `keyline`), `burst` (`grade` knows only `'night2dawn'`), `ref`, `seq`, `converge`, `afterimage` (pass `text`/`sub`/`credit`/`color`/`char`), `memories`;
+- **generic once the daylight args are set (bright films)**: `kanjiSlam` (`sky: 'day'` or a real `bg`; otherwise it paints a dusk or night sky), `typeCard` (`paper`, `quiet` mode);
+- **reusable once you pass your strings**: `titleRiff` (`glyphs`, `ruby`, `sub`, `hud` — otherwise it slams 残 / 光 and prints 残光's HUD; its sun disc and dusk palette stay);
+- **残光 set pieces** with hard-coded strings, glyphs or image landmarks (Porting checklist, below) — rewrite them for your film rather than re-skinning: `ember`, `tunnel`, `wetFloor`, `train`, `heart`, `skyShatter`, `thread`, `fall`, `flame`, `ink`, `road`.
+
+Scene defaults are 残光 dusk colours (ink `#140B1E`, amber rims and glows `#FFA552`). The 残光 timeline builds custom fx
+as small factories: long cast shadow, light sweeps (train windows), sinking sun with a 残光 ring, glyph-shaped firefly swarm, sound rings per beat, heart glow, falling tear, crossing lamps pinned to background coordinates (`bgPt(S, u, v)` maps image-normalised coordinates through the current cover view).
+
+**`intro.js` — light that opens and closes the film** (helpers `Z.INTRO.post.<scene>(S)`, `Z.INTRO.black(S)`)
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `ember` | `breathe`: one ember breathing with the envelope, black micro-stops · `ignite`: ember → ring of fire on the low hit, beat rings, cracks · `collapse`: the dawn world implodes into one point | `mode`, `stops [[t0,t1]…]`, `flares`, `thumps`, `blackFrom`, `crackAt`, `ring 176`, `bg` (collapse), `keys`, `grain` | s01, s02, s65 |
+| `titleRiff` | title sequence on the riff: sun disc, monument glyphs slam on accents, HUD corners, silhouette in the sun, lockup; `outro` variant recaps 8–12 earlier frames per beat | `variant 'intro'\|'outro'`, `recap [{bg, char, view, h, cy}]`, `char`, `sky`, `cues {sun, hud, zan, ko, split, sil, lock, exit}` (beat indices), `exit`, `final`, `glyphs ['残','光']` (the two slammed glyphs), `ruby ['ざん','こう']` (reading per glyph in the lockup; `false` = none), `sub 'afterglow'` (lockup line), `hud {title, when, bpm, geo, place, len}` (the six HUD corner strings; defaults are 残光's) | s03, s64 |
+| `converge` | every motif spirals into one point → white-out | `seed`, `whiteAt` (default shot end) | s51 |
+| `afterimage` | the negative of the title lockup fading on the retina + credit | `text '残光'`, `sub`, `credit`, `color '#39C6E0'`, `char` | s66 (end card) |
+
+**`typo.js` — typographic set pieces** (`Z.typo.post.{kanjiSlam, typeCard, tunnel}`)
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `kanjiSlam` | monument kanji slammed per beat behind a singer, damped-spring camera kicks, ink/light speed lines, rim-lit character, optional fire | `glyphs` (one per beat; take them from the lyric, never type them: `[...Z.line(12).text.replace(/\s/g, '')]`, or a slice of it — `check_no_lyrics` flags typed lyric glyphs), `char`, `bg`, `variant 'default'\|'night'\|'hand'`, `fire`, `sky 'sunset'\|'night'\|'day'` (set by the variant: `'sunset'`, or `'night'` for the `night` variant; `'day'` keeps the plate as painted — no dusk multiply, no low sun — and `Z.typo.post.kanjiSlam` then adds no palette LUT and little bloom), `skyGrad [[k, c]…]` (the `'day'` sky when `bg` is null; default a blue daylight gradient), any preset field (`charX/Y/H`, `face [fx,fy]`, `color`, `fam`, `weight`, `rim`, `slots`, `frames`, `wind`, `lines`) | s16, s38, s52, s56 |
+| `typeCard` | `quiet`: one small mincho line typed in on black (or `paper`) with a vermilion hairline · `flicker`: glitching word per beat building to white | `lines`, `mode`, `size 42`, `fam 'mincho'`, `weight 500`, `color`, `paper` (background colour; default near-black; on a light paper the text defaults to ink and `Z.typo.post.typeCard` drops the bloom; `flicker` is additive light, keep its paper dark), `ruleColor` (hairline colour, default vermilion), `vertical`, `rule`, `sub`, `lead .1`, `stagger`, `fade .6`, `gap .36`, `x`, `y` | s29, s37 |
+| `tunnel` | one-take push through rings of lyric text (beats 1 & 3), dial and Latin rings, toward a light that blooms | `words [5]`, `plan [[t, word]…]`, `toward 'dawn'`, `f 820`, `v0 3.1`, `v1 9.5`, `fadeIn`, `reveal` | s61 |
+
+**`glass.js` — glass heart and shattering sky**
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `heart` | `shatter`: radial fracture, slow-motion burst · `gather`: shards drift back into her hands (fireflies if the bg says so) · `burn`: shards on fire · `sun`: embers and shards spiral into a reborn sun | `mode`, `heart`, `char`, `bg`, `breakBeat`, `x 960`, `y 470`, `charX/charY/charH`, `n 24`, `fuseBeat 2`, `sunX/sunY/sunR` | s18, s19, s40, s53, s54 |
+| `skyShatter` | the painted sky cracks and falls away in bands per beat, revealing night; silhouette figure | `bg`, `char`, `night '#070b1c'`, `seed`, `impact`, `releaseBeat 1`, `bands 5` | s39 |
+
+**`dark.js` — night-side set pieces** (12 fps drawn motion)
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `thread` | wrist ribbon unravels into one travelling thread toward a far light; holds on the stop, whips on the accent | `hand`, `light [x,y]`, `stops`, `kickAt`, `arriveAt`, `handX/Y/H/Rot` | s06 |
+| `fall` | falling toward a square of dawn; light streaks; time-freeze on audio stops | `char`, `freeze [[t0,t1]]` (default: stops in the shot), `pulse`, `vp [x,y]`, `speed`, `h` | s12 |
+| `flame` | cupped hands with a breathing flame (`breathe`/`grow`), or a face lit from below (`dark`) | `mode`, `img`, `face`, `stops`, `flameAt`, `zoomAt`, `zoomTo`, `igniteAt`, `faceAt`, `facePos` | s15, s31, s50 |
+| `ink` | sumi tendrils curl around her in a pale fog void, lurching per beat | `char`, `seed 7`, `h`, `x 960`, `y 992` | s46 |
+
+**`night.js` — rain, wet floor, passing train** (`Z.night.post.{fall, count, train}`)
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `wetFloor` | `fall`: glowing words fall like drops (one landing per beat), splash, perspective ripples · `count`: top-down puddle, one drop per beat, DotGothic counter + HUD | `mode`, `bg`, `words`, `spots`, `heroSpot`, `lead`, `heroAt`, `from`/`to` views, `shimmer`, `hudColor`, `hudAlpha` | s24, s25 |
+| `train` | night crossing, lamps alternating per beat, a train strobes through with her images in lit windows, freezes on the stop, leaves streaks | `bg`, `chars`/`windowChars`, `freeze [t0,t1]`, `exitAt`, `side`, `hero`, `heroX`, `cars`, `shutter .5`, `taps 7` | s33 |
+
+**`memory.js`**
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `memories` | faded polaroids drop onto a desk on beats, captions write themselves (Klee One), window light leaves, prints burn from the edges; the photo with her burns last | `photos [{bg, caption, date, view, char}]`, `char`, `charIn`, `order`, `dropBeats [0,2,4,6,7,8]`, `burnBeats`, `pushAt`, `endZoom 1.9`, `seed 45` | s45 |
+| `road` | `tear`: a glass tear falls in slow motion, splash, a line of light races to the horizon, the road of light opens · `run`: tracking shot of her running on the glowing road, slow-mo, freeze | `mode`, `char`, `impact`, `horizon`, `open`, `dolly` (default: beats 3/6/8/12 after the shot start), `slowAt`, `freezeAt`, `freezeStyle 'photo'` | s48, s49 |
+
+**`meta.js` — scenes about other shots** (private buffers per nesting depth)
+| scene | what | args | 残光 |
+|---|---|---|---|
+| `panels` | manga コマ割り: slanted ink gutters, staggered 8th-note openings, per-beat punch-ins, collapse into one panel | `panels [{bg\|img, view, viewTo, char, charX/Y/H, flip, tone, lines 'focus'\|'speed', punch, alt, lamps, tint, fx, fxBack, illust:{…}}]`, `collapseAt`, `hero`, `gutter 22`, `margin 22`, `gutterColor`, `keyline`, `openAt`, `openDur .36`, `order`, `layout`, `collapseDur .2`, `collapseZoom .045`, `shake 7` | s20, s41 |
+| `burst` | one composed mini-shot per beat: framing, character pop, smear, flash, speed lines; optional night→dawn grade; ≤ 2 bars, no A → B → A sprite order (check_shots warns) | `cuts [{bg, view, viewTo, char, charX/Y/H, flip, rim, tint, dir, lamps}]`, `every 1`, `lead 1/30`, `flash 'alt'\|'all'\|'none'\|[k…]`, `flashColor`, `speed`, `grade null\|'night2dawn'`, `roll .018` | s55, s59 |
+| `ref` | re-renders another shot: `freeze` (desaturate, crack, split), `rewind` (VHS, OSD), `melt` (columns drip, cool to blue) | `shot`, `mode`, `at`; freeze: `live`, `crackAt`, `crackXY`, `crackAngle`, `desat .88`, `push`, `jitter`, `split 8`; rewind: `span 3`, `from`, `follow`, `hold .1`, `fps 15`, `osd`; melt: `meltAt`, `meltEnd`, `cols`, `depth`, `drip`, `seed`, `rate` | s22, s43, s32 |
+| `seq` | Blender image sequence in sync with song time | `pattern 'blender/renders/A/f_####.jpg'`, `t0` (shot t0), `fps 30`, `frames`, `offset 0`, `rate 1`, `view`, `prefetch 2`, `overlay {leak, flash, letterbox, introFlash, vignette, grade}` | s23, s44 |
+
+## Porting checklist (song-specific constants of the tegaki scenes)
+
+The stock scenes were written for 残光; before reusing one (in a vocaloid film, or as a technique source), check (and references/05 §10 for any film):
+- **Image-pixel landmarks** tied to specific PNGs: `dark.js` `HR` (hand_reach pivot/ribbon tail), `FALL` (fall pivot/ribbon), `FLAME_AT` (flame core per image — or pass `flameAt`); `glass.js` kneeling-pose anchor points (chest shard, picking hand); `night.js` `WET` (horizon/vanishing point of bg_wetstreet), `FALL_HERO`, `LAMPS`/`ARM_LAMPS` (lamp lenses on bg_crossing_night); `meta.js` crossing-lamp positions; `memory.js` face position in turn_smile; `typo.js` `SLAM` presets (`face`, `charX/Y/H`). Measure the new image's pixels and override.
+- **Hard-coded 残光 literals (not args — edit the file or write your own scene)**: `ember`'s typed '残光 / ZANKŌ' (`intro.js`); `tunnel`'s `LATIN` rings and railway crossbucks (`typo.js`); `wetFloor count`'s 23:41 timecode and 'RAIN 7.5mm/h 水面観測' (`night.js`).
+- **残光 defaults you override with args**: `titleRiff` `glyphs` (残 / 光), `ruby` (ざん / こう), `sub` ('afterglow') and `hud` (title, DUSK / DAWN line, BPM 131, coordinates, 踏切 No.7, 03:44); `ember` `stops`, `flares`, `thumps`, `crackAt` (残光 intro micro-stops — pass from `audio.stops`); `train` `freeze [116.76,116.93]`, `exitAt 117.85`; `tunnel` words; `typeCard` default line and black paper; `kanjiSlam` dusk sky (`sky`); `afterimage` `text` / `sub` / `credit` / `color`; default asset paths (`assets/char/REF_master.png`, `bg_sky.png`, …) everywhere.

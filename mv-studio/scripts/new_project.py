@@ -53,7 +53,7 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
                    "Thumbs.db", ".DS_Store", "desktop.ini", "npm-debug.log*"]
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
-# --style -> starter in engine/starters; <style>:<treatment> picks a treatment
+# --style -> starter in engine/starters; <style>:<treatment> picks a treatment (where each lives: references/05-engine.md §12)
 STYLES = {"own": "blank", "vocaloid": "vocaloid", "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
           "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
 STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
@@ -290,7 +290,7 @@ def main() -> int:
                          "before writing analysis/lyrics_mv.lrc")
     print("\nNext steps:\n  " + "\n  ".join(steps))
     print("\nengine/timeline.js is " + f"the {starter} starter"
-          + ": replace its shots with your storyboard (README.md, SKILL.md phases 2-7).")
+          + ": replace its shots with your storyboard (README.md, SKILL.md phases 3-7).")
     return rc
 
 

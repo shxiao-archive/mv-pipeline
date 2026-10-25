@@ -20,6 +20,7 @@ SPEC = {
     "papercraft-en-quest": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="papercraft"),
     "vocaloid-en-singer": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="vocaloid"),
     "own-en-film": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="own"),   # no preset asked for
+    "magazine-en-press": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=False, style="magazine"),   # one-tatum MZ.flash inserts are the style
 }
 SPEC["interface-en-chat"]["style"] = "screen"
 STARTER = Path(__file__).resolve().parents[1] / "template" / "engine" / "starters" / "stage.js"

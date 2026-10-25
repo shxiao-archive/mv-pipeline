@@ -31,7 +31,7 @@ merely sounds like a preset is not a request for it.
    - **a preset asked for:** its brief, `styles/<preset>/BRIEF.md` (the feel, the art construction, the motion
      vocabulary of that tradition), and its starter as an example to rewrite:
 
-     | preset | in one line | starters (`--style`) |
+     | preset | in one line | starters (`--style`; code and docs: references/05 §12) |
      |---|---|---|
      | vocaloid | the ボカロPV: lyrics as the subject, motion-graphics layers, rhythm-driven editing, limited animation, symbols over plot | `vocaloid`, `vocaloid:signal` |
      | interface | a digital-tech look: the song on an AI chat screen and on high-precision technical plates | `interface`, `interface:treatise` |
@@ -43,8 +43,9 @@ merely sounds like a preset is not a request for it.
    camera helper, the decay layer, a shape kit). A film that designs its own style never adopts a preset's look —
    its palette, type system or signature devices — and a preset film keeps to its own.
 3. When you build, search the index first: `grep -i <words> index/index.jsonl` — one line per scene, transition,
-   effect, helper, lyric plan and grade, with what it shows, the call, and `where` as `path:first-last`. Read that
-   line range only (offset / limit), never a whole engine file. A pack's technical manual is
+   effect, helper, lyric plan and grade, with what it shows, the call, and `where` as `path:first-last`. Start with
+   the indexed range (offset / limit). Read surrounding code or the full file when needed to understand dependencies,
+   initialization, shared state, or behavior. A pack's technical manual is
    `styles/<preset>/STYLE.md`: open the section you need.
 4. A reference manual only when you enter its phase (table below).
 
@@ -55,7 +56,7 @@ user a 3–6 line summary plus an image at the checkpoints (◆).
 
 | phase | output | check | read |
 |---|---|---|---|
-| 0 setup | env report; the user's choice of art generator; credit line; solo or team | `python <skill>/scripts/check_env.py` | references/01 §0 |
+| 0 setup | env report; the user's choice of art generator; credit line; solo or team; a preset or the film's own style (`--style`) | `python <skill>/scripts/check_env.py` | references/01 §0 |
 | 1 listen | `analysis/audio.json`, `overview.png`, timed lyrics, `analysis/cues.json` | `python tools/check_sync.py --lyrics-only`, `tools/lyric_timing.py status` | references/03 |
 | 2 direct ◆ | `docs/CONCEPT.md` (with the film's style), `docs/BRIEF.md` | the user's go | `direction.md`, `design-a-style.md` or the preset's BRIEF.md |
 | 3 plan | the shot list in `engine/timeline.js` (`moment`, `line`, `cue` per shot) | `node tools/storyboard.mjs` | references/05 §3 |

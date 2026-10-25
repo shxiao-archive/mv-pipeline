@@ -239,7 +239,7 @@ Palette words pull every image toward their light and time of day: change the me
   python -c "import sys,glob;from PIL import Image;fs=[f for f in sorted(glob.glob(sys.argv[1])) if '.raw.' not in f];W=320;ims=[Image.open(f).convert('RGBA') for f in fs];hs=[int(W*i.height/i.width) for i in ims];S=Image.new('RGB',(W*min(6,len(fs)),max(hs)*((len(fs)+5)//6)),(30,30,30));[S.paste(i.resize((W,h)),((k%6)*W,(k//6)*max(hs)),i.resize((W,h))) for k,(i,h) in enumerate(zip(ims,hs))];S.save(sys.argv[2])" "assets/char/*.png" assets/char/_sheet.jpg
   ```
 - Check per image: identity matches the master; asymmetric details on the right side; hands (finger count, ribbon wrist); alpha clean on black and orange; no text; the subject reads in silhouette.
-- Record landmarks you will animate around (face centre, hand position, flame core, lamp lenses) in image pixels — several library scenes pin effects to such coordinates (05-engine §11).
+- Record landmarks you will animate around (face centre, hand position, flame core, lamp lenses) in image pixels — several library scenes pin effects to such coordinates (a preset's porting checklist, e.g. `styles/vocaloid/STYLE.md`).
 
 ## 9. Other image models
 

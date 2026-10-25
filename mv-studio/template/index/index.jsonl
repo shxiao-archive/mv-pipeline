@@ -455,19 +455,19 @@
 {"id":"tool:press_selftest","kind":"tool","fits":["magazine"],"does":"Self-test of the magazine press (engine/styles/magazine/press.js) in a headless browser, no project data needed: * a spot-A proof prints in spot A's hue and a spot-B proof in spot B's (the separation gives a dark colour some key, as * a …","where":"engine/styles/magazine/press_selftest.mjs","use":"node engine/styles/magazine/press_selftest.mjs"}
 {"id":"tool:preview_style_fx","kind":"tool","fits":["vocaloid"],"does":"preview_style_fx.mjs -- visual smoke test of key GLSL recipes from the style cookbook (STYLE_RESEARCH.md) rendered onto the procedural dusk scene (assets/style/dusk_scene_gray.png, from tools/style_palette_sheet.py) -> …","where":"engine/styles/vocaloid/preview_style_fx.mjs","use":"node engine/styles/vocaloid/preview_style_fx.mjs"}
 {"id":"tool:verify_style_snippets","kind":"tool","fits":["vocaloid"],"does":"verify_style_snippets.mjs -- verifies the code sketches in the style cookbook (STYLE_RESEARCH.md): - every ```glsl block (with the \"@common\" block prepended) compiles + links as a WebGL2 program in headless Chromium (software …","where":"engine/styles/vocaloid/verify_style_snippets.mjs","use":"node engine/styles/vocaloid/verify_style_snippets.mjs"}
-{"id":"manual:references/01-workflow#Phases","kind":"manual","does":"Phases at a glance (mv-studio)","where":"<skill>/references/01-workflow.md:7-24","lines":18}
-{"id":"manual:references/01-workflow#0","kind":"manual","does":"0. Setup","where":"<skill>/references/01-workflow.md:25-39","lines":15}
-{"id":"manual:references/01-workflow#1","kind":"manual","does":"1. Listen (analysis)","where":"<skill>/references/01-workflow.md:40-60","lines":21}
-{"id":"manual:references/01-workflow#1b","kind":"manual","does":"1b. Style (mv-studio)","where":"<skill>/references/01-workflow.md:61-67","lines":7}
-{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Concept","where":"<skill>/references/01-workflow.md:68-76","lines":9}
-{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Assets","where":"<skill>/references/01-workflow.md:77-99","lines":23}
-{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Storyboard & timeline","where":"<skill>/references/01-workflow.md:100-113","lines":14}
-{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:114-124","lines":11}
-{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Review (the quality loop)","where":"<skill>/references/01-workflow.md:125-139","lines":15}
-{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Deliver","where":"<skill>/references/01-workflow.md:140-147","lines":8}
-{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:148-159","lines":12}
-{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:160-166","lines":7}
-{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:167-179","lines":13}
+{"id":"manual:references/01-workflow#Phases","kind":"manual","does":"Phases at a glance (mv-studio)","where":"<skill>/references/01-workflow.md:7-25","lines":19}
+{"id":"manual:references/01-workflow#0","kind":"manual","does":"0. Setup","where":"<skill>/references/01-workflow.md:26-40","lines":15}
+{"id":"manual:references/01-workflow#1","kind":"manual","does":"1. Listen (analysis)","where":"<skill>/references/01-workflow.md:41-61","lines":21}
+{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Direct","where":"<skill>/references/01-workflow.md:62-75","lines":14}
+{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Plan","where":"<skill>/references/01-workflow.md:76-89","lines":14}
+{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Art","where":"<skill>/references/01-workflow.md:90-112","lines":23}
+{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:113-123","lines":11}
+{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Render","where":"<skill>/references/01-workflow.md:124-134","lines":11}
+{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:135-144","lines":10}
+{"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:145-152","lines":8}
+{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:153-164","lines":12}
+{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:165-171","lines":7}
+{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:172-184","lines":13}
 {"id":"manual:references/03-audio-and-lyrics#1","kind":"manual","does":"1. Prepare the audio","where":"<skill>/references/03-audio-and-lyrics.md:9-17","lines":9}
 {"id":"manual:references/03-audio-and-lyrics#2","kind":"manual","does":"2. Run the analysis","where":"<skill>/references/03-audio-and-lyrics.md:18-39","lines":22}
 {"id":"manual:references/03-audio-and-lyrics#3","kind":"manual","does":"3. `audio.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:40-63","lines":24}
@@ -503,11 +503,11 @@
 {"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:85-98","lines":14}
 {"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:99-118","lines":20}
 {"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:119-136","lines":18}
-{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Scene library catalogue (`core/scenes.js` + the vocaloid pack `styles/vocaloid/*.js`, 24 scenes)","where":"<skill>/references/05-engine.md:137-209","lines":73}
-{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:210-255","lines":46}
-{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting checklist (song-specific constants of the vocaloid scene library)","where":"<skill>/references/05-engine.md:256-265","lines":10}
-{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:266-277","lines":12}
-{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:278-367","lines":90}
+{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Shared scenes (`core/scenes.js`)","where":"<skill>/references/05-engine.md:137-154","lines":18}
+{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:155-200","lines":46}
+{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:201-206","lines":6}
+{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:207-218","lines":12}
+{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:219-323","lines":105}
 {"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
 {"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-50","lines":24}
@@ -544,7 +544,7 @@
 {"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:74-80","lines":7}
 {"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:81-105","lines":25}
 {"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:106-136","lines":31}
-{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review in two rounds","where":"<skill>/references/09-qa-and-lessons.md:137-217","lines":81}
+{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:137-217","lines":81}
 {"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:10-29","lines":20}
 {"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:30-43","lines":14}
 {"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs (if the film has a cast)","where":"<skill>/references/10-craft.md:44-98","lines":55}
@@ -648,3 +648,5 @@
 {"id":"manual:styles/vocaloid/STYLE#B","kind":"manual","does":"B. Signal — a recording device failing","where":"<skill>/styles/vocaloid/STYLE.md:75-160","lines":86}
 {"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both treatments)","where":"<skill>/styles/vocaloid/STYLE.md:161-205","lines":45}
 {"id":"manual:styles/vocaloid/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10 §3, team: 11)","where":"<skill>/styles/vocaloid/STYLE.md:206-219","lines":14}
+{"id":"manual:styles/vocaloid/STYLE#Scene","kind":"manual","does":"Scene catalogue (the tegaki scenes, `engine/styles/vocaloid/*.js`)","where":"<skill>/styles/vocaloid/STYLE.md:271-333","lines":63}
+{"id":"manual:styles/vocaloid/STYLE#Porting","kind":"manual","does":"Porting checklist (song-specific constants of the tegaki scenes)","where":"<skill>/styles/vocaloid/STYLE.md:334-340","lines":7}

@@ -112,6 +112,6 @@ from a preset's look.
 ## 7. Reading the library cheaply
 
 `index/index.jsonl` has one line per scene, effect, transition, helper, lyric plan, grade and tool: what it shows, the
-call, and `where` as `path:first-last` lines. Read that range (offset / limit), never the whole file; read a file's
-header only when the range is not enough. Each style pack's `styles/<pack>/STYLE.md` is its technical manual: open
-the section you need when you build with that pack.
+call, and `where` as `path:first-last` lines. Start with the indexed range (offset / limit). Read surrounding code or
+the full file when needed to understand dependencies, initialization, shared state, or behavior. Each style pack's
+`styles/<pack>/STYLE.md` is its technical manual: open the section you need when you build with that pack.

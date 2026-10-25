@@ -80,6 +80,16 @@
         "fixtures/test_song.wav",
         "fixtures/lyrics_en.lrc"
       ]
+    },
+    {
+      "id": 9,
+      "name": "magazine-en-press",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make a lyric video that looks like a Japanese experimental print magazine: risograph spreads, vertical type, the page itself reacting to the music until something happens to it at the end. No image generator. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the magazine style: every frame printed in three inks with visible screens and misregistration, vertical lyric type revealed as sung, editorial marks (folios, rulers, proof circles) that keep time with the music, spreads that change on the beat, a page fate at the end (burned, torn, flashed or closed); every line shown; no lyric text in code.",
+      "files": [
+        "fixtures/test_song.wav",
+        "fixtures/lyrics_en.lrc"
+      ]
     }
   ]
 }

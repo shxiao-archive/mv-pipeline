@@ -66,14 +66,14 @@ Put the song at `audio/song.wav` (scaffold with `--song` does this) and work thr
 
 | phase | what you produce | main commands / files |
 |---|---|---|
-| Listen | beat grid, bars, sections, stops, impacts | `python tools/analyze_audio.py`; look at `analysis/overview.png`; curate `analysis/sections_auto.json` → `analysis/sections.json`, re-run |
-| Lyrics | `analysis/lyrics_mv.lrc` (official text, sung-onset times, JIZURA markup `/` `*…*` `!` `[間奏]`) | `references/03-audio-and-lyrics.md`; transcription / alignment only for timings: `tools/transcribe_*.py` (setup `-Lyrics`; forced alignment also needs CPU torch + torchaudio 2.8, best in `vendor/pydeps_torch`: `references/03` §9) |
-| Concept | `docs/CONCEPT.md` | skill `direction.md` + `design-a-style.md` (or the preset's `BRIEF.md`) |
-| Assets | the film's pictures, if it uses any (`assets/bg/*.png`, `assets/char/*.png` RGBA, …) | `python tools/artgen.py run <jobs.jsonl> --out-dir assets/char` (the generator in `art.config.json`: Codex, Grok, NovelAI or custom), `tools/alpha_matte.py`; `references/04-asset-generation.md` |
-| Plan → edit | `engine/timeline.js` (shots with `moment` / `line` / `cue`) → `node tools/storyboard.mjs` → `docs/STORYBOARD.md` | `references/05-engine.md` (scenes, args, post, transitions) |
-| Build | the film's own scenes in `engine/scenes/*.js`; optional: JIZURA lyric plans, Blender shots | `references/05-engine.md`, `references/06-jizura.md`, `references/07-blender-3d.md` (`python tools/blender_run.py blender/shots/<shot>.py`) |
-| Review | stills → contact sheets → full render → review sheets, 2–3 passes | `node tools/stills.mjs`, `python tools/review_sheets.py`, `node tools/jz_cuts_at.mjs <times>`; `references/09-qa-and-lessons.md` |
-| Deliver | 16:9 master, share encode, 9:16 vertical | `node tools/render_final.mjs --name mv`; `references/08-render-and-delivery.md` |
+| 1 Listen | beat grid, bars, sections, stops, impacts | `python tools/analyze_audio.py`; look at `analysis/overview.png`; curate `analysis/sections_auto.json` → `analysis/sections.json`, re-run |
+| 1 Listen: lyrics | `analysis/lyrics_mv.lrc` (official text, sung-onset times, JIZURA markup `/` `*…*` `!` `[間奏]`) | `references/03-audio-and-lyrics.md`; transcription / alignment only for timings: `tools/transcribe_*.py` (setup `-Lyrics`; forced alignment also needs CPU torch + torchaudio 2.8, best in `vendor/pydeps_torch`: `references/03` §9) |
+| 2 Direct | `docs/CONCEPT.md` (with the film's style) | skill `direction.md` + `design-a-style.md` (or the preset's `BRIEF.md`) |
+| 3 Plan | `engine/timeline.js` (shots with `moment` / `line` / `cue`) → `node tools/storyboard.mjs` → `docs/STORYBOARD.md` | `references/05-engine.md` (scenes, args, post, transitions) |
+| 4 Art | the film's pictures, if it uses any (`assets/bg/*.png`, `assets/char/*.png` RGBA, …) | `python tools/artgen.py run <jobs.jsonl> --out-dir assets/char` (the generator in `art.config.json`: Codex, Grok, NovelAI or custom), `tools/alpha_matte.py`; `references/04-asset-generation.md` |
+| 5 Build | the film's own scenes in `engine/scenes/*.js`; optional: JIZURA lyric plans, Blender shots | `references/05-engine.md`, `references/06-jizura.md`, `references/07-blender-3d.md` (`python tools/blender_run.py blender/shots/<shot>.py`) |
+| 6 Render, 7 Review | stills → full render → review sheets → `node tools/verify.mjs render/mv.mp4`; one jury round (a second only if you ask) | `node tools/stills.mjs`, `node tools/render_final.mjs --name mv`, `python tools/review_sheets.py`, `python tools/jury_pack.py`, `node tools/jz_cuts_at.mjs <times>`; `references/09-qa-and-lessons.md` |
+| 8 Deliver | 16:9 master, share encode, 9:16 vertical | `references/08-render-and-delivery.md` |
 
 ### Editing `engine/timeline.js`
 
