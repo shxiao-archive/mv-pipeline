@@ -1,4 +1,4 @@
-/* vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */
+/* mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */
 (() => {
   'use strict';
   const Z = window.Z;
@@ -216,7 +216,7 @@
     }
     ctx.restore();
   };
-  // falling feathers (simple drawn shapes) — tegaki style
+  // falling feathers (simple drawn shapes)
   D.feathers = (ctx, t, o = {}) => {
     const n = o.n ?? 14, seed = o.seed ?? 51;
     ctx.save();

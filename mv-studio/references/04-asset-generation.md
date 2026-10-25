@@ -2,7 +2,7 @@
 
 Contents: 0 Start here: the generation table (`tools/gen_table.py`) · 0b Other styles · 1 What to generate (shot-driven list) · 2 `tools/imagegen.py` · 3 Codex CLI gotchas · 4 Alpha: native vs chroma key (`tools/alpha_matte.py`) · 5 Character consistency method · 6 Style-block templates · 7 Backgrounds and props · 8 Review · 9 Other image models · 10 Pitfalls · 11 Grok · 12 NovelAI · 13 Choosing the generator (`tools/artgen.py`)
 
-The method is model-agnostic: **one master reference image + a verbatim character sentence + a verbatim style block** for every pose, transparent output via native alpha or a flat chroma-key background. The kit wraps the **Codex CLI**'s native image tool because that is what 残光 used; §9 covers other generators.
+The method is model-agnostic: **one master reference image + verbatim locks (a style block; a character sentence if there is a cast)** for every picture, transparent output via native alpha or a flat chroma-key background. The kit wraps the Codex CLI, Grok, NovelAI or a custom generator (§9, §11–13). A film without generated pictures skips this file.
 
 ---
 
@@ -32,11 +32,11 @@ behind the locks (§5–7) and the generators' own fields.
    **Back views:** a row with `"view": "back"` gets the `CHAR_BACK` lock (the character from behind: hair as seen
    from behind, outfit, signature items) or, without one, `CHAR` with every comma-separated part that names the face
    (eyes, bangs, mouth, expression …) left out, a "seen from behind" lead-in and a `face, eyes, looking at viewer`
-   negative. A back view prompted with the full `CHAR` comes back with eyes on the back of her head.
+   negative. A back view prompted with the full `CHAR` comes back with eyes on the back of the head.
 2. **Masters first:** three char rows with no `refs.char`; `jobs` → generate → `post`; pick one with the user; then
-   `"refs": { "char": ["assets/gen/CH00b.png"] }` carries her face into every later char row (Codex, Grok). On
+   `"refs": { "char": ["assets/gen/CH00b.png"] }` carries the character's face into every later char row (Codex, Grok). On
    NovelAI a character reference costs Anlas: leave `refs.char` empty there and lean on `CHAR` plus takes (§12).
-3. **Faces that live (optional):** if the film wants her to blink or sing, per framing (bust, half body), the approved picture plus variant rows
+3. **Faces that live (optional, a cast only):** if the film wants a character to blink or sing, per framing (bust, half body), the approved picture plus variant rows
    that repaint only its eye or mouth box (`"ref_mode": "inpaint", "mode": "full"`), swapped whole by the engine
    (`anim.whole`); an expression sheet is the fallback (styles/vocaloid/STYLE.md, Characters with a living face). A
    character who sings or reacts in a shot is drawn from such a framing. A still character is fine too.
@@ -60,7 +60,7 @@ Busts drawn touching merge into one figure: `post` then cuts the sheet's own `co
 
 ## 0b. Other styles: one lock and one table per style
 
-The sections below are written for tegaki. The other styles that use generated art need other locks; the table works
+The examples in §5–7 come from illustrated-character films; other kinds of pictures need other locks; the table works
 the same (`jobs` → generate → `post` → review sheets). These examples compile with `gen_table.py jobs`; they have not
 been through a full film yet, so take a second batch after the first review sheet. Write your own words in the locks.
 
@@ -74,7 +74,7 @@ at photographic plates and legible objects, §12); the character can stay on the
   "rows": [
     { "id": "PL01", "kind": "world", "locks": ["NEUTRAL", "EMPTY"], "subject": "an empty concrete corridor, ceiling lamps, a door at the end", "aspect": "16:9" },
     { "id": "OBJ01", "kind": "world", "locks": ["NEUTRAL", "ISO"], "subject": "a portable cassette recorder, three-quarter view", "transparent": true },
-    { "id": "CH30", "kind": "char", "locks": ["NEUTRAL", "CHAR"], "subject": "extreme close-up of her eye, looking left", "aspect": "16:9" },
+    { "id": "CH30", "kind": "char", "locks": ["NEUTRAL", "CHAR"], "subject": "extreme close-up of an eye, looking left", "aspect": "16:9" },
     { "id": "SIL01", "kind": "world", "locks": ["NEUTRAL", "ISO"], "subject": "the silhouette of a bird in flight, wings up", "transparent": true } ] }
 ```
 Motion as separate rows (the same bird, wings level and wings down), states as variant rows (`"edit": "soiled, dust on it"`).
@@ -108,7 +108,7 @@ and the size of the colour areas must match the drawn puppets.
 
 ## 1. What to generate (derive it from the storyboard)
 
-Do not generate a generic pose library. Go through `docs/STORYBOARD.md` shot by shot and list what each shot needs; merge duplicates. 残光 ended with **17 poses (+6 alternates), 14 backgrounds, 1 prop** for ~70 shots, about one asset per 2 shots. The engine re-frames, re-grades and re-lights the same images (`illust` camera moves, LUTs, silhouettes, rims, panels, bursts), but a return is a new treatment, not the same shot again.
+Do not generate a generic library. Go through `docs/STORYBOARD.md` shot by shot and list what each shot needs; merge duplicates. The engine can re-frame, re-grade and re-light the same image, but a return is a new treatment, not the same shot again.
 
 **The picture budget:** count it from the shot list, never from a habit.
 - A film cut from pictures needs at least one per 2–3 pictured shots, and no picture in more than 4 shots.
@@ -117,19 +117,7 @@ Do not generate a generic pose library. Go through `docs/STORYBOARD.md` shot by 
 - `storyboard.mjs` warns about both, counting the image paths in the shots' args.
 - NovelAI at 1 MP or less costs no Anlas on Opus, so generate in batches by section until the budget is met.
 
-| need | 残光 example | typical shots |
-|---|---|---|
-| reference / masters | `REF_master` (+ `master_a`, `master_c`) full body front | title lockup, afterimage, recaps |
-| singing (2–3) | `bust_sing` (hand on headphone), `profile_sing` (side profile), `sing_power` (low angle, full voice) | chorus slams, panels, bursts |
-| quiet / emotional (3–4) | `bust_calm` (eyes closed), `face_tear`, `lookup_tear`, `smile_dawn` | verses, breathing shots, ending |
-| back view | `back_sunset` (hair and ribbon blowing) | establishing shots, small figure in a big world |
-| full-body action (3–4) | `run` (to the left), `turn_smile`, `jump`, `fall` (seen from above), `reach_viewer` (foreshortened hand) | climaxes, bursts, the road |
-| body language (2–3) | `hug_self`, `sit_knees`, `kneel_pick` | verses, despair, gathering |
-| hands / close-ups | `hand_reach` (arm + ribbon only), `flame_hands`, `hands_shards`, `eyes_ecu` (**opaque 16:9** eye close-up) | lyric images (指先, 小さな火, 拾い上げて) |
-| locations (8–14) | `bg_crossing`, `_night`, `_dawn`, `bg_platform`, `bg_embankment`, `bg_train`, `_night`, `bg_rooftop`, `bg_sky` (sky only), `bg_fireflies`, `bg_classroom`, `bg_vending`, `bg_door`, `bg_wetstreet` | every `illust` shot |
-| props | `prop_heart` (cracked glass heart, RGBA) | the song's central metaphor |
-
-Rules of thumb: one image per *lyric image* the song insists on (in 残光: cracked sky, thread, rusted door, cold fingertips, falling, a small flame, shattered heart, wet floor, broken wings, tears → road); a back view and a sky-only plate are always useful; generate the **time-of-day variants** your colour script needs for the 2–3 key locations (残光: night/dawn; a daylight film: noon / afternoon / golden hour) — a LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted; make close-ups as separate generations (cropping a full body gives soft, low-detail faces). A face that blinks
+Rules of thumb: one image per *lyric image* the song insists on; generate the **time-of-day variants** the colour script needs for the key locations — a LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted; make close-ups as separate generations (cropping a full body gives soft, low-detail faces). A face that blinks
 or sings comes from an expression-sheet row (§0), one per framing.
 
 ## 2. `tools/imagegen.py`
@@ -201,13 +189,13 @@ python tools/alpha_matte.py redraw  orig.png orig_green.png out.png         # ma
 - Always view the `preview` composite on black **and** orange: green fringes and dark halos only show on one of them.
 - **Choose the key from the character's palette before generating.** Green (default) only if nothing in the design has G > max(R, B) — no teal, aqua, mint, lime, emerald. Teal / aqua / mint / green designs (typical for summer and sea films, and for V家 colours): magenta, `"key": "#FF00FF"` in the job. Blue (`#0000FF`) only if nothing is blue. The keyer (`alpha_matte.py key --key auto`) reads the screen colour from the image border whichever you pick.
 
-## 5. Character consistency method
+## 5. Character consistency method (if the film has a cast)
 
-1. **Character bible** `docs/CHARACTER.md` (cover: name & concept · silhouette · hair (colour + inner colour) · eyes · signature item · outfit layers · motion prop (which side!) · palette roles as hex · do-nots (existing-character likenesses); a worked example is [examples/zanko/CHARACTER.md](https://github.com/EGSECDA/vocaloid-style-mv-pipeline/blob/main/examples/zanko/CHARACTER.md) in the kit repo, not inside the installed skill): an *original* design (never an existing character — say so in the prompt: "ORIGINAL virtual singer girl (Vocaloid-style design, NOT Hatsune Miku, not any existing character)"), with hair (colour + an inner colour that rim-lights well), eyes, a **signature item** (残光: white headphones with orange ring lights, a setting-sun hairpin), outfit, a **motion prop** that animates for free (a 1 m vermilion ribbon on the left wrist), and the palette roles as hex.
-2. **Character sentence**: compress the bible into one sentence that is pasted verbatim into every pose prompt (see §6). Name the side of asymmetric details ("ribbon on her LEFT wrist", "hairpin on her right side") — models flip them otherwise.
-3. **Three master candidates** (three master rows, §0): full body, plain pose, different angle/expression each, *no* reference image, full bible + style block. Make a contact sheet, pick one (ask the user at this checkpoint), copy it to `assets/char/REF_master.png`. 残光 chose `master_b` (front, arms loose, wind in the hair).
+1. **Character bible** `docs/CHARACTER.md` (cover: name & concept · silhouette · hair (colour + inner colour) · eyes · signature item · outfit layers · motion prop (which side!) · palette roles as hex · do-nots (existing-character likenesses); ): an *original* design (never an existing character — say so in the prompt: "ORIGINAL character, not any existing character"), with its identity details, any signature item or motion prop, and the palette roles as hex.
+2. **Character sentence**: compress the bible into one sentence that is pasted verbatim into every pose prompt (see §6). Name the side of asymmetric details ("ribbon on the LEFT wrist") — models flip them otherwise.
+3. **Three master candidates** (three master rows, §0): full body, plain pose, different angle/expression each, *no* reference image, full bible + style block. Make a contact sheet, pick one (ask the user at this checkpoint), copy it to `assets/char/REF_master.png`.
 4. **Every pose** = `images: ["assets/char/REF_master.png"]` + pose description + *"The same original character as in the reference image (…character sentence…)"* + the style block. The reference carries the face and proportions; the sentence carries the details the model would drift on.
-5. **Two takes of difficult poses** (unusual camera angles, foreshortening, lying/falling, hands): run the job twice (a second jobs file with `alt/` outputs) and keep the better one. 残光 generated alternates of `fall`, `flame_hands`, `hug_self`, `kneel_pick`, `reach_viewer`, `smile_dawn`. A "lying on her back, seen directly from above" prompt came back as a **standing** figure; an extreme close-up asked as a cut-out (`eyes_ecu`, `transparent: true`) came back as a floating face crop and was redone **opaque, full-bleed 16:9**; `hand_reach` needed a rewrite that described only the arm ("Crop shows only the forearm, hand and ribbon").
+5. **Two takes of difficult poses** (unusual camera angles, foreshortening, lying/falling, hands): run the job twice (a second jobs file with `alt/` outputs) and keep the better one. A "lying on the back, seen directly from above" prompt came back as a **standing** figure; an extreme close-up asked as a cut-out (`eyes_ecu`, `transparent: true`) came back as a floating face crop and was redone **opaque, full-bleed 16:9**; `hand_reach` needed a rewrite that described only the arm ("Crop shows only the forearm, hand and ribbon").
 6. Check every result against the master side by side: hair inner colour, eye colour, signature item, motion prop side, outfit layers. Regenerate rather than "fix in post".
 7. **Several reference images: say what each one is for.** "The first image is the drawing style only; the second is
    the character design only (face, hair, outfit)." Without it the model mixes the style image's subject into the design.
@@ -223,47 +211,25 @@ python tools/alpha_matte.py redraw  orig.png orig_green.png out.png         # ma
 
 ## 6. Style-block templates (write new ones per project)
 
-These are the blocks 残光 actually used. **Copy the structure, not the words**: a new film needs its own medium, palette words and mood. Keep each block identical across all jobs of its kind.
+Write the blocks per film from the concept's medium, palette and picture-source slots, in your own words. Keep each
+block identical across all jobs of its kind. (The vocaloid preset's 残光 blocks are in `styles/vocaloid/STYLE.md`,
+Asset notes, for preset films only.)
 
-Character sentence (残光):
-```text
-The same original character as in the reference image (waist-length ink violet-black hair with sunset-orange inner
-colour and tips, blunt bangs, amber-gold eyes, white headphones with glowing orange ring lights, setting-sun hairpin on
-her right side, navy sailor blouse with vermilion tie, oversized cream knit cardigan, navy pleated skirt, black tights,
-brown loafers, long vermilion ribbon tied on her LEFT wrist).
-```
-Character style block (appended to every character, close-up and prop prompt):
-```text
-Japanese Vocaloid music-video tegaki (hand-drawn) illustration: confident hand-inked line art with visible brush-pen
-pressure (thick outer contour, thin inner lines), flat cel colours with ONE hard shadow tone, no airbrushed gradients on
-skin or clothes, restrained dusk palette (ink violet-black, dusk magenta, vermilion, sunset orange, amber, cream), crisp
-readable silhouette, looks like a key frame from an indie Vocaloid MV. No text, no watermark, no signature.
-```
-Background style block:
-```text
-Style: Japanese Vocaloid MV tegaki background art, hand-inked outlines on buildings and objects (coloured line art, not
-pure black), flat cel colour areas with hard-edged shadow shapes, sky painted as a few posterised colour bands instead
-of a smooth gradient, subtle paper grain, restrained palette of ink violet-black, dusk magenta, vermilion, sunset orange,
-amber and cream. Wide 16:9 landscape composition. No people, no characters, no text, no readable signs, no watermark.
-```
+Character sentence, if the film has a cast: the bible compressed into one sentence of identity details (hair, eyes,
+signature items, outfit), with the side of every asymmetric detail named.
+
 Prompt anatomy that worked: **framing** ("Bust shot (chest up)", "Full body seen from behind", "Extreme close-up … 16:9 landscape") → **pose/action** with physical cues for animation (hair and ribbon direction, wind) → **emotion** → character sentence → style block → constraints. For backgrounds: place + time of day + light source + 2–3 concrete local details (crossbuck, catenary wires, vending machine) + style block; for night/dawn variants restate the place ("The same kind of quiet suburban railway crossing at night: …") and the light that changes.
 
-Daylight example (summer / sea film), palette words only (the 残光 blocks above name a dusk palette, and those words alone pull every image toward sunset):
-```text
-…high-key summer daylight, saturated sky cyan and sea teal, white cumulus, coral and sunflower accents, crisp cast
-shadows, bright paper white, no dusk or night tones…
-```
-
-Variation ideas for a new film (pick one coherent medium): pencil + watercolour wash; screen-print 2–3 inks; thick-line pop with halftone; sumi ink + one accent colour; pastel chalk; flat vector with paper texture. Change the palette words, the line description and the shading rule together, and match the time of day to the colour script.
+Palette words pull every image toward their light and time of day: change the medium, palette words, line description and shading rule together, from the concept.
 
 ## 7. Backgrounds and props
 
-- **Size**: 16:9 at **1672×941** (the model's landscape size) is enough. The engine draws with `imageSmoothingQuality = 'high'`; up to **~1.45× cover zoom** at 1080p stays clean under line boil + grain (残光 camera moves used zoom 1.0–1.5). For deeper push-ins (eyes, a single window) generate a dedicated close-up instead of zooming.
+- **Size**: 16:9 at **1672×941** (the model's landscape size) is enough. The engine draws with `imageSmoothingQuality = 'high'`; up to **~1.45× cover zoom** at 1080p stays clean. For deeper push-ins (eyes, a single window) generate a dedicated close-up instead of zooming.
 - Ask for **no people and no readable text** in backgrounds: the engine adds characters and typesets every sign itself (models write fake kana).
 - Leave compositional room: low horizon for sky shots, an empty road centre for a small figure, a clear light source (sun, lamp, door gap) — scenes pin glows, lamp flashes and sun discs onto image coordinates.
-- Variants follow the colour script: a night film needs lamps painted on and dawn plates with the sun on the horizon; a daylight film needs noon / afternoon / golden-hour plates with a consistent cast-shadow direction. A sky-only plate (`bg_sky` in 残光; with cumulus for daylight) and a sea- or ground-only plate are the most reused images (cracks, slams, monuments).
+- Variants follow the colour script: a night film needs lamps painted on and dawn plates with the sun on the horizon; a daylight film needs noon / afternoon / golden-hour plates with a consistent cast-shadow direction. Plates with nothing but sky, sea or ground are easy to reuse under different treatments.
 - Props: isolated object, transparent, same style block.
-- Colour: 残光 generated art *in colour* using the palette words above and pulled shots together in the engine with gradient-map LUTs at `lutMix` 0.1–0.35 (05-engine). For layers that will be heavily graded (multiplane strips, props), "grey values only: black ink lines, 3–5 flat grey fills" prompts give full control later.
+- Colour: generate in colour from the palette words and pull shots together in the engine with gradient-map LUTs (`lutMix`, 05-engine), or ask for grey values and colour in code. For layers that will be heavily graded (multiplane strips, props), "grey values only: black ink lines, 3–5 flat grey fills" prompts give full control later.
 - File layout: `assets/char/*.png` (RGBA, trimmed), `assets/char/alt/`, `assets/bg/*.png` (opaque), job files next to their outputs.
 
 ## 8. Review
@@ -272,7 +238,7 @@ Variation ideas for a new film (pick one coherent medium): pencil + watercolour 
   ```bash
   python -c "import sys,glob;from PIL import Image;fs=[f for f in sorted(glob.glob(sys.argv[1])) if '.raw.' not in f];W=320;ims=[Image.open(f).convert('RGBA') for f in fs];hs=[int(W*i.height/i.width) for i in ims];S=Image.new('RGB',(W*min(6,len(fs)),max(hs)*((len(fs)+5)//6)),(30,30,30));[S.paste(i.resize((W,h)),((k%6)*W,(k//6)*max(hs)),i.resize((W,h))) for k,(i,h) in enumerate(zip(ims,hs))];S.save(sys.argv[2])" "assets/char/*.png" assets/char/_sheet.jpg
   ```
-- Check per image: identity matches the master; asymmetric details on the right side; hands (finger count, ribbon wrist); alpha clean on black and orange; no text; the pose reads in silhouette (the engine uses silhouettes and rims a lot).
+- Check per image: identity matches the master; asymmetric details on the right side; hands (finger count, ribbon wrist); alpha clean on black and orange; no text; the subject reads in silhouette.
 - Record landmarks you will animate around (face centre, hand position, flame core, lamp lenses) in image pixels — several library scenes pin effects to such coordinates (05-engine §11).
 
 ## 9. Other image models
@@ -281,12 +247,12 @@ Anything that can (a) take a reference image and (b) produce either RGBA or a fl
 
 ## 10. Pitfalls
 
-- Generating poses before the master is fixed → five slightly different girls. Lock `REF_master.png` first.
+- Generating poses before the master is fixed → five slightly different characters. Lock `REF_master.png` first.
 - Prompt drift: editing the character sentence between batches. Keep it in one file and paste it programmatically.
 - Unusual angles (from above, lying, foreshortened) silently fall back to a standing pose — always two takes, always look.
 - Native alpha at 252–254 → the background ghosts through the body; run `normalize_alpha` (automatic in `imagegen.py`).
 - Close-ups meant to fill the frame must be **opaque 16:9**, not cut-outs.
-- Model-drawn text, logos or signatures in the art; existing-character likeness (headphones + twin tails + teal = trouble). Say "original" and "no text" in every prompt.
+- Model-drawn text, logos or signatures in the art; existing-character likeness. Say "original" and "no text" in every prompt.
 - `--force` overwrites the chosen take; copy keepers to `alt/` or rename before re-running a batch.
 - Too many assets: every new image is ~1 min plus review time. Re-frame, re-grade and silhouette what you have first.
 
@@ -314,8 +280,8 @@ shadow-free; the engine adds contact shadows and reflections).
 
 ## 12. NovelAI (mv-studio: `tools/novelaigen.py`)
 
-NovelAI's image API with its anime models (default `nai-diffusion-4-5-full`): strong for tegaki characters and painted
-anime backgrounds, weaker for photographic plates, legible objects and UI-like pictures. Same jobs files (`aspect`
+NovelAI's image API with its anime-trained models (default `nai-diffusion-4-5-full`): strong for illustrated characters
+and painted backgrounds, weaker for photographic plates, legible objects and UI-like pictures. Same jobs files (`aspect`
 as Grok plus `4:3` `3:4`; sized to ≤ 1 MP in multiples of 64).
 ```bash
 python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char --dry-run          # request bodies in _novelai/, nothing sent
@@ -331,17 +297,17 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
 - **Cost.** On an Opus subscription a plain generation up to 1 MP and 28 steps is free; larger sizes, more steps, img2img
   and references cost Anlas (HTTP 402 = no subscription or not enough Anlas; the tool stops at the first 401/402/403).
 - **Prompts.** The V4.5 models read natural language *and* Danbooru-style tags; a tag lead-in helps
-  (`1girl, solo, original, full body, ...` then the character sentence). **Never use character, series or artist tags**:
+  (a count tag such as `solo` or `no humans`, `original`, the framing, then the subject). **Never use character, series or artist tags**:
   they reproduce existing characters and styles, which breaks "original characters only". The tool adds a negative
   prompt (`nsfw`, text, logo, watermark, bad hands, ...) from `art.config.json` → `novelai.negative`; a job adds its own
   with `"negative"`. Cut-outs get the tags `solo, simple background, green background` (V3 models: plus the usual key
   sentence); check the edge for a green rim and use `"key": "#FF00FF"` for green / teal designs as usual.
-- **Write the locks as tags on NovelAI.** Prompt = `1girl, solo, original character,` + framing + pose + emotion +
+- **Write the locks as tags on NovelAI.** Prompt = count tags + `original` + framing + subject +
   the STYLE tags + `masterpiece, best quality, very aesthetic`. The character goes in `"char"` (a V4 character caption:
   hair, eyes, outfit, signature items as tags); `gen_table.py` fills it from the row's `CHAR` / `CHAR_BACK` lock. Leave
   out prose sentences, "generous margin" and "nothing touching the edges": in an A/B on one pose (Gemini runs of
   2026-10, seed 1003) the prose version stood front-on with both hands at the chest, the tag version with the character
-  caption threw her head back with the microphone raised.
+  caption threw the head back with the microphone raised.
 - **Backgrounds on NovelAI:** start the WORLD lock with `scenery, no humans,` and end it with `anime background art,
   detailed background, painterly sky, dramatic lighting` (+ quality tags). The §6 wording "flat cel colour areas …
   sky painted as a few posterised colour bands" reads as screen-print to NovelAI: in the same A/B it gave a halftone dot

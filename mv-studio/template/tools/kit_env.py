@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""kit_env.py -- portable environment shared by the Python tools and the Blender scripts of a vocaloid-style-mv project.
+r"""kit_env.py -- portable environment shared by the Python tools and the Blender scripts of an mv-studio project.
 
 Nothing in tools/ or blender/ hard-codes a machine path; everything is derived from here (stdlib only, so it also
 imports inside Blender's bundled Python):

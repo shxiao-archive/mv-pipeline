@@ -25,24 +25,25 @@ break it on purpose when the song asks for it.
   black frame, a held breath.
 - **The turn.** Most songs move from one state to another (despair → resolve, longing → letting go). The film's light,
   colour and composition travel the same way.
-- **The thesis.** One sentence that turns the song into a *visual mechanism*, not a mood. "Afterglow" → *light that
-  remains after its source is gone* (afterimages, embers, a sky still glowing). Forgetting → *things lose their
-  outlines*. Waiting → *time loops* (the same shot again with one change). Anger → *pressure until it breaks*.
+- **The thesis.** One sentence that turns the song into a *visual mechanism*, not a mood: a rule for what the pictures
+  do, which only this song gives. (The shape of one: forgetting → *things lose their outlines*.)
 
 ## 3. What each part of the song is for
 
-| part | its job | usual treatment (depart from it with a reason) |
-|---|---|---|
-| intro | promise the world | sparse, one image or idea; the title on the riff |
-| verse (Aメロ) | tell | slower cuts, wider or intimate shots, small type, one effect at a time |
-| pre-chorus (Bメロ) | build tension | closer, shorter cuts, the light starts to change, a hold (溜め) before the hook |
-| chorus (サビ) | pay off | full palette, the biggest type, the key picture, cuts on downbeats, キメ on the hits |
-| interlude (間奏) | show off | no vocals: a set piece, a camera move, pure motion |
-| second verse | vary | the first verse's grammar plus one new element |
-| bridge (Cメロ) | turn | another place, time or palette; the film's reveal |
-| drop chorus (落ちサビ) | strip back | one picture, one light, the voice alone |
-| last chorus (ラスサビ) | maximum | earlier pictures return changed and bigger, plus one move never seen before |
-| outro | resolve | the opening image returns transformed; a composed last picture |
+A common job per part; the song may give a part another one, and the film decides how to show it.
+
+| part | a common job |
+|---|---|
+| intro | promise the world |
+| verse (Aメロ) | tell |
+| pre-chorus (Bメロ) | build tension |
+| chorus (サビ) | pay off |
+| interlude (間奏) | no vocals: the picture or motion carries it |
+| second verse | vary |
+| bridge (Cメロ) | turn |
+| drop chorus (落ちサビ) | strip back |
+| last chorus (ラスサビ) | the peak |
+| outro | resolve |
 
 ## 4. Finding ideas (so they do not run out)
 
@@ -84,30 +85,29 @@ transition grammar, ending, pacing (some songs want long takes), type density (s
 
 Half a page; lyric lines by number only. The jury reads it and judges the film against it, so it says what the film
 is trying to do, not what the style usually does:
-- thesis and logline; the style, and per section the methods the song asks for, and why;
+- thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its distance table §4, or
+  the preset named by the user), and per section the methods the song asks for, and why;
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;
 - how each section sets its lyrics (each its own way; the keyword is the peak of its phrase);
 - the colour script, one line per section;
-- a "not in this film" list: the clichés this song invites (generic particles, lens flares, stock "AI" imagery,
-  default neon) and the look-alikes to avoid.
+- a "not in this film" list: the clichés this song invites and the look-alikes to avoid.
 
 Record every later departure and every change the user asked for, with the reason, in `docs/PROGRESS.md`, so the next
 round does not undo it.
 
 ## 6. Combining
 
-A style's methods mix freely inside one film (an illustrated ボカロPV whose bridge breaks down at full speed, a chat
-that cuts to treatise plates on its chorus), and styles can mix by section too (a stage show that opens in a pop-up
-book). Make a switch work:
+A film may change its methods inside itself, by section or at one moment; a preset film may also mix presets the user
+asked for. Make a switch work:
 - **motivate it**: set it up before (the light heats, a glitch shows a line early) and let it be felt after (damage,
   recovery, a changed state);
 - **keep one link** across it: the same cast, palette, motif or running number;
 - **one lyric voice at a time**: never two lyric systems on screen at once (`check_shots.mjs` catches overlaps);
 - **say it in the concept**: which sections use which methods, and why.
 
-A style of your own is welcome too: write its idea, elements and motion in `docs/CONCEPT.md` the way the briefs do,
-and build it from the shared engine.
+A style of the film's own is the default (`design-a-style.md`); it is built from the shared engine's techniques, never
+from a preset's look.
 
 ## 7. Reading the library cheaply
 

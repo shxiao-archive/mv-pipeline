@@ -201,10 +201,10 @@ if (spriteFps > 0) {                                           // which sprite i
       }
     }
   }
-  for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words: pick a calmer plan or reframe)`);
-  for (const [id, u] of hidden) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS HIDDEN (${(u.v * 100).toFixed(0)} % of the lyric under the foreground: the character covers the words; move the words or the character, or put the lyric in front)`);
-  for (const [id, u] of dim) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS LOW CONTRAST (${u.v.toFixed(1)}:1 against the picture around them, needs ${LEG.contrast}:1; a lighter or darker colour, an outline, a shadow or a plate)`);
-  for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (hold one pose per shot; faces change with chars[].anim; styles/vocaloid/STYLE.md, One pose per shot)`);
+  for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words there)`);
+  for (const [id, u] of hidden) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS HIDDEN (${(u.v * 100).toFixed(0)} % of the lyric under the foreground: the foreground covers the words there)`);
+  for (const [id, u] of dim) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS LOW CONTRAST (${u.v.toFixed(1)}:1 against the picture around them, needs ${LEG.contrast}:1 there; how the words reach it is the film's choice)`);
+  for (const f of spriteFlips(samples)) (flag('strict') ? errors : warns).push(`${f.id} @${f.t.toFixed(2)}: SPRITE ${f.kind === 'pingpong' ? 'PING-PONG' : 'RAPID SWAPS'} ${f.msg} (sprites swap back and forth inside one shot; faces change with chars[].anim)`);
 }
 {                                                              // which lyrics each frame draws, around every cut
   await E.page.evaluate(() => {

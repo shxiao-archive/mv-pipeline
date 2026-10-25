@@ -36,7 +36,7 @@ On macOS / Linux use `python3` wherever this file says `python`.
 
 ## 2. Smoke test: the demo film (no song, no art needed)
 
-Run it in a throwaway project scaffolded without `--song` (`python <skill>/scripts/new_project.py _smoke --setup`,
+Run it in a throwaway project scaffolded without `--song` (`python <skill>/scripts/new_project.py _smoke --style vocaloid --setup`,
 `<skill>` = the skill folder), never in your film's: the steps below write `audio/song.wav` (`make_demo_song.py`
 refuses to replace a different existing file unless `--force`), `analysis/lyrics_mv.lrc` and `analysis/sections.json`.
 
@@ -52,7 +52,7 @@ python tools/review_sheets.py render/demo.mp4 --step 1 --out render/review
 python tools/review_sheets.py render/demo_vertical.mp4 --step 1 --out render/review_v   # 9:16: 216x384 thumbnails
 ```
 
-The default `engine/timeline.js` is that demo: 「蛍火」 (HOTARUBI), eleven shots built only from procedural scenes
+In a `--style vocaloid` project `engine/timeline.js` is that demo (a machine test, not a model for your film): 「蛍火」 (HOTARUBI), eleven shots built only from procedural scenes
 and the JIZURA lyric layer. Look at `render/stills/smoke.jpg`: a night sky with a firefly light igniting, star
 trails, a vortex, kanji slams, fireflies forming 蛍, a dawn and a violet end card mean the machine renders correctly
 (reference: `docs/images/demo_sheet.jpg` in the kit repo,
@@ -68,36 +68,35 @@ Put the song at `audio/song.wav` (scaffold with `--song` does this) and work thr
 |---|---|---|
 | Listen | beat grid, bars, sections, stops, impacts | `python tools/analyze_audio.py`; look at `analysis/overview.png`; curate `analysis/sections_auto.json` → `analysis/sections.json`, re-run |
 | Lyrics | `analysis/lyrics_mv.lrc` (official text, sung-onset times, JIZURA markup `/` `*…*` `!` `[間奏]`) | `references/03-audio-and-lyrics.md`; transcription / alignment only for timings: `tools/transcribe_*.py` (setup `-Lyrics`; forced alignment also needs CPU torch + torchaudio 2.8, best in `vendor/pydeps_torch`: `references/03` §9) |
-| Concept | `docs/CONCEPT.md` | `references/02-creative-direction.md` |
-| Assets | `assets/char/*.png` (RGBA), `assets/bg/*.png` | `python tools/artgen.py run <jobs.jsonl> --out-dir assets/char` (the generator in `art.config.json`: Codex, Grok, NovelAI or custom), `tools/alpha_matte.py`; `references/04-asset-generation.md` |
+| Concept | `docs/CONCEPT.md` | skill `direction.md` + `design-a-style.md` (or the preset's `BRIEF.md`) |
+| Assets | the film's pictures, if it uses any (`assets/bg/*.png`, `assets/char/*.png` RGBA, …) | `python tools/artgen.py run <jobs.jsonl> --out-dir assets/char` (the generator in `art.config.json`: Codex, Grok, NovelAI or custom), `tools/alpha_matte.py`; `references/04-asset-generation.md` |
 | Plan → edit | `engine/timeline.js` (shots with `moment` / `line` / `cue`) → `node tools/storyboard.mjs` → `docs/STORYBOARD.md` | `references/05-engine.md` (scenes, args, post, transitions) |
-| Build | new scenes in `engine/scenes/*.js`, JIZURA plans + curation, optional Blender shots | `references/06-jizura.md`, `references/07-blender-3d.md` (`python tools/blender_run.py blender/shots/<shot>.py`) |
+| Build | the film's own scenes in `engine/scenes/*.js`; optional: JIZURA lyric plans, Blender shots | `references/05-engine.md`, `references/06-jizura.md`, `references/07-blender-3d.md` (`python tools/blender_run.py blender/shots/<shot>.py`) |
 | Review | stills → contact sheets → full render → review sheets, 2–3 passes | `node tools/stills.mjs`, `python tools/review_sheets.py`, `node tools/jz_cuts_at.mjs <times>`; `references/09-qa-and-lessons.md` |
 | Deliver | 16:9 master, share encode, 9:16 vertical | `node tools/render_final.mjs --name mv`; `references/08-render-and-delivery.md` |
 
 ### Editing `engine/timeline.js`
 
-Keep the structure of the demo timeline and replace its shots:
+`engine/timeline.js` starts as the starter of your `--style` (the blank one by default): an example of the API to
+rewrite, not a look to keep.
 
 - `Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT` at the top: the title, its small Latin line, the artist name and
   the exact credit line (ask the artist). Title and credit feed the HUD, the end card and the vertical header / footer;
   `Z.ARTIST` is the artist name in the 9:16 header. `new_project.py --title --title-sub --artist --credit` sets them
   when scaffolding (`--credit` alone also sets the artist: the name after its colon); otherwise they still hold the
-  demo's 蛍火 / HOTARUBI / NikusonP.
+  starter's placeholders.
 - Inside `Z.setup(audio)`: `B(n)` = start of bar *n* (the bar numbers of `audio.json` / `sections.json`), `nb(t)` =
   nearest beat. Cut on bar starts at section changes and on `nb(lyric onset)` inside sections; never compute
   times from the BPM.
 - `shot(id, t0, t1, scene, args, { lyric, plan, post, trans, text, hud })` — one call per shot, ids `s01…` in film order.
-- JIZURA plans (`main`, `cf` centre-free, `noir`, `mono`) and the curation deny-lists: change them per film and
-  re-check the stills (any change re-rolls the cuts). Find a bad lyric frame with `node tools/jz_cuts_at.mjs 12.5 main`;
+- If the film uses the JIZURA lyric layer: its plans (`Z.addPlan`) and curation lists are the film's own; re-check the
+  stills after any change (any change re-rolls the cuts). Find a bad lyric frame with `node tools/jz_cuts_at.mjs 12.5 main`;
   list the parts that cover the picture with `node tools/jizura_cover.mjs`.
 - `Z.LOOK_DEFAULT` / `Z.LOOKS` (per section label), `Z.globalFX` (flashes, kick shake), `Z.hud`.
 - `Z.VERTICAL_CFG`: which shots keep the whole 16:9 composition in the 9:16 version (`full`), the plan map, header text
   (`title` / `sub` / `artist` = `Z.TITLE` / `Z.TITLE_SUB` / `Z.ARTIST`), when header and footer show (`credits`), the
-  lyric schemes of the vertical plans (`schemes`, default `'dark'`) and the tint of the blurred surround (`ambience`,
-  default `[10, 6, 18]`; a daylight film wants `schemes: 'light'` and a light tint).
-- The demo is a night film (dark-scheme lyrics, bloom from a 0.72 threshold, night palette): for a bright film re-tune
-  those values first (skill `references/02-creative-direction.md` §13).
+  lyric schemes of the vertical plans (`schemes`), the tint of the blurred surround (`ambience`, default neutral black)
+  and `chrome`, the film's own header / footer drawing (`false` = none; the credit must still appear somewhere).
 - `window.__zankoMeta.duration`: the render length (song end + end-card tail).
 
 Test a scene in isolation with its own timeline: `engine/tests/<name>.js` and

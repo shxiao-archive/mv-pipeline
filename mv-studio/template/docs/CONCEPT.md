@@ -12,21 +12,34 @@ user before any art is generated.
 The jury judges the film against this block. `own` unless the user asked for a preset (SKILL.md).
 
 - **Style:** own | <preset the user asked for> — for a preset, which of its methods each section uses, and stop here.
+Each slot answered from the song (design-a-style.md §2):
+
 - **Reads as** (one line: what a viewer would call it):
-- **Traits** (6–10: what it looks and feels like, design-a-style.md §2):
-- **Palette system** (ground, ink, accent and its share, how colour changes over the film):
-- **Type roles** (≤ 3 families, each with one job):
-- **Shape and motif grammar** (the master shape, the secondary one, each motif and its one meaning):
-- **Motion feel** (ones / twos / threes, beat- or cue-locked, easing family, impact ladder, what is quantised):
-- **Finish** (layers, texture, light, what makes a frame look finished in this film):
+- **Traits** (6–10 visible traits):
+- **Medium** (what it is made of, or pretends to be; its physics):
+- **Palette roles** (the colours, each one's job, how they change over the film):
+- **Type roles** (the faces, each one's job, where type lives in the frame):
+- **Shape and motif grammar** (what recurs, what each means, how its states change):
+- **Motion feel** (what moves, how, what stays still; what is locked to the beat):
+- **Impacts** (what happens on the song's hits; how the biggest differs):
+- **Editing rhythm** (what decides a cut; how pictures hand over):
+- **Lyric system** (JIZURA, the scenes' own type, in the pictures, sparse, none):
+- **Cast** (none, or who, how many, how drawn, where in the frame):
+- **Picture source** (generated, code-drawn, the user's own, photographic, 3D, none):
+- **Ending** (the last idea the film leaves):
 - **Borrowed techniques** (library modules used, none of them a preset's look):
+
+Distance check (design-a-style.md §4): "same" / "different" per slot.
+
+| slot | vocaloid | interface | stage | papercraft | magazine |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
 
 ## Frame and arc
 
-- **Frame:** how the film opens and how it closes (a frame that returns at the end reads as a whole).
-- **What recurs and how it escalates:** one place, prop or motif that comes back every chorus and is a step bigger
-  each time (a meter that climbs, a set that falls apart, a hook that is set larger and harder).
-- **Arc:** start state → turn → end state, by section.
+- **Frame:** how the film opens and how it closes.
+- **What recurs** (if anything) and how it changes on each return.
+- **Arc:** how the film changes over the song, by section.
 
 ## Signature moments (2-4)
 
@@ -46,8 +59,7 @@ The clichés this song invites and the look-alikes to avoid.
 
 ## How the lyrics are set, section by section
 
-Each section sets its lines differently (typed, stamped, written by a pen, part of the picture...), and keywords are
-the visual peak of their phrase.
+From the lyric-system slot (skip this table if the film shows no lyrics).
 
 | section | treatment |
 |---|---|

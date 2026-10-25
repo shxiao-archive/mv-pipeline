@@ -6,7 +6,7 @@ mv-studio is a derivative of other people's open work. Keep these notices when y
 
 https://github.com/EGSECDA/vocaloid-style-mv-pipeline. The engine (`template/engine/core`, `scenes`), the tools, the JIZURA
 adapter, the Blender scripts, the palettes and LUTs, the demo song 「蛍火」, `scripts/` and the method references
-(`references/01`–`09`, `effect-cookbook.md`) come from it, modified where marked (mv-studio). Licence:
+(`references/01`–`09` and `effect-cookbook.md`; `02` and the cookbook now live in `styles/vocaloid/DIRECTION.md` and `COOKBOOK.md`) come from it, modified where marked (mv-studio). Licence:
 `LICENSE` (= `licenses/LICENSE-vocaloid-style-mv-pipeline.txt`). Its third-party components (JIZURA, fonts, Playwright,
 librosa, …): `THIRD_PARTY_NOTICES.md`. The 「残光」 song, lyrics, character and frames are © NikusonP, all rights
 reserved, and are not part of this skill.

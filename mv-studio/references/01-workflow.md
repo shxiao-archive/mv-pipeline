@@ -60,32 +60,32 @@ estimated); sections labelled; every line cue has a hint.
 
 ## 1b. Style (mv-studio)
 
-Pick vocaloid (tegaki / signal) / interface (screen / treatise) / stage / papercraft / magazine (SKILL.md table; `styles/<style>/STYLE.md`)
-before the concept: it decides the starter timeline (`new_project.py --style`), the asset list and how lyrics are set.
-Styles and treatments can be mixed by section.
+The default is a style of the film's own (`design-a-style.md`; scaffold `--style own`, the blank starter). A preset
+(SKILL.md table; `styles/<preset>/BRIEF.md`) only when the user asked for it. The choice decides the starter timeline
+(`new_project.py --style`); what pictures the film needs and how lyrics are set follow from the concept, not from
+the starter.
 
 ## 2. Concept
 
-Read `references/02-creative-direction.md`. Produce `docs/CONCEPT.md` (≈1 page):
-thesis (one sentence about what the song is *about* visually), logline, emotional arc per section, colour script, master shapes + motifs (with meanings), character bible summary, 5–10 signature moments mapped to times, ending idea, what makes this film *different* from the 残光 example.
+Read `direction.md`, then `design-a-style.md` (or the preset's BRIEF.md and, for vocaloid, `styles/vocaloid/DIRECTION.md`).
+Produce `docs/CONCEPT.md` (≈1 page): thesis (one sentence about what the song is *about* visually), logline, arc per
+section, the style block (`design-a-style.md` §2 slots and the §4 distance table), signature moments mapped to times,
+ending idea. A cast summary only if the film has a cast.
 
 **Checkpoint:** summarise to the user in a few lines.
 
 ## 3. Assets
 
-Read `references/04-asset-generation.md`, starting at §0: every image of the film is a row of ONE generation table,
-`assets/gen/table.json` (`tools/gen_table.py`).
-1. Character bible `docs/CHARACTER.md` (hair/eyes/outfit/signature item/motion prop/palette), then the table's
-   **locks**: `STYLE`, `CHAR` (the character sentence), `CHAR_BACK` (her from behind, no face words; back-view rows say `"view": "back"`), `WORLD`, `ISO`,
-   `EMPTY`.
-2. Three master rows → generate → pick one with the user → the table's `refs.char`. **Checkpoint:** contact sheet.
-3. The rest of the rows, from the storyboard's needs:
-   - optional: **face variants** that repaint only her eyes or mouth (blink, open, smile …) for `chars[].anim`, if
-     the film wants her to blink or sing (styles/vocaloid/STYLE.md, Characters with a living face);
-   - poses (close-ups, back view, hands, signature props, dynamic poses, emotional beats; two takes for hard poses);
-   - locations from the lyrics' imagery and the colour script, with the time-of-day variants your colour script needs
-     for the 2–3 key locations (a LUT can shift a plate's mood, but light sources must be painted);
-   - transparent props for the symbolic objects.
+Only if the film uses generated or drawn pictures (the concept's picture-source slot). A code-drawn film skips to §4.
+Read `references/04-asset-generation.md`, starting at §0: every generated image of the film is a row of ONE generation
+table, `assets/gen/table.json` (`tools/gen_table.py`).
+1. The table's **locks**, in your words from the concept: `STYLE` and `WORLD` always; if the film has a cast, a
+   character bible `docs/CHARACTER.md` first, then `CHAR` (the character sentence) and `CHAR_BACK` (from behind, no
+   face words; back-view rows say `"view": "back"`); `ISO` / `EMPTY` when the film needs them.
+2. A few master rows (the key picture; the character if there is one) → generate → pick with the user → the table's
+   `refs`. **Checkpoint:** contact sheet.
+3. The rest of the rows, from the storyboard's needs: the pictures the concept names, with the variants (time of
+   day, pose, face) the film actually uses.
 
 ```bash
 python tools/artgen.py providers                                                # which generator? ask the user once
@@ -94,28 +94,32 @@ python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  
 python tools/gen_table.py post assets/gen/table.json                            # finals, sheets split, _review_*.jpg
 python tools/gen_table.py status assets/gen/table.json
 ```
-Acceptance: every image viewed (`_review_*.jpg`, `_<id>_figures.jpg`); character recognisably identical across poses;
-no green fringes; nothing imitates an existing character.
+Acceptance: every image viewed (`_review_*.jpg`, `_<id>_figures.jpg`); a cast, if any, recognisably identical across
+pictures; no green fringes; nothing imitates an existing character.
 
 ## 4. Storyboard & timeline
 
-1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `docs/STORYBOARD.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated STORYBOARD.md: change the shots. Size of the list (60–80 shots for a 3–4 min song; chorus shots 0.9–2 s, verse shots 2.5–5 s, a few long holds). Think in beats when the tempo is high: at 160+ BPM chorus shots of 2–4 beats; per-beat scenes cut every beat (0.33–0.37 s), so run `burst` with `every: 2` and keep `kanjiSlam` (one slam per beat) to ≤ 2 bars. Map each lyric line to an image that *answers* it (see 02 §5). Mark the signature moments.
-2. `engine/timeline.js`: the edit. Start from the template's commented demo timeline (「蛍火」): keep its structure — film identity (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`), helpers, JIZURA plans + curation, HUD, global FX, `Z.VERTICAL_CFG` — and replace the shots with your storyboard. The demo is a night film: re-tune every night-specific value that does not fit your film's key (palette consts, `Z.LOOK_DEFAULT`, JIZURA `schemes`, HUD colours, the 9:16 surround; 02 §13). Helpers inside `Z.setup(audio)`:
+1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `docs/STORYBOARD.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated STORYBOARD.md: change the shots. Size the list from the concept's editing rhythm. Map each lyric line to an image that *answers* it (`direction.md` §4). Mark the signature moments.
+2. `engine/timeline.js`: the edit. It starts as your `--style` starter (the blank one by default): keep its
+   structure — film identity (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`), helpers, `Z.LOOK_DEFAULT`,
+   `Z.VERTICAL_CFG` — and replace its placeholder values and shots with the film's. Helpers inside `Z.setup(audio)`:
    - `B(n)` = start of bar *n* using the bar numbers of `audio.json` / `sections.json` (`bars[].index`; songs with a pickup have a bar 0, songs without don't — look the bar up by index, not by array position);
    - `nb(t)` = nearest beat to `t` (snap lyric onsets to the grid).
    ```js
-   shot('s12', nb(47.00), nb(50.87), 'fall', { char: A + 'fall.png' }, { plan: 'noir', trans: { type: 'black', dur: 0.3 }, post: { bloom: 0.5 } });
+   shot('s12', nb(47.00), nb(50.87), 'myScene', { /* the scene's args */ }, { lyric: 'none', trans: { type: 'black', dur: 0.3 } });
    ```
-   Cut on lyric onsets snapped to beats (`nb(lyricTime)`) inside sections, and on bar starts (`B(n)`) at section changes. Give every shot an id (`s01…`), a JIZURA lyric plan (`main`/`cf`/`noir`/… or `lyric:'none'` when the scene's own typography carries the line), post params, and a transition when it's motivated.
+   Cut on lyric onsets snapped to beats (`nb(lyricTime)`) inside sections, and on bar starts (`B(n)`) at section changes. Give every shot an id (`s01…`), its lyric handling (a JIZURA plan the film defined, or `lyric:'none'` when the scene's own typography carries the line), post params if any, and a transition when it's motivated.
 3. Render stills at every shot's midpoint immediately, even with placeholder scenes — an animatic of stills reveals pacing problems early. `node tools/cues_sheet.mjs` gives one labelled frame per line cue: the quickest "is this the picture for this line?" check.
 
 ## 5. Build
 
-- **Scene library first**: `references/05-engine.md` lists every scene in `engine/scenes/*.js` with args. Most shots are `illust` (background + camera move + characters + fx). Adapt existing special scenes before writing new ones.
-- **New scenes** for the song's signature moments (a new song needs new metaphors: rain → ink, light → fireflies, broken glass → paper, etc.). One file per area, registered with `Z.scene(name, {preload, init, draw})`.
-- **The film's own scene file** `engine/scenes/<film>.js`: its set pieces and the 3–6 events of every shot are drawn there, `timeline.js` keeps the edit (`references/10-craft.md` §7: 30+ own lines per shot; `tools/storyboard.mjs` warns when it is missing).
-- **JIZURA**: plans per section + curation (`references/06-jizura.md`).
-- **3D**: 1–2 Blender sequences for the instrumental showcases (`references/07-blender-3d.md`); run them with `python tools/blender_run.py blender/shots/<shot>.py -- --mode full --res 100` (it finds Blender; `--res 100` = true 1080p).
+- **The film's own scene file** `engine/scenes/<film>.js` draws the film's pictures; `timeline.js` keeps the edit
+  (`tools/storyboard.mjs` warns when there is none). Search the index for techniques to reuse
+  (`references/05-engine.md`); the stock scenes belong to the vocaloid demo and are API examples.
+- New scenes register with `Z.scene(name, {preload, init, draw})`, one file per area.
+- **Optional layers**, when the concept calls for them: JIZURA kinetic lyrics (`references/06-jizura.md`); Blender 3D
+  shots (`references/07-blender-3d.md`; run them with `python tools/blender_run.py blender/shots/<shot>.py -- --mode full --res 100`,
+  `--res 100` = true 1080p).
 - Each scene author keeps a test timeline `engine/tests/<name>.js` and renders stills with `node tools/stills.mjs --url "engine/index.html?tl=tests/<name>.js" --times …`.
 
 ## 6. Review (the quality loop)
@@ -167,7 +171,7 @@ project.json (mode, style, timing offsets, review tolerances)    art.config.json
 audio/song.wav                       analysis/{audio.json, envelope_30fps.json, lyrics_mv.lrc, lyric_timing.json, cues.json}
 plan/shots.json (generated)          docs/{BRIEF.md, CONCEPT.md, STORYBOARD.md (generated), PROGRESS.md, REVIEW.md, WANTED_ART.md}
 assets/char/*.png (RGBA, trimmed)    assets/bg/*.png (opaque 16:9)    assets/style/{palettes.json, luts/}
-docs/CHARACTER.md (tegaki)
+docs/CHARACTER.md (if the film has a cast)
 engine/timeline.js                   engine/scenes/*.js               engine/tests/*.js
 blender/shots/*.py → blender/renders/<shot>/f_####.jpg
 render/{stills/, review*/, <name>.mp4}

@@ -1,4 +1,4 @@
-/* vocaloid-style-mv engine — mg.js: a motion-graphics kit any style can restyle (Z.MG), plus the impact ladder and a
+/* mv-studio engine — mg.js: a motion-graphics kit any style can restyle (Z.MG), plus the impact ladder and a
  * pixel-art buffer. Pure functions of song time; colours, widths and counts are arguments, never a look of their own.
  *
  *   MG.rings(ctx, t, x, y, o)        rings that leave the centre on each beat and fade (o: color, width, r0, speed, life,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Image generation through the NovelAI image API -- the same jobs file as tools/imagegen.py and tools/grokgen.py.
 
-NovelAI's anime models (V4.5 by default) suit tegaki characters and painted backgrounds. The key comes ONLY from the
+NovelAI's models are anime-trained (V4.5 by default). The key comes ONLY from the
 environment variable NOVELAI_API_KEY (a persistent API token from NovelAI's account settings, set by the user in their
 own shell); it is never read from, or written to, a file, and never printed. Without it this tool stops before any
 request.
@@ -14,7 +14,7 @@ Then LOOK at <out-dir>/_check_novelai.jpg (every image, with its id).
 
 Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; tools/grokgen.py: aspect) plus:
   "negative": "..."            extra negative prompt (added to the default one)
-  "char": "1girl, ..."         the character's tags as a V4 character caption (tools/gen_table.py fills it from the
+  "char": "solo, ..."           the character's tags as a V4 character caption (tools/gen_table.py fills it from the
                                CHAR / CHAR_BACK lock of char rows); the prompt keeps the scene and the pose
   "size": "1472x704"           width x height (or "width" + "height"; else "aspect"); snapped to 64 px, capped by max_pixels
   "seed": 1234                 fixed seed (default: derived from id + prompt, so a re-run gives the same image;

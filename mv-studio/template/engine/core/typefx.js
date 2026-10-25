@@ -1,4 +1,4 @@
-/* vocaloid-style-mv engine — typefx.js: reusable kinetic-type moves (Z.TFX). Text always comes from the caller (a lyric
+/* mv-studio engine — typefx.js: reusable kinetic-type moves (Z.TFX). Text always comes from the caller (a lyric
  * via Z.line(i).text, or the film's own copy); these functions never hold words. Times are song seconds.
  *
  *   TFX.pop(ctx, text, x, y, o)       each glyph pops in on its own time: o.at (start), o.stagger (s per glyph, or o.times

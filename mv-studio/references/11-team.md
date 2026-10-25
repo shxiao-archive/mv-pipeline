@@ -80,7 +80,7 @@ Z.setup = async (audio) => {
   levels, direction rule, lyric band, timing rules, transition rules, performance budget), **fixed layouts of every
   recurring place with coordinates**, then 14–17 blocks of 8–18 s, each: id, file, range, cues, one-line summary,
   entry state, shot-by-shot table (time | line | shot in phases | out), exit state, handover to the next block; the
-  running gags table; recurring props and set-ups; a cue coverage table; risks and fallbacks.
+  recurring motifs table; recurring props and set-ups; a cue coverage table; risks and fallbacks.
 - `docs/ASSETS.md`: per pack — files, exported functions with signatures and parameter tables, coordinate conventions,
   the poses / states / variants the storyboard needs (counted from it), acceptance criteria for its model sheet. §0 is
   the common convention: `drawX(g, o)` with `x, y` = the feet in world coordinates, `s` (1 = full-shot height), `face`
@@ -105,11 +105,10 @@ line, plus trial placements in two sets. It finds what no single pack builder ca
 3. Pure functions of t; `Z.rnd` / `Z.hash` for randomness; `node tools/lint.mjs engine/blocks/<id>.js` after every edit.
 4. Timing: one accent per cue at cue + 0–0.15 s, anticipation before, follow-through after; instrumental passages hold
    readable poses (other versions of the song may stretch them).
-5. The polish rules of `references/10` §6 (composition, ≥ 3 depths, light from one side, palette, eased motion with
-   follow-through, a camera that is always alive, everyone reacting, text rules, the lyric band, no dead 0.5 s).
+5. The style block of `docs/CONCEPT.md` and the brief's rules; `references/10` §6 for technique.
 6. Work in three passes and log each in `docs/blocks/<id>.md`: **A rough (~30 min)**: every shot exists, every cue has
    the right picture, timing right, no gaps; **B refine (~60 min)**: performance, depth, light, particles, impacts,
-   transitions, drawn in the block's own scene file (references/10 §7: 30+ own lines per shot, not more arguments); **C polish (~30 min)**: every cue at full size, `pops.mjs`, the budget, another look. Do not wait for the
+   transitions, drawn in the block's own scene file; **C polish (~30 min)**: every cue at full size, `pops.mjs`, the budget, another look. Do not wait for the
    neighbours.
 7. Open every image you render (Read it) and check it against the storyboard; at least two full rounds.
 8. Return: shot count and summary, differences from the storyboard, the seam / transition check, known problems,
@@ -120,25 +119,25 @@ the rules, the checks and what to return)
 
 **Proposer (×3, different stances)**
 ```
-You are designing the storyboard of a music video for {song} in the mv-studio skill's {style} style ({style one-liner}).
+You are designing the storyboard of a music video for {song} in the look of its docs/CONCEPT.md ({look one-liner}).
 Project root {ROOT}. Read docs/BRIEF.md, analysis/cues.json (lines by index; never quote lyrics), references/10-craft.md,
-<skill>/styles/{style}/STYLE.md. Write documents only.
+docs/CONCEPT.md (and <skill>/styles/{style}/STYLE.md for a preset film). Write documents only.
 You are storyboard artist "{stance}": {A: continuity and camera — the film as one continuous take on paper: motivated
-transitions, handover states, layers of depth, colour bridges | B: comedy and performance — the gags of every line,
-how the running gag escalates each time, acting, type as a performer | C: production — what can be built well in this
+transitions, handover states, layers of depth, colour bridges | B: bold concept — the strongest reading of the concept
+per line, how the motifs develop on each return, picture and type as performers | C: production — what can be built well in this
 engine, reuse, fixed layout coordinates, the list of poses / props / sets, how to split the work}.
 Write docs/design/proposal_{X}.md: 1 thesis + ≤ 8 selling points; 2 colour script; 3 a shot table covering 0–{END}
 with no gaps (shot, cue + time, length, place, framing and camera move, what happens in phases, text in frame, depth
 layers, the exit: type + motive + who draws it); 4 continuity (map / route, screen direction, the recurring prop,
-shape matches, camera system, fixed layouts); 5 the running gags, escalating per repeat; 6 the 5 hardest shots and how
+shape matches, camera system, fixed layouts); 5 the motifs, developing per return; 6 the 5 hardest shots and how
 to avoid failing them. Return the path, the thesis, your 5 best ideas.
 ```
 
 **Judge (×2)**
 ```
-{same background}. You are judge {N}, viewpoint: {1: director and audience — fit to each line, continuity, laughs,
+{same background}. You are judge {N}, viewpoint: {1: director and audience — fit to each line, continuity, the concept,
 emotional curve, the climaxes | 2: production and consistency — can it be made polished in this engine, reuse, one
-style, block handovers, performance}. Read the three proposals. Score each 1–10 on fit, continuity, fun, buildable
+style, block handovers, performance}. Read the three proposals. Score each 1–10 on fit, continuity, the concept, buildable
 polish, consistency, with reasons. List the 12–20 best ideas (source, time, why), 8–12 mistakes to avoid, and a
 skeleton for the final storyboard (which proposal is the base, what to graft). Write docs/design/judge_{N}.md.
 ```

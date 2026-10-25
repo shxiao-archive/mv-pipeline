@@ -15,20 +15,20 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 ## 2. Checklist (per pass)
 
 - [ ] Lyrics readable for ≥ max(0.7 s, 0.09 s × characters); no light text on bright skies; nothing important hidden under the HUD.
-- [ ] No lyric over the character's face/action in intimate shots (use the centre-free plan or text-behind).
+- [ ] No lyric over what a shot is about, unless the concept wants it there (another plan, text-behind, or a different picture).
 - [ ] No opaque plates/cards/blocks from JIZURA covering the picture (see 06 §5).
 - [ ] No dead air: no shot that is just black/grey without intent while the music plays.
 - [ ] Exposure: bright scenes (dawn, flashes, white characters) not blown out — check bloom, glow fx, LUT mix and exposure together.
-- [ ] Bright / daylight film (02 §13): lyrics in dark text wherever the sky is light (`schemes: 'light'` or `colors.enabled`, 06 §4); no milky bloom (threshold ≥ 0.9); no dusk tints leaking from scene and fx defaults (amber rims, `#140B1E` ink, the 残光 palettes, `kanjiSlam` without `sky: 'day'`); no additive particles clipping to white; no white flashes on white frames (use a colour flash or `invert`); the 9:16 surround and bands match the film's key (`Z.VERTICAL_CFG.ambience` / `schemes`).
+- [ ] Text over bright pictures is dark where the picture is light (06 §4); no milky bloom; no additive particles clipping to white; no white flashes on white frames. Outside a vocaloid preset film: no defaults of the stock scenes leaking in (amber rims, `#140B1E` ink, the 残光 palettes). The 9:16 surround and bands are the film's (`Z.VERTICAL_CFG.ambience` / `schemes` / `chrome`).
 - [ ] Flashes ≤ 3 per second; no saturated red full-frame flicker; fast stripes/spirals < 25 % of the frame.
-- [ ] Cuts on beats/onsets; big hits on chorus downbeats; stops used (freeze/black/hold); the ending lands on the final cut.
-- [ ] Character identical across shots; no green fringes; no cropped heads unless intended.
-- [ ] Colour script reads: each section's palette is distinct and the arc is visible in the contact sheets.
-- [ ] Transitions motivated (match shapes, barrier arms, shatter on impact), not decorative noise.
+- [ ] Cuts and hits where the concept's editing rhythm puts them (on the measured grid, never on a BPM count); stops handled on purpose; the ending lands on the final cut.
+- [ ] A cast, if any, identical across shots; no green fringes; no cropped subjects unless intended.
+- [ ] The concept's colour script reads in the contact sheets.
+- [ ] Transitions motivated by the concept, not decorative noise.
 - [ ] Credits present (title lockup, outro, end card, 9:16 header artist and footer) and spelled exactly as given — no leftover demo title, subtitle or artist (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`).
 - [ ] Vertical version: graphic shots keep full composition; lyrics in the bands; header/footer not colliding.
 
-## 3. Failure modes & fixes (visual) — all happened on 残光
+## 3. Failure modes & fixes (visual) — met on the vocaloid demo film 残光
 
 | symptom | cause | fix |
 |---|---|---|
@@ -36,15 +36,15 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 | Full **yellow** or **black** frame with a lyric on it | JIZURA kinetic cameras (`knTiltKick`, `knCardFlip`, …) draw the cut as an opaque card | deny `kn*` cams |
 | "SCENE 48 / CUT 121" slate, yellow highlighter boxes | `tyColophon`, `tyTextRule`, `marker`-type parts | deny |
 | White extruded 3D box over a dark scene | layout `wall` (also `cylinder`, `cube`) | deny |
-| Lyrics invisible at night | style scheme with a light background → dark text | `schemes: 'dark'` in the adapter; prefer gold/noir/mono |
-| Giant lyric covers the kneeling girl (key action) | default plan | centre-free plan (`plan: 'cf'`) for that shot |
-| Runner hidden behind a giant lyric | character drawn in the scene layer | also draw her into `S.fg` with the scene's transform (`S.fg.setTransform(ctx.getTransform())`) |
-| 4 s of near-black / empty grey frames | JIZURA `full` mode during a lyric gap | replace with an illustrated shot; reserve `full` for dense typography moments |
+| Lyrics invisible at night | style scheme with a light background → dark text | `schemes: 'dark'` in the adapter |
+| Giant lyric covers the key action | the shot's plan | a `centerFree` plan or text-behind for that shot |
+| Runner hidden behind a giant lyric | character drawn in the scene layer | also draw the character into `S.fg` with the scene's transform (`S.fg.setTransform(ctx.getTransform())`) |
+| 4 s of near-black / empty grey frames | JIZURA `full` mode during a lyric gap | replace with a picture; use `full` only where its own backgrounds are wanted |
 | Dawn shots washed out, face blown | glow fx + screen tint + LUT + bloom stacked | lower glow (≈0.3), drop the screen tint, `bloom 0.3`, `bloomThreshold 0.8`, `exposure −0.12` |
 | Climax burst wraps back to a night cut before the dawn shot | 7 beats, 6 cuts in the list | match cut count to beats; end the list on the target look |
 | Burst never shifts night→dawn | arg name mismatch (`dawn: true` vs `grade: 'night2dawn'`) | read the scene's header comment for exact args |
 | Glass cracks overpower the verse | full-intensity fx in a quiet section | scale fx per section (verse < chorus) |
-| Over-busy pre-chorus | JIZURA noir + glitch + our CA | accept for tension, but keep the character readable |
+| Over-busy pre-chorus | JIZURA noir + glitch + our CA | keep what the shot is about readable |
 | Vertical: title glyphs cropped | 6:5 centre crop on graphic shots | list graphic shots in `Z.VERTICAL_CFG.full` (whole 16:9 composition in the band) |
 | Vertical: blurred ghost of title text in the ambience | ambience is a blurred copy of the frame | darken the ambience extra on FULL shots |
 
@@ -151,7 +151,8 @@ or a subagent started with no history. Never the builder judging its own film: i
 **The jury prompt** (paste with the paths filled in):
 ```text
 You are a senior jury member for music videos and motion design (think: a Motionographer editor, the creative director
-of an animation studio, a top ボカロP / MV director for the Japanese and Chinese styles). You did NOT make this film.
+of an animation studio, an experienced MV director and editor). You did NOT make this film. You judge it against
+what its own concept sets out to do, not against a style you prefer.
 Judge it harshly and precisely so it can reach award level. Kindness is useless here; specificity is everything.
 
 The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index.md> (contact sheet per section,
@@ -170,12 +171,12 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      block of the concept: palette, type, shapes, motion feel); for a preset the user asked for, an expert names the
      tradition at once. Judge the identity, not a checklist: a departure the concept argues for is not a fault; a
      preset's look adopted without being asked for is
-   - concept_story: a visual idea about what the song is about; each line answered by a picture (not a literal
-     illustration); a hook in the first 5 s; unmistakable hero moments; choruses that escalate; an ending, not a stop
+   - concept_story: the film does what its concept says; a visual idea about what the song is about; the lines
+     answered the way the concept sets them; the moments the concept names as peaks land; an ending, not a stop
    - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; no dead or
      jittery motion, no sprites flipping back and forth
-   - composition_type: framing and size vary (not always centred), depth, negative space; lyrics legible, set as part
-     of the picture, inside the safe area; CJK and Latin type set well
+   - composition_type: composition and type as the concept intends, carried out with control; lyrics legible and
+     inside the safe area; CJK and Latin type set well
    - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts
    - sync: cuts and hits on the music, sections change with the song, the lyric never ahead of the voice
    - technical: the automatic checks, fonts (no tofu or fallback), no pops, black frames or seams

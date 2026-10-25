@@ -1,9 +1,9 @@
-{"id":"helper:Z.img","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — asset loading.)","where":"engine/core/assets.js:21-25","use":"Z.img(p)","lines":5}
-{"id":"helper:Z.imgSync","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — asset loading.)","where":"engine/core/assets.js:26-36","use":"Z.imgSync(p)","lines":11}
-{"id":"helper:Z.seqPath","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — asset loading.)","where":"engine/core/assets.js:37-47","use":"Z.seqPath(pattern, n)","lines":11}
+{"id":"helper:Z.img","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — asset loading.)","where":"engine/core/assets.js:21-25","use":"Z.img(p)","lines":5}
+{"id":"helper:Z.imgSync","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — asset loading.)","where":"engine/core/assets.js:26-36","use":"Z.imgSync(p)","lines":11}
+{"id":"helper:Z.seqPath","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — asset loading.)","where":"engine/core/assets.js:37-47","use":"Z.seqPath(pattern, n)","lines":11}
 {"id":"helper:Z.canvas","kind":"helper","fits":["shared"],"does":"offscreen canvases","where":"engine/core/assets.js:48-48","use":"Z.canvas(w = 1920, h = 1080)","lines":1}
-{"id":"helper:Z.ctx2d","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — asset loading.)","where":"engine/core/assets.js:49-52","use":"Z.ctx2d(c)","lines":4}
-{"id":"helper:Z.tinted","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — asset loading.)","where":"engine/core/assets.js:53-61","use":"Z.tinted(img, color, key)","lines":9}
+{"id":"helper:Z.ctx2d","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — asset loading.)","where":"engine/core/assets.js:49-52","use":"Z.ctx2d(c)","lines":4}
+{"id":"helper:Z.tinted","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — asset loading.)","where":"engine/core/assets.js:53-61","use":"Z.tinted(img, color, key)","lines":9}
 {"id":"helper:Z.block","kind":"helper","fits":["shared"],"does":"}) in engine/blocks/<id>.js: register the block. t0 / t1 may be numbers or functions of ctx; shots(ctx) returns the block's shots (ids start with the block id; private scenes are named <id>_xxx). ctx = what the lead passes (audio, B, …","where":"engine/core/blocks.js:20-31","use":"Z.block(id, def)","lines":12}
 {"id":"helper:Z.blockShots","kind":"helper","fits":["shared"],"does":"the shots of every loaded block, checked: id prefix, inside [t0, t1) ?only=b05,b06 load only these blocks (a builder renders its own block fast)","where":"engine/core/blocks.js:32-47","use":"Z.blockShots(ctx)","lines":16}
 {"id":"helper:Z.setProject","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — the CUE TABLE (analysis/cues.json, written by tools/make_cues.py) and project timing offsets.)","where":"engine/core/cues.js:34-41","use":"Z.setProject(p)","lines":8}
@@ -16,21 +16,21 @@
 {"id":"helper:D.viewLerp","kind":"helper","fits":["shared"],"does":"interpolate two views","where":"engine/core/draw.js:33-35","use":"D.viewLerp(a, b, k)","lines":3}
 {"id":"helper:D.shake","kind":"helper","fits":["shared"],"does":"camera shake (deterministic, on 2s by default)","where":"engine/core/draw.js:36-45","use":"D.shake(t, amp, fps = 24, seed = 1)","lines":10}
 {"id":"helper:D.meshDraw","kind":"helper","fits":["shared"],"does":"draw img into the rect (x0, y0, w, h) through a grid warped by field(u, v) -> [dx, dy] (px). Cells that do not move are plain blits; moving cells are two affine-mapped triangles, each grown a little so no seams show.","where":"engine/core/draw.js:46-67","use":"D.meshDraw(ctx, img, x0, y0, w, h, field, mesh = {})","lines":22}
-{"id":"helper:D.sprite","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:68-105","use":"D.sprite(ctx, img, x, y, h, opt = {})","lines":38}
+{"id":"helper:D.sprite","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:68-105","use":"D.sprite(ctx, img, x, y, h, opt = {})","lines":38}
 {"id":"helper:D.silhouette","kind":"helper","fits":["shared"],"does":"silhouette (sprite filled with colour) — for shadow play / rim light","where":"engine/core/draw.js:106-110","use":"D.silhouette(ctx, img, x, y, h, color, opt = {})","lines":5}
 {"id":"helper:D.rim","kind":"helper","fits":["shared"],"does":"rim light: draw a tinted copy offset behind","where":"engine/core/draw.js:111-117","use":"D.rim(ctx, img, x, y, h, color, off = [6, -4], opt = {})","lines":7}
 {"id":"helper:D.glow","kind":"helper","fits":["shared"],"does":"light","where":"engine/core/draw.js:118-125","use":"D.glow(ctx, x, y, r, color, a = 1)","lines":8}
 {"id":"helper:D.softLight","kind":"helper","fits":["shared"],"does":"a light SOURCE (sun, lamp, neon, flame core): stacked additive halos with no hard rim and a soft white-hot centre. A single bright gradient disc reads as a glass marble; light reads as light when the halo is much wider than the core and …","where":"engine/core/draw.js:126-138","use":"D.softLight(ctx, x, y, core, color, o = {})","lines":13}
-{"id":"helper:D.disc","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:139-140","use":"D.disc(ctx, x, y, r, color, a = 1)","lines":2}
+{"id":"helper:D.disc","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:139-140","use":"D.disc(ctx, x, y, r, color, a = 1)","lines":2}
 {"id":"helper:D.rays","kind":"helper","fits":["shared"],"does":"crepuscular rays from (x,y)","where":"engine/core/draw.js:141-156","use":"D.rays(ctx, x, y, n, len, color, a, t, seed = 3)","lines":16}
 {"id":"helper:D.embers","kind":"helper","fits":["shared"],"does":"particles (closed-form, deterministic) embers rising: n particles, each with a lifetime loop; area = [x0,y0,x1,y1]","where":"engine/core/draw.js:157-176","use":"D.embers(ctx, t, o = {})","lines":20}
 {"id":"helper:D.fireflies","kind":"helper","fits":["shared"],"does":"fireflies: slow wander, blinking","where":"engine/core/draw.js:177-193","use":"D.fireflies(ctx, t, o = {})","lines":17}
 {"id":"helper:D.rain","kind":"helper","fits":["shared"],"does":"rain streaks","where":"engine/core/draw.js:194-206","use":"D.rain(ctx, t, o = {})","lines":13}
 {"id":"helper:D.dust","kind":"helper","fits":["shared"],"does":"dust motes in light","where":"engine/core/draw.js:207-219","use":"D.dust(ctx, t, o = {})","lines":13}
-{"id":"helper:D.feathers","kind":"helper","fits":["shared"],"does":"falling feathers (simple drawn shapes) — tegaki style","where":"engine/core/draw.js:220-238","use":"D.feathers(ctx, t, o = {})","lines":19}
-{"id":"helper:D.crackNet","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:239-259","use":"D.crackNet(seed, cx, cy, n = 22, reach = 1100)","lines":21}
-{"id":"helper:D.cracks","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:260-287","use":"D.cracks(ctx, lines, prog, o = {})","lines":28}
-{"id":"helper:D.font","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:288-293","use":"D.font(ctx, size, fam = 'mincho', weight = 700)","lines":6}
+{"id":"helper:D.feathers","kind":"helper","fits":["shared"],"does":"falling feathers (simple drawn shapes)","where":"engine/core/draw.js:220-238","use":"D.feathers(ctx, t, o = {})","lines":19}
+{"id":"helper:D.crackNet","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:239-259","use":"D.crackNet(seed, cx, cy, n = 22, reach = 1100)","lines":21}
+{"id":"helper:D.cracks","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:260-287","use":"D.cracks(ctx, lines, prog, o = {})","lines":28}
+{"id":"helper:D.font","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:288-293","use":"D.font(ctx, size, fam = 'mincho', weight = 700)","lines":6}
 {"id":"helper:D.vtext","kind":"helper","fits":["shared"],"does":"vertical text column; returns glyph boxes. o: { size, fam, weight, pitch, color, stroke, strokeW, reveal (0..1 chars shown), glow }","where":"engine/core/draw.js:294-315","use":"D.vtext(ctx, text, x, yTop, o = {})","lines":22}
 {"id":"helper:D.htext","kind":"helper","fits":["shared"],"does":"horizontal text with per-char reveal / stagger. o: { size, fam, weight, color, stroke, glow, align, reveal, spacing, jitter }","where":"engine/core/draw.js:316-343","use":"D.htext(ctx, text, x, y, o = {})","lines":28}
 {"id":"helper:D.halftone","kind":"helper","fits":["shared"],"does":"halftone dot field (screentone) inside a rect, dot size from a function of position","where":"engine/core/draw.js:344-355","use":"D.halftone(ctx, rect, step, fn, color = '#140B1E')","lines":12}
@@ -39,7 +39,7 @@
 {"id":"helper:D.along","kind":"helper","fits":["shared"],"does":"things in the world rarely move in straight lines: a point at k (0..1) on a quadratic curve p0 -> p2 bent towards p1, with its tangent angle (bank a bird, a paper plane, a thrown light into the turn)","where":"engine/core/draw.js:381-386","use":"D.along(k, p0, p1, p2)","lines":6}
 {"id":"helper:D.travel","kind":"helper","fits":["shared"],"does":"a move with anticipation and follow-through between two times (eased, a little back first, a little overshoot)","where":"engine/core/draw.js:387-394","use":"D.travel(t, t0, t1, p0, p2, o = {})","lines":8}
 {"id":"helper:D.fill","kind":"helper","fits":["shared"],"does":"screen-space overlay helpers","where":"engine/core/draw.js:395-395","use":"D.fill(ctx, color, a = 1, comp = 'source-over')","lines":1}
-{"id":"helper:D.vgrad","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:396-402","use":"D.vgrad(ctx, stops, a = 1, comp = 'source-over', rect = [0, 0, W, H])","lines":7}
+{"id":"helper:D.vgrad","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — drawing toolkit shared by all scenes (Canvas2D). Everything is a pure function of its args. */)","where":"engine/core/draw.js:396-402","use":"D.vgrad(ctx, stops, a = 1, comp = 'source-over', rect = [0, 0, W, H])","lines":7}
 {"id":"helper:Z.charTimes","kind":"helper","fits":["shared"],"does":"per-character start times of line i from analysis/lyric_timing.json (or null)","where":"engine/core/lyrics.js:97-98","use":"Z.charTimes(i)","lines":2}
 {"id":"helper:Z.line","kind":"helper","fits":["shared"],"does":"the line object (or a blank one past the end)","where":"engine/core/lyrics.js:99-99","use":"Z.line(i)","lines":1}
 {"id":"helper:Z.lineAt","kind":"helper","fits":["shared"],"does":"index of the line on screen at t (shown `lead` s before the voice), -1 in gaps","where":"engine/core/lyrics.js:100-100","use":"Z.lineAt(t, lead = 0.2)","lines":1}
@@ -47,7 +47,7 @@
 {"id":"helper:Z.isEmph","kind":"helper","fits":["shared"],"does":"is character k of line i inside an *emphasis*?","where":"engine/core/lyrics.js:108-110","use":"Z.isEmph(i, k)","lines":3}
 {"id":"helper:Z.wordsAt","kind":"helper","fits":["shared"],"does":"like charsAt, but whole words: a word is out once its first character is sung","where":"engine/core/lyrics.js:111-116","use":"Z.wordsAt(i, t, o = {})","lines":6}
 {"id":"helper:Z.wordIndex","kind":"helper","fits":["shared"],"does":"index of a word in line i (letters only, any case); -1 if absent","where":"engine/core/lyrics.js:117-122","use":"Z.wordIndex(i, word, last = false)","lines":6}
-{"id":"helper:Z.shotList","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — frame orchestration.)","where":"engine/core/main.js:223-225","use":"Z.shotList()","lines":3}
+{"id":"helper:Z.shotList","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — frame orchestration.)","where":"engine/core/main.js:223-225","use":"Z.shotList()","lines":3}
 {"id":"helper:Z.shotById","kind":"helper","fits":["shared"],"does":"helpers for meta scenes (ref / burst / montage)","where":"engine/core/main.js:226-232","use":"Z.shotById(id)","lines":7}
 {"id":"helper:MG.rings","kind":"helper","fits":["shared"],"does":"rings that leave the centre on each beat and fade (o: color, width, r0, speed, life, beats: [t...] (default: the song's beats), every (every n-th beat), alpha)","where":"engine/core/mg.js:29-40","use":"MG.rings(ctx, t, x, y, o = {})","lines":12}
 {"id":"helper:MG.arcs","kind":"helper","fits":["shared"],"does":"broken arcs that step round on each beat (o: color, width, r, n (arcs), gap, step (rad per beat), ease (s of the step))","where":"engine/core/mg.js:41-48","use":"MG.arcs(ctx, t, x, y, o = {})","lines":8}
@@ -83,12 +83,12 @@
 {"id":"helper:Z.shade","kind":"helper","fits":["shared"],"does":"run a fragment shader. `frag` defines vec4 frag(vec2 p) (p = the point of the scene in ctx coordinates, px, y down; return straight-alpha rgba 0..1). Given for free: uRes (canvas px), uT (song time, from uniforms.uT), uPx (scene units …","where":"engine/core/shade.js:187-206","use":"Z.shade(ctx, frag, uniforms = {}, o = {})","lines":20}
 {"id":"helper:Z.glScene","kind":"helper","fits":["shared"],"does":"-> {...}, ss, rect, before(ctx, S), after(ctx, S), preload, init }) a scene that is one shader (+ Canvas2D before / after it: ground, type, the spark)","where":"engine/core/shade.js:207-280","use":"Z.glScene(name, def)","lines":74}
 {"id":"helper:Z.lineBatch","kind":"helper","fits":["shared"],"does":"GPU capsule segments: tens of thousands of anti-aliased hairlines per frame .seg(ax, ay, bx, by, width, color, alpha) .poly(pts, width, color, alpha, close) color '#hex' | [r, g, b] 0..1 .draw(ctx, { blend 'normal' | 'add', screenWidth …","where":"engine/core/shade.js:281-283","use":"Z.lineBatch(cap)","lines":3}
-{"id":"transition:cut","kind":"transition","fits":["shared"],"does":"(in vocaloid-style-mv engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:8-8","use":"{ trans: { type: 'cut', dur } }","lines":1}
-{"id":"transition:xfade","kind":"transition","fits":["shared"],"does":"(in vocaloid-style-mv engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:9-11","use":"{ trans: { type: 'xfade', dur } }","lines":3}
+{"id":"transition:cut","kind":"transition","fits":["shared"],"does":"(in mv-studio engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:8-8","use":"{ trans: { type: 'cut', dur } }","lines":1}
+{"id":"transition:xfade","kind":"transition","fits":["shared"],"does":"(in mv-studio engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:9-11","use":"{ trans: { type: 'xfade', dur } }","lines":3}
 {"id":"transition:flash","kind":"transition","fits":["shared"],"does":"white/colour flash: A brightens to flash, B emerges. peak 0.7: at full strength, under bloom, the frame burns white for several frames (a jury and a viewer both called it overexposed); peak: 1 for a real white-out","where":"engine/core/trans.js:12-15","use":"{ trans: { type: 'flash', dur } }","lines":4}
-{"id":"transition:black","kind":"transition","fits":["shared"],"does":"(in vocaloid-style-mv engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:16-20","use":"{ trans: { type: 'black', dur } }","lines":5}
+{"id":"transition:black","kind":"transition","fits":["shared"],"does":"(in mv-studio engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:16-20","use":"{ trans: { type: 'black', dur } }","lines":5}
 {"id":"transition:iris","kind":"transition","fits":["shared"],"does":"iris: B revealed by a growing circle from (cx,cy) — sun ↔ lamp ↔ 。 match cuts","where":"engine/core/trans.js:21-26","use":"{ trans: { type: 'iris', dur } }","lines":6}
-{"id":"transition:irisClose","kind":"transition","fits":["shared"],"does":"(in vocaloid-style-mv engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:27-32","use":"{ trans: { type: 'irisClose', dur } }","lines":6}
+{"id":"transition:irisClose","kind":"transition","fits":["shared"],"does":"(in mv-studio engine — transitions. fn(ctx, A, B, k, o): draw the blend of outgoing canvas A and incoming canvas B at k∈[0,1].)","where":"engine/core/trans.js:27-32","use":"{ trans: { type: 'irisClose', dur } }","lines":6}
 {"id":"transition:barrier","kind":"transition","fits":["shared"],"does":"crossing barrier arm: a striped bar sweeps down (pivot at left) wiping in B","where":"engine/core/trans.js:33-45","use":"{ trans: { type: 'barrier', dur } }","lines":13}
 {"id":"transition:wipe","kind":"transition","fits":["shared"],"does":"diagonal wipe with a hard graphic edge","where":"engine/core/trans.js:46-54","use":"{ trans: { type: 'wipe', dur } }","lines":9}
 {"id":"transition:slices","kind":"transition","fits":["shared"],"does":"horizontal slices sliding in alternately","where":"engine/core/trans.js:55-64","use":"{ trans: { type: 'slices', dur } }","lines":10}
@@ -103,28 +103,28 @@
 {"id":"helper:TFX.ghosts","kind":"helper","fits":["shared"],"does":"earlier lines lingering behind the current one: items [{ text, x, y, at }] (newest last); each older item drawn at o.alphas ([0.24, 0.16, 0.1]) and offset o.drift px","where":"engine/core/typefx.js:60-71","use":"TFX.ghosts(ctx, items, t, o = {})","lines":12}
 {"id":"helper:TFX.chaos","kind":"helper","fits":["shared"],"does":"a new layout every beat for a sprint: bar | tape | vertical | overflow | echo | tilt | outline | scatter | corner (o.layouts limits the set; o.seed); a 3-frame overshoot in","where":"engine/core/typefx.js:72-94","use":"TFX.chaos(ctx, text, t, o = {})","lines":23}
 {"id":"helper:Z.clamp","kind":"helper","fits":["shared"],"does":"math","where":"engine/core/util.js:11-11","use":"Z.clamp(x, a = 0, b = 1)","lines":1}
-{"id":"helper:Z.lerp","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:12-12","use":"Z.lerp(a, b, k)","lines":1}
-{"id":"helper:Z.inv","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:13-13","use":"Z.inv(a, b, x)","lines":1}
-{"id":"helper:Z.remap","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:14-14","use":"Z.remap(x, a, b, c, d)","lines":1}
-{"id":"helper:Z.smooth","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:15-15","use":"Z.smooth(a, b, x)","lines":1}
-{"id":"helper:Z.fract","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:16-17","use":"Z.fract(x)","lines":2}
-{"id":"helper:Z.mix3","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:18-18","use":"Z.mix3(c1, c2, k)","lines":1}
-{"id":"helper:Z.hex","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:19-19","use":"Z.hex(h)","lines":1}
-{"id":"helper:Z.rgba","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:20-20","use":"Z.rgba(h, a = 1)","lines":1}
-{"id":"helper:Z.quant","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:21-27","use":"Z.quant(t, fps)","lines":7}
+{"id":"helper:Z.lerp","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:12-12","use":"Z.lerp(a, b, k)","lines":1}
+{"id":"helper:Z.inv","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:13-13","use":"Z.inv(a, b, x)","lines":1}
+{"id":"helper:Z.remap","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:14-14","use":"Z.remap(x, a, b, c, d)","lines":1}
+{"id":"helper:Z.smooth","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:15-15","use":"Z.smooth(a, b, x)","lines":1}
+{"id":"helper:Z.fract","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:16-17","use":"Z.fract(x)","lines":2}
+{"id":"helper:Z.mix3","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:18-18","use":"Z.mix3(c1, c2, k)","lines":1}
+{"id":"helper:Z.hex","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:19-19","use":"Z.hex(h)","lines":1}
+{"id":"helper:Z.rgba","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:20-20","use":"Z.rgba(h, a = 1)","lines":1}
+{"id":"helper:Z.quant","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:21-27","use":"Z.quant(t, fps)","lines":7}
 {"id":"helper:Z.dropFrames","kind":"helper","fits":["shared"],"does":"time effects (after world-execute-me v4, MIT): give a shot `tmap: t => ...` (core/main.js) or use them inside a scene dropFrames(t, fps, from) the instant a film running at only `fps` frames a second would show (a stutter; from = shot …","where":"engine/core/util.js:28-28","use":"Z.dropFrames(t, fps, from = 0)","lines":1}
-{"id":"helper:Z.replay","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:29-29","use":"Z.replay(t, starts, len = Infinity)","lines":1}
-{"id":"helper:Z.passOf","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:30-30","use":"Z.passOf(t, starts)","lines":1}
-{"id":"helper:Z.replayMap","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:31-31","use":"Z.replayMap(src, starts, len = Infinity)","lines":1}
-{"id":"helper:Z.tear","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:32-35","use":"Z.tear(t, at, amount = 0.5, hold = 0.1)","lines":4}
+{"id":"helper:Z.replay","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:29-29","use":"Z.replay(t, starts, len = Infinity)","lines":1}
+{"id":"helper:Z.passOf","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:30-30","use":"Z.passOf(t, starts)","lines":1}
+{"id":"helper:Z.replayMap","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:31-31","use":"Z.replayMap(src, starts, len = Infinity)","lines":1}
+{"id":"helper:Z.tear","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:32-35","use":"Z.tear(t, at, amount = 0.5, hold = 0.1)","lines":4}
 {"id":"helper:Z.withInserts","kind":"helper","fits":["shared"],"does":"a shot that cuts away to inserts and comes back in the state it would have by then (world-execute-me v4 withInserts): Z.withInserts(shot, [{ t0, t1, shot: { scene, args, id, line, moment, ... }, back: { type, dur } }]) the parts of …","where":"engine/core/util.js:36-67","use":"Z.withInserts(def, inserts)","lines":32}
-{"id":"helper:Z.tween","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:68-70","use":"Z.tween(t, t0, t1, a, b, ease = E.outExpo)","lines":3}
+{"id":"helper:Z.tween","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:68-70","use":"Z.tween(t, t0, t1, a, b, ease = E.outExpo)","lines":3}
 {"id":"helper:Z.hash","kind":"helper","fits":["shared"],"does":"seeded randomness","where":"engine/core/util.js:71-75","use":"Z.hash(...xs)","lines":5}
-{"id":"helper:Z.rnd","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:76-76","use":"Z.rnd(...xs)","lines":1}
-{"id":"helper:Z.rnds","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:77-77","use":"Z.rnds(...xs)","lines":1}
-{"id":"helper:Z.rng","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:78-86","use":"Z.rng(seed)","lines":9}
+{"id":"helper:Z.rnd","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:76-76","use":"Z.rnd(...xs)","lines":1}
+{"id":"helper:Z.rnds","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:77-77","use":"Z.rnds(...xs)","lines":1}
+{"id":"helper:Z.rng","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:78-86","use":"Z.rng(seed)","lines":9}
 {"id":"helper:Z.noise1","kind":"helper","fits":["shared"],"does":"smooth 1-D value noise, deterministic","where":"engine/core/util.js:87-87","use":"Z.noise1(x, seed = 0)","lines":1}
-{"id":"helper:Z.fbm1","kind":"helper","fits":["shared"],"does":"(in vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:88-90","use":"Z.fbm1(x, seed = 0, oct = 3)","lines":3}
+{"id":"helper:Z.fbm1","kind":"helper","fits":["shared"],"does":"(in mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.)","where":"engine/core/util.js:88-90","use":"Z.fbm1(x, seed = 0, oct = 3)","lines":3}
 {"id":"helper:Z.makeClock","kind":"helper","fits":["shared"],"does":"beat clock","where":"engine/core/util.js:91-141","use":"Z.makeClock(beats, bpm, downbeatIndex0 = 0, bars = null)","lines":51}
 {"id":"helper:Z.makeHits","kind":"helper","fits":["shared"],"does":"drum hits (audio.onsets: [t, strength 0..1] per kind) Z.hit('kick', t, tau): the strongest recent onset, decaying exp(-dt / tau) -- a punch that answers the drum","where":"engine/core/util.js:142-154","use":"Z.makeHits(onsets)","lines":13}
 {"id":"helper:Z.makeEnv","kind":"helper","fits":["shared"],"does":"audio envelope (analysis/envelope_30fps.json)","where":"engine/core/util.js:155-166","use":"Z.makeEnv(env)","lines":12}
@@ -156,8 +156,8 @@
 {"id":"type-scene:kanjiSlam","kind":"type-scene","fits":["vocaloid"],"does":"chorus-downbeat monument kanji slammed per beat behind a character (shots 16, 38, 52, 56)","where":"engine/scenes/typo.js:388-537","use":"shot(id, t0, t1, 'kanjiSlam', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"type-scene:typeCard","kind":"type-scene","fits":["vocaloid"],"does":"'quiet' single mincho line on black (shot 29) · 'flicker' glitching 救って per beat → white (shot 37)","where":"engine/scenes/typo.js:564-713","use":"shot(id, t0, t1, 'typeCard', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"type-scene:tunnel","kind":"type-scene","fits":["vocaloid"],"does":"one-take push through rings of lyric text toward a point of light that blooms into dawn (shot 61) Post helpers for the timeline (shot.post): Z.typo.post.kanjiSlam · Z.typo.post.typeCard · Z.typo.post.tunnel Everything is a pure function …","where":"engine/scenes/typo.js:783-932","use":"shot(id, t0, t1, 'tunnel', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
-{"id":"scene:own","kind":"scene","fits":["shared"],"does":"(in engine/timeline.js — the BLANK starter: a film that designs its own style (no preset). Read <skill>/design-a-style.md.)","where":"engine/starters/blank.js:20-38","use":"shot(id, t0, t1, 'own', { … })","lines":19}
-{"id":"helper:Z.sectionAt","kind":"helper","fits":["shared"],"does":"(in engine/timeline.js — the BLANK starter: a film that designs its own style (no preset). Read <skill>/design-a-style.md.)","where":"engine/starters/blank.js:39-54","use":"Z.sectionAt(t)","lines":16}
+{"id":"scene:own","kind":"scene","fits":["shared"],"does":"(in engine/timeline.js — the BLANK starter: a film that designs its own style (no preset). Read <skill>/design-a-style.md.)","where":"engine/starters/blank.js:20-37","use":"shot(id, t0, t1, 'own', { … })","lines":18}
+{"id":"helper:Z.sectionAt","kind":"helper","fits":["shared"],"does":"(in engine/timeline.js — the BLANK starter: a film that designs its own style (no preset). Read <skill>/design-a-style.md.)","where":"engine/starters/blank.js:38-53","use":"Z.sectionAt(t)","lines":16}
 {"id":"helper:IF.chatLayout","kind":"helper","fits":["interface"],"does":"rectangles: win, main, head, thread, composer, side, drawer","where":"engine/styles/interface/chat.js:30-40","use":"IF.chatLayout({ win = WIN, side = 1, drawer = 0 } = {})","lines":11}
 {"id":"helper:IF.mark","kind":"helper","fits":["interface"],"does":"the speaker's avatar mark; IF.thinking(...) its \"thinking\" pulse","where":"engine/styles/interface/chat.js:41-46","use":"IF.mark(ink, x, y, r, { color = 'me', alpha = 1, pulse = 0, lit = 1 } = {})","lines":6}
 {"id":"helper:IF.thinking","kind":"helper","fits":["interface"],"does":"(in styles/interface — chat.js: a chat client drawn in code (no screenshots), the stage of an \"interface\" film.)","where":"engine/styles/interface/chat.js:47-53","use":"IF.thinking(ink, cx, cy, r, t, { color = 'me', alpha = 1, speed = 1, stuck = 0 } = {})","lines":7}
@@ -416,7 +416,7 @@
 {"id":"tool:jizura_serve","kind":"tool","fits":["shared"],"does":"Tiny static file server for the JIZURA pages (same origin for engine, hosts, audio and the read-only upstream clone). * * node tools/jizura_serve.mjs [port] (port 0 / omitted = free port) * * Mounts (read-only): * /project/... -> …","where":"tools/jizura_serve.mjs","use":"node tools/jizura_serve.mjs"}
 {"id":"tool:jury_pack","kind":"tool","fits":["shared"],"does":"The pictures an independent jury reviews a film from (references/09 §8).","where":"tools/jury_pack.py","use":"python tools/jury_pack.py"}
 {"id":"tool:jz_cuts_at","kind":"tool","fits":["shared"],"does":"Which JIZURA cut (layout / enter / exit / decor / fx) is active at given times, per plan, inside the real engine page. * node tools/jz_cuts_at.mjs 196.8,203.5 [plan] [--url engine/index.html] (plan omitted = all plans) * Author: …","where":"tools/jz_cuts_at.mjs","use":"node tools/jz_cuts_at.mjs"}
-{"id":"tool:kit_env","kind":"tool","fits":["shared"],"does":"kit_env.mjs -- portable environment shared by every Node tool of a vocaloid-style-mv project. Nothing in tools/ hard-codes a machine path; everything is derived from here:","where":"tools/kit_env.mjs","use":"node tools/kit_env.mjs"}
+{"id":"tool:kit_env","kind":"tool","fits":["shared"],"does":"kit_env.mjs -- portable environment shared by every Node tool of an mv-studio project. Nothing in tools/ hard-codes a machine path; everything is derived from here:","where":"tools/kit_env.mjs","use":"node tools/kit_env.mjs"}
 {"id":"tool:lineup","kind":"tool","fits":["shared"],"does":"Line-up sheet: every character cut-out side by side at ONE scale, plus a trial placement on key backgrounds, so inconsistent heads, line weights, palettes or proportions show before the cut-outs reach a scene.","where":"tools/lineup.py","use":"python tools/lineup.py"}
 {"id":"check:lint","kind":"check","fits":["shared"],"does":"Before every render: the cheap checks that catch broken files. * node tools/lint.mjs [paths...] [--no-lyrics-check] * * SYNTAX every .js / .mjs under engine/ and tools/ parses (node --check) * MOJIBAKE no U+FFFD replacement character in …","where":"tools/lint.mjs","use":"node tools/lint.mjs"}
 {"id":"tool:lrc","kind":"tool","fits":["shared"],"does":"Shared lyric helpers for the Python tools: the SAME line parsing as engine/core/lyrics.js, and the text-free files.","where":"tools/lrc.py","use":"python tools/lrc.py"}
@@ -439,7 +439,7 @@
 {"id":"tool:score_timing","kind":"tool","fits":["shared"],"does":"Lyric timing from the producer's SCORE (UTAU .ust or a MIDI file): exact per-character onsets, no speech model.","where":"tools/score_timing.py","use":"python tools/score_timing.py"}
 {"id":"tool:stills","kind":"tool","fits":["shared"],"does":"Render individual frames of the engine to PNG (fast visual review) and tile them into a contact sheet. * node tools/stills.mjs --times 1,5.5,12 [--url engine/index.html] [--out render/stills] [--sheet name] [--canvas out] * node …","where":"tools/stills.mjs","use":"node tools/stills.mjs"}
 {"id":"check:storyboard","kind":"check","fits":["shared"],"does":"The storyboard, generated from the LIVE shot list (engine/timeline.js), so it can never drift from the film, and * checked. Writes plan/shots.json (text-free) and docs/STORYBOARD.md; exit 1 when a check fails. * * node …","where":"tools/storyboard.mjs","use":"node tools/storyboard.mjs"}
-{"id":"tool:style_palette_sheet","kind":"tool","fits":["shared"],"does":"Palette system (shipped with the 残光 / Zankō dusk palettes P1-P5 as a starting point) — writes machine-readable palettes, 256x1 gradient-map LUT PNGs and a visual contact sheet that applies every palette to a procedural dusk scene (or, …","where":"tools/style_palette_sheet.py","use":"python tools/style_palette_sheet.py"}
+{"id":"tool:style_palette_sheet","kind":"tool","fits":["shared"],"does":"Palette system — writes machine-readable palettes, 256x1 gradient-map LUT PNGs and a visual contact sheet that applies every palette to a procedural dusk scene (or, with --plate, to one of your own backgrounds: judge daylight palettes …","where":"tools/style_palette_sheet.py","use":"python tools/style_palette_sheet.py"}
 {"id":"tool:time_selftest","kind":"tool","fits":["shared"],"does":"Self-test of the time and word helpers (no browser): Z.withInserts, Z.replay / replayMap / passOf, Z.dropFrames, * Z.tear, Z.wordsAt / wordIndex, the metre clock (Z.makeClock with a bar map) and Z.makeHits (engine/core/util.js, * …","where":"tools/time_selftest.mjs","use":"node tools/time_selftest.mjs"}
 {"id":"tool:transcribe_align_mms","kind":"tool","fits":["shared"],"does":"-*- coding: utf-8 -*-","where":"tools/transcribe_align_mms.py","use":"python tools/transcribe_align_mms.py"}
 {"id":"tool:transcribe_kana","kind":"tool","fits":["shared"],"does":"-*- coding: utf-8 -*-","where":"tools/transcribe_kana.py","use":"python tools/transcribe_kana.py"}
@@ -457,30 +457,16 @@
 {"id":"manual:references/01-workflow#Phases","kind":"manual","does":"Phases at a glance (mv-studio)","where":"<skill>/references/01-workflow.md:7-24","lines":18}
 {"id":"manual:references/01-workflow#0","kind":"manual","does":"0. Setup","where":"<skill>/references/01-workflow.md:25-39","lines":15}
 {"id":"manual:references/01-workflow#1","kind":"manual","does":"1. Listen (analysis)","where":"<skill>/references/01-workflow.md:40-60","lines":21}
-{"id":"manual:references/01-workflow#1b","kind":"manual","does":"1b. Style (mv-studio)","where":"<skill>/references/01-workflow.md:61-66","lines":6}
-{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Concept","where":"<skill>/references/01-workflow.md:67-73","lines":7}
-{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Assets","where":"<skill>/references/01-workflow.md:74-99","lines":26}
-{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Storyboard & timeline","where":"<skill>/references/01-workflow.md:100-111","lines":12}
-{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:112-120","lines":9}
-{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Review (the quality loop)","where":"<skill>/references/01-workflow.md:121-135","lines":15}
-{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Deliver","where":"<skill>/references/01-workflow.md:136-143","lines":8}
-{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:144-155","lines":12}
-{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:156-162","lines":7}
-{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:163-175","lines":13}
-{"id":"manual:references/02-creative-direction#1","kind":"manual","does":"1. Read the song","where":"<skill>/references/02-creative-direction.md:9-15","lines":7}
-{"id":"manual:references/02-creative-direction#2","kind":"manual","does":"2. Find the thesis","where":"<skill>/references/02-creative-direction.md:16-23","lines":8}
-{"id":"manual:references/02-creative-direction#3","kind":"manual","does":"3. Colour script","where":"<skill>/references/02-creative-direction.md:24-29","lines":6}
-{"id":"manual:references/02-creative-direction#4","kind":"manual","does":"4. Shapes & motifs","where":"<skill>/references/02-creative-direction.md:30-35","lines":6}
-{"id":"manual:references/02-creative-direction#5","kind":"manual","does":"5. Lyric → image mapping","where":"<skill>/references/02-creative-direction.md:36-54","lines":19}
-{"id":"manual:references/02-creative-direction#6","kind":"manual","does":"6. Structure & escalation","where":"<skill>/references/02-creative-direction.md:55-72","lines":18}
-{"id":"manual:references/02-creative-direction#7","kind":"manual","does":"7. Character","where":"<skill>/references/02-creative-direction.md:73-78","lines":6}
-{"id":"manual:references/02-creative-direction#8","kind":"manual","does":"8. Typography voice","where":"<skill>/references/02-creative-direction.md:79-84","lines":6}
-{"id":"manual:references/02-creative-direction#9","kind":"manual","does":"9. Signature moments","where":"<skill>/references/02-creative-direction.md:85-88","lines":4}
-{"id":"manual:references/02-creative-direction#10","kind":"manual","does":"10. Variation matrix — make it different","where":"<skill>/references/02-creative-direction.md:89-109","lines":21}
-{"id":"manual:references/02-creative-direction#11","kind":"manual","does":"11. Worked example: 残光 in brief","where":"<skill>/references/02-creative-direction.md:110-113","lines":4}
-{"id":"manual:references/02-creative-direction#12","kind":"manual","does":"12. Anti-patterns","where":"<skill>/references/02-creative-direction.md:114-123","lines":10}
-{"id":"manual:references/02-creative-direction#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/references/02-creative-direction.md:124-141","lines":18}
-{"id":"manual:references/02-creative-direction#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/references/02-creative-direction.md:142-156","lines":15}
+{"id":"manual:references/01-workflow#1b","kind":"manual","does":"1b. Style (mv-studio)","where":"<skill>/references/01-workflow.md:61-67","lines":7}
+{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Concept","where":"<skill>/references/01-workflow.md:68-76","lines":9}
+{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Assets","where":"<skill>/references/01-workflow.md:77-99","lines":23}
+{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Storyboard & timeline","where":"<skill>/references/01-workflow.md:100-113","lines":14}
+{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:114-124","lines":11}
+{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Review (the quality loop)","where":"<skill>/references/01-workflow.md:125-139","lines":15}
+{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Deliver","where":"<skill>/references/01-workflow.md:140-147","lines":8}
+{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:148-159","lines":12}
+{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:160-166","lines":7}
+{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:167-179","lines":13}
 {"id":"manual:references/03-audio-and-lyrics#1","kind":"manual","does":"1. Prepare the audio","where":"<skill>/references/03-audio-and-lyrics.md:9-17","lines":9}
 {"id":"manual:references/03-audio-and-lyrics#2","kind":"manual","does":"2. Run the analysis","where":"<skill>/references/03-audio-and-lyrics.md:18-39","lines":22}
 {"id":"manual:references/03-audio-and-lyrics#3","kind":"manual","does":"3. `audio.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:40-63","lines":24}
@@ -496,40 +482,40 @@
 {"id":"manual:references/03-audio-and-lyrics#12","kind":"manual","does":"12. mv-studio: timing ground truth","where":"<skill>/references/03-audio-and-lyrics.md:278-332","lines":55}
 {"id":"manual:references/04-asset-generation#0","kind":"manual","does":"0. Start here: the generation table (`tools/gen_table.py`)","where":"<skill>/references/04-asset-generation.md:9-60","lines":52}
 {"id":"manual:references/04-asset-generation#0b","kind":"manual","does":"0b. Other styles: one lock and one table per style","where":"<skill>/references/04-asset-generation.md:61-108","lines":48}
-{"id":"manual:references/04-asset-generation#1","kind":"manual","does":"1. What to generate (derive it from the storyboard)","where":"<skill>/references/04-asset-generation.md:109-134","lines":26}
-{"id":"manual:references/04-asset-generation#2","kind":"manual","does":"2. `tools/imagegen.py`","where":"<skill>/references/04-asset-generation.md:135-166","lines":32}
-{"id":"manual:references/04-asset-generation#3","kind":"manual","does":"3. Codex CLI gotchas (why the wrapper exists)","where":"<skill>/references/04-asset-generation.md:167-176","lines":10}
-{"id":"manual:references/04-asset-generation#4","kind":"manual","does":"4. Alpha: native vs chroma key (`tools/alpha_matte.py`)","where":"<skill>/references/04-asset-generation.md:177-203","lines":27}
-{"id":"manual:references/04-asset-generation#5","kind":"manual","does":"5. Character consistency method","where":"<skill>/references/04-asset-generation.md:204-223","lines":20}
-{"id":"manual:references/04-asset-generation#6","kind":"manual","does":"6. Style-block templates (write new ones per project)","where":"<skill>/references/04-asset-generation.md:224-258","lines":35}
-{"id":"manual:references/04-asset-generation#7","kind":"manual","does":"7. Backgrounds and props","where":"<skill>/references/04-asset-generation.md:259-268","lines":10}
-{"id":"manual:references/04-asset-generation#8","kind":"manual","does":"8. Review","where":"<skill>/references/04-asset-generation.md:269-277","lines":9}
-{"id":"manual:references/04-asset-generation#9","kind":"manual","does":"9. Other image models","where":"<skill>/references/04-asset-generation.md:278-281","lines":4}
-{"id":"manual:references/04-asset-generation#10","kind":"manual","does":"10. Pitfalls","where":"<skill>/references/04-asset-generation.md:282-292","lines":11}
-{"id":"manual:references/04-asset-generation#11","kind":"manual","does":"11. Grok Build CLI (mv-studio: `tools/grokgen.py` + `tools/grok_run.sh`)","where":"<skill>/references/04-asset-generation.md:293-314","lines":22}
-{"id":"manual:references/04-asset-generation#12","kind":"manual","does":"12. NovelAI (mv-studio: `tools/novelaigen.py`)","where":"<skill>/references/04-asset-generation.md:315-382","lines":68}
-{"id":"manual:references/04-asset-generation#13","kind":"manual","does":"13. Choosing the generator (`tools/artgen.py`)","where":"<skill>/references/04-asset-generation.md:383-406","lines":24}
+{"id":"manual:references/04-asset-generation#1","kind":"manual","does":"1. What to generate (derive it from the storyboard)","where":"<skill>/references/04-asset-generation.md:109-122","lines":14}
+{"id":"manual:references/04-asset-generation#2","kind":"manual","does":"2. `tools/imagegen.py`","where":"<skill>/references/04-asset-generation.md:123-154","lines":32}
+{"id":"manual:references/04-asset-generation#3","kind":"manual","does":"3. Codex CLI gotchas (why the wrapper exists)","where":"<skill>/references/04-asset-generation.md:155-164","lines":10}
+{"id":"manual:references/04-asset-generation#4","kind":"manual","does":"4. Alpha: native vs chroma key (`tools/alpha_matte.py`)","where":"<skill>/references/04-asset-generation.md:165-191","lines":27}
+{"id":"manual:references/04-asset-generation#5","kind":"manual","does":"5. Character consistency method (if the film has a cast)","where":"<skill>/references/04-asset-generation.md:192-211","lines":20}
+{"id":"manual:references/04-asset-generation#6","kind":"manual","does":"6. Style-block templates (write new ones per project)","where":"<skill>/references/04-asset-generation.md:212-224","lines":13}
+{"id":"manual:references/04-asset-generation#7","kind":"manual","does":"7. Backgrounds and props","where":"<skill>/references/04-asset-generation.md:225-234","lines":10}
+{"id":"manual:references/04-asset-generation#8","kind":"manual","does":"8. Review","where":"<skill>/references/04-asset-generation.md:235-243","lines":9}
+{"id":"manual:references/04-asset-generation#9","kind":"manual","does":"9. Other image models","where":"<skill>/references/04-asset-generation.md:244-247","lines":4}
+{"id":"manual:references/04-asset-generation#10","kind":"manual","does":"10. Pitfalls","where":"<skill>/references/04-asset-generation.md:248-258","lines":11}
+{"id":"manual:references/04-asset-generation#11","kind":"manual","does":"11. Grok Build CLI (mv-studio: `tools/grokgen.py` + `tools/grok_run.sh`)","where":"<skill>/references/04-asset-generation.md:259-280","lines":22}
+{"id":"manual:references/04-asset-generation#12","kind":"manual","does":"12. NovelAI (mv-studio: `tools/novelaigen.py`)","where":"<skill>/references/04-asset-generation.md:281-348","lines":68}
+{"id":"manual:references/04-asset-generation#13","kind":"manual","does":"13. Choosing the generator (`tools/artgen.py`)","where":"<skill>/references/04-asset-generation.md:349-372","lines":24}
 {"id":"manual:references/05-engine#1","kind":"manual","does":"1. Architecture","where":"<skill>/references/05-engine.md:7-26","lines":20}
 {"id":"manual:references/05-engine#2","kind":"manual","does":"2. Hard rules","where":"<skill>/references/05-engine.md:27-35","lines":9}
-{"id":"manual:references/05-engine#3","kind":"manual","does":"3. The timeline (`engine/timeline.js`)","where":"<skill>/references/05-engine.md:36-71","lines":36}
-{"id":"manual:references/05-engine#4","kind":"manual","does":"4. Scene API","where":"<skill>/references/05-engine.md:72-86","lines":15}
-{"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:87-96","lines":10}
-{"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:97-116","lines":20}
-{"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:117-134","lines":18}
-{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Scene library catalogue (`engine/scenes/*.js`, 24 scenes)","where":"<skill>/references/05-engine.md:135-203","lines":69}
-{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:204-249","lines":46}
-{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting checklist (song-specific constants)","where":"<skill>/references/05-engine.md:250-259","lines":10}
-{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:260-271","lines":12}
-{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:272-360","lines":89}
-{"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-8","lines":4}
-{"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:9-22","lines":14}
-{"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:23-46","lines":24}
-{"id":"manual:references/06-jizura#4","kind":"manual","does":"4. Styles","where":"<skill>/references/06-jizura.md:47-80","lines":34}
-{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:81-138","lines":58}
-{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Character shots & text-behind","where":"<skill>/references/06-jizura.md:139-144","lines":6}
-{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:145-149","lines":5}
-{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:150-153","lines":4}
-{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:154-157","lines":4}
+{"id":"manual:references/05-engine#3","kind":"manual","does":"3. The timeline (`engine/timeline.js`)","where":"<skill>/references/05-engine.md:36-69","lines":34}
+{"id":"manual:references/05-engine#4","kind":"manual","does":"4. Scene API","where":"<skill>/references/05-engine.md:70-84","lines":15}
+{"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:85-94","lines":10}
+{"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:95-114","lines":20}
+{"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:115-132","lines":18}
+{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Scene library catalogue (`engine/scenes/*.js`, 24 scenes)","where":"<skill>/references/05-engine.md:133-205","lines":73}
+{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:206-251","lines":46}
+{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting checklist (song-specific constants of the vocaloid scene library)","where":"<skill>/references/05-engine.md:252-261","lines":10}
+{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:262-273","lines":12}
+{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:274-362","lines":89}
+{"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
+{"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
+{"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-50","lines":24}
+{"id":"manual:references/06-jizura#4","kind":"manual","does":"4. Styles","where":"<skill>/references/06-jizura.md:51-84","lines":34}
+{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:85-143","lines":59}
+{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Shots with a subject & text-behind","where":"<skill>/references/06-jizura.md:144-149","lines":6}
+{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:150-154","lines":5}
+{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:155-158","lines":4}
+{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:159-162","lines":4}
 {"id":"manual:references/07-blender-3d#1","kind":"manual","does":"1. What is worth doing in 3D","where":"<skill>/references/07-blender-3d.md:9-18","lines":10}
 {"id":"manual:references/07-blender-3d#2","kind":"manual","does":"2. Files and commands","where":"<skill>/references/07-blender-3d.md:19-60","lines":42}
 {"id":"manual:references/07-blender-3d#3","kind":"manual","does":"3. The look recipe (\"not default-grey 3D\")","where":"<skill>/references/07-blender-3d.md:61-71","lines":11}
@@ -540,7 +526,7 @@
 {"id":"manual:references/07-blender-3d#8","kind":"manual","does":"8. Output → engine (`seq` scene)","where":"<skill>/references/07-blender-3d.md:118-129","lines":12}
 {"id":"manual:references/07-blender-3d#9","kind":"manual","does":"9. Timings (RTX 3080, EEVEE, 16 samples, GP line art, bloom, DOF)","where":"<skill>/references/07-blender-3d.md:130-143","lines":14}
 {"id":"manual:references/07-blender-3d#10","kind":"manual","does":"10. Blender 5.1 API gotchas (verified)","where":"<skill>/references/07-blender-3d.md:144-158","lines":15}
-{"id":"manual:references/07-blender-3d#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/07-blender-3d.md:159-172","lines":14}
+{"id":"manual:references/07-blender-3d#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/07-blender-3d.md:159-171","lines":13}
 {"id":"manual:references/08-render-and-delivery#1","kind":"manual","does":"1. Deliverables (what 残光 shipped, 3:46 at 30 fps)","where":"<skill>/references/08-render-and-delivery.md:9-21","lines":13}
 {"id":"manual:references/08-render-and-delivery#2","kind":"manual","does":"2. `tools/render_frames.mjs` (the renderer)","where":"<skill>/references/08-render-and-delivery.md:22-51","lines":30}
 {"id":"manual:references/08-render-and-delivery#3","kind":"manual","does":"3. Final render + audio mux (`tools/render_final.mjs`)","where":"<skill>/references/08-render-and-delivery.md:52-74","lines":23}
@@ -552,36 +538,29 @@
 {"id":"manual:references/08-render-and-delivery#9","kind":"manual","does":"9. Pitfalls","where":"<skill>/references/08-render-and-delivery.md:151-163","lines":13}
 {"id":"manual:references/09-qa-and-lessons#1","kind":"manual","does":"1. The loop","where":"<skill>/references/09-qa-and-lessons.md:5-14","lines":10}
 {"id":"manual:references/09-qa-and-lessons#2","kind":"manual","does":"2. Checklist (per pass)","where":"<skill>/references/09-qa-and-lessons.md:15-30","lines":16}
-{"id":"manual:references/09-qa-and-lessons#3","kind":"manual","does":"3. Failure modes & fixes (visual) — all happened on 残光","where":"<skill>/references/09-qa-and-lessons.md:31-50","lines":20}
+{"id":"manual:references/09-qa-and-lessons#3","kind":"manual","does":"3. Failure modes & fixes (visual) — met on the vocaloid demo film 残光","where":"<skill>/references/09-qa-and-lessons.md:31-50","lines":20}
 {"id":"manual:references/09-qa-and-lessons#4","kind":"manual","does":"4. Pipeline & tooling pitfalls","where":"<skill>/references/09-qa-and-lessons.md:51-67","lines":17}
 {"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:68-74","lines":7}
 {"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:75-99","lines":25}
 {"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:100-130","lines":31}
-{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review in two rounds","where":"<skill>/references/09-qa-and-lessons.md:131-210","lines":80}
-{"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:9-28","lines":20}
-{"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:29-42","lines":14}
-{"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs","where":"<skill>/references/10-craft.md:43-97","lines":55}
-{"id":"manual:references/10-craft#3","kind":"manual","does":"3. Characters and assets from an image generator","where":"<skill>/references/10-craft.md:98-124","lines":27}
-{"id":"manual:references/10-craft#4","kind":"manual","does":"4. Sets","where":"<skill>/references/10-craft.md:125-143","lines":19}
-{"id":"manual:references/10-craft#5","kind":"manual","does":"5. Props, effects and transitions","where":"<skill>/references/10-craft.md:144-167","lines":24}
-{"id":"manual:references/10-craft#6","kind":"manual","does":"6. Choreography of a shot","where":"<skill>/references/10-craft.md:168-203","lines":36}
-{"id":"manual:references/10-craft#7","kind":"manual","does":"7. Density targets (what \"the same level\" means in numbers)","where":"<skill>/references/10-craft.md:204-233","lines":30}
-{"id":"manual:references/10-craft#8","kind":"manual","does":"8. Review","where":"<skill>/references/10-craft.md:234-248","lines":15}
-{"id":"manual:references/10-craft#9","kind":"manual","does":"9. Scale it to the budget","where":"<skill>/references/10-craft.md:249-258","lines":10}
+{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review in two rounds","where":"<skill>/references/09-qa-and-lessons.md:131-211","lines":81}
+{"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:10-29","lines":20}
+{"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:30-43","lines":14}
+{"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs (if the film has a cast)","where":"<skill>/references/10-craft.md:44-98","lines":55}
+{"id":"manual:references/10-craft#3","kind":"manual","does":"3. Characters and assets from an image generator (if the film uses one)","where":"<skill>/references/10-craft.md:99-125","lines":27}
+{"id":"manual:references/10-craft#4","kind":"manual","does":"4. Sets","where":"<skill>/references/10-craft.md:126-144","lines":19}
+{"id":"manual:references/10-craft#5","kind":"manual","does":"5. Props, effects and transitions","where":"<skill>/references/10-craft.md:145-168","lines":24}
+{"id":"manual:references/10-craft#6","kind":"manual","does":"6. Choreography of a shot","where":"<skill>/references/10-craft.md:169-204","lines":36}
+{"id":"manual:references/10-craft#7","kind":"manual","does":"7. Density of the reference films (a measure, not a target)","where":"<skill>/references/10-craft.md:205-234","lines":30}
+{"id":"manual:references/10-craft#8","kind":"manual","does":"8. Review","where":"<skill>/references/10-craft.md:235-249","lines":15}
+{"id":"manual:references/10-craft#9","kind":"manual","does":"9. Scale it to the budget","where":"<skill>/references/10-craft.md:250-259","lines":10}
 {"id":"manual:references/11-team#1","kind":"manual","does":"1. Roles","where":"<skill>/references/11-team.md:17-33","lines":17}
 {"id":"manual:references/11-team#2","kind":"manual","does":"2. Phases and gates","where":"<skill>/references/11-team.md:34-47","lines":14}
 {"id":"manual:references/11-team#3","kind":"manual","does":"3. Engine side: blocks","where":"<skill>/references/11-team.md:48-72","lines":25}
 {"id":"manual:references/11-team#4","kind":"manual","does":"4. The shared contracts (every agent reads them)","where":"<skill>/references/11-team.md:73-98","lines":26}
-{"id":"manual:references/11-team#5","kind":"manual","does":"5. Rules for block builders (put them in every block prompt)","where":"<skill>/references/11-team.md:99-117","lines":19}
-{"id":"manual:references/11-team#6","kind":"manual","does":"6. Prompt templates (fill the `{…}`; every prompt names the project root, the files to read, the files it may write,","where":"<skill>/references/11-team.md:118-218","lines":101}
-{"id":"manual:references/11-team#7","kind":"manual","does":"7. Lessons from running it","where":"<skill>/references/11-team.md:219-232","lines":14}
-{"id":"manual:references/effect-cookbook#0","kind":"manual","does":"0. How to use this menu","where":"<skill>/references/effect-cookbook.md:9-17","lines":9}
-{"id":"manual:references/effect-cookbook#1","kind":"manual","does":"1. Timing conventions","where":"<skill>/references/effect-cookbook.md:18-24","lines":7}
-{"id":"manual:references/effect-cookbook#2","kind":"manual","does":"2. Palette system","where":"<skill>/references/effect-cookbook.md:25-51","lines":27}
-{"id":"manual:references/effect-cookbook#3","kind":"manual","does":"3. Typography system","where":"<skill>/references/effect-cookbook.md:52-65","lines":14}
-{"id":"manual:references/effect-cookbook#4","kind":"manual","does":"4. Recipes","where":"<skill>/references/effect-cookbook.md:66-157","lines":92}
-{"id":"manual:references/effect-cookbook#5","kind":"manual","does":"5. Safety (photosensitivity, ITU-R BT.1702 spirit)","where":"<skill>/references/effect-cookbook.md:158-165","lines":8}
-{"id":"manual:references/effect-cookbook#6","kind":"manual","does":"6. Anti-patterns","where":"<skill>/references/effect-cookbook.md:166-178","lines":13}
+{"id":"manual:references/11-team#5","kind":"manual","does":"5. Rules for block builders (put them in every block prompt)","where":"<skill>/references/11-team.md:99-116","lines":18}
+{"id":"manual:references/11-team#6","kind":"manual","does":"6. Prompt templates (fill the `{…}`; every prompt names the project root, the files to read, the files it may write,","where":"<skill>/references/11-team.md:117-217","lines":101}
+{"id":"manual:references/11-team#7","kind":"manual","does":"7. Lessons from running it","where":"<skill>/references/11-team.md:218-231","lines":14}
 {"id":"manual:styles/interface/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/interface/BRIEF.md:11-37","lines":27}
 {"id":"manual:styles/interface/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/interface/BRIEF.md:38-64","lines":27}
 {"id":"manual:styles/interface/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/interface/BRIEF.md:65-91","lines":27}
@@ -643,6 +622,27 @@
 {"id":"manual:styles/vocaloid/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/vocaloid/BRIEF.md:162-176","lines":15}
 {"id":"manual:styles/vocaloid/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/vocaloid/BRIEF.md:177-184","lines":8}
 {"id":"manual:styles/vocaloid/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/vocaloid/BRIEF.md:185-207","lines":23}
+{"id":"manual:styles/vocaloid/COOKBOOK#0","kind":"manual","does":"0. How to use this menu","where":"<skill>/styles/vocaloid/COOKBOOK.md:9-17","lines":9}
+{"id":"manual:styles/vocaloid/COOKBOOK#1","kind":"manual","does":"1. Timing conventions","where":"<skill>/styles/vocaloid/COOKBOOK.md:18-24","lines":7}
+{"id":"manual:styles/vocaloid/COOKBOOK#2","kind":"manual","does":"2. Palette system","where":"<skill>/styles/vocaloid/COOKBOOK.md:25-51","lines":27}
+{"id":"manual:styles/vocaloid/COOKBOOK#3","kind":"manual","does":"3. Typography system","where":"<skill>/styles/vocaloid/COOKBOOK.md:52-65","lines":14}
+{"id":"manual:styles/vocaloid/COOKBOOK#4","kind":"manual","does":"4. Recipes","where":"<skill>/styles/vocaloid/COOKBOOK.md:66-157","lines":92}
+{"id":"manual:styles/vocaloid/COOKBOOK#5","kind":"manual","does":"5. Safety (photosensitivity, ITU-R BT.1702 spirit)","where":"<skill>/styles/vocaloid/COOKBOOK.md:158-165","lines":8}
+{"id":"manual:styles/vocaloid/COOKBOOK#6","kind":"manual","does":"6. Anti-patterns","where":"<skill>/styles/vocaloid/COOKBOOK.md:166-178","lines":13}
+{"id":"manual:styles/vocaloid/DIRECTION#1","kind":"manual","does":"1. Read the song","where":"<skill>/styles/vocaloid/DIRECTION.md:9-15","lines":7}
+{"id":"manual:styles/vocaloid/DIRECTION#2","kind":"manual","does":"2. Find the thesis","where":"<skill>/styles/vocaloid/DIRECTION.md:16-23","lines":8}
+{"id":"manual:styles/vocaloid/DIRECTION#3","kind":"manual","does":"3. Colour script","where":"<skill>/styles/vocaloid/DIRECTION.md:24-29","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#4","kind":"manual","does":"4. Shapes & motifs","where":"<skill>/styles/vocaloid/DIRECTION.md:30-35","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#5","kind":"manual","does":"5. Lyric → image mapping","where":"<skill>/styles/vocaloid/DIRECTION.md:36-54","lines":19}
+{"id":"manual:styles/vocaloid/DIRECTION#6","kind":"manual","does":"6. Structure & escalation","where":"<skill>/styles/vocaloid/DIRECTION.md:55-72","lines":18}
+{"id":"manual:styles/vocaloid/DIRECTION#7","kind":"manual","does":"7. Character","where":"<skill>/styles/vocaloid/DIRECTION.md:73-78","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#8","kind":"manual","does":"8. Typography voice","where":"<skill>/styles/vocaloid/DIRECTION.md:79-84","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#9","kind":"manual","does":"9. Signature moments","where":"<skill>/styles/vocaloid/DIRECTION.md:85-88","lines":4}
+{"id":"manual:styles/vocaloid/DIRECTION#10","kind":"manual","does":"10. Variation matrix — make it different","where":"<skill>/styles/vocaloid/DIRECTION.md:89-109","lines":21}
+{"id":"manual:styles/vocaloid/DIRECTION#11","kind":"manual","does":"11. Worked example: 残光 in brief","where":"<skill>/styles/vocaloid/DIRECTION.md:110-113","lines":4}
+{"id":"manual:styles/vocaloid/DIRECTION#12","kind":"manual","does":"12. Anti-patterns","where":"<skill>/styles/vocaloid/DIRECTION.md:114-123","lines":10}
+{"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:124-141","lines":18}
+{"id":"manual:styles/vocaloid/DIRECTION#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/styles/vocaloid/DIRECTION.md:142-156","lines":15}
 {"id":"manual:styles/vocaloid/STYLE#A","kind":"manual","does":"A. Tegaki — illustrated MV with an original character (the base kit's style)","where":"<skill>/styles/vocaloid/STYLE.md:28-73","lines":46}
 {"id":"manual:styles/vocaloid/STYLE#B","kind":"manual","does":"B. Signal — a recording device failing","where":"<skill>/styles/vocaloid/STYLE.md:74-159","lines":86}
 {"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both treatments)","where":"<skill>/styles/vocaloid/STYLE.md:160-204","lines":45}

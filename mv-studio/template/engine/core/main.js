@@ -1,4 +1,4 @@
-/* vocaloid-style-mv engine — frame orchestration.
+/* mv-studio engine — frame orchestration.
  *
  * Contract used by tools/render_frames.mjs:
  *   window.ready            Promise, resolves when assets/fonts/plans are loaded

@@ -8,7 +8,7 @@ Condensed from the 残光 style bible ([examples/zanko/STYLE_RESEARCH.md](https:
 
 ## 0. How to use this menu
 
-1. From the concept (02-creative-direction.md) pick **3–5 master motifs** with one meaning each (残光: circle = light/memory; crack/shard = the broken sky and heart; a vermilion thread = her ribbon). At most **3 motifs per shot**.
+1. From the concept (DIRECTION.md) pick **3–5 master motifs** with one meaning each (残光: circle = light/memory; crack/shard = the broken sky and heart; a vermilion thread = her ribbon). At most **3 motifs per shot**.
 2. Pick recipes that *express* those motifs; skip the rest. A recipe used once with intent beats ten used as decoration.
 3. **Budget outside the climaxes: one screen effect + one decoration per shot.** Grain and paper/boil stay on all the time — they glue AI art, procedural graphics and 3D into one film.
 4. **Escalate by section**: each section unlocks new tools; the last chorus brings back chorus-1 ideas "on fire" plus one move nobody has seen yet. Keep **≥ 3 full holds** (≥ 2 bars, almost no motion) — stillness is what makes the bursts read.
@@ -45,7 +45,7 @@ Global neutrals: flash white `#FFFFFF` (1-frame flashes only), sumi `#111014`, p
 - `P2_nami` 波 sea: `[[0,'#06222E'],[.28,'#0B4F63'],[.50,'#138A8F'],[.70,'#3CC6C0'],[.88,'#9BEBD8'],[1,'#E8FFF6']]`
 - `P3_yuunagi` 夕凪 evening calm: `[[0,'#2A1838'],[.25,'#6A2E5A'],[.48,'#C9506A'],[.68,'#FF8C5A'],[.86,'#FFC77A'],[1,'#FFF1D0']]`
 
-Keep `lutMix` 0.08–0.25 on daylight plates. The rest of a bright film's settings (bloom, lyric schemes, fx colours): 02-creative-direction.md §13.
+Keep `lutMix` 0.08–0.25 on daylight plates. The rest of a bright film's settings (bloom, lyric schemes, fx colours): DIRECTION.md §13.
 
 **Choreography rules**: one palette per shot; palette changes on cuts or through a *motivated* scrub (sunset, a lamp switching on); inversion is motivated (the retina after a bright event), never random; line colour = the palette's ink, pure black only for hard-cut black frames; `lutMix` 0.1–0.35 pulls AI art into the palette without flattening it.
 

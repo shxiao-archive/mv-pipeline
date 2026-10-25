@@ -14,7 +14,7 @@ Do in 3D what would be painful to hand-animate:
 3. **Light as a story device**: a sun that sinks and sweeps shadows across facades, windows and lamps switching on as night falls — one keyframe pair in 3D, weeks by hand.
 4. **Beat-locked mechanical motion**: barrier arms landing on downbeats, lamps alternating per beat, instanced swarms.
 
-Keep in 2D: characters and faces, most lyrics (JIZURA), painterly skies, emotional close-ups. 3D supports the tegaki frames; with toon bands + line art + the engine's boil/grain it reads as the same film. Put the 3D shots where the vocal rests (post-chorus hit, interlude) so they act as showcases with `lyric: 'none'`.
+What is 3D and what stays 2D is the film's decision. When both appear, match them on purpose (line colour, shading bands, the engine's post pass) or contrast them on purpose. 3D shots with `lyric: 'none'` carry no lyric layer.
 
 ## 2. Files and commands
 
@@ -75,7 +75,7 @@ print(bc.render_sequence(os.path.join(A["out"], "f_####"), A["start"], A["end"])
 |---|---|---|---|
 | cost at 1080p | +~0.1 s/frame | ≈ 4.1 s/frame total | ~0 |
 | width | world-space `radius` (thick near, thin far) | constant px, taper modifiers | world-space shell |
-| tegaki feel | Noise modifier `step=2` = lines boiling on twos; Length modifier = overshoot | Perlin/sinus modifiers | none |
+| hand-drawn feel | Noise modifier `step=2` = lines boiling on twos; Length modifier = overshoot | Perlin/sinus modifiers | none |
 | verdict | use it | clean technical lines | poor on boxy architecture |
 
 Width formula (measured): `px ≈ radius × (lens / sensor_width × res_x) / distance` — r = 0.05 at 9 m with a 24 mm lens = 7 px at 1920 wide. The default 0.0025 and even 0.012 are invisible; streets use **0.04–0.06**, close text 0.03. Exclude the road plane with `lineart_usage = 'OCCLUSION_ONLY'` (no border lines, still occludes); exclude wires, markings, clouds, sign text, far cards via `collection.lineart_usage = 'EXCLUDE'`. Line colour = a dark palette colour (`#241638`), never pure black. Lines can also go to a separate pass (`add_pass_outputs(..., grease_pencil=True)` → RGBA `p_gp####.png`) so the engine can recolour/boil them; `mist=True` gives a 16-bit depth-fog pass.
@@ -163,9 +163,8 @@ Check `nvidia-smi` before final renders; do not render Blender while the browser
 - Beat times typed by hand into the script drift from the edit; always `beats_in()` from `audio.json`.
 - Keyframes with default Bézier interpolation overshoot between per-frame keys; force LINEAR on every animated ID (`set_id_interp`).
 - Orange-tinted lamps shift Shader-to-RGB band thresholds; keep lamps white (or pure primaries for `toon_rgb_split`).
-- Pure black line colour and AgX make 3D look like a different film next to tegaki shots.
+- Pure black line colour and AgX make 3D look like a different film next to drawn shots.
 - Hard-coded absolute paths in shot scripts break the kit; resolve from `__file__`.
-- Don't let 3D replace the character: 残光's 3D shots contain only places and glyphs; she stays 2D.
 
 ---
 Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT)

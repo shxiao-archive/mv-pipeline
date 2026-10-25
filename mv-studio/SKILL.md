@@ -2,19 +2,19 @@
 name: mv-studio
 description: >-
   Make an original music video (MV / PV / lyric video) for a song from its audio and lyrics, rendered by a
-  deterministic Canvas2D/WebGL2 engine. Strongest in the ボカロPV tradition — 手書き illustrated stories with an original
-  character, JIZURA kinetic lyrics (文字PV, V家手书), signal-decay / glitch cutting (疾走感, 故障风) — and also screen /
-  chat lyric videos, technical-treatise kinetic typography, watercolour picture-book stage shows (绘本风), pop-up
-  papercraft RPG storybooks and experimental print magazines (riso / 雑誌); styles combine freely. Beat-locked editing, art from Codex / Grok / NovelAI or the
-  user's own, optional toon 3D, 9:16 version. Use whenever the user wants an MV, PV, lyric video or beat-synced
-  animation for a song ("make an MV for my song", "给这首歌做个MV", "この曲のMVを作って", "a lyric video like a chat
-  log"), even with only a .wav/.mp3. Not for editing existing footage.
+  deterministic Canvas2D/WebGL2 engine. By default each film designs its own look from the song; style presets on
+  request: ボカロPV (手書き / JIZURA kinetic lyrics / signal-glitch cutting), screen / chat lyric video and technical
+  treatise typography, watercolour picture-book stage show (绘本风), pop-up papercraft RPG storybook, experimental
+  print magazine (riso / 雑誌). Beat-locked editing, art from Codex / Grok / NovelAI or the user's own, optional toon
+  3D, 9:16 version. Use whenever the user wants an MV, PV, lyric video or beat-synced animation for a song ("make an
+  MV for my song", "给这首歌做个MV", "この曲のMVを作って", "a lyric video like a chat log"), even with only a
+  .wav/.mp3. Not for editing existing footage.
 ---
 
 # mv-studio
 
-Turns a song + its lyrics into a finished MV (16:9 master, 9:16, share encodes). Built on vocaloid-style-mv-pipeline
-by NikusonP (MIT), with style packs adapted from other MIT / ISC projects; credits and licences in `NOTICE.md`.
+Turns a song + its lyrics into a finished MV (16:9 master, 9:16, share encodes). This skill is the workflow and the
+tools; the look is the film's. Credits and licences of the code it builds on: `NOTICE.md` (end of this file).
 
 **Every film is its own.** By default the film designs its own style from the song: its own palette, type, shapes,
 motion feel and pictures. A **preset** is used only when the user asks for it — by name ("vocaloid", "stage") or by
@@ -99,3 +99,6 @@ film reads as its style, and general craft (references/09 §8).
 Requirements: Node 20+, Python 3.10+ (numpy, librosa, scipy, soundfile, pillow, matplotlib), ffmpeg, Edge or Chrome;
 optional NVIDIA GPU (else `--codec x264`), an image generator, Blender 5.x. `check_env.py` says what is missing and
 what it costs ("no Blender → the 3D moments become 2.5D", "no generator → a code-drawn style or the user's art").
+
+Credits: the engine and tools build on vocaloid-style-mv-pipeline by NikusonP (MIT); the style packs adapt other MIT /
+ISC projects (`NOTICE.md`).

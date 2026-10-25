@@ -29,11 +29,11 @@ Pick by the song: a story or a ballad → tegaki; a frantic, high-BPM song → s
 
 This is the treatment vocaloid-style-mv-pipeline (NikusonP, MIT) was built for and documented in full; its references
 are the guide. Engine: `template/engine/scenes/*.js` (24 scenes), JIZURA lyric layer, Blender toon 3D. Starter: the demo
-timeline 「蛍火」 (`engine/timeline.js`; kept as `engine/starters/tegaki_demo.js` when another style is scaffolded).
+timeline 「蛍火」 (`engine/timeline.js`; kept as `engine/starters/tegaki_demo.js` in a `vocaloid:signal` project).
 Case study 「残光」: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/tree/main/examples/zanko (© NikusonP — learn
 from it, do not reuse its motifs, character or palettes).
 
-Read, in order: `references/02-creative-direction.md` (thesis, colour script, motifs, signature moments, variation
+Read, in order: `styles/vocaloid/DIRECTION.md` (thesis, colour script, motifs, signature moments, variation
 matrix, bright films §13) → `references/04-asset-generation.md` (start at §0, the generation table: masters, expression sheets for the living
 faces below, poses, plates; character bible §5; Codex §2–3,
 Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline, `illust` and the scene library, post, LUTs; additions §12) →
@@ -215,3 +215,55 @@ either drifts in style or does not change. Other poses are other pictures, cut t
 - Both: prompts name what each reference image is for ("the first image is style only; the others are this character's
   design"); missing pictures go to `docs/WANTED_ART.md`; per lyric line 2–5 motif variants (signal), a composed picture
   per line (tegaki).
+
+## Asset notes (moved from references/04: the 残光 film's own asset list and prompt blocks)
+
+For a vocaloid preset film. **Copy the structure, not the words.**
+
+### Style blocks of 残光
+
+These are the blocks 残光 actually used. **Copy the structure, not the words**: a new film needs its own medium, palette words and mood. Keep each block identical across all jobs of its kind.
+
+Character sentence (残光):
+```text
+The same original character as in the reference image (waist-length ink violet-black hair with sunset-orange inner
+colour and tips, blunt bangs, amber-gold eyes, white headphones with glowing orange ring lights, setting-sun hairpin on
+her right side, navy sailor blouse with vermilion tie, oversized cream knit cardigan, navy pleated skirt, black tights,
+brown loafers, long vermilion ribbon tied on her LEFT wrist).
+```
+Character style block (appended to every character, close-up and prop prompt):
+```text
+Japanese Vocaloid music-video tegaki (hand-drawn) illustration: confident hand-inked line art with visible brush-pen
+pressure (thick outer contour, thin inner lines), flat cel colours with ONE hard shadow tone, no airbrushed gradients on
+skin or clothes, restrained dusk palette (ink violet-black, dusk magenta, vermilion, sunset orange, amber, cream), crisp
+readable silhouette, looks like a key frame from an indie Vocaloid MV. No text, no watermark, no signature.
+```
+Background style block:
+```text
+Style: Japanese Vocaloid MV tegaki background art, hand-inked outlines on buildings and objects (coloured line art, not
+pure black), flat cel colour areas with hard-edged shadow shapes, sky painted as a few posterised colour bands instead
+of a smooth gradient, subtle paper grain, restrained palette of ink violet-black, dusk magenta, vermilion, sunset orange,
+amber and cream. Wide 16:9 landscape composition. No people, no characters, no text, no readable signs, no watermark.
+```
+Daylight example (summer / sea film), palette words only (the 残光 blocks above name a dusk palette, and those words alone pull every image toward sunset):
+```text
+…high-key summer daylight, saturated sky cyan and sea teal, white cumulus, coral and sunflower accents, crisp cast
+shadows, bright paper white, no dusk or night tones…
+```
+
+
+
+### The 残光 asset list (for ~70 shots)
+
+| need | 残光 example | typical shots |
+|---|---|---|
+| reference / masters | `REF_master` (+ `master_a`, `master_c`) full body front | title lockup, afterimage, recaps |
+| singing (2–3) | `bust_sing` (hand on headphone), `profile_sing` (side profile), `sing_power` (low angle, full voice) | chorus slams, panels, bursts |
+| quiet / emotional (3–4) | `bust_calm` (eyes closed), `face_tear`, `lookup_tear`, `smile_dawn` | verses, breathing shots, ending |
+| back view | `back_sunset` (hair and ribbon blowing) | establishing shots, small figure in a big world |
+| full-body action (3–4) | `run` (to the left), `turn_smile`, `jump`, `fall` (seen from above), `reach_viewer` (foreshortened hand) | climaxes, bursts, the road |
+| body language (2–3) | `hug_self`, `sit_knees`, `kneel_pick` | verses, despair, gathering |
+| hands / close-ups | `hand_reach` (arm + ribbon only), `flame_hands`, `hands_shards`, `eyes_ecu` (**opaque 16:9** eye close-up) | lyric images (指先, 小さな火, 拾い上げて) |
+| locations (8–14) | `bg_crossing`, `_night`, `_dawn`, `bg_platform`, `bg_embankment`, `bg_train`, `_night`, `bg_rooftop`, `bg_sky` (sky only), `bg_fireflies`, `bg_classroom`, `bg_vending`, `bg_door`, `bg_wetstreet` | every `illust` shot |
+| props | `prop_heart` (cracked glass heart, RGBA) | the song's central metaphor |
+

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Palette system (shipped with the 残光 / Zankō dusk palettes P1-P5 as a starting point) — writes machine-readable
+"""Palette system — writes machine-readable
 palettes, 256x1 gradient-map LUT PNGs and a visual contact sheet that applies every palette to a procedural dusk scene
 (or, with --plate, to one of your own backgrounds: judge daylight palettes on a daylight plate).
-Edit PALETTES below for a new song's colour script, then re-run.
+PALETTES below holds the vocaloid demo's colour script (an example of the data format, not a suggested look):
+replace it with the film's own colours from docs/CONCEPT.md, then re-run.
 
 Usage:
   python tools/style_palette_sheet.py [--sheet docs/style_palettes.png] [--plate assets/bg/<plate>.png]

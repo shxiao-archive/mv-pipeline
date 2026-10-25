@@ -62,7 +62,9 @@ STYLE = {
     "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
 }
 # the presets' signature scenes: an own-style film may borrow techniques, not a preset's look (SKILL.md)
-PRESET_SCENES = r"^(if|tr|pc|st|mz)[A-Z]|^sig(Shot|Term|Frag|Abs)$"
+# the vocaloid demo's set pieces count too (illust, solid, seq, ref and jz are plain building blocks)
+PRESET_SCENES = (r"^(if|tr|pc|st|mz)[A-Z]|^sig(Shot|Term|Frag|Abs)$|^(afterimage|burst|converge|ember|fall|flame|heart|ink|kanjiSlam"
+                 r"|memories|panels|road|skyShatter|thread|titleRiff|train|tunnel|typeCard|wetFloor)$")
 V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"kind\s*:\s*['\"]inks", "limp": r"kind\s*:\s*['\"]limp",
       "fps": r"\bfps\s*:\s*\d", "replay": r"replay(Map)?\(", "tear": r"Z\.tear\(", "rays": r"\brays\s*:"}
 
@@ -113,7 +115,7 @@ def style_checks(proj, add, style):
         head = "## The film's style"
         block = concept.split(head, 1)[1].split("\n## ", 1)[0] if head in concept else ""
         field = lambda k: ((re.search(r"\*\*" + k + r"\*\*[^:\n]*:(.*)", block) or [None, ""])[1] or "").strip()
-        tail = block.split("**Traits**", 1)[-1].split("**Palette", 1)[0].splitlines()[1:] if "**Traits**" in block else []
+        tail = block.split("**Traits**", 1)[-1].split("\n- **", 1)[0].splitlines()[1:] if "**Traits**" in block else []
         traits = [l for l in tail if re.match(r"\s*([-*]|\d+[.)])\s+\S", l)] or [t for t in re.split(r"[;,]", field("Traits")) if t.strip()]
         add("docs/CONCEPT.md defines the film's own style: a Reads-as line and >= 6 traits", bool(field("Reads as")) and len(traits) >= 6,
             f"reads as: {field('Reads as')[:60]!r}; {len(traits)} traits" if block else "no 'The film's style' block")

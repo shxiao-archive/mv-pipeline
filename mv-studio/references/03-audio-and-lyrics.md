@@ -105,7 +105,7 @@ const B  = n => { const b = audio.bars.find(x => x.index === n); return b ? b.st
 const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);              // nearest beat
 const stopsIn = (a, b) => audio.stops.filter(s => s.kind === 'stop' && s.end > a && s.start < b);  // e.g. freeze windows
 ```
-Patterns that worked: cut on `nb(lyricOnset)` inside a section and on `B(n)` at section changes; big hits (flash, slam, palette change) on chorus downbeats and `drop` impacts; freezes on `stops`; per-beat motion from `pulse`, per-bar loops from `barPhase`; a global camera shake driven by `env.low(t)^3` during choruses only (残光 `Z.globalFX`). Several library scenes read `Z.audio.stops` and `onsets_strong` directly (`fall`, `ember`, `road`).
+Patterns earlier films used (choices, not rules): cut on `nb(lyricOnset)` inside a section and on `B(n)` at section changes; big hits (flash, slam, palette change) on chorus downbeats and `drop` impacts; freezes on `stops`; per-beat motion from `pulse`, per-bar loops from `barPhase`; a global camera shake driven by `env.low(t)^3` during choruses only (残光 `Z.globalFX`). Several library scenes read `Z.audio.stops` and `onsets_strong` directly (`fall`, `ember`, `road`).
 
 Blender shot scripts read the same file (`blender/shots/_shared.py`: `beats_in(t0, t1, 'downbeats')`, `frame_of(t, t0)`) — see 07.
 
@@ -227,7 +227,7 @@ Rules: **VAD off** (Silero misreads sung vowels), separated stem beats every DSP
 
 **Hallucinations to delete on sight** (they appear on silence, vocal chops and vocalise): 「ご視聴ありがとうございました」, 「チャンネル登録…」, 「作詞・作曲・編曲 初音ミク」, 「ラララ…」, repeated short tokens. Mark wordless regions (vocalise, chops) instead of inventing words.
 
-`lyrics.json` per line: `index, start, end, text, words[{w, reading, start, end}], chars[{c, start, end}]` (per display character — for tegaki reveals and karaoke fills), `section_hint, repeat_of, confidence, alternatives, reading, romaji, last_mora_start, start_16th, timing_source, note`.
+`lyrics.json` per line: `index, start, end, text, words[{w, reading, start, end}], chars[{c, start, end}]` (per display character — for reveals and karaoke fills), `section_hint, repeat_of, confidence, alternatives, reading, romaji, last_mora_start, start_16th, timing_source, note`.
 
 ## 10. Writing `analysis/lyrics_mv.lrc`
 
@@ -269,7 +269,7 @@ After editing the LRC, every JIZURA cut is re-planned: re-render stills (06-jizu
 - Section rows referring to bars that don't exist (bar 0 without a pickup, bars past the end) → the script stops with a clear error; `--sections curated` on a new song is always wrong (it is the 残光 table).
 - Treating `bpm` as a grid → drift (§5). Treating `beats_smooth` as hit times → hits up to ~20 ms off the transient; use `beats` for hits.
 - Hook vocals start before the downbeat (残光: ~0.3 s): start the lyric animation on the pickup, land the visual hit on the downbeat.
-- Chorus-ending "stop bars" (band drops out) are the near-a-cappella moments — the title line was sung inside them in 残光; they deserve the film's most important images, not a cut-away.
+- Chorus-ending "stop bars" (band drops out) are the near-a-cappella moments — the title line was sung inside them in 残光; worth deciding on purpose what the film does there.
 - Whisper on a full mix with VAD: one hour-long hallucination. Stems, VAD off, several passes, forced scoring.
 - MMS can attach a line's first mora to the previous phrase's tail after a pause; check onsets that land in silence on `vocal_activity.npz` and override (`START_OVERRIDE`).
 - A missing line in every ASR pass is invisible to diffing — compare against the official sheet line by line.

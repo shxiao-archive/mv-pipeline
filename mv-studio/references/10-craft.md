@@ -4,7 +4,8 @@ The style guides say what a style looks like. This file says how the films behin
 with which assets, which rules of motion and which review loop. It is distilled from the six study films (their
 process documents and code): *dalabengba-mv* (paper RPG), *PDoomVideo* (watercolour stage show), *pdoom-video*
 (treatise plates), *world-execute-me-lyric-mv* (chat interface), *netsu-ijou-pv* (signal), *vocaloid-style-mv-pipeline*
-(tegaki, 「残光」). Use the methods; never their characters, songs, copy or art.
+(tegaki, 「残光」). Use the methods; never their characters, songs, copy, art or look. The numbers below describe
+those films; the film's own CONCEPT style block decides its targets.
 
 ## 0. Why they look better than a first pass
 
@@ -40,11 +41,11 @@ brief  →  storyboard (with fixed set layouts)  →  asset specs  →  ASSET LI
 - Shots may not change shared assets. A missing pose is made from the nearest pose plus joint offsets (`jointsAdd`), or
   drawn locally, and written down as a request for the library.
 
-## 2. Characters drawn in code: rigs
+## 2. Characters drawn in code: rigs (if the film has a cast)
 
 ### 2.1 Design sheet (before code)
 
-- Proportions in heads (chibi 2.5–3, stylised 4–5, realistic 6–7) and a **scale table**: height in px at full shot
+- Proportions in heads (the film's choice) and a **scale table**: height in px at full shot
   (s = 1, e.g. 260), medium (~420), close-up (head ~360). Every character of the film on one scale (a lineup sheet).
 - One palette per part (skin, skin shade, hair, hair shade, outfit, outfit shade, accent); shades are mixes of the base
   with ink, never new hues.
@@ -77,7 +78,7 @@ brief  →  storyboard (with fixed set layouts)  →  asset specs  →  ASSET LI
   `face: ±1` mirroring with text never mirrored, light direction fixed on screen whatever the mirroring.
 - **Far side darker:** far arm and leg mixed 15–20 % with ink and drawn first.
 
-### 2.3 Vocabulary targets
+### 2.3 Vocabulary (what the paper-RPG and stage films built; size the film's own from its storyboard)
 
 | who | poses | expressions | states / props |
 |---|---|---|---|
@@ -95,7 +96,7 @@ walk and run at 8 phases, the close-up at the largest zoom the film uses, the `d
 at it; fix; render again; at least two full rounds. Then a **lineup**: every character at s = 1 on one ground line with
 the height line, and trial placements in two of the film's sets (this is where a scarf turns out to hang off a balcony).
 
-## 3. Characters and assets from an image generator
+## 3. Characters and assets from an image generator (if the film uses one)
 
 (Tools: `references/04`. Method from netsu-ijou-pv and 「残光」.)
 
@@ -104,7 +105,7 @@ the height line, and trial placements in two of the film's sets (this is where a
 2. **Character lock:** a front and a back reference (and a face close-up) approved by eye; a written sheet of every
    design element (hair side, accessories, colours with hex, proportions in heads). Later images always get the style
    reference + the design references + the approved look, and the prompt says which image is for what: "the FIRST
-   image is a drawing-style reference ONLY; the other images show this exact character; copy her design and face, not
+   image is a drawing-style reference ONLY; the other images show this exact character; copy its design and face, not
    their rendering or pose".
 3. **One generation table** for the whole film (`assets/gen/table.json` or the generator script): id, kind (char /
    world), size, transparent or not, extra references, post-processing (full / crop / none), subject sentence. Prefixes
@@ -128,14 +129,14 @@ the height line, and trial placements in two of the film's sets (this is where a
   (960, 430) r 70, the throne at x = 1580, 13 towers at x = 300 + 110·i). Every shot in that place uses them, so cuts
   between shots of one place match.
 - **Layers with depth factors:** sky (0), far (0.2–0.6), mid, main (1), near (1.2), foreground (1.4–1.6, blur 3–5 px),
-  each drawn through the multiplane camera (`PC.applyCam(g, cam, depth)` or `Z.cam*`). At least three depths in every
-  frame, something pressing on each edge, no empty corner.
+  each drawn through the multiplane camera (`PC.applyCam(g, cam, depth)` or `Z.cam*`). How many depths a frame has, and how
+  full it is, is the film's.
 - **Named preset cameras per set** (`CAMS.TR_2S`, `CAMS.CU_K`): wide, two-shot, each character's reaction framing
   (mirrored for answer shots), the close-up. Shots pick a preset and add drift and pushes.
 - **Lighting states per set as parameters** (day, dusk, night, fire, alarm): one function, many moods; tint layers plus
   point glows for night and caves.
 - **Set dressing density:** ground clutter with ink edges, props that react (a lantern sways when someone runs past),
-  the running gag's prop on set. A set looks built when it has 20–40 distinct drawn things, not 5.
+  recurring props on set. The reference films' sets had 20–40 distinct drawn things.
 - **Long takes through one world:** a continuous scrolling world, a camera on a spline (`journeyCam`), the character's
   state from one function of time shared by every shot that sees it (`heroState(T)`); zone changes (meadow → village)
   are hidden behind a foreground occluder sweeping past (a tree, an arch) — the seam sits behind it.
@@ -178,30 +179,30 @@ Write every shot as a row before coding it:
 Rule for every shot: **something happens** — a character does something, something breaks, transforms, chases or
 falls. The picture tells the joke; text in the frame only when the joke needs a word.
 
-### 6.2 Timing rules (all reference films agree)
+### 6.2 Timing patterns the reference films share (the editing-rhythm slot decides)
 
 - **One accent per cue**, landing at cue + 0.00…0.15 s; **anticipation** before it (0.1–0.4 s: a wind-up, a bulge, a
   squash); **follow-through** after it (overshoot `outBack`, settle `elastic`, secondary motion catching up).
 - Groups **stagger 30–80 ms**; after an action, **hold ≥ 0.2 s** before the next one; uniform speed only for travel.
 - Big changes land on beats; inside a phrase, reframe on half bars; a cut lands on a downbeat or on the cue.
-- Shots of 1.4–4 s for comedy and verses; long takes only with continuous action inside.
 - Name the phases inside a shot (hop → slide → teeter → fall → land) and give each its time from the cue sheet; a shot
   is a little sequence, not a pose that drifts.
 
 ### 6.3 Camera
 
-- **Always alive:** drift 4–6 px at ~0.35 Hz under everything, except a deliberately locked shot.
+- Drift, tracking, pushes and shake are the motion-feel slot's choice (a locked camera is a choice too). The
+  reference films drifted 4–6 px at ~0.35 Hz.
 - **Tracks the action with lag:** aim at the subject's position 0.1–0.15 s ago (`sledAt(t − 0.14)`), lead in the
   direction of travel; push in on emotion; shake on hits (§5); whip with speed lines between places.
 - Framing follows the scale table: full / medium / close-up are fixed zooms, so the cast keeps its size across cuts.
 
 ### 6.4 Performance
 
-- Everyone on screen reacts on every cue: the listener blinks, turns, flinches; nobody is a statue.
-- Every 0.5 s window has motion (secondary motion + drift + particles at least) — `motion_check.py` measures it.
+- In the reference films everyone on screen reacts on cues (blink, turn, flinch).
+- `motion_check.py` reports still 0.5 s windows; whether stillness is wanted is the film's.
 - Keep faces and key action out of the lyric band (karaoke / subtitle zone) whenever a line is sung.
 
-## 7. Density targets (what "the same level" means in numbers)
+## 7. Density of the reference films (a measure, not a target)
 
 | unit | reference films | a solo first pass usually has |
 |---|---|---|

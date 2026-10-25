@@ -1,4 +1,4 @@
-/* vertical 9:16 layout (1080x1920) -- written for 残光, configurable from the timeline via Z.VERTICAL_CFG.
+/* vertical 9:16 layout (1080x1920), configured from the timeline via Z.VERTICAL_CFG.
  * The 16:9 engine renders each frame (lyrics off) into #out; this compositor lays it out vertically:
  *   blurred full-bleed ambience  →  picture band (6:5 centre crop)  →  JIZURA lyrics re-planned natively at 9:16
  *   (中央を空ける: top / bottom bands around the picture)  →  header / footer / credit.
@@ -15,7 +15,7 @@
   const CROP_STD = { sx: 312, sy: 0, sw: 1296, sh: 1080 }, PIC_STD = { x: 0, y: 510, w: VW, h: 900 };
   // purely graphic shots (ember intro, title, outro lockup, end card) keep the whole 16:9 composition
   const CROP_FULL = { sx: 0, sy: 0, sw: 1920, sh: 1080 }, PIC_FULL = { x: 0, y: 656, w: VW, h: 608 };
-  // Per-film settings: set Z.VERTICAL_CFG in engine/timeline.js (inside Z.setup). The defaults are the 残光 values.
+  // Per-film settings: set Z.VERTICAL_CFG in engine/timeline.js (inside Z.setup). The defaults are neutral.
   //   full     shot ids that keep the whole 16:9 composition (title, type cards, end card ...)
   //   planMap  16:9 JIZURA plan -> vertical plan name; each vertical plan is re-planned from its source plan at 9:16
   //   title / sub / artist   header text;  credits: [t0, t1] when the header + credit footer are shown
@@ -25,20 +25,17 @@
   //   quiet    shot ids whose typography lives in the picture (title, hook slams, end card): the blurred surround gets
   //            a deeper tint so the big letters do not echo as a ghost in the bands (mv-studio)
   //   schemesOf { v_plan: schemes } per vertical plan override of `schemes` (mv-studio)
-  //   ambience [r, g, b] tint laid over the blurred 9:16 surround (a near-black violet by default; a daylight film
-  //            wants a light tint, e.g. [236, 244, 250]; a light tint also turns the header / footer / rules dark ink)
-  const CFG_DEFAULT = {
-    full: ['s01', 's02', 's03', 's64', 's65', 's66'],
-    planMap: { main: 'v_main', cf: 'v_main', noir: 'v_noir', mono: 'v_mono' },
-    title: '残光', sub: 'ZANKŌ — afterglow', artist: 'NikusonP', credits: [17.6, 223.54],
-    schemes: 'dark', ambience: [10, 6, 18],
-  };
+  //   ambience [r, g, b] tint laid over the blurred 9:16 surround (black by default; a light tint also turns the
+  //            built-in header / footer / rules dark ink)
+  //   chrome   (vx, t, { PIC, VW, VH, credits }) draws the film's own header / footer / rules instead of the built-in
+  //            ones; false draws none
+  const CFG_DEFAULT = { full: [], planMap: {}, title: '', sub: '', artist: '', credits: [0, 0], schemes: 'dark', ambience: [0, 0, 0] };
   let CFG = CFG_DEFAULT, FULL = new Set(CFG.full);
 
   const baseReady = window.ready;
   window.ready = (async () => {
     const meta = await baseReady;
-    CFG = Object.assign({}, CFG_DEFAULT, Z.VERTICAL_CFG || {});
+    CFG = Object.assign({}, CFG_DEFAULT, { title: Z.TITLE || '', sub: Z.TITLE_SUB || '', artist: Z.ARTIST || '', credits: [0, meta.duration] }, Z.VERTICAL_CFG || {});
     FULL = new Set(CFG.full);
     // header / footer faces must be loaded before frame 0 (a face first requested mid-render makes workers differ)
     const txt = CFG.title + CFG.sub + CFG.artist + (Z.CREDIT || '') + '0123456789:';
@@ -75,7 +72,7 @@
     ax.drawImage(out, (1920 - 607.5) / 2, 0, 607.5, 1080, 0, 0, amb.width, amb.height);
     vx.imageSmoothingQuality = 'high';
     vx.filter = 'blur(10px) saturate(1.25)'; vx.drawImage(amb, -60, -60, VW + 120, VH + 120); vx.filter = 'none';
-    const [ar, ag, ab] = CFG.ambience || [10, 6, 18], tint = a => `rgba(${ar},${ag},${ab},${a})`;
+    const [ar, ag, ab] = CFG.ambience || [0, 0, 0], tint = a => `rgba(${ar},${ag},${ab},${a})`;
     const lightAmb = 0.2126 * ar + 0.7152 * ag + 0.0722 * ab > 140;   // a light surround: header / footer / rules in dark ink
     const INK = lightAmb ? '#0B1524' : '#F4EFE6', RULE = lightAmb ? 'rgba(11,21,36,0.32)' : 'rgba(244,239,230,0.32)';
     const g = vx.createLinearGradient(0, 0, 0, VH);
@@ -90,12 +87,15 @@
     // ---- picture band + soft shadow
     vx.save(); vx.shadowColor = 'rgba(0,0,0,0.6)'; vx.shadowBlur = 40; vx.fillStyle = '#000'; vx.fillRect(PIC.x, PIC.y, PIC.w, PIC.h); vx.restore();
     vx.drawImage(out, CROP.sx, CROP.sy, CROP.sw, CROP.sh, PIC.x, PIC.y, PIC.w, PIC.h);
-    // frame rules + ticks
     const [c0, c1] = CFG.credits, credits = t > c0 && t < c1;
-    vx.save(); vx.strokeStyle = RULE; vx.lineWidth = 1.5;
-    vx.beginPath(); vx.moveTo(0, PIC.y - 0.5); vx.lineTo(VW, PIC.y - 0.5); vx.moveTo(0, PIC.y + PIC.h + 0.5); vx.lineTo(VW, PIC.y + PIC.h + 0.5); vx.stroke();
-    for (const x of [48, VW - 48]) { vx.beginPath(); vx.moveTo(x, PIC.y - 14); vx.lineTo(x, PIC.y - 2); vx.moveTo(x, PIC.y + PIC.h + 2); vx.lineTo(x, PIC.y + PIC.h + 14); vx.stroke(); }
+    const own = CFG.chrome !== undefined;
+    // frame rules + ticks
+    if (!own) {
+      vx.save(); vx.strokeStyle = RULE; vx.lineWidth = 1.5;
+      vx.beginPath(); vx.moveTo(0, PIC.y - 0.5); vx.lineTo(VW, PIC.y - 0.5); vx.moveTo(0, PIC.y + PIC.h + 0.5); vx.lineTo(VW, PIC.y + PIC.h + 0.5); vx.stroke();
+      for (const x of [48, VW - 48]) { vx.beginPath(); vx.moveTo(x, PIC.y - 14); vx.lineTo(x, PIC.y - 2); vx.moveTo(x, PIC.y + PIC.h + 2); vx.lineTo(x, PIC.y + PIC.h + 14); vx.stroke(); }
     vx.restore();
+    }
     // ---- lyrics, typeset by JIZURA at 9:16 in the bands around the picture
     const plan = shot ? lyricPlan(shot, t) : null;
     if (plan) {
@@ -104,7 +104,8 @@
       vx.drawImage(lyr, 0, 0);
     }
     // ---- header / footer (quiet, out of the way of the title card and the end card)
-    if (credits) {
+    if (own) { if (CFG.chrome) { vx.save(); CFG.chrome(vx, t, { PIC, VW, VH, credits }); vx.restore(); } }
+    else if (credits) {
       const fade = Z.clamp((t - c0) / 0.8) * Z.clamp((c1 - t) / 0.3);
       vx.save(); vx.globalAlpha = 0.72 * fade; vx.fillStyle = INK; vx.textBaseline = 'alphabetic';
       D.font(vx, 40, 'minchoHeavy', 900); vx.textAlign = 'left'; vx.fillText(CFG.title, 56, 96);

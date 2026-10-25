@@ -43,14 +43,12 @@ JIZURA plan (shot.lyric) ─► TEXT layer (transparent) ◄─ shot.text(ctx,S)
     const lastBar = audio.bars.length ? audio.bars[audio.bars.length - 1].index : 0;
     const B = n => { const b = audio.bars.find(x => x.index === n); return b ? b.start : n > lastBar ? audio.music_cut : 0; };   // by bars[].index, never array position
     const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);
-    Z.LOOK_DEFAULT = { boil: 1.1, bloom: 0.3, bloomThreshold: 0.72, grain: 0.06, vignette: 0.35, lutMix: 0 };   // night / dusk; daylight values: §7
+    Z.LOOK_DEFAULT = { boil: 0, bloom: 0, grain: 0, vignette: 0, lutMix: 0 };   // the film's own values (every param: §7)
     // JIZURA: JZ.setAudio(...); await JZ.addPlan('main', {...}); ...           (06-jizura.md)
     const S = []; const shot = (id, t0, t1, scene, args, extra = {}) => S.push(Object.assign({ id, t0, t1, scene, args }, extra));
-    shot('s04', B(10), nb(20.76), 'illust', { bg: BG + 'bg_sky.png', bgFrom: { zoom: 1.28, y: -0.7 }, bgTo: { zoom: 1.12, y: 0.55 },
-      chars: [{ img: A + 'back_sunset.png', front: true, x: 880, y: 1330, h: 1180, rim: { color: '#FFA552' }, in: { dur: 1.4, dy: 160 } }] },
-      { trans: { type: 'iris', dur: 0.55, cx: 960, cy: 540 }, post: { lutA: 'P1', lutMix: 0.18 } });
+    shot('s04', B(10), nb(20.76), 'myScene', { /* the scene's own args */ }, { lyric: 'none', trans: { type: 'iris', dur: 0.55, cx: 960, cy: 540 } });
     Z.SHOTS = S;
-    window.__zankoMeta.duration = audio.music_cut + 3;   // song + afterimage tail (mux pads the audio)
+    window.__zankoMeta.duration = audio.music_cut + 3;   // song + end-card tail (mux pads the audio)
   };
 })();
 ```
@@ -134,13 +132,17 @@ LUT names: every palette in `assets/style/palettes.json` gets two rows — `P1`,
 
 ## 8. Scene library catalogue (`engine/scenes/*.js`, 24 scenes)
 
+These are the vocaloid preset's scenes, written for its demo film 残光: their look (dusk colours, a singer, kanji,
+HUD) belongs to that preset. An own-style film reads them as API examples and borrows techniques, not scenes
+(`design-a-style.md` §5).
+
 Shot ids refer to 残光's `examples/zanko/timeline.js`. The case study is in the kit repo only, not in the installed skill folder — online: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/tree/main/examples/zanko (raw file: https://raw.githubusercontent.com/EGSECDA/vocaloid-style-mv-pipeline/main/examples/zanko/timeline.js). Reuse classes:
 - **generic (args only)**: `illust`, `solid`, `jz`, `panels` (`gutterColor`, `keyline`), `burst` (`grade` knows only `'night2dawn'`), `ref`, `seq`, `converge`, `afterimage` (pass `text`/`sub`/`credit`/`color`/`char`), `memories`;
 - **generic once the daylight args are set (bright films)**: `kanjiSlam` (`sky: 'day'` or a real `bg`; otherwise it paints a dusk or night sky), `typeCard` (`paper`, `quiet` mode);
 - **reusable once you pass your strings**: `titleRiff` (`glyphs`, `ruby`, `sub`, `hud` — otherwise it slams 残 / 光 and prints 残光's HUD; its sun disc and dusk palette stay);
 - **残光 set pieces** with hard-coded strings, glyphs or image landmarks (§10) — rewrite them for your film rather than re-skinning: `ember`, `tunnel`, `wetFloor`, `train`, `heart`, `skyShatter`, `thread`, `fall`, `flame`, `ink`, `road`.
 
-Scene defaults are 残光 dusk colours (ink `#140B1E`, amber rims and glows `#FFA552`): pass your palette's colours.
+Scene defaults are 残光 dusk colours (ink `#140B1E`, amber rims and glows `#FFA552`).
 
 **`scenes.js` — base**
 | scene | what | args (defaults) | 残光 |
@@ -237,8 +239,8 @@ Then: add `<script src="scenes/rain_glass.js"></script>` to `index.html` **and**
 ```js
 // engine/tests/rain.js
 (() => { const Z = window.Z; Z.setup = async () => {
-  Z.LOOK_DEFAULT = { boil: 1.1, bloom: 0.3, grain: 0.05, vignette: 0.3 };
-  Z.SHOTS = [{ id: 'x', t0: 62.53, t1: 66.26, scene: 'rainGlass', lyric: 'none', args: { bg: 'assets/bg/bg_wetstreet.png', char: 'assets/char/back_sunset.png' } }];
+  Z.LOOK_DEFAULT = { boil: 0, bloom: 0, grain: 0, vignette: 0 };
+  Z.SHOTS = [{ id: 'x', t0: 62.53, t1: 66.26, scene: 'rainGlass', lyric: 'none', args: { bg: 'assets/bg/<plate>.png' } }];
   window.__zankoMeta.duration = 66.26; }; })();
 ```
 ```bash
@@ -247,9 +249,9 @@ node tools/render_frames.mjs --url "engine/index.html?tl=tests/rain.js" --start 
 ```
 Use the real song times the scene is meant for (beats, stops and lyric onsets then line up). `stills.mjs` prints ms per frame and any page errors. Checklist for a new scene: renders identically when entered mid-shot (render one still at `t0+2` in a fresh page and compare with the clip), < 40 ms per frame, drawn motion on 12 fps, beat-locked accents on real beats, fonts loaded in `init`, no text over the face (or use `S.fg` + a centre-free lyric plan), header comment documenting args.
 
-## 10. Porting checklist (song-specific constants)
+## 10. Porting checklist (song-specific constants of the vocaloid scene library)
 
-The library was written for 残光; before reusing a scene with new assets, check:
+The stock scenes were written for 残光; before reusing one (in a vocaloid film, or as a technique source), check:
 - `core/main.js`: default `__zankoMeta.duration` (224.32) — set it in your timeline.
 - **Image-pixel landmarks** tied to specific PNGs: `dark.js` `HR` (hand_reach pivot/ribbon tail), `FALL` (fall pivot/ribbon), `FLAME_AT` (flame core per image — or pass `flameAt`); `glass.js` kneeling-pose anchor points (chest shard, picking hand); `night.js` `WET` (horizon/vanishing point of bg_wetstreet), `FALL_HERO`, `LAMPS`/`ARM_LAMPS` (lamp lenses on bg_crossing_night); `meta.js` crossing-lamp positions; `memory.js` face position in turn_smile; `typo.js` `SLAM` presets (`face`, `charX/Y/H`). Measure the new image's pixels and override.
 - **Hard-coded 残光 literals (not args — edit the file or write your own scene)**: `ember`'s typed '残光 / ZANKŌ' (`intro.js`); `tunnel`'s `LATIN` rings and railway crossbucks (`typo.js`); `wetFloor count`'s 23:41 timecode and 'RAIN 7.5mm/h 水面観測' (`night.js`).
@@ -259,7 +261,7 @@ The library was written for 残光; before reusing a scene with new assets, chec
 
 ## 11. Pitfalls
 
-- A character with `front: true` is drawn into the scene layer during transitions (no fg canvas then), so the lyric briefly passes in front of her — keep transitions into text-behind shots short.
+- A character with `front: true` is drawn into the scene layer during transitions (no fg canvas then), so the lyric briefly passes in front of the character — keep transitions into text-behind shots short.
 - `lyric: 'full'` covers the scene with JIZURA's backgrounds; during gaps without a lyric it can show an empty frame — use an illustrated shot there.
 - Typographic scenes (slams, cards, tunnel, title, end card) need `lyric: 'none'` or the JIZURA layer doubles the text.
 - `ctx.filter` blur on full-frame canvases, per-frame `getImageData`, or rebuilding art every frame → 100+ ms frames. Cache.

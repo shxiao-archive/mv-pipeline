@@ -6,6 +6,10 @@ Contents: 1 What it is · 2 How it's wired in · 3 Plans · 4 Styles · 5 Curati
 
 [JIZURA 字面](https://github.com/852wa/JIZURA) (MIT, Copyright (c) 2026 hakoniwa) is a browser app that auto-builds 文字PV lyric-motion videos: give it lyrics (+ LRC times) and a song, and it plans cuts from ~860 parts in 10 groups (layout, enter, hold, exit, decor, treat, bg, cam, fx, trans) and 27 styles, with beat-snapping, 2コマ打ち, chromatic ghosts and transparent front/back export. We use its **engine** (not its UI) as a deterministic lyric layer inside our renderer.
 
+It is one optional lyric layer. A film may set its words with its own type in its scenes, mix the two by section, or
+show no lyrics; the concept's lyric-system slot decides. The plan values, styles and deny-lists quoted below are the
+vocaloid demo timeline's (`--style vocaloid`), shown as API examples, not as defaults for a film.
+
 ## 2. How it's wired in
 
 - `setup` clones the repo to `vendor/JIZURA`; `node tools/build_jizura_bundle.mjs` concatenates `src/*.js` (minus the UI) into `jizura/app/jizura_engine.js` — byte-for-byte the upstream engine, no patches.
@@ -22,7 +26,7 @@ Contents: 1 What it is · 2 How it's wired in · 3 Plans · 4 Styles · 5 Curati
 
 ## 3. Plans
 
-A plan = one JIZURA project. Make several and pick per shot (`shot.plan`):
+A plan = one JIZURA project. Make several and pick per shot (`shot.plan`). The demo timeline's plans:
 
 ```js
 const common = { lyrics: lrc, fps: 30, res: 1080, aspect: '16:9', seed: 2609,
@@ -62,29 +66,30 @@ node tools/stills.mjs --url "engine/index.html?tl=tests/jz_styles.js" --times <l
 `node tools/jizura_probe.mjs --style gold --lrc analysis/lyrics_mv.lrc --times 18.5,25.2 --modes front` only checks raw JIZURA (transparent PNGs; no curation, `schemes` or `colors`): fine for timings and cut lists, not for judging readability.
 
 **Schemes.** Each style has 2–4 colour schemes and the cuts rotate through them; many styles include a light-background "swap" scheme whose text is dark. The adapter option `schemes` remaps every cut of the plan into a subset:
-- `'dark'` — schemes with background luminance < 0.25: light text, for night and dusk films (the template default);
-- `'light'` — schemes with background luminance > 0.6: dark text, for daylight / bright films;
+- `'dark'` — schemes with background luminance < 0.25: light text (for text over dark pictures);
+- `'light'` — schemes with background luminance > 0.6: dark text (for text over bright pictures);
 - `[i, …]` — explicit scheme indices of the style.
 
 A style with no matching scheme keeps JIZURA's own choice.
 
-Findings from 残光 (night-heavy film): **gold** (金夜: ivory/gold mincho) = elegant default; **noir** (white + cyan/amber ghosts, glitch layouts) = tension; **mono** (white mincho, strong RGB split) = climax; **ocean** works for blue scenes. **sumi** (and the light schemes of most styles) draw dark ink text → invisible on night scenes, hence `schemes: 'dark'`. **crimson** has no light scheme: its text is white or pink, and its near-black is only the accent / ink colour (`#140509`).
+What some styles draw: **gold** (金夜: ivory/gold mincho); **noir** (white + cyan/amber ghosts, glitch layouts); **mono** (white mincho, strong RGB split); **ocean** (blues). **sumi** (and the light schemes of most styles) draw dark ink text → invisible on night scenes, hence `schemes: 'dark'`. **crimson** has no light scheme: its text is white or pink, and its near-black is only the accent / ink colour (`#140509`).
 
-**Bright / daylight films need the opposite** — ivory text disappears on a sunny sky:
+**Text over bright pictures needs the opposite** — ivory text disappears on a sunny sky:
 - `schemes: 'light'` (dark text), or pin one scheme, e.g. `style: 'ocean', schemes: [2]` (navy on pale blue);
 - or bring your own colours: `colors: { enabled: true, bg: '<colour the text sits on>', fg: '#0B2A4A', sub: '#2F5E86', accentOn: true, accent: '#FF5A3C' }, schemes: [0]` — `enabled` replaces scheme 0's `bg` / `fg` / `sub`; with `accentOn` the accent and ghost colours apply to every scheme, contrast-fitted against its `bg`.
 
 Light-background schemes at the pinned JIZURA (fc16bfe; style, scheme indices, text colour): ocean 2 navy · sakura 0, 3 plum · sunset 1, 3 violet · forest 1, 3 dark green · vapor 1, 2 indigo · candy 0–2 violet / plum · kraft 0, 1 · sumi 0, 3 ink · gold 1 (black on gold) · specimen 1 · noir 1 · newsprint 0 · paper 0 navy · rouge 0 · caution 0 (black on yellow) · mint 2 · acid 1 · blueprint 2 (blue) · magenta 1 (magenta). No light scheme: crimson, hud, mono, synth80. Avoid transit with `'light'`: its scheme 2 (grey `#9C9A94`, luminance 0.60) passes the test but keeps white text.
 
-Keep one dark plan for night or shadowed shots and choose the plan per shot from the luminance behind the text; `check_shots.mjs` reports LYRICS LOW CONTRAST (under 3:1 against the picture around the words). Where white cloud meets deep sea, use the centre-free plan or a 20–35 % `grad` fx that darkens or lightens the band the text sits in.
+Keep one dark plan for night or shadowed shots and choose the plan per shot from the luminance behind the text; `check_shots.mjs` reports LYRICS LOW CONTRAST (under 3:1 against the picture around the words). Where the luminance behind one line changes a lot, a plan per region or a change in the picture is the film's choice; the check reports where.
 
 ## 5. Curation (deny-lists)
 
-Random parts must be curated for the film's tone. The template timeline builds `enabled` from JIZURA's registries (`J.GROUP_KEYS`; `J.registry(group)` = `J.LAYOUTS`, `J.ENTER`, `J.HOLD`, `J.EXIT`, `J.DECOR`, `J.TREAT`, `J.BG`, `J.CAMERA`, `J.FXE`, `J.TRANS`; keys in `J.order(group)`): a part is off if it is on a deny-list or belongs to the horror set (`hr*` keys, `set: 'horror'`).
+Random parts are curated for the film's own tone. The template timeline builds `enabled` from JIZURA's registries (`J.GROUP_KEYS`; `J.registry(group)` = `J.LAYOUTS`, `J.ENTER`, `J.HOLD`, `J.EXIT`, `J.DECOR`, `J.TREAT`, `J.BG`, `J.CAMERA`, `J.FXE`, `J.TRANS`; keys in `J.order(group)`): a part is off if it is on a deny-list or belongs to the horror set (`hr*` keys, `set: 'horror'`).
 
-Optional mood filter, `MOODS` in `timeline.js`: `null` (default) = no filter — the demo and 残光 are curated by the deny-lists alone. An array of JIZURA tags (`glitch calm pop graphic editorial emotional`) keeps only the parts whose registry entry's `tags` include one of them; untagged parts (the plain `cut` / `none` entries) stay on. Night / ballad film: `['emotional', 'calm', 'editorial', 'glitch']`; upbeat or bright film: `['pop', 'emotional', 'graphic', 'calm']`. Setting it re-rolls every cut. The plan's `mood` field is not a filter (§3).
+Optional mood filter, `MOODS` in `timeline.js`: `null` (default) = no filter — the demo is curated by the deny-lists alone. An array of JIZURA tags (`glitch calm pop graphic editorial emotional`) keeps only the parts whose registry entry's `tags` include one of them; untagged parts (the plain `cut` / `none` entries) stay on. Setting it re-rolls every cut. The plan's `mood` field is not a filter (§3).
 
-The 残光 deny-lists (adapt per film):
+The demo's deny-lists. The rows about opaque cards, full-frame effects and plates that cover the picture are defects
+(measure them with `jizura_cover.mjs` below); the rest are the demo's tone, and a film's own lists follow its concept:
 
 | group | denied | why |
 |---|---|---|
@@ -122,7 +127,7 @@ measures that box while a cut's words hold. Two ways out:
 - `lyric: { mode: 'front', plan, safe: 0.9 }` scales that shot's lyric layer into the box;
 - `crop: true` on a shot that crops on purpose (a monument kanji, 見切れ).
 
-Never shrink every shot's lyrics to pass: the big cropped type is the style. The check also records which lyrics
+Shrinking every shot's lyrics is not the only way to pass: big cropped type, where the film wants it, is marked `crop`. The check also records which lyrics
 every frame around each cut draws (LYRIC OVERLAP): the JIZURA cuts and the lines the film's own type reads with
 `Z.line(i).text`. The deny lists were found on the demo's Japanese lines; an
 English film may meet more parts that split or repeat words: look at the cut strips.
@@ -136,16 +141,16 @@ prints; big-type layouts it lists are a choice (they cover with letters, not pla
 
 Dump the registry with `node tools/jizura_parts.mjs` → `jizura/parts.json` (per part: name, tags in the `moods` field, set) when building a new deny-list.
 
-## 6. Character shots & text-behind
+## 6. Shots with a subject & text-behind
 
-- **Centre-free plan** (`centerFree: true`, JIZURA 中央を空ける): lyrics split into left/right bands (or top/bottom on tall frames) — use for any shot where the character's face/action is the point (kneeling and gathering, bust shots, singing).
-- **The character in front of the type** (`illust` char `front: true`; custom scenes draw into `S.fg` with the same transform): only where the words stay whole. A giant line she stands beside, or a monument glyph that isn't the sung word. `check_shots.mjs` flags a lyric more than 5 % under the foreground (LYRICS HIDDEN, an ERROR with `--strict`). Users read covered lyrics as a mistake, not depth.
-- Shots whose scene *is* the typography (kanji slams, type cards, tunnels, title/end cards) use `lyric: 'none'`.
+- **Centre-free plan** (`centerFree: true`, JIZURA 中央を空ける): lyrics split into left/right bands (or top/bottom on tall frames) — an option where the text must not cross the middle of the picture.
+- **The character in front of the type** (`illust` char `front: true`; custom scenes draw into `S.fg` with the same transform): only where the words stay whole. `check_shots.mjs` flags a lyric more than 5 % under the foreground (LYRICS HIDDEN, an ERROR with `--strict`). Users read covered lyrics as a mistake, not depth.
+- Shots whose scene *is* the typography use `lyric: 'none'`.
 
 ## 7. Debugging
 
 - A lyric frame looks wrong → find the cut: `node tools/jz_cuts_at.mjs 25.5,37.5,45.0 main` prints layout / enter / hold / exit / decor / treat / bg / cam / fx per plan at those times. Deny the culprit part, re-render the stills.
-- Typical culprits we hit: full yellow frame (knTiltKick card), "SCENE 48 / CUT 121" slate (tyColophon), white extruded box (wall), empty grey frame (mono plan in `full` mode during a gap with no lyric — replace with an illustrated shot), lyric over a face (switch the shot to `cf` or put the character in front).
+- Typical culprits we hit: full yellow frame (knTiltKick card), "SCENE 48 / CUT 121" slate (tyColophon), white extruded box (wall), empty grey frame (mono plan in `full` mode during a gap with no lyric — replace with an illustrated shot), lyric over a face (another plan, or the subject in front).
 
 ## 8. Vertical 9:16
 

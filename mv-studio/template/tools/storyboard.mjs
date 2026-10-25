@@ -19,12 +19,13 @@
  *          (no JIZURA layer, no text hook, no line index in its args)
  *   WARN   a shot without `moment` (ERROR with --strict) · a line no shot declares it answers · a line too short to read
  *          (< max(0.7 s, 0.09 s per character)) · line cues without a picture hint (analysis/cues.json)
- *          · characters placed the same way (ERROR with --strict): over half of the character shots centred (|u - 0.5| < 0.08), or a third
- *            of the frame never used (u < 0.4 / u > 0.6), with 4+ character shots (args.chars x or pin)
+ *          · vocaloid preset only (project.json style): characters placed the same way (ERROR with --strict): over
+ *            half of the character shots centred (|u - 0.5| < 0.08), or a third of the frame never used (u < 0.4 /
+ *            u > 0.6), with 4+ character shots (args.chars x or pin)
  *          · too few pictures (fewer than one per 3 pictured shots) or one picture in more than 4 shots, in a film
  *            mostly cut from pictures (image paths in the shots' args; inserts not counted)
- *          · 12+ shots and no scene file of the film's own in engine/scenes/ (the depth the reference films have comes
- *            from per-shot drawing there, references/10 §7)
+ *          · 12+ shots and no scene file of the film's own in engine/scenes/ (its scenes belong there, the edit in
+ *            timeline.js)
  * Tolerances from project.json -> review: { cutTolerance: 0.04, cueTolerance: 0.15, grid: 'half' | 'beat', minShotFrames: 3 }.
  *
  * mv-studio (MIT).
@@ -88,7 +89,7 @@ lines.forEach(L => {
 const noHint = cues.filter(c => c.kind === 'line' && !c.hint).length;
 if (noHint) warn('cues', `${noHint} line cue(s) without a picture hint (analysis/cues.json "hint")`);
 const placed = shots.filter(s => s.place && s.place.length).map(s => s.place[0]);   // the first char of a shot: the lead
-if (placed.length >= 4) {
+if (placed.length >= 4 && /^vocaloid/.test((P.project && P.project.style) || '')) {
   const centred = placed.filter(u => Math.abs(u - 0.5) < 0.08).length, left = placed.filter(u => u < 0.4).length, right = placed.filter(u => u > 0.6).length;
   if (centred > placed.length / 2 || !left || !right)
     (strict ? err : warn)('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
@@ -109,7 +110,7 @@ const STOCK_SCENES = new Set(['scenes.js', 'intro.js', 'typo.js', 'glass.js', 'd
 const sceneDir = path.join(ROOT, 'engine', 'scenes');
 const ownScenes = fs.existsSync(sceneDir) ? fs.readdirSync(sceneDir).filter(f => f.endsWith('.js') && !STOCK_SCENES.has(f)) : [];
 if (shots.length >= 12 && !ownScenes.length)
-  warn('depth', `${shots.length} shots and no scene file of the film's own in engine/scenes/: draw its set pieces and 3-6 events per shot there, keep timeline.js for the edit (references/10 §7: 30+ own lines per shot)`);
+  warn('depth', `${shots.length} shots and no scene file of the film's own in engine/scenes/: write the film's scenes there and keep timeline.js for the edit`);
 
 // ---- outputs
 const rows = shots.map((s, k) => {

@@ -20,7 +20,7 @@ What it does
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
                 asked for: vocaloid (the tegaki demo timeline) | vocaloid:signal | interface | interface:treatise |
-                stage | papercraft | magazine (engine/starters/; the demo is kept as engine/starters/tegaki_demo.js)
+                stage | papercraft | magazine (engine/starters/; a vocaloid:signal project keeps the demo as engine/starters/tegaki_demo.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -210,8 +210,15 @@ def main() -> int:
     print(f"template : {tpl}\nproject  : {dst}")
     copy_template(dst, a.force)
     tl, starters = dst / "engine" / "timeline.js", dst / "engine" / "starters"
-    if tl.is_file():
+    if tl.is_file() and a.style.startswith("vocaloid"):
         shutil.copy2(tl, starters / "tegaki_demo.js")
+    if a.style == "own":                               # the vocaloid demo's palettes stay out of an own-style film
+        pal = dst / "assets" / "style" / "palettes.json"
+        if pal.is_file():
+            pj_ = json.loads(pal.read_text(encoding="utf-8"))
+            pal.write_text(json.dumps({"global": pj_.get("global", {}), "palettes": []}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        for f in (dst / "assets" / "style" / "luts").glob("P*.png"):
+            f.unlink()
     if starter:
         shutil.copy2(starters / f"{starter}.js", tl)
         print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (an example to rewrite: read "

@@ -35,8 +35,8 @@ Screen direction: _(e.g. the journey always moves left to right; home is on the 
 
 ## 5. Motion
 
-Camera always moving (drift, push, pan); anticipation and overshoot; hits on beats; quiet is slow, never still.
-_(add the film's own rules)_
+The motion-feel and editing-rhythm slots of docs/CONCEPT.md: how the camera moves (or stays), how things ease, where
+hits land, what quiet looks like.
 
 ## 6. Continuity devices
 
@@ -49,4 +49,4 @@ lens-flare soup, stock "AI" imagery, a lyric repeated as a caption over a pictur
 
 ## 8. Reserved zones
 
-Where the lyrics live (and what must stay out of that band), HUD corners, title-safe margins.
+Where the words live (if anywhere) and what must stay clear of them; any reserved corners; title-safe margins.

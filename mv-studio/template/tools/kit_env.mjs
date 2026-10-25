@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// kit_env.mjs -- portable environment shared by every Node tool of a vocaloid-style-mv project.
+// kit_env.mjs -- portable environment shared by every Node tool of an mv-studio project.
 // -----------------------------------------------------------------------------------------
 // Nothing in tools/ hard-codes a machine path; everything is derived from here:
 //

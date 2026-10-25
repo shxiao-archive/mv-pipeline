@@ -12,7 +12,7 @@ it so the engine can switch them (engine/scenes/scenes.js chars[].anim).
   python tools/gen_table.py align  BASE.png VARIANT.png OUT.png [--mode patch|full] [--region u0,v0,u1,v1]
   python tools/gen_table.py selftest
 
-Table (JSON):
+Table (JSON). Every lock and row kind is optional: a film without a cast has no CHAR locks or char rows.
   { "locks": { "STYLE": "...", "CHAR": "...", "CHAR_BACK": "...", "WORLD": "...", "ISO": "...", "EMPTY": "..." },   # your words per film
     "refs":  { "style": "assets/ref/style_ref.png", "char": ["assets/ref/char_front.png", "assets/ref/char_approved.png"] },
     "out":   "assets/gen",                       # finals go to <out>/<id>.png, raw generations to <out>/raw/

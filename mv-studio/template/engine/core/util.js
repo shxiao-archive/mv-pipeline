@@ -1,4 +1,4 @@
-/* vocaloid-style-mv engine — math, easing, seeded randomness, beat clock, audio envelope access.
+/* mv-studio engine — math, easing, seeded randomness, beat clock, audio envelope access.
  * Everything here is a pure function of its arguments (no wall clock, no unseeded Math.random). */
 (() => {
   'use strict';
