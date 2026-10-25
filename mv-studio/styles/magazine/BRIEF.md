@@ -59,6 +59,13 @@ that is the film's story.
   it springs back. A broken reprise can print permanently out of register.
 - **Pictures you choose.** Generated art, the user's photos or your own renders, chosen for shape: a horizon, a hand,
   an eye, a figure against light. Generate neutral, colour in the press. Keep a manifest of sources.
+- **Enough pictures for the cut rate.** Count them from the shot list, not from a habit:
+  - a picture appears in at most two or three shots, and each return is a new treatment (a detail crop, another
+    screen, a negative, a cell of a grid), never the same page again;
+  - a magazine film cuts often, so a 3-minute song with about 80 shots wants about 30–40 pictures;
+  - add material that costs no generation: objects and specimens, type pages, diagrams, paper scraps and textures
+    drawn in code;
+  - NovelAI at 1 MP or less is free on Opus, so the limit is time, not money: generate in batches by chapter.
 - **Finished versus amateur:** a finished frame is a quiet page with one big sung line, exact marks, three inks and
   visible dots. An amateur frame is a photo with a halftone filter and text dropped on top in the middle.
 
@@ -66,8 +73,12 @@ that is the film's story.
 
 | move | feel | when | not when | size |
 |---|---|---|---|---|
-| page punch | the page jumps at you | kick, in the band sections | quiet verses | zoom 2–3 %, back in 0.1 s |
-| plate slip | the print shudders | snare | constantly | spot A 5–8 px, spring back 0.15 s |
+| page punch | the page jumps at you | a strong kick that starts something: a section hit, a chorus slam | every kick; quiet verses; a fast song's groove | zoom 1.5–3 %, back in 0.1 s (`react: 1` on that shot) |
+| plate slip | the print shudders | a strong snare in a chorus | constantly; anything that reads as camera shake | spot A 5–8 px in one direction, spring back 0.15 s |
+| camera travel | reading the page | holds longer than a bar: along a column, across a spread, from a picture to its caption | over a slam | the whole hold, one smooth ease (`F.xf` lerped over `S.p`) |
+| page turn / fold | the magazine as an object | chapter changes, on a downbeat | inside a phrase | 0.3–0.5 s, outCubic, the next page printed underneath |
+| push into the dots | the picture dissolves into print | a transition into the next picture or a section | as a zoom on every cut | the cell grows until one dot fills the frame, 0.5–1 bar |
+| plates pulled apart | the print taken apart | a break, a stop, a bridge | in a groove | K / A / B drift apart into layers, then snap back on the downbeat |
 | grain sparkle | air in the paper | hats | — | grain +0.03 |
 | develop | a picture appears out of paper | a strip or cell on its own beat | everywhere at once | photo from 0 to full in 1–2 frames, or a slow tone-up over a bar |
 | hard cut on the group | the metre made visible | 4+3+3, 3+3+2 accents | 4/4 verses (use the bar) | one picture per group |
@@ -81,12 +92,33 @@ that is the film's story.
 | subliminal frame | memory, foreshadowing | phrase ends, 4–6 per film | a lyric moment | one tatum |
 
 **The motion feel:**
-- The page holds still; the press moves. Most motion is print mechanics on the beat (punch, slip, develop), not the
-  camera.
+- Motion is designed, not reactive. A page is read (the camera travels over it), turned, folded, pushed into its dots,
+  taken apart into plates. The drums add accents to the shots that hit, never a pulse under every shot: on a fast
+  song, a reaction to every hit is camera shake.
+- On a fast song (over about 140 BPM), the rhythm lives in the cuts and in layouts that rebuild on the beat groups,
+  while the camera moves long and smooth across them.
 - Hard cuts on bars and groups, holds on whole phrases; no dissolves (a page is turned, torn or burned, never faded).
 - Hits are cue-locked to real events (a piano note, a stab, a kick), never a constant pulse.
 
-## 4. Let the song choose
+## 4. Layout invention
+
+The spread (a picture block beside a lyric column) is the home layout, not the only one. Give every chapter its own
+layout idea, and never use the same layout in two shots in a row. Some to start from:
+
+- **Type as the picture:** one sung character the size of the page, set in a spot ink; a page of only furniture and one
+  line; a column that runs across the gutter.
+- **The page as a machine:** the bar's groups as strips, cells or columns that rebuild on each group; a ruler or a gauge
+  as the main image; a contents page or an index that counts the song.
+- **The magazine as an object:** the closed cover, the spine, pages turning, a stack of proofs, a page folded into a
+  strip, two pages overprinted when the paper shows through.
+- **Print taken apart:** one plate alone (only the red); the plates pulled apart; the halftone dot pushed until it
+  becomes the next picture; a test print with colour bars.
+- **The world through the page:** a hole, a tear, a window cut where the picture should be, type over the world as
+  light.
+
+Draft each chapter's layout idea in the concept, next to its inks and its stage of the page's fate.
+
+## 5. Let the song choose
 
 | range | from | to |
 |---|---|---|
@@ -99,7 +131,7 @@ that is the film's story.
 A slow ballad can be a single magazine read page by page that closes at the end; a math-rock song is a layout made
 of its own bar lengths. Say where each section sits in the concept.
 
-## 5. How the reference film was made
+## 6. How the reference film was made
 
 - **The reference (he-drowns-mv-v2):** a real-time film in which a Japanese experimental magazine falls into the sea.
   Version 1 was the magazine drowning slowly; version 2 tore, soaked and swallowed the page and put a 3D sea behind it.
@@ -115,7 +147,7 @@ of its own bar lengths. Say where each section sits in the concept.
   ruler) earns its place, static decoration does not; the page's fate needs a beginning (a burned cover) and an end
   (the page closing over the world).
 
-## 6. Craft notes
+## 7. Craft notes
 
 - The sung line prints in key, or in a spot with at least 3:1 contrast against the paper, or as light over a dark
   world, and is never set over a busy picture without a paper band. check_shots measures only the text layer, so a
@@ -125,17 +157,18 @@ of its own bar lengths. Say where each section sits in the concept.
 - Inks are a decision per chapter: write them in the concept (`MZ.LOOK`, and `press` per shot).
 - A raw, unscreened picture appears only where the page is cut away.
 
-## 7. Avoid
+## 8. Avoid
 
 - More than three inks as the norm; full-colour photographs pasted unprinted.
 - A halftone filter over everything with the type on top; type outlines, glows, drop shadows.
 - Digital glow, lens flares, bloom; dissolves and crossfades.
-- Random jitter as "print"; misregistration that never returns.
+- Random jitter as "print"; misregistration that never returns; a punch or a slip on every drum hit (camera shake).
+- The same picture or the same layout over and over: count the pictures from the shot list.
 - The interface preset's cool, precise tech document (hairline charts, signal orange, a spark): this is warm,
   physical, editorial.
 - The reference film's song, its sea, its moon, its eye, its kanji (海 → 母) or its photographs.
 
-## 8. Where it lives
+## 9. Where it lives
 
 Search `grep '"magazine"' index/index.jsonl`, or by word:
 - the press: `MZ.begin`, `MZ.print`, `MZ.react`, `MZ.INKS`, `MZ.LOOK`;

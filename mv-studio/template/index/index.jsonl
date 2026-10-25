@@ -238,12 +238,12 @@
 {"id":"helper:MZ.tint","kind":"helper","fits":["magazine"],"does":"a flat screened tint block (multiply) paths","where":"engine/styles/magazine/layout.js:262-264","use":"MZ.tint(c, color, x, y, w, h, a = 1)","lines":3}
 {"id":"helper:MZ.dropPath","kind":"helper","fits":["magazine"],"does":"an ink drop / burn hole; MZ.tornPath(c, x0, x1, y, amp, seed, down)","where":"engine/styles/magazine/layout.js:265-274","use":"MZ.dropPath(c, cx, cy, r, seed, spikes = 0)","lines":10}
 {"id":"helper:MZ.tornPath","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — layout.js: the magazine's type and editorial furniture, drawn into the press layers (press.js).)","where":"engine/styles/magazine/layout.js:275-282","use":"MZ.tornPath(c, x0, x1, y, amp, seed, down = true)","lines":8}
-{"id":"helper:MZ.ink","kind":"helper","fits":["magazine"],"does":"layer (I): type and rules as solid ink, drawn in 'lighter' on black: red = key (MZ.K), green = spot A (MZ.A), blue = spot B (MZ.B). ink(MZ.A, 0.5) = half-tone spot A. Inks combine subtractively on a paper texture (mottle, fibre, ink …","where":"engine/styles/magazine/press.js:45-46","use":"MZ.ink(ch, a = 1)","lines":2}
-{"id":"helper:MZ.defaults","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:47-56","use":"MZ.defaults()","lines":10}
-{"id":"helper:MZ.layers","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:57-60","use":"MZ.layers()","lines":4}
-{"id":"helper:MZ.begin","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:61-210","use":"MZ.begin()","lines":150}
-{"id":"helper:MZ.print","kind":"helper","fits":["magazine"],"does":"print it onto the scene ctx; back = a canvas / image behind the page","where":"engine/styles/magazine/press.js:215-229","use":"MZ.print(ctx, F, t, back = null)","lines":15}
-{"id":"helper:MZ.react","kind":"helper","fits":["magazine"],"does":"the drums work the press: kick = page punch (zoom), snare = plate slip, hat = grain sparkle","where":"engine/styles/magazine/press.js:230-240","use":"MZ.react(F, t, amt = 1)","lines":11}
+{"id":"helper:MZ.ink","kind":"helper","fits":["magazine"],"does":"layer (I): type and rules as solid ink, drawn in 'lighter' on black: red = key (MZ.K), green = spot A (MZ.A), blue = spot B (MZ.B). ink(MZ.A, 0.5) = half-tone spot A. Inks combine subtractively on a paper texture (mottle, fibre, ink …","where":"engine/styles/magazine/press.js:47-48","use":"MZ.ink(ch, a = 1)","lines":2}
+{"id":"helper:MZ.defaults","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:49-58","use":"MZ.defaults()","lines":10}
+{"id":"helper:MZ.layers","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:59-62","use":"MZ.layers()","lines":4}
+{"id":"helper:MZ.begin","kind":"helper","fits":["magazine"],"does":"(in styles/magazine — press.js: the PRESS. Two Canvas2D layers become a printed page (GPU, core/shade.js).)","where":"engine/styles/magazine/press.js:63-212","use":"MZ.begin()","lines":150}
+{"id":"helper:MZ.print","kind":"helper","fits":["magazine"],"does":"print it onto the scene ctx; back = a canvas / image behind the page","where":"engine/styles/magazine/press.js:217-243","use":"MZ.print(ctx, F, t, back = null)","lines":27}
+{"id":"helper:MZ.react","kind":"helper","fits":["magazine"],"does":"the drum ACCENTS work the press: a strong kick (>= thr, >= gap s after the last) = page punch, a strong snare = plate slip (one direction per hit, springs back); hats = grain always. amt 0 = grain only (the stock scenes' default: pass …","where":"engine/styles/magazine/press.js:244-257","use":"MZ.react(F, t, amt = 1, o = {})","lines":14}
 {"id":"helper:MZ.stand","kind":"helper","fits":["magazine"],"does":"stand-in pictures drawn in code ('horizon' | 'figure' | 'flora' | 'city' | 'deep'): REPLACE with your art","where":"engine/styles/magazine/scenes.js:47-113","use":"MZ.stand(kind = 'horizon')","lines":67}
 {"id":"scene:mzSpread","kind":"scene","fits":["magazine"],"does":"a two-page spread: a picture on one page, the sung line set in a vertical column on the other beside empty manuscript squares; folio, crop marks. { img, side 'left' (picture side), line, head, caption [..], gloss, fig { n, label, at } } …","where":"engine/styles/magazine/scenes.js:114-137","use":"shot(id, t0, t1, 'mzSpread', { … })","lines":24}
 {"id":"scene:mzContents","kind":"scene","fits":["magazine"],"does":"a contents page: the song's sections as chapters, page numbers = their bar numbers; rows set on beats, the current chapter in spot A. { img, title (your words) }","where":"engine/styles/magazine/scenes.js:138-162","use":"shot(id, t0, t1, 'mzContents', { … })","lines":25}
@@ -487,13 +487,13 @@
 {"id":"manual:references/03-audio-and-lyrics#4","kind":"manual","does":"4. `envelope_30fps.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:64-80","lines":17}
 {"id":"manual:references/03-audio-and-lyrics#5","kind":"manual","does":"5. How the engine and Blender use it","where":"<skill>/references/03-audio-and-lyrics.md:81-113","lines":33}
 {"id":"manual:references/03-audio-and-lyrics#6","kind":"manual","does":"6. Curating sections (semi-manual)","where":"<skill>/references/03-audio-and-lyrics.md:114-133","lines":20}
-{"id":"manual:references/03-audio-and-lyrics#6b","kind":"manual","does":"6b. Odd or changing metre (`analysis/meter.json`)","where":"<skill>/references/03-audio-and-lyrics.md:134-167","lines":34}
-{"id":"manual:references/03-audio-and-lyrics#7","kind":"manual","does":"7. Verify by eye and ear","where":"<skill>/references/03-audio-and-lyrics.md:168-173","lines":6}
-{"id":"manual:references/03-audio-and-lyrics#8","kind":"manual","does":"8. Lyrics: what to trust","where":"<skill>/references/03-audio-and-lyrics.md:174-184","lines":11}
-{"id":"manual:references/03-audio-and-lyrics#9","kind":"manual","does":"9. Alignment / transcription pipeline (`tools/transcribe_*.py`)","where":"<skill>/references/03-audio-and-lyrics.md:185-227","lines":43}
-{"id":"manual:references/03-audio-and-lyrics#10","kind":"manual","does":"10. Writing `analysis/lyrics_mv.lrc`","where":"<skill>/references/03-audio-and-lyrics.md:228-261","lines":34}
-{"id":"manual:references/03-audio-and-lyrics#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/03-audio-and-lyrics.md:262-273","lines":12}
-{"id":"manual:references/03-audio-and-lyrics#12","kind":"manual","does":"12. mv-studio: timing ground truth","where":"<skill>/references/03-audio-and-lyrics.md:274-328","lines":55}
+{"id":"manual:references/03-audio-and-lyrics#6b","kind":"manual","does":"6b. Odd or changing metre (`analysis/meter.json`)","where":"<skill>/references/03-audio-and-lyrics.md:134-171","lines":38}
+{"id":"manual:references/03-audio-and-lyrics#7","kind":"manual","does":"7. Verify by eye and ear","where":"<skill>/references/03-audio-and-lyrics.md:172-177","lines":6}
+{"id":"manual:references/03-audio-and-lyrics#8","kind":"manual","does":"8. Lyrics: what to trust","where":"<skill>/references/03-audio-and-lyrics.md:178-188","lines":11}
+{"id":"manual:references/03-audio-and-lyrics#9","kind":"manual","does":"9. Alignment / transcription pipeline (`tools/transcribe_*.py`)","where":"<skill>/references/03-audio-and-lyrics.md:189-231","lines":43}
+{"id":"manual:references/03-audio-and-lyrics#10","kind":"manual","does":"10. Writing `analysis/lyrics_mv.lrc`","where":"<skill>/references/03-audio-and-lyrics.md:232-265","lines":34}
+{"id":"manual:references/03-audio-and-lyrics#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/03-audio-and-lyrics.md:266-277","lines":12}
+{"id":"manual:references/03-audio-and-lyrics#12","kind":"manual","does":"12. mv-studio: timing ground truth","where":"<skill>/references/03-audio-and-lyrics.md:278-332","lines":55}
 {"id":"manual:references/04-asset-generation#0","kind":"manual","does":"0. Start here: the generation table (`tools/gen_table.py`)","where":"<skill>/references/04-asset-generation.md:9-60","lines":52}
 {"id":"manual:references/04-asset-generation#0b","kind":"manual","does":"0b. Other styles: one lock and one table per style","where":"<skill>/references/04-asset-generation.md:61-108","lines":48}
 {"id":"manual:references/04-asset-generation#1","kind":"manual","does":"1. What to generate (derive it from the storyboard)","where":"<skill>/references/04-asset-generation.md:109-127","lines":19}
@@ -594,19 +594,20 @@
 {"id":"manual:styles/interface/STYLE#B","kind":"manual","does":"B. Treatise — the song as plates from an illustrated technical treatise","where":"<skill>/styles/interface/STYLE.md:160-276","lines":117}
 {"id":"manual:styles/interface/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10, team: 11)","where":"<skill>/styles/interface/STYLE.md:277-297","lines":21}
 {"id":"manual:styles/magazine/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/magazine/BRIEF.md:13-44","lines":32}
-{"id":"manual:styles/magazine/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/magazine/BRIEF.md:45-64","lines":20}
-{"id":"manual:styles/magazine/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/magazine/BRIEF.md:65-88","lines":24}
-{"id":"manual:styles/magazine/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/magazine/BRIEF.md:89-101","lines":13}
-{"id":"manual:styles/magazine/BRIEF#5","kind":"manual","does":"5. How the reference film was made","where":"<skill>/styles/magazine/BRIEF.md:102-117","lines":16}
-{"id":"manual:styles/magazine/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/magazine/BRIEF.md:118-127","lines":10}
-{"id":"manual:styles/magazine/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/magazine/BRIEF.md:128-137","lines":10}
-{"id":"manual:styles/magazine/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/magazine/BRIEF.md:138-149","lines":12}
+{"id":"manual:styles/magazine/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/magazine/BRIEF.md:45-71","lines":27}
+{"id":"manual:styles/magazine/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/magazine/BRIEF.md:72-102","lines":31}
+{"id":"manual:styles/magazine/BRIEF#4","kind":"manual","does":"4. Layout invention","where":"<skill>/styles/magazine/BRIEF.md:103-120","lines":18}
+{"id":"manual:styles/magazine/BRIEF#5","kind":"manual","does":"5. Let the song choose","where":"<skill>/styles/magazine/BRIEF.md:121-133","lines":13}
+{"id":"manual:styles/magazine/BRIEF#6","kind":"manual","does":"6. How the reference film was made","where":"<skill>/styles/magazine/BRIEF.md:134-149","lines":16}
+{"id":"manual:styles/magazine/BRIEF#7","kind":"manual","does":"7. Craft notes","where":"<skill>/styles/magazine/BRIEF.md:150-159","lines":10}
+{"id":"manual:styles/magazine/BRIEF#8","kind":"manual","does":"8. Avoid","where":"<skill>/styles/magazine/BRIEF.md:160-170","lines":11}
+{"id":"manual:styles/magazine/BRIEF#9","kind":"manual","does":"9. Where it lives","where":"<skill>/styles/magazine/BRIEF.md:171-182","lines":12}
 {"id":"manual:styles/magazine/STYLE#1","kind":"manual","does":"1. The two layers and the press","where":"<skill>/styles/magazine/STYLE.md:7-30","lines":24}
 {"id":"manual:styles/magazine/STYLE#2","kind":"manual","does":"2. Press settings (`MZ.defaults()`)","where":"<skill>/styles/magazine/STYLE.md:31-59","lines":29}
 {"id":"manual:styles/magazine/STYLE#3","kind":"manual","does":"3. Type and furniture (`layout.js`)","where":"<skill>/styles/magazine/STYLE.md:60-85","lines":26}
 {"id":"manual:styles/magazine/STYLE#4","kind":"manual","does":"4. Scenes (`scenes.js`)","where":"<skill>/styles/magazine/STYLE.md:86-110","lines":25}
-{"id":"manual:styles/magazine/STYLE#5","kind":"manual","does":"5. Drums and metre","where":"<skill>/styles/magazine/STYLE.md:111-127","lines":17}
-{"id":"manual:styles/magazine/STYLE#6","kind":"manual","does":"6. Checks","where":"<skill>/styles/magazine/STYLE.md:128-137","lines":10}
+{"id":"manual:styles/magazine/STYLE#5","kind":"manual","does":"5. Drums and metre","where":"<skill>/styles/magazine/STYLE.md:111-131","lines":21}
+{"id":"manual:styles/magazine/STYLE#6","kind":"manual","does":"6. Checks","where":"<skill>/styles/magazine/STYLE.md:132-141","lines":10}
 {"id":"manual:styles/papercraft/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/papercraft/BRIEF.md:10-30","lines":21}
 {"id":"manual:styles/papercraft/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look hand-made and finished)","where":"<skill>/styles/papercraft/BRIEF.md:31-49","lines":19}
 {"id":"manual:styles/papercraft/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/papercraft/BRIEF.md:50-69","lines":20}

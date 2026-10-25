@@ -2,7 +2,7 @@
  * press layers (layout.js) and prints it (press.js). Lyric text never appears in code: `line` holds line indices.
  *
  * common args: img / imgs (paths; none = a stand-in picture, MZ.stand), head (running head: your words), line [i, ...],
- *   press { ...F } (press settings for this shot: inks by MZ.INKS name or '#hex', mode, cell, ...), react 1 (drums -> press)
+ *   press { ...F } (press settings for this shot: inks by MZ.INKS name or '#hex', mode, cell, ...), react 0 (1 = strong drum accents punch the page and slip the plates: the shots that hit, not every shot)
  * The film's own inks / paper: MZ.LOOK = { inkA: 'red', inkB: 'teal', paper: '#efebe2', ... } in the timeline.
  *
  * 'mzSpread'   a two-page spread: a picture on one page, the sung line set in a vertical column on the other beside
@@ -94,7 +94,7 @@
     const back = draw(L.P, L.I, L.F) || null;
     if (S.args.press) Object.assign(L.F, S.args.press);
     named(L.F);
-    MZ.react(L.F, S.t, S.args.react ?? 1);
+    MZ.react(L.F, S.t, S.args.react ?? 0);
     MZ.print(ctx, L.F, S.t, back);
   };
   const paper = P => { P.fillStyle = '#fff'; P.fillRect(0, 0, W, H); };

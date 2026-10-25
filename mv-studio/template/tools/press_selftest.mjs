@@ -31,7 +31,12 @@ const res = await page.evaluate(async (o) => {
   };
   const F0 = MZ.defaults(), hex = h => Z.hex(MZ.INKS[h] || h);
   const back = Z.canvas(1920, 1080); { const g = back.getContext('2d'); g.fillStyle = '#204060'; g.fillRect(0, 0, 1920, 1080); }
+  const weak = Array.from({ length: 40 }, (_, i) => [i * 0.1, 0.5]), strong = Array.from({ length: 8 }, (_, i) => [10 + i * 0.35, 0.95]);
+  Z.audio = { onsets: { kick: [...weak, ...strong], snare: [[20, 0.9]] } };
+  const re = t => { const F = MZ.defaults(); MZ.react(F, t); return [F.xf[0], F.offA[0], F.offA[1]]; };
+  const react = { weak: re(2.05)[0], kept: re(10.70)[0], dropped: re(10.36)[0], s1: re(20.01), s2: re(20.08), late: re(21)[1] };
   return {
+    react: [react, null],
     paper: [shot('#ffffff', null), hex(F0.paper)],
     spotA: [shot(F0.inkA, null), hex(F0.inkA).map((v, i) => v * hex(F0.paper)[i] / 255)],
     spotB: [shot(F0.inkB, null), hex(F0.inkB).map((v, i) => v * hex(F0.paper)[i] / 255)],
@@ -40,6 +45,12 @@ const res = await page.evaluate(async (o) => {
   };
 }, origin);
 let bad = 0;
+{ const r = res.react[0], ang = v => Math.atan2(v[2], v[1]), chk = (ok, what) => { if (!ok) { bad++; console.log(`FAIL react: ${what}`, JSON.stringify(r)); } };
+  chk(r.weak === 1, 'weak kicks move the page');
+  chk(r.kept > 1.012 && Math.abs(r.dropped - 1) < 0.001, 'strong kicks closer than the gap are not dropped / a kept one does not punch');
+  chk(Math.abs(ang(r.s1) - ang(r.s2)) < 1e-6 && Math.hypot(r.s1[1], r.s1[2]) > Math.hypot(r.s2[1], r.s2[2]), 'a snare slip changes direction or does not spring back');
+  chk(Math.abs(r.late) < 0.01, 'the slip never returns');
+  delete res.react; }
 const hue = (k, ok) => { if (!ok(res[k][0])) { bad++; console.log(`FAIL ${k}: got ${res[k][0]} (not in the ink's hue; want ~${res[k][1].map(Math.round)})`); } delete res[k]; };
 hue('spotA', ([r, g, b]) => r > 150 && g < 110 && b < 110);
 hue('spotB', ([r, g, b]) => r < 50 && g > 60 && b > 60 && Math.abs(g - b) < 25);

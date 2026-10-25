@@ -13,7 +13,7 @@ Z.scene('myPage', { init: () => MZ.loadFonts(), draw(ctx, S) {
   MZ.photo(P, 'assets/bg/sea.png', 70, 70, 820, 920);          // pictures in normal colour
   MZ.lyricV(I, S.args.line[0], S.t, 1500, 150, 92, { color: MZ.ink(MZ.K) });   // ink: channels, drawn 'lighter'
   Object.assign(F, MZ.LOOK, { cell: 6 });          // the film's inks, then this shot's settings
-  MZ.react(F, S.t);                                // kick punch, snare slip, hat grain
+  MZ.react(F, S.t, S.args.react ?? 0);             // hat grain; with react 1, strong kicks punch and snares slip
   MZ.print(ctx, F, S.t, back);                     // back: a canvas behind the page (optional)
 } });
 ```
@@ -112,12 +112,16 @@ does. A colour that neither spot can make falls back to the nearer one. This is 
 
 - **`Z.hit(kind, t, tau)`** returns the strongest recent onset of `audio.onsets[kind]` (`kick | snare | hat |
   vocal`), decaying `exp(-dt / tau)`. Also `Z.lastHit(kind, t, thr)` and `Z.hitCount(kind, from, t, thr)`.
-- **`MZ.react(F, t, amt)`:**
-  - kick: zoom +2.5 %;
-  - snare: spot A ±7 px and spot B ∓4 px in a direction that changes per frame;
-  - hat: grain +0.03.
+- **`MZ.react(F, t, amt, { thr, gap })`** works the press from the drum *accents*:
+  - a strong kick (strength at least `thr`, default 0.8, and at least `gap` s after the last one kept, default 0.6)
+    zooms the page 1.5 %;
+  - a strong snare slips spot A 6 px and spot B 3 px, in one direction per hit, springing back over 0.15 s;
+  - hats add grain (+0.03), always.
 
-  Pass `react: 0` in args for a still page.
+  The stock scenes pass `react: 0` by default (grain only). Set `react: 1` on the shots that should hit, such as a
+  chorus slam or a section's first bar. On every shot of a fast song it reads as camera shake.
+- **Camera travel:** lerp `F.xf` (zoom, rotation, dx, dy) over `S.p` with one ease for the whole hold, e.g.
+  `F.xf = [Z.lerp(1.04, 1.12, e), 0, Z.lerp(0.03, -0.03, e), 0]` with `e = Z.ease.inOutSine(S.p)`.
 - **`Z.clock.meter(t)`** returns `{ bar, meter, len, q, group, groups, gq, gPhase, tatum }`. Also
   `Z.clock.groupPulse(t, k)`.
   - With no bar map, it is 4/4 from the beats.

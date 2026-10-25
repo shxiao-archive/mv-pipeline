@@ -43,10 +43,10 @@
         const last = !list.slice(j + 1).some(chorus);
         if (last && t1 - t0 > 6) {
           const mid = nb(t0 + (t1 - t0) * 0.6);
-          shot(id, t0, mid, 'mzSlam', { imgs: PICS, words: WORDS, line: linesIn(t0, mid) }, 'the last chorus: the slam, harder (REPLACE)');
+          shot(id, t0, mid, 'mzSlam', { imgs: PICS, words: WORDS, react: 1, line: linesIn(t0, mid) }, 'the last chorus: the slam, harder (REPLACE)');
           return shot(id + 'b', mid, t1, 'mzTear', { img: PICS[2], world: 'deep', line: linesIn(mid, t1), at: mid + 0.4 }, 'the page tears: the world behind it (REPLACE)');
         }
-        return shot(id, t0, t1, 'mzSlam', { imgs: PICS, words: WORDS, every: chorusN === 1 ? 2 : 1, line: lines }, `chorus ${chorusN}: one picture and one character per beat group (REPLACE)`);
+        return shot(id, t0, t1, 'mzSlam', { imgs: PICS, words: WORDS, every: chorusN === 1 ? 2 : 1, react: 1, line: lines }, `chorus ${chorusN}: one picture and one character per beat group (REPLACE)`);
       }
       if (is(s, /pre|build|bridge-?up/i)) return shot(id, t0, t1, 'mzStrips', { img: PICS[3], line: lines }, 'the build: the bar cut into its beat groups');
       if (is(s, /bridge|inst|solo|break/i)) {

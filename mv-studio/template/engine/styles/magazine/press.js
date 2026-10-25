@@ -24,7 +24,9 @@
  *          the paper has left; lightK / lightA / lightB
  *   neg (negative reprint), ca (chromatic split, px), xerox (copier streaks), vig, grainAmt, gain, flash [r, g, b, a]
  *
- * MZ.react(F, t, amt)  the drums work the press: kick = page punch (zoom), snare = plate slip, hat = grain sparkle
+ * MZ.react(F, t, amt, {thr, gap})  the drum ACCENTS work the press: a strong kick (>= thr, >= gap s after the last)
+ *                      = page punch, a strong snare = plate slip (one direction per hit, springs back); hats = grain
+ *                      always. amt 0 = grain only (the stock scenes' default: pass react 1 on the shots that hit)
  * MZ.INKS              { black, sumi, red, scarlet, crimson, pink, teal, green, moss, blue, ultramarine, navy, sea,
  *                        orange, yellow, gold, purple, white, paper }
  *
@@ -227,13 +229,28 @@
   };
 
   // the drums work the press: kick = the page punches towards you, snare = a plate slips, hat = the grain sparkles
-  MZ.react = (F, t, amt = 1) => {
-    if (!Z.hit) return;
-    const k = Z.hit('kick', t, 0.1) * amt, s = Z.hit('snare', t, 0.14) * amt, h = Z.hit('hat', t, 0.06) * amt;
-    F.xf[0] *= 1 + 0.025 * k;
-    const a = Z.rnds(Math.floor(t * 30), 7) * Math.PI * 2;                 // a new slip direction per frame of the hit
-    F.offA = [F.offA[0] + Math.cos(a) * 7 * s, F.offA[1] + Math.sin(a) * 7 * s];
-    F.offB = [F.offB[0] - Math.cos(a) * 4 * s, F.offB[1] - Math.sin(a) * 4 * s];
-    F.grainAmt += 0.03 * h;
+  // accents, not a pulse: a fast song has ~9 drum hits a second, and reacting to all of them shakes the page
+  const ACC = {};
+  const accent = (k, t, thr, gap) => {                    // the last of the strong hits kept at least gap s apart
+    const key = `${k}|${thr}|${gap}`;
+    if (!ACC[key]) {
+      ACC[key] = [];
+      for (const [ht, v] of (Z.audio?.onsets?.[k] || [])) if (v >= thr && (!ACC[key].length || ht - ACC[key].at(-1) >= gap)) ACC[key].push(ht);
+    }
+    let h = -1;
+    for (const x of ACC[key]) { if (x > t) break; h = x; }
+    return h;
+  };
+  MZ.react = (F, t, amt = 1, o = {}) => {
+    F.grainAmt += 0.03 * (Z.hit ? Z.hit('hat', t, 0.06) : 0);   // hats: paper texture, always
+    if (!amt) return;
+    const thr = o.thr ?? 0.8, gap = o.gap ?? 0.6;
+    const kt = accent('kick', t, thr, gap), st = accent('snare', t, thr, gap);
+    if (kt >= 0) F.xf[0] *= 1 + 0.015 * amt * Math.exp(-(t - kt) / 0.1);
+    if (st >= 0) {
+      const s = amt * Math.exp(-(t - st) / 0.15), a = Z.rnds(Math.round(st * 1000), 7) * Math.PI * 2;   // one direction per hit
+      F.offA = [F.offA[0] + Math.cos(a) * 6 * s, F.offA[1] + Math.sin(a) * 6 * s];
+      F.offB = [F.offB[0] - Math.cos(a) * 3 * s, F.offB[1] - Math.sin(a) * 3 * s];
+    }
   };
 })();
