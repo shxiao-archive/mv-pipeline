@@ -6,7 +6,7 @@ Contents: 1 Architecture · 2 Hard rules (determinism, performance) · 3 The tim
 
 ## 1. Architecture
 
-`engine/index.html` loads, in order: seeded `Math.random` shim → `../jizura/app/jizura_engine.js` + `jizura_adapter.js` → `core/util.js` → `core/assets.js` → `core/gl.js` → `core/draw.js` → `core/trans.js` → `scenes/scenes.js` → scene files (`intro typo glass dark night memory meta`) → the timeline (`timeline.js`, or `?tl=tests/<file>.js`) → `core/main.js`. `engine/vertical.html` is the same stack (`?tl=` included) plus `Z.NO_LYRICS = Z.VERTICAL = true` and `vertical.js` (see 08).
+`engine/index.html` loads, in order: seeded `Math.random` shim → `../jizura/app/jizura_engine.js` + `jizura_adapter.js` → `core/util.js` → `core/assets.js` → `core/gl.js` → `core/draw.js` → `core/trans.js` → … → `core/scenes.js` (`solid`, `jz`, `illust`) → the style packs (`styles/<preset>/*`, §12) → the timeline (`timeline.js`, or `?tl=tests/<file>.js`) → `core/main.js`. `engine/vertical.html` is the same stack (`?tl=` included) plus `Z.NO_LYRICS = Z.VERTICAL = true` and `vertical.js` (see 08).
 
 Contract used by the renderer: `window.ready` (Promise → `{duration, fps, renderer, shots, assets}`), `window.renderFrame(t)` (async, draws song time `t` into `<canvas id="out">`), `window.__zankoMeta` (`{duration, fps}`; the timeline must set `duration`).
 
@@ -26,7 +26,7 @@ JIZURA plan (shot.lyric) ─► TEXT layer (transparent) ◄─ shot.text(ctx,S)
 
 ## 2. Hard rules
 
-- **Pure function of time.** No `Date.now()`/`performance.now()` in visuals, no unseeded randomness. Use `Z.rnd(...ints)` [0,1), `Z.rnds` [−1,1), `Z.rng(seed)` (mulberry32 stream with `.range .pick .sign`), `Z.noise1(x, seed)`, `Z.fbm1(x, seed, oct)`, `S.rng(seed)` (seeded per shot). Particles are closed-form in `t` (`D.embers`); if a simulation is unavoidable, integrate from the shot start with fixed `dt` (残光 `fall`). Workers seek to arbitrary frames: a scene may be entered at any `t` and must not carry state between frames except caches of immutable data (offscreen art keyed by args).
+- **Pure function of time.** No `Date.now()`/`performance.now()` in visuals, no unseeded randomness. Use `Z.rnd(...ints)` [0,1), `Z.rnds` [−1,1), `Z.rng(seed)` (mulberry32 stream with `.range .pick .sign`), `Z.noise1(x, seed)`, `Z.fbm1(x, seed, oct)`, `S.rng(seed)` (seeded per shot). Particles are closed-form in `t` (`D.rain`); if a simulation is unavoidable, integrate from the shot start with fixed `dt` (残光 `fall`). Workers seek to arbitrary frames: a scene may be entered at any `t` and must not carry state between frames except caches of immutable data (offscreen art keyed by args).
 - The render page seeds `Math.random` once per frame (`__zankoSeed(f)`), so third-party code (JIZURA's textures) stays identical across workers — but don't rely on draw order.
 - **Bitmap warm-up.** Chromium rasterises the *first* draw of an ImageBitmap differently (measured up to 78/255 on sprite edges). `meta.js` draws every preloaded image once at 4 scales in its `init`; it only runs if a meta scene (`panels`, `burst`, `ref`, `seq`) is in the timeline. If yours has none, move that warm-up into `main.js` after `Z.preload` — otherwise frames can differ at worker seams.
 - Draw only inside 1920×1080; `save()/restore()` around state; reset `globalCompositeOperation`, `filter`, `globalAlpha`. `Z.scratch[0..2]` are shared 1920×1080 temp canvases — use them only inside one synchronous draw, never across `await`.
@@ -84,15 +84,15 @@ Math/easing: `Z.clamp lerp inv remap smooth fract quant hex rgba mix3 TAU`, `Z.t
 
 ## 5. Drawing toolkit (`Z.draw`, alias `D`)
 
-The rays, embers, fireflies, feathers, glass cracks and rim light were built for the vocaloid demo 「残光」 and carry
-its look (amber and cream defaults, its cracked sky); the index lists them under `vocaloid`. In a film with its own
-style they are that preset's devices, not neutral techniques (`design-a-style.md` §5).
+The rays, embers, fireflies, feathers, glass cracks and rim light carry the vocaloid preset's look; they live in its
+pack (`engine/styles/vocaloid/fx.js`, which adds them to `Z.draw`, to `illust` fx and chars) with its transitions
+(`trans.js`: `barrier`, `shatter`). In a film with its own style they are that preset's devices (`design-a-style.md` §5).
 
 - Framing: `D.cover(ctx, img, {zoom, x, y, rot}, alpha)` (x/y in −1..1 of the spare margin), `D.viewLerp(a, b, k)`, `D.shake(t, amp, fps=24, seed)`.
-- Characters: `D.sprite(ctx, img, x, y, h, {anchor:[.5,1], rot, flip, sway, breathe, t, phase, alpha, wave:{amp, freq 2.2, speed 3.2, from .25, q}})` — `wave` is a hair-wind strip warp (keep `from` 0.25–0.4 so the face doesn't bend); `D.silhouette(…, color)`, `D.rim(…, color, [dx,dy])`.
-- Light: `D.glow(ctx, x, y, r, color, a)` (additive radial), `D.disc`, `D.rays(ctx, x, y, n, len, color, a, t, seed)`.
-- Particles (closed-form): `D.embers(ctx, t, {n 80, seed, area:[x0,y0,x1,y1], color '#FFA552', rise 120, size 3, alpha, wind})`, `D.fireflies({n 40, area, color '#DDFF7A', size 3, alpha})`, `D.rain({n 260, angle .18, speed 1900, len 60, color, width 1.4})`, `D.dust({n 70, color})`, `D.feathers({n 14, size, color, line})`.
-- Glass: `D.crackNet(seed, cx, cy, n=22, reach=1100)` → cached polylines; `D.cracks(ctx, lines, prog, {glow, core, width, alpha})`.
+- Characters: `D.sprite(ctx, img, x, y, h, {anchor:[.5,1], rot, flip, sway, breathe, t, phase, alpha, wave:{amp, freq 2.2, speed 3.2, from .25, q}})` — `wave` is a hair-wind strip warp (keep `from` 0.25–0.4 so the face doesn't bend); `D.silhouette(…, color)`; vocaloid: `D.rim(…, color, [dx,dy])`.
+- Light: `D.glow(ctx, x, y, r, color, a)` (additive radial), `D.disc`, `D.softLight`; vocaloid: `D.rays(ctx, x, y, n, len, color, a, t, seed)`.
+- Particles (closed-form): `D.rain({n 260, angle .18, speed 1900, len 60, color, width 1.4})`, `D.dust({n 70, color})`; vocaloid: `D.embers(ctx, t, {n 80, seed, area:[x0,y0,x1,y1], color '#FFA552', rise 120, size 3, alpha, wind})`, `D.fireflies({n 40, area, color '#DDFF7A', size 3, alpha})`, `D.feathers({n 14, size, color, line})`.
+- Glass (vocaloid): `D.crackNet(seed, cx, cy, n=22, reach=1100)` → cached polylines; `D.cracks(ctx, lines, prog, {glow, core, width, alpha})`.
 - Type: `Z.FONT` = `mincho` Shippori Mincho B1 · `minchoHeavy` Zen Old Mincho · `tokumin` Kaisei Tokumin · `serif` Noto Serif JP · `gothic` Zen Kaku Gothic New · `dela` Dela Gothic One · `sans` Noto Sans JP · `hand` Klee One · `brush` Yuji Syuku · `dot` DotGothic16 (Noto Sans/Serif **SC** are also fetched for Chinese). `D.font(ctx, size, fam, weight)`, `D.vtext(ctx, text, x, yTop, {size, fam, weight, pitch, color, stroke, reveal, glow})` (縦書き), `D.htext(ctx, text, x, y, {size, fam, weight, color, stroke, glow, align, reveal, spacing, jitter, scaleIn})`. Await real weights in `init` (`document.fonts.load('800 100px "Shippori Mincho B1"', chars)`) so frame 0 never falls back.
 - Overlays: `D.fill(ctx, color, a, comp)`, `D.vgrad(ctx, [[k, color]…], a, comp, rect)`, `D.halftone(ctx, rect, step, fn, color)`.
 
@@ -106,13 +106,13 @@ style they are that preset's devices, not neutral techniques (`design-a-style.md
 | `black` | — | dip to black |
 | `iris` | `cx, cy, color` | B in a growing circle with a fading ring — match-cut circles (sun → lamp → 。) |
 | `irisClose` | `cx, cy` | A shrinks into a circle |
-| `barrier` | `px, py` | striped crossing arm sweeps down from a left pivot, wiping B in |
+| `barrier` (vocaloid) | `px, py` | striped crossing arm sweeps down from a left pivot, wiping B in |
 | `wipe` | `angle −0.35, color '#C8373A'` | diagonal hard wipe with a coloured edge |
 | `slices` | `n 9` | horizontal slices slide in alternately |
 | `push` | `dx −1, dy 0` | A slides out, B in |
 | `zoom` | — | A scales up and fades, B scales in from 0.4 |
 | `ink` | `seed` | B through growing organic ink blobs |
-| `shatter` | `cx, cy, seed` | A breaks into triangles that fall away |
+| `shatter` (vocaloid) | `cx, cy, seed` | A breaks into triangles that fall away |
 
 New: `Z.transition('name', (ctx, A, B, k, o) => {})` — draw the blend of canvases A, B at k∈[0,1]; `o` = the trans spec + `{t, W, H}`.
 
@@ -132,11 +132,11 @@ New: `Z.transition('name', (ctx, A, B, k, o) => {})` — draw the blend of canva
 | `flash` 0, `flashColor [1,1,1]` | mix to colour (keep ≤ 3 full-frame flashes/s) |
 | `invert` 0, `vignette` 0.35, `grain` 0.06 (re-seeded 24/s), `fade` 0 (to black), `letterbox` 0..1 (2.39:1 bars), `shake [x,y]` px, `textOpacity` 1 | finish |
 
-LUT names: every palette in `assets/style/palettes.json` gets two rows — `P1`, `P1_duo` (also the full id `P1_oumagatoki`) … `P5` — plus hand-built ramps `night`, `ember`, `dawn`, `mono`, `day` (high-key daylight: navy → sky blue → white). The atlas is **256×32 rows** (`LUT_ROWS = 32`, mv-studio; was 16): 5 palettes × 2 + 5 ramps = 15, plus any `Z.RAMPS` (signal adds 4); beyond 32 raise `LUT_ROWS` and the LUT texture height (`gl.js`) and the atlas canvas height (`main.js`) together. The shipped `P1`–`P5` are 残光's dusk/night ramps: a high-key frame lives in the top third of the ramp, so `P1` turns a blue sky (luma ≈ 0.76) orange — build your own palettes for a bright film. Palette ids must look like `P<n>_<name>` (the short name is the part before `_`). New palettes: edit `PALETTES` in `tools/style_palette_sheet.py` and run it (writes `palettes.json`, OKLab-interpolated LUT PNGs and a contact sheet on a built-in dusk scene; `--plate assets/bg/<plate>.png` previews them on one of your own backgrounds instead); add ramps in `buildLutAtlas()` in `main.js`.
+LUT names: every palette in the film's `assets/style/palettes.json` gets two rows — `<short>`, `<short>_duo` (also the full id) — plus hand-built ramps `night`, `mono`, `day` (high-key daylight: navy → sky blue → white) and the packs' `Z.RAMPS` (vocaloid: `ember`, `dawn`; signal: 4). A `--style vocaloid` project's palettes.json is a copy of `engine/styles/vocaloid/palettes.json`: `P1`, `P1_duo` (`P1_oumagatoki`) … `P5`, LUTs in `engine/styles/vocaloid/luts/`. The atlas is **256×32 rows** (`LUT_ROWS = 32`, mv-studio; was 16): a vocaloid film: 5 palettes × 2 + 3 ramps + 6 `Z.RAMPS` = 19; beyond 32 raise `LUT_ROWS` and the LUT texture height (`gl.js`) and the atlas canvas height (`main.js`) together. The shipped `P1`–`P5` are 残光's dusk/night ramps: a high-key frame lives in the top third of the ramp, so `P1` turns a blue sky (luma ≈ 0.76) orange — build your own palettes for a bright film. Palette ids must look like `P<n>_<name>` (the short name is the part before `_`). New palettes: edit `PALETTES` in `tools/style_palette_sheet.py` and run it (writes `palettes.json`, OKLab-interpolated LUT PNGs and a contact sheet on a built-in dusk scene; `--plate assets/bg/<plate>.png` previews them on one of your own backgrounds instead); add ramps with `Z.RAMPS = Object.assign(Z.RAMPS || {}, { name: [[k, '#hex'], …] })` in the timeline file.
 
-## 8. Scene library catalogue (`engine/scenes/*.js`, 24 scenes)
+## 8. Scene library catalogue (`core/scenes.js` + the vocaloid pack `styles/vocaloid/*.js`, 24 scenes)
 
-These are the vocaloid preset's scenes, written for its demo film 残光: their look (dusk colours, a singer, kanji,
+`illust`, `solid` and `jz` are shared (`core/scenes.js`); the others are the vocaloid preset's scenes, written for its demo film 残光: their look (dusk colours, a singer, kanji,
 HUD) belongs to that preset. An own-style film reads them as API examples and borrows techniques, not scenes
 (`design-a-style.md` §5).
 
@@ -277,7 +277,7 @@ The stock scenes were written for 残光; before reusing one (in a vocaloid film
 
 ## 12. mv-studio additions (core)
 
-- **Style packs** load after the scene library (`index.html`, `vertical.html`): `styles/interface/*` (`Z.IF`, scenes
+- **Style packs** load after `core/scenes.js` (`index.html`, `vertical.html`): `styles/vocaloid/*` (its fx, transitions and scenes, §5, §8), `styles/interface/*` (`Z.IF`, scenes
   `ifChat ifPlate ifCode`; `kit.js`: ink plates `IF.inks / inkClip / part`, sagging type `IF.limp`, `IF.masked`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
   zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
@@ -286,17 +286,17 @@ The stock scenes were written for 残光; before reusing one (in a vocaloid film
   `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`) and `styles/magazine/*`
   (`Z.MZ`: the press `MZ.begin / print / react` with spot separation, screens and misregistration, type and furniture
   `MZ.lyricV / folio / ruler / proofCircle ...`, scenes `mzSpread mzContents mzStrips mzGrid mzSlam mzBurn mzTear
-  mzContact mzDecon mzFlash`; self-test `node tools/press_selftest.mjs`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = the scene library + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
+  mzContact mzDecon mzFlash`; self-test `node engine/styles/magazine/press_selftest.mjs`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = `styles/vocaloid` + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
 - **Rigs, particles, model sheets** (`core/rig.js`, method in `references/10`): `Z.rig` (joint-table blending
   `mix`, keyed actions `keyed`, `cycle` from distance, `ik2`, `squash`, `trail`, `blink`, `take` for expression
   changes), `Z.rig.biped` (a generic skeleton: 34 poses incl. walk / run / jump / fall / dance moves, 19 expressions,
   `solve(o)` → skeleton, `anchors`, measured `STRIDE`), `Z.rig.face` (one face construction for a cast); stateless
-  `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/*.js`:
-  `biped`, `papercraft_doll`, `stage_person`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage).
+  `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/biped.js`; the
+  styles' own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage).
   Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
 - **Preloading:** a scene preloads only the images its args name (`illust`: bg / chars / layers). An image a custom
   `fx` or `text` hook draws needs `await Z.preload([...])` in `Z.setup`, or it is missing on the first frames.
-- **Living faces on cut-outs** (`scenes/scenes.js` `chars[].anim`): a still character with face patches from one
+- **Living faces on cut-outs** (`core/scenes.js` `chars[].anim`): a still character with face patches from one
   expression sheet (`tools/gen_table.py`): `blink` on a seeded clock, `mouth` on the sung characters, `expr` +
   `exprAt` on cues; optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states`.
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from

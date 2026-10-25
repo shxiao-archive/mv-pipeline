@@ -70,8 +70,7 @@ preset scores, with the frames that show them.
   system, cast and signature devices:
   - the ボカロPV look: an illustrated original singer at the centre of the frame, lyric columns flanking the subject,
     a band or plate behind the lyric line, the PV HUD, kanji slams, the 残光 palettes (P1–P5), and its light devices
-    (`D.crackNet`/`D.cracks`, `D.rays`, `D.embers`, `D.fireflies`, `D.feathers`, `D.rim`: the index lists them
-    under `vocaloid`);
+    (crack webs, rays, embers, fireflies, feathers, a rim light: the preset's pack, `engine/styles/vocaloid/`);
   - the AI-chat voices and colour states;
   - the treatise's spark-and-number plates;
   - the puppet troupe on its painted stage;

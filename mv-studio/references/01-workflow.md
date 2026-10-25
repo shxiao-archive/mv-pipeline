@@ -115,7 +115,7 @@ pictures; no green fringes; nothing imitates an existing character.
 
 - **The film's own scene file** `engine/scenes/<film>.js` draws the film's pictures; `timeline.js` keeps the edit
   (`tools/storyboard.mjs` warns when there is none). Search the index for techniques to reuse
-  (`references/05-engine.md`); the stock scenes belong to the vocaloid demo and are API examples.
+  (`references/05-engine.md`); a preset's scenes and devices live in its pack (`engine/styles/<preset>/`).
 - New scenes register with `Z.scene(name, {preload, init, draw})`, one file per area.
 - **Optional layers**, when the concept calls for them: JIZURA kinetic lyrics (`references/06-jizura.md`); Blender 3D
   shots (`references/07-blender-3d.md`; run them with `python tools/blender_run.py blender/shots/<shot>.py -- --mode full --res 100`,
@@ -160,7 +160,7 @@ user each round's scores and fix list.
 ## Parallelising
 
 - **Team mode** (`--mode team`): the full process with parallel agents, blocks in `engine/blocks/` and prompt templates — `references/11-team.md`.
-- Split scene work by file (`intro.js`, `typo.js`, `glass.js`, …) — one owner each, plus their own test timeline. Shared core files (`engine/core/*`, `index.html`, `timeline.js`) belong to the lead.
+- Split scene work by file (one per area in `engine/scenes/`) — one owner each, plus their own test timeline. Shared core files (`engine/core/*`, `index.html`, `timeline.js`) belong to the lead.
 - Asset batches and Blender shots run independently of scene code.
 - Long agent runs can stop on usage limits: have agents write files early and often; after an interruption, review what's on disk before re-running anything (in 残光 all seven scene modules were complete on disk even though every agent "failed" before reporting).
 

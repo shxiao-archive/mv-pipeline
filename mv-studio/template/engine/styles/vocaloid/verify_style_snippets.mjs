@@ -3,7 +3,7 @@
 //  - every ```glsl block (with the "@common" block prepended) compiles + links as a WebGL2 program in headless Chromium
 //    (software SwiftShader on purpose, so the check does not depend on the GPU)
 //  - every ```js block passes `node --check`, and the concatenated blocks pass small unit tests
-//   node tools/verify_style_snippets.mjs [--md docs/STYLE_RESEARCH.md]
+//   node engine/styles/vocaloid/verify_style_snippets.mjs [--md docs/STYLE_RESEARCH.md]
 // The cookbook is examples/zanko/STYLE_RESEARCH.md in the kit repo (not in the installed skill folder; online:
 // https://raw.githubusercontent.com/EGSECDA/vocaloid-style-mv-pipeline/main/examples/zanko/STYLE_RESEARCH.md);
 // copy it to docs/ or point --md at it.
@@ -13,11 +13,11 @@ import path from 'node:path';
 import os from 'node:os';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
-import { ROOT, cliArg, handleHelp, launchBrowser } from './kit_env.mjs';
+import { ROOT, cliArg, handleHelp, launchBrowser } from '../../../tools/kit_env.mjs';
 
 handleHelp(`
 verify_style_snippets.mjs -- compile every glsl block and test every js block of the style cookbook
-  node tools/verify_style_snippets.mjs [--md FILE]
+  node engine/styles/vocaloid/verify_style_snippets.mjs [--md FILE]
   --md FILE    cookbook markdown (relative to the project root)     [docs/STYLE_RESEARCH.md]
 Env: BROWSER_CHANNEL (falls back to Playwright's bundled Chromium)`);
 

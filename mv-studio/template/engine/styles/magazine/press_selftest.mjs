@@ -3,11 +3,11 @@
  * a spot-A proof prints in spot A's hue and a spot-B proof in spot B's (the separation gives a dark colour some key, as
  * a real separation does), white prints bare paper, the key channel of the ink layer prints near the key ink, and a
  * hole in the proof shows the back canvas raw.
- *   node tools/press_selftest.mjs        exit 1 on a failed check
+ *   node engine/styles/magazine/press_selftest.mjs        exit 1 on a failed check
  * mv-studio (MIT).
  */
-import { launchBrowser, gpuArgs } from './kit_env.mjs';
-import { serveRoot } from './engine_page.mjs';
+import { launchBrowser, gpuArgs } from '../../../tools/kit_env.mjs';
+import { serveRoot } from '../../../tools/engine_page.mjs';
 
 const { server, origin } = await serveRoot();
 const browser = await launchBrowser({ headless: true, args: gpuArgs() });

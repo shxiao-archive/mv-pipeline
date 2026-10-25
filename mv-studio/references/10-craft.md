@@ -91,7 +91,7 @@ eyes (`Z.rig.take`). The face changes 2–4 frames **before** the body acts (thi
 
 ### 2.4 Model sheet (the acceptance test)
 
-Render one sheet per rig (`engine/sheets/<name>.js`, §8; start from `sheets/papercraft_doll.js` or `sheets/stage_person.js`): every pose in both facings, every expression, every state, the
+Render one sheet per rig (`engine/sheets/<name>.js`, §8; start from `sheets/biped.js`, or a style's own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`): every pose in both facings, every expression, every state, the
 walk and run at 8 phases, the close-up at the largest zoom the film uses, the `detail: 0` and silhouette versions. Look
 at it; fix; render again; at least two full rounds. Then a **lineup**: every character at s = 1 on one ground line with
 the height line, and trial placements in two of the film's sets (this is where a scarf turns out to hang off a balcony).
@@ -228,7 +228,7 @@ effects in every shot). So every film:
 3. keeps `timeline.js` for the edit: times, scene, arguments.
 
 Build from what exists: `D.travel` / `D.along` (paths), `D.coverPt`, `D.contactShadow`, `D.onWater`, `D.glow`,
-`D.rays`, `D.embers` / `D.fireflies` / `D.dust`, `Z.burst` / `Z.stream` (particles), `Z.tween`, `Z.rig`, and inside
+`D.softLight`, `D.dust` / `D.rain`, `Z.burst` / `Z.stream` (particles), `Z.tween`, `Z.rig`, and inside
 `illust` an effect `{ type: 'custom', fn }`. `tools/storyboard.mjs` warns when a film of 12+ shots has no scene file of
 its own; `evals/grade.py` counts own lines per shot (bar: 30).
 

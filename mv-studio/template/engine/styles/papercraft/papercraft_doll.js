@@ -1,6 +1,6 @@
-/* engine/sheets/papercraft_doll.js — MODEL SHEET of PC.doll (styles/papercraft): poses, expressions, cycles, actions,
+/* engine/styles/papercraft/papercraft_doll.js — MODEL SHEET of PC.doll (styles/papercraft): poses, expressions, cycles, actions,
  * emotes, detail 0 / silhouette, a lineup. Copy it for your own cast: one sheet per character (references/10 §2.4).
- *   node tools/stills.mjs --url "engine/index.html?tl=sheets/papercraft_doll.js" --times 0.5,1.5,2.5,3.5 --out render/sheets/doll
+ *   node tools/stills.mjs --url "engine/index.html?tl=styles/papercraft/papercraft_doll.js" --times 0.5,1.5,2.5,3.5 --out render/sheets/doll
  */
 (() => {
   'use strict';

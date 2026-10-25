@@ -1,4 +1,5 @@
-/* vocaloid-style-mv engine — base scenes. Special-purpose scenes live in engine/scenes/*.js and register with Z.scene too. */
+/* mv-studio engine — the shared scenes (solid, jz, illust). A style's scenes live in its pack (engine/styles/<preset>/), a film's
+ * own in engine/scenes/<film>.js; both register with Z.scene too. */
 (() => {
   'use strict';
   const Z = window.Z, D = Z.draw, E = Z.ease;
@@ -10,8 +11,7 @@
     draw(ctx, S) {
       const a = S.args;
       if (a.grad) D.vgrad(ctx, a.grad); else D.fill(ctx, a.color || '#000');
-      if (a.embers) D.embers(ctx, S.t, a.embers);
-      if (a.fireflies) D.fireflies(ctx, S.t, a.fireflies);
+      for (const type of ['embers', 'fireflies']) if (a[type]) fx(ctx, S, Object.assign({}, a[type], { type }));   // a style pack's Z.FX types
     },
   });
 
@@ -26,7 +26,7 @@
   //   tint: [{ color, a, comp }] | grad: stops (overlay), night: 0..1 (darken toward blue),
   //   chars: [{ img, x, y, h, x2, y2, h2, ease, anchor, flip, sway, breathe, wave, rim, sil, alpha,
   //             in: { dur, dx, dy, ds, alpha:true, ease }, out: { at, dur, dx, dy, alpha:true }, q (koma fps) }],
-  //   fx: [{ type: 'embers'|'fireflies'|'rain'|'dust'|'feathers'|'rays'|'glow'|'light'|'cracks', ...opts }],
+  //   fx: [{ type: 'rain'|'dust'|'glow'|'light'|'grad'|'fill'|'custom' or a type a style pack adds to Z.FX, ...opts }],
   //   GROUNDING (mv-studio): a char / layer / 'light' fx with `pin: [u, v]` (a point of the bg image, 0..1, read with
   //   tools/art_grid.py) stands ON that point of the painting and moves and scales with the bg camera; `pin2` + `ease`
   //   moves it along the painted surface. A char with `ground: true | { a, w }` gets a contact shadow at its feet;
@@ -206,7 +206,7 @@
     const opt = { tint: c.tint, anchor: c.anchor || [0.5, 1], rot, flip: c.flip, sway: c.sway ?? 0.012, breathe: c.breathe ?? 1, t, alpha, phase: c.phase || 0,
       wave: c.wave === false ? null : Object.assign({ amp: 10, from: 0.3, q: 12 }, c.wave || {}), field: anim && anim.field };
     if (c.shadow) { ctx.save(); ctx.globalAlpha = c.shadow.a ?? 0.5; D.silhouette(ctx, img, x + (c.shadow.dx || 30), y + (c.shadow.dy || 0), h, c.shadow.color || '#140B1E', Object.assign({}, opt, { key: 'sh' + c.img })); ctx.restore(); }
-    if (c.rim) D.rim(ctx, img, x, y, h, c.rim.color || '#FFA552', c.rim.off || [7, -3], Object.assign({}, opt, { key: 'rim' + c.img + c.rim.color }));
+    for (const k in Z.CHAR_FX) if (c[k]) Z.CHAR_FX[k](ctx, c, img, x, y, h, opt);   // char options a style pack adds (vocaloid: rim)
     if (c.sil) D.silhouette(ctx, img, x, y, h, c.sil, Object.assign({}, opt, { key: 'sil' + c.img + c.sil }));
     else D.sprite(ctx, img, x, y, h, opt);
     if (c.glowAt) D.glow(ctx, x + c.glowAt[0] * h, y - c.glowAt[1] * h, c.glowAt[2] * h, c.glowColor || '#FFA552', c.glowA ?? 0.9);
@@ -215,28 +215,22 @@
   function fx(ctx, S, f) {
     const t = S.t;
     switch (f.type) {
-      case 'embers': D.embers(ctx, t, f); break;
-      case 'fireflies': D.fireflies(ctx, t, f); break;
       case 'rain': D.rain(ctx, t, f); break;
       case 'dust': D.dust(ctx, t, f); break;
-      case 'feathers': D.feathers(ctx, t, f); break;
-      case 'rays': D.rays(ctx, f.x, f.y, f.n || 18, f.len || 1400, f.color || '#FFA552', f.a ?? 0.18, t, f.seed || 3); break;
       case 'light': {                                          // a light source: soft stacked halos, no rim (pin it to the painting)
         let x = f.x, y = f.y, s = 1;
         if (f.pin && S.bgImg) { [x, y] = D.coverPt(S.bgImg, S.bgView, f.pin[0], f.pin[1]); s = S.bgView.zoom ?? 1; }
         D.softLight(ctx, x, y, (f.core || 40) * s, f.color || '#FFD9A0', { a: (f.a ?? 1) * (1 + (f.beat || 0) * S.clock.pulse(t, 8)), spread: f.spread, flicker: f.flicker, t }); break;
       }
       case 'glow': D.glow(ctx, f.x, f.y, f.r, f.color || '#FFA552', (f.a ?? 0.8) * (1 + (f.beat || 0) * S.clock.pulse(t, 8))); break;
-      case 'cracks': {
-        const net = D.crackNet(f.seed || 1, f.x ?? W / 2, f.y ?? H * 0.3, f.n || 22, f.reach || 1100);
-        const pr = f.prog != null ? f.prog : Z.clamp((S.lt - (f.at || 0)) / (f.dur || 1.2));
-        D.cracks(ctx, net, E.outCubic(pr), f); break;
-      }
       case 'grad': D.vgrad(ctx, f.stops, f.a ?? 1, f.comp || 'source-over'); break;
       case 'fill': D.fill(ctx, f.color, f.a ?? 0.5, f.comp || 'source-over'); break;
       case 'custom': f.fn(ctx, S); break;
+      default: if (Z.FX[f.type]) Z.FX[f.type](ctx, S, f);
     }
   }
+  // fx types and char options a style pack registers: Z.FX[type] = (ctx, S, f) => …, Z.CHAR_FX[option] = (ctx, c, img, x, y, h, opt) => …
+  Z.FX = {}; Z.CHAR_FX = {};
   Z.fx = fx;
   Z.drawChar = drawChar;
 })();

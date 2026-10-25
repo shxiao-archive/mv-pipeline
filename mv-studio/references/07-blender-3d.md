@@ -121,7 +121,7 @@ Each layer is posterised into its own cel bands and **all three cast real shadow
 - In the timeline:
   ```js
   shot('s23', B(43), B(47), 'seq', { pattern: 'blender/renders/A/f_####.jpg', t0: B(43), fps: 30, frames: 222 },
-       { lyric: 'none', trans: { type: 'shatter', dur: 0.5 }, post: { boil: 0.5, bloom: 0.4, beatCA: 2 } });
+       { lyric: 'none', trans: { type: 'xfade', dur: 0.5 }, post: { boil: 0.5, bloom: 0.4, beatCA: 2 } });
   ```
   Frame `n = clamp(1 + floor((t − t0)·fps·rate), 1, frames) + offset`; the next 2 frames are prefetched (`prefetch`); decoded frames live in a 48-frame LRU. A missing frame draws a labelled placeholder (`SEQ <pattern> #0042`) and warns once — renders never crash on a half-finished sequence. Optional `view {zoom, x, y}` (re-frame), `rate` (slow-mo), `overlay {leak, flash (downbeats), letterbox, introFlash, vignette, grade [{color, a, comp}]}`.
 - The engine's post pass (boil 0.5, grain, bloom, palette LUT) puts the 3D frames into the same film as the drawn shots. 残光 shipped the sequences at **50 % (960×540)**, upscaled by `D.cover`, and nobody could tell under boil + grain; render `--res 100` if the shot has fine text or wires in close-up.

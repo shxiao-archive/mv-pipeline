@@ -28,8 +28,9 @@ Pick by the song: a story or a ballad → tegaki; a frantic, high-BPM song → s
 ## A. Tegaki — illustrated MV with an original character (the base kit's style)
 
 This is the treatment vocaloid-style-mv-pipeline (NikusonP, MIT) was built for and documented in full; its references
-are the guide. Engine: `template/engine/scenes/*.js` (24 scenes), JIZURA lyric layer, Blender toon 3D. Starter: the demo
-timeline 「蛍火」 (`engine/timeline.js`; kept as `engine/starters/tegaki_demo.js` in a `vocaloid:signal` project).
+are the guide. Engine: the pack `template/engine/styles/vocaloid/` (its scenes, light devices `fx.js`, transitions
+`trans.js`, palettes P1–P5 and LUTs, cookbook tools), JIZURA lyric layer, Blender toon 3D. Starter: the demo 「蛍火」
+(`engine/starters/vocaloid.js`).
 Case study 「残光」: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/tree/main/examples/zanko (© NikusonP — learn
 from it, do not reuse its motifs, character or palettes).
 

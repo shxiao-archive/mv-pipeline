@@ -96,7 +96,7 @@ pile, a giant version of the lead), so the choruses read as one story. End on th
 
 ## 6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)
 
-Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `sheets/stage_person.js`):
+Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `engine/styles/stage/stage_person.js`):
 - **The troupe on `ST.puppet`:** the lead's design plus 3–5 members (colour, top, hat); the vocabulary is the point:
   13 eye shapes, 7 mouths, 6 hats, 8 emotes, 12 beat-synced moves, `ST.mood` changes — use them all over the film.
 - **A human on `ST.person`** (the biped skeleton: 34 poses, 19 expressions; coat, hair, glasses, bowtie): the "I" of the

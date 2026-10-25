@@ -13,7 +13,7 @@ roll and a half-beat stop; bars 7–10 chorus (full drums, side-chained pad, hig
 stop at 22.5 s. `tools/analyze_audio.py` finds 128.1 BPM, 12 bars (numbered 1–12 in `audio.json`, the pre-chorus
 stop at 12.83 s and the final cut at 22.51 s).
 
-The film is the default `engine/timeline.js` (its header lists the eleven shots). It uses only procedural scenes
+The film is the vocaloid starter `engine/starters/vocaloid.js` (its header lists the eleven shots), the `engine/timeline.js` of a `--style vocaloid` project. It uses only procedural scenes
 (`typeCard`, `illust` with gradients and custom fx, `converge`, `kanjiSlam` without character art, `afterimage`)
 plus the JIZURA lyric layer, so it also shows how the pieces of a real timeline fit together.
 
@@ -27,7 +27,7 @@ node tools/render_final.mjs --name demo
 ```
 
 Run these steps in a throwaway project scaffolded **without** `--song` (`python <skill>/scripts/new_project.py
-_smoke --setup`), never in your film's project: they write `audio/song.wav`, `analysis/lyrics_mv.lrc` and
+_smoke --style vocaloid --setup`), never in your film's project: they write `audio/song.wav`, `analysis/lyrics_mv.lrc` and
 `analysis/sections.json`. Scaffold the film separately with `--song` / `--lyrics`; it can reuse the smoke project's
 fonts (`--setup-args "-FontsFrom ../_smoke/engine/fonts"`, bash `"--fonts-from ../_smoke/engine/fonts"`).
 

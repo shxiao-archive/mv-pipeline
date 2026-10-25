@@ -133,7 +133,7 @@ does. A colour that neither spot can make falls back to the nearer one. This is 
 
 - `node tools/check_shots.mjs --strict` checks one lyric line per frame: old lines kept on the page count as overlap.
 - `node tools/storyboard.mjs` checks that every sung line is answered by a shot (`line` in the shot).
-- `node tools/press_selftest.mjs` checks the press: spot colours keep their hue, paper stays paper, key ink prints near
+- `node engine/styles/magazine/press_selftest.mjs` checks the press: spot colours keep their hue, paper stays paper, key ink prints near
   black, and a hole shows the back raw.
 - The press type is drawn by the scene, so LOW CONTRAST and HIDDEN cannot see it. Read your stills for contrast:
   key on paper, or a paper band.

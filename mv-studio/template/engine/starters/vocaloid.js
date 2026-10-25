@@ -1,6 +1,6 @@
-/* engine/timeline.js -- THE EDIT. This default timeline is the procedural demo film 「蛍火」 (HOTARUBI) for the
+/* engine/timeline.js -- THE EDIT. The vocaloid starter is the procedural demo film 「蛍火」 (HOTARUBI) for the
  * synthetic demo song (demo/make_demo_song.py + demo/lyrics_demo.lrc). It uses no image assets at all: only scenes
- * from engine/scenes/*.js, the drawing toolkit (Z.draw) and the JIZURA lyric layer, so a fresh install can render
+ * from the vocaloid pack (engine/styles/vocaloid/), the drawing toolkit (Z.draw) and the JIZURA lyric layer, so a fresh install can render
  * it end to end. It is also the STARTING POINT for a new film: keep the structure (helpers, JIZURA plans and
  * curation, looks, HUD, global FX, vertical config), replace the shots with your shot list (moment / line / cue per shot; node tools/storyboard.mjs writes docs/STORYBOARD.md).
  *

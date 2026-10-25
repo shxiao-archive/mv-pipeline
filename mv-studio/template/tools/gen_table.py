@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gen_table.py -- the film's assets as ONE generation table (references/10 §3; the netsu-ijou-pv method), plus
 VARIANTS: small edits of an approved image (eyes closed, mouth open, a head turn, wind in the hair) that are aligned to
-it so the engine can switch them (engine/scenes/scenes.js chars[].anim).
+it so the engine can switch them (engine/core/scenes.js chars[].anim).
 
   python tools/gen_table.py jobs   assets/gen/table.json [--pass base|variants]   # -> assets/gen/jobs_<pass>.jsonl
   python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  # (the user's chosen generator)
@@ -32,7 +32,7 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
   "pick": {"neutral": 2, "blink": 4, ...}) and draws a grid on the neutral one (_<id>_grid.jpg: set "eyes" and
   "mouth" [u0, v0, u1, v1] there, a little larger than the features), takes them, aligns them to the first (neutral) one, cuts each other expression to the face (`face`
   area pasted from each copy) and writes <id>.png, <id>_<name>.png and <id>.anim.json
-  (blink / open -> anim.blink / anim.mouth, the others -> anim.expr) for engine/scenes/scenes.js. Variant rows (below)
+  (blink / open -> anim.blink / anim.mouth, the others -> anim.expr) for engine/core/scenes.js. Variant rows (below)
   are for a full-body picture that needs one more face; big changes by variant drift in style (tested): avoid them.
   Prompt = the row's locks (default: char -> STYLE + CHAR, world -> STYLE + WORLD, + ISO when transparent, + EMPTY for
   world rows that are not transparent) + "New image: " + subject. References: the style reference first, then the

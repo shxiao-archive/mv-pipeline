@@ -19,8 +19,8 @@ What it does
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
-                asked for: vocaloid (the tegaki demo timeline) | vocaloid:signal | interface | interface:treatise |
-                stage | papercraft | magazine (engine/starters/; a vocaloid:signal project keeps the demo as engine/starters/tegaki_demo.js)
+                asked for: vocaloid (the tegaki demo) | vocaloid:signal | interface | interface:treatise |
+                stage | papercraft | magazine (engine/timeline.js is a copy of engine/starters/<starter>.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -53,8 +53,8 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
                    "Thumbs.db", ".DS_Store", "desktop.ini", "npm-debug.log*"]
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
-# --style -> starter in engine/starters (None: the tegaki demo timeline); <style>:<treatment> picks a treatment
-STYLES = {"own": "blank", "vocaloid": None, "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
+# --style -> starter in engine/starters; <style>:<treatment> picks a treatment
+STYLES = {"own": "blank", "vocaloid": "vocaloid", "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
           "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
 STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
                  "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own",
@@ -210,21 +210,11 @@ def main() -> int:
     print(f"template : {tpl}\nproject  : {dst}")
     copy_template(dst, a.force)
     tl, starters = dst / "engine" / "timeline.js", dst / "engine" / "starters"
-    if tl.is_file() and a.style.startswith("vocaloid"):
-        shutil.copy2(tl, starters / "tegaki_demo.js")
-    if a.style == "own":                               # the vocaloid demo's palettes stay out of an own-style film
-        pal = dst / "assets" / "style" / "palettes.json"
-        if pal.is_file():
-            pj_ = json.loads(pal.read_text(encoding="utf-8"))
-            pal.write_text(json.dumps({"global": pj_.get("global", {}), "palettes": []}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        for f in (dst / "assets" / "style" / "luts").glob("P*.png"):
-            f.unlink()
-    if starter:
-        shutil.copy2(starters / f"{starter}.js", tl)
-        print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (an example to rewrite: read "
-              + ("<skill>/design-a-style.md" if a.style == "own" else f"<skill>/styles/{a.style.split(':')[0]}/BRIEF.md") + ")")
-    else:
-        print(f"  style  : {a.style} -> engine/timeline.js is the illustrated demo (an example to rewrite: read <skill>/styles/vocaloid/BRIEF.md)")
+    shutil.copy2(starters / f"{starter}.js", tl)
+    if a.style.startswith("vocaloid"):                 # the preset's palettes (P1-P5) become the film's
+        shutil.copy2(dst / "engine" / "styles" / "vocaloid" / "palettes.json", dst / "assets" / "style" / "palettes.json")
+    print(f"  style  : {a.style} -> engine/timeline.js is the {starter} starter (an example to rewrite: read "
+          + ("<skill>/design-a-style.md" if a.style == "own" else f"<skill>/styles/{a.style.split(':')[0]}/BRIEF.md") + ")")
     pj = dst / "project.json"
     proj = json.loads(pj.read_text(encoding="utf-8")) if pj.is_file() else {}
     proj.update({"mode": a.mode, "style": a.style})
@@ -258,7 +248,7 @@ def main() -> int:
     set_timeline_strings(dst, values)
     if song or lyrics:
         keep = [f"Z.{k}" for k, v in values.items() if v is None]
-        if keep and starter is None:
+        if keep and starter == "vocaloid":
             print(f"  note: {', '.join(keep)} still hold the demo's values (蛍火 / HOTARUBI / NikusonP): set them in "
                   "engine/timeline.js (or pass --title / --title-sub / --artist / --credit)")
 
@@ -299,7 +289,7 @@ def main() -> int:
         steps.insert(-3, "# lyrics have no timings yet: see references/03-audio-and-lyrics.md (alignment) "
                          "before writing analysis/lyrics_mv.lrc")
     print("\nNext steps:\n  " + "\n  ".join(steps))
-    print("\nengine/timeline.js is " + ("the procedural demo film" if starter is None else f"the {starter} starter")
+    print("\nengine/timeline.js is " + f"the {starter} starter"
           + ": replace its shots with your storyboard (README.md, SKILL.md phases 2-7).")
     return rc
 

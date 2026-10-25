@@ -2,21 +2,21 @@
 // preview_style_fx.mjs -- visual smoke test of key GLSL recipes from the style cookbook (STYLE_RESEARCH.md) rendered onto
 // the procedural dusk scene (assets/style/dusk_scene_gray.png, from tools/style_palette_sheet.py) -> docs/style_fx_preview.png
 // (4x4 grid, 1920x1080). Software WebGL (SwiftShader) on purpose: the result does not depend on the GPU.
-//   node tools/preview_style_fx.mjs [--md docs/STYLE_RESEARCH.md] [--out docs/style_fx_preview.png]
+//   node engine/styles/vocaloid/preview_style_fx.mjs [--md docs/STYLE_RESEARCH.md] [--out docs/style_fx_preview.png]
 // The cookbook is examples/zanko/STYLE_RESEARCH.md in the kit repo (not in the installed skill folder; online:
 // https://raw.githubusercontent.com/EGSECDA/vocaloid-style-mv-pipeline/main/examples/zanko/STYLE_RESEARCH.md);
 // copy it to docs/ or point --md at it.
 // Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, cliArg, handleHelp, launchBrowser } from './kit_env.mjs';
+import { ROOT, cliArg, handleHelp, launchBrowser } from '../../../tools/kit_env.mjs';
 
 handleHelp(`
 preview_style_fx.mjs -- render 16 cookbook shaders on the dusk test scene into one contact sheet
-  node tools/preview_style_fx.mjs [--md FILE] [--out FILE]
+  node engine/styles/vocaloid/preview_style_fx.mjs [--md FILE] [--out FILE]
   --md FILE    style cookbook with #### <ID> headings and \`\`\`glsl blocks   [docs/STYLE_RESEARCH.md]
   --out FILE   output PNG (relative to the project root)                  [docs/style_fx_preview.png]
-Needs assets/style/dusk_scene_gray.png and assets/style/luts/P1..P5 (python tools/style_palette_sheet.py).`);
+Needs assets/style/dusk_scene_gray.png (python tools/style_palette_sheet.py) and engine/styles/vocaloid/luts/P1..P5.`);
 
 const mdPath = path.resolve(ROOT, cliArg('md', 'docs/STYLE_RESEARCH.md'));
 const outPath = path.resolve(ROOT, cliArg('out', 'docs/style_fx_preview.png'));
@@ -48,9 +48,9 @@ const dataUrl = (p) => {
 };
 const imgs = {
   scene: dataUrl('assets/style/dusk_scene_gray.png'),
-  P1: dataUrl('assets/style/luts/P1_oumagatoki.png'), P2: dataUrl('assets/style/luts/P2_zansho.png'),
-  P3: dataUrl('assets/style/luts/P3_fumikiri.png'), P4: dataUrl('assets/style/luts/P4_hotarubi.png'),
-  P5: dataUrl('assets/style/luts/P5_taishoku.png'),
+  P1: dataUrl('engine/styles/vocaloid/luts/P1_oumagatoki.png'), P2: dataUrl('engine/styles/vocaloid/luts/P2_zansho.png'),
+  P3: dataUrl('engine/styles/vocaloid/luts/P3_fumikiri.png'), P4: dataUrl('engine/styles/vocaloid/luts/P4_hotarubi.png'),
+  P5: dataUrl('engine/styles/vocaloid/luts/P5_taishoku.png'),
 };
 
 const browser = await launchBrowser({ headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });

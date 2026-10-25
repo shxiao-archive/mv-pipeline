@@ -42,7 +42,7 @@ def stage_checks(proj, add):
     base = len(PAINT.findall(STARTER.read_text(encoding="utf-8")))
     mine = 0
     for f in [proj / "engine" / "timeline.js", *(proj / "engine" / "scenes").glob("*.js"), *(proj / "engine" / "tests").glob("*.js")]:
-        if f.is_file() and not (f.parent.name == "scenes" and (STARTER.parents[1] / "scenes" / f.name).is_file()):
+        if f.is_file():
             mine += len(PAINT.findall(f.read_text(encoding="utf-8", errors="ignore")))
     for f in (proj / "engine" / "styles").rglob("*.js") if (proj / "engine" / "styles").is_dir() else []:
         if not (STARTER.parents[1] / "styles" / f.relative_to(proj / "engine" / "styles")).is_file():
@@ -58,7 +58,7 @@ STYLE = {
     "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
     "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
     "magazine": dict(scene=r"^mz[A-Z]", starter="starters/magazine.js", use=r"\bMZ\.|['\"]mz[A-Z]"),
-    "vocaloid": dict(scene=None, starter="timeline.js"),
+    "vocaloid": dict(scene=None, starter="starters/vocaloid.js"),
     "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
 }
 # the presets' signature scenes: an own-style film may borrow techniques, not a preset's look (SKILL.md)
@@ -72,13 +72,13 @@ V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"k
 def own_files(proj):
     """The project's engine files the agent wrote: (path, own lines). timeline.js (compared with the style's starter by
     the caller, so a shipped starter scores ~0) and files the template does not have; a template file the project
-    carries (core/, styles/, the stock scenes) is the template's."""
+    carries (core/, styles/) is the template's."""
     eng, out = proj / "engine", []
     if not eng.is_dir():
         return out
     for f in eng.rglob("*.js"):
         rel = f.relative_to(eng)
-        if rel.parts[0] in {"vendor", "fonts", "starters"}:            # starters/: the scaffold keeps the demo there
+        if rel.parts[0] in {"vendor", "fonts", "starters"}:            # starters/: the presets' starters, not the film's
             continue
         # shortcut: edits to a template file are not counted: a copy from an older skill differs line by line (drift, not
         # the agent's work); count them against the run's own skill snapshot once runs keep one

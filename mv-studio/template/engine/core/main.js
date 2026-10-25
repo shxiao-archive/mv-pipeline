@@ -52,8 +52,6 @@
       x.fillStyle = g; x.fillRect(0, row, 256, 1); Z.LUT[name] = row; row++;
     };
     ramp('night', [[0, '#04060d'], [0.3, '#0d1a33'], [0.55, '#23407a'], [0.75, '#7aa6d6'], [0.9, '#e8c38a'], [1, '#fff4dc']]);   // moonlit night with warm highlights
-    ramp('ember', [[0, '#07040a'], [0.35, '#2a0c14'], [0.6, '#8e1f22'], [0.8, '#f06a2a'], [1, '#ffe2a8']]);                      // darkness + fire
-    ramp('dawn', [[0, '#120d24'], [0.3, '#3a2d63'], [0.55, '#9a6aa0'], [0.75, '#f3a6a0'], [0.9, '#ffd9b0'], [1, '#fffaf0']]);     // first light
     ramp('mono', [[0, '#0b0a0d'], [1, '#f4efe6']]);
     ramp('day', [[0, '#0e2a47'], [0.5, '#2c8fc4'], [0.8, '#bfe8fa'], [1, '#ffffff']]);                                          // high-key daylight
     // ramps registered by style packs or the timeline file: Z.RAMPS = { name: [[k, '#hex'], ...] } (defined before main.js runs)

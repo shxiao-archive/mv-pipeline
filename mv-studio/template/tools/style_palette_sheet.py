@@ -2,8 +2,7 @@
 """Palette system — writes machine-readable
 palettes, 256x1 gradient-map LUT PNGs and a visual contact sheet that applies every palette to a procedural dusk scene
 (or, with --plate, to one of your own backgrounds: judge daylight palettes on a daylight plate).
-PALETTES below holds the vocaloid demo's colour script (an example of the data format, not a suggested look):
-replace it with the film's own colours from docs/CONCEPT.md, then re-run.
+PALETTES below is a grey placeholder: replace it with the film's own colours from docs/CONCEPT.md, then re-run.
 
 Usage:
   python tools/style_palette_sheet.py [--sheet docs/style_palettes.png] [--plate assets/bg/<plate>.png]
@@ -12,7 +11,7 @@ Outputs (under the project root):
   assets/style/palettes.json          (roles, gradient stops, duotone pairs, contrast)
   assets/style/luts/<id>.png          (256x1 RGB gradient-map LUT, OKLab-interpolated)
   assets/style/luts/<id>_duo.png      (256x1 duotone LUT)
-  assets/style/dusk_scene_gray.png    (the grey test scene; used by tools/preview_style_fx.mjs)
+  assets/style/dusk_scene_gray.png    (the grey test scene; engine/styles/vocaloid/preview_style_fx.mjs renders onto it)
   docs/style_palettes.png             (contact sheet)
 Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 """
@@ -31,52 +30,17 @@ SHEET_FONTS = [os.path.join(ROOT, "engine", "fonts", "NotoSansJP_wght_.ttf"), "Y
                "ヒラギノ角ゴシック W3.ttc", "Hiragino Sans GB.ttc", "NotoSansCJK-Regular.ttc", "NotoSansCJKjp-Regular.otf",
                "NotoSansJP-Regular.otf", "DejaVuSans.ttf", "Arial.ttf", "arial.ttf"]
 
+# REPLACE: the film's own palettes from docs/CONCEPT.md, one entry per palette. Grey placeholder; the format:
+# id (<short>_<name>: the engine looks a LUT up by either), name, use, roles (name -> hex), gradmap (luminance 0..1 ->
+# hex, dark to light), duotone [dark, light], accent, optional afterimage (the complementary flash colour).
+# The vocaloid preset's palettes: engine/styles/vocaloid/palettes.json.
 PALETTES = [
     {
-        "id": "P1_oumagatoki", "name": "逢魔が時 Oumagatoki (magic hour)",
-        "use": "main chorus / title / emotional peaks; the canonical 'afterglow' look",
-        "roles": {"ink": "#140B1E", "shadow": "#3A1745", "dusk": "#7A2350", "vermilion": "#C8373A",
-                  "sunset": "#F0663A", "glow": "#FFA552", "highlight": "#FFE3B0"},
-        "gradmap": [[0.0, "#140B1E"], [0.22, "#3A1745"], [0.42, "#7A2350"], [0.58, "#C8373A"],
-                    [0.72, "#F0663A"], [0.86, "#FFA552"], [1.0, "#FFE3B0"]],
-        "duotone": ["#140B1E", "#FFA552"], "accent": "#C8373A", "afterimage": "#39C6E0",
-    },
-    {
-        "id": "P2_zansho", "name": "残照 Zanshō (lingering glow vs. night)",
-        "use": "verses, memory-vs-present split tone, blue sky above / orange horizon",
-        "roles": {"night": "#0B1524", "steel": "#1E3552", "haze": "#3F6284", "mist": "#8FB2C9",
-                  "cream": "#E9D9B8", "amber": "#F4A640", "ember": "#D8542A"},
-        "gradmap": [[0.0, "#0B1524"], [0.25, "#1E3552"], [0.45, "#3F6284"], [0.60, "#D8542A"],
-                    [0.80, "#F4A640"], [1.0, "#E9D9B8"]],
-        "duotone": ["#0B1524", "#F4A640"], "accent": "#D8542A", "afterimage": "#2F7BD9",
-    },
-    {
-        "id": "P3_fumikiri", "name": "踏切 Fumikiri (railway crossing alarm)",
-        "use": "pre-chorus tension, bridge alarm, beat-strobe hits; graphic black/red/white + hazard yellow",
-        "roles": {"black": "#0A0A0C", "asphalt": "#2A2F36", "signal": "#E5102E", "lamp": "#FF4B3A",
-                  "caution": "#FFC21A", "white": "#F3F1EA"},
-        "gradmap": [[0.0, "#0A0A0C"], [0.38, "#0A0A0C"], [0.40, "#E5102E"], [0.70, "#E5102E"],
-                    [0.72, "#F3F1EA"], [1.0, "#F3F1EA"]],
-        "duotone": ["#0A0A0C", "#E5102E"], "accent": "#FFC21A", "afterimage": "#00E0C8",
-    },
-    {
-        "id": "P4_hotarubi", "name": "蛍火 Hotarubi (blue hour + fireflies)",
-        "use": "quiet verse, breakdown, bridge-before-drop, outro embers; cold field + chartreuse glow",
-        "roles": {"abyss": "#050F16", "bluehour": "#0C2233", "teal": "#17405A", "reed": "#2F6B6A",
-                  "firefly": "#9BD86A", "glow": "#DDFF7A", "core": "#F6FFE0"},
-        "gradmap": [[0.0, "#050F16"], [0.25, "#0C2233"], [0.45, "#17405A"], [0.62, "#2F6B6A"],
-                    [0.82, "#9BD86A"], [0.93, "#DDFF7A"], [1.0, "#F6FFE0"]],
-        "duotone": ["#050F16", "#DDFF7A"], "accent": "#DDFF7A", "afterimage": "#C04BD8",
-    },
-    {
-        "id": "P5_taishoku", "name": "褪色 Taishoku (faded photograph / 走馬灯 memory)",
-        "use": "flashbacks, 走馬灯 inserts, paper/diary scenes; low-saturation sepia with cyan/rose split tone",
-        "roles": {"sepia": "#241C1A", "umber": "#4A3B35", "taupe": "#7D6A5E", "dustrose": "#B79C8B",
-                  "parchment": "#D8C7AE", "paper": "#EFE6D6", "bleach_cyan": "#9CC2C0", "faded_rose": "#C98D86"},
-        "gradmap": [[0.0, "#241C1A"], [0.20, "#4A3B35"], [0.45, "#7D6A5E"], [0.68, "#B79C8B"],
-                    [0.85, "#D8C7AE"], [1.0, "#EFE6D6"]],
-        "duotone": ["#241C1A", "#EFE6D6"], "accent": "#C98D86", "afterimage": "#6FA9A6",
-        "split_tone": {"shadows": ["#9CC2C0", 0.15], "highlights": ["#C98D86", 0.10]},
+        "id": "A_replace", "name": "A (REPLACE)",
+        "use": "REPLACE: where the film uses it",
+        "roles": {"dark": "#141414", "mid": "#6E6E6E", "light": "#E6E6E6"},
+        "gradmap": [[0.0, "#141414"], [0.5, "#6E6E6E"], [1.0, "#E6E6E6"]],
+        "duotone": ["#141414", "#E6E6E6"], "accent": "#9A9A9A",
     },
 ]
 GLOBAL = {"flash_white": "#FFFFFF", "sumi": "#111014", "paper": "#F4EFE6"}
@@ -228,7 +192,7 @@ def main():
     os.makedirs(OUT_LUT, exist_ok=True)
     os.makedirs(os.path.dirname(sheet_path), exist_ok=True)
 
-    scene = dusk_scene()   # always refreshed: tools/preview_style_fx.mjs renders onto it
+    scene = dusk_scene()   # always refreshed: engine/styles/vocaloid/preview_style_fx.mjs renders onto it
     Image.fromarray((scene * 255).round().astype(np.uint8), 'L').save(os.path.join(OUT_STYLE, "dusk_scene_gray.png"))
     if plate:   # Rec.601 luma of the plate, same 640x360 frame as the dusk scene
         grey = ImageOps.fit(Image.open(plate).convert("L"), (640, 360), Image.LANCZOS)

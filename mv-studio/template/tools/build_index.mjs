@@ -10,14 +10,12 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSy
 import { join, relative, dirname, basename } from 'node:path';
 
 const args = process.argv.slice(2), opt = k => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
-const STOCK = new Set(['scenes.js', 'intro.js', 'typo.js', 'glass.js', 'dark.js', 'night.js', 'memory.js', 'meta.js']);
 const PACK = { signal: 'vocaloid', interface: 'interface', treatise: 'interface', stage: 'stage', papercraft: 'papercraft', magazine: 'magazine' };
 
 function fitsOf(path) {
-  const m = path.match(/engine\/styles\/(\w+)\//);
-  if (m) return [PACK[m[1]] || m[1]];
-  if (/engine\/scenes\//.test(path)) return [STOCK.has(basename(path)) ? 'vocaloid' : 'film'];
-  if (/engine\/timeline\.js$/.test(path)) return ['vocaloid'];
+  const m = path.match(/engine\/(?:styles\/(\w+)\/|starters\/(?!blank\.)(\w+)\.js$)/);   // a preset's pack or starter
+  if (m) { const p = m[1] || m[2]; return [PACK[p] || p]; }
+  if (/engine\/(scenes\/|timeline\.js$)/.test(path)) return ['film'];
   return ['shared'];
 }
 const clean = s => s.replace(/^[\s/*]+/, '').replace(/-{3,}/g, '').replace(/\s+/g, ' ').trim();
@@ -121,6 +119,10 @@ for (const f of walk('engine', /\.js$/)) rows.push(...indexSource(readFileSync(f
 for (const f of walk('tools', /\.(mjs|py)$/).filter(f => dirname(f) === 'tools')) {
   const n = basename(f), kind = /^(check_|motion_check|pops|lint|storyboard|verify)/.test(n) ? 'check' : 'tool';
   rows.push({ id: `${kind}:${n.replace(/\.\w+$/, '')}`, kind, fits: ['shared'], does: toolDoc(readFileSync(f, 'utf8')) || n, where: rel(f), use: `${n.endsWith('.py') ? 'python' : 'node'} tools/${n}` });
+}
+for (const f of walk('engine/styles', /\.mjs$/)) {                     // a preset's own tools live in its pack
+  const n = basename(f, '.mjs');
+  rows.push({ id: `tool:${n}`, kind: 'tool', fits: fitsOf(rel(f)), does: toolDoc(readFileSync(f, 'utf8')) || n, where: rel(f), use: `node ${rel(f)}` });
 }
 const skill = opt('--skill') || (existsSync('../references') ? '..' : null);
 const out = opt('--out') || 'index/index.jsonl';

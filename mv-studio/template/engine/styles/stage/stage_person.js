@@ -1,5 +1,5 @@
-/* engine/sheets/stage_person.js — MODEL SHEET of ST.person (styles/stage): poses, expressions, a lineup with the troupe.
- *   node tools/stills.mjs --url "engine/index.html?tl=sheets/stage_person.js" --times 0.5,1.5,2.5 --out render/sheets/person
+/* engine/styles/stage/stage_person.js — MODEL SHEET of ST.person (styles/stage): poses, expressions, a lineup with the troupe.
+ *   node tools/stills.mjs --url "engine/index.html?tl=styles/stage/stage_person.js" --times 0.5,1.5,2.5 --out render/sheets/person
  */
 (() => {
   'use strict';
