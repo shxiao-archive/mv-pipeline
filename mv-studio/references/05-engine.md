@@ -222,16 +222,16 @@ them (vocaloid: `styles/vocaloid/STYLE.md` "Porting checklist"). For any film, s
 the film's style; `--style` chooses only the starter timeline copied to `engine/timeline.js`. The table says where each
 preset's code and docs live:
 
-| preset | treatment | `--style` | starter (`engine/starters/`) | code (`engine/`) | docs (`<skill>/styles/`) |
+| preset | treatment | `--style` | starter (`engine/starters/`) | code (`engine/`) | docs (`<skill>/`) |
 |---|---|---|---|---|---|
 | — (the film's own, default) | — | `own` | `blank.js` | `scenes/<film>.js` | `design-a-style.md` |
-| vocaloid | tegaki | `vocaloid` | `vocaloid.js` | `styles/vocaloid/` | `vocaloid/` (§A) |
-| vocaloid | signal | `vocaloid:signal` | `signal.js` | `styles/signal/` | `vocaloid/` (§B) |
-| interface | screen | `interface` | `interface.js` | `styles/interface/` | `interface/` |
-| interface | treatise | `interface:treatise` | `treatise.js` | `styles/treatise/` | `interface/` |
-| stage | — | `stage` | `stage.js` | `styles/stage/` | `stage/` |
-| papercraft | — | `papercraft` | `papercraft.js` | `styles/papercraft/` | `papercraft/` |
-| magazine | — | `magazine` | `magazine.js` | `styles/magazine/` | `magazine/` |
+| vocaloid | tegaki | `vocaloid` | `vocaloid.js` | `styles/vocaloid/` | `styles/vocaloid/` (§A) |
+| vocaloid | signal | `vocaloid:signal` | `signal.js` | `styles/signal/` | `styles/vocaloid/` (§B) |
+| interface | screen | `interface` | `interface.js` | `styles/interface/` | `styles/interface/` |
+| interface | treatise | `interface:treatise` | `treatise.js` | `styles/treatise/` | `styles/interface/` |
+| stage | — | `stage` | `stage.js` | `styles/stage/` | `styles/stage/` |
+| papercraft | — | `papercraft` | `papercraft.js` | `styles/papercraft/` | `styles/papercraft/` |
+| magazine | — | `magazine` | `magazine.js` | `styles/magazine/` | `styles/magazine/` |
 
 - **What each pack registers** (all load after `core/scenes.js`): `styles/vocaloid/*` (its fx, transitions and scenes, §5; its scenes: `styles/vocaloid/STYLE.md`), `styles/interface/*` (`Z.IF`, scenes
   `ifChat ifPlate ifCode`; `kit.js`: ink plates `IF.inks / inkClip / part`, sagging type `IF.limp`, `IF.masked`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
