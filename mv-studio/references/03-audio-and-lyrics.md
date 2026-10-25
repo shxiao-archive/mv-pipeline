@@ -145,6 +145,10 @@ stays in 4/4 needs none.
    - the bar map on the spectrogram.
 
    It also writes a draft, `analysis/meter_auto.json`.
+
+   **If it prints a WARNING that the analyser's beat is not 4 tatums:** the beat tracker locked to another pulse. In
+   music that mixes 6/8 and 4/4 this is often 2:3, a dotted quarter. Re-run `tools/analyze_audio.py` with the
+   `--bpm-range` it prints before anything else uses the beats.
 2. Copy the draft to `analysis/meter.json` and fix it by ear and against the plot:
    ```json
    {"tatum": 0.164835, "t0": 0.4085, "bars": [[12, "4/4", [3, 3, 3, 3, 4]], [1, "3/8", [6]], [9, "5/8", [4, 6]]]}

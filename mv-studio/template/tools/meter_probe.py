@@ -106,7 +106,10 @@ def draft(acc, P, t0, first_down):
         j = int(np.argmin(np.abs(cs - k))) if len(cs) else 0
         score = {L: A[j, L - 1] for L in lens} if len(cs) else {16: 1}
         best = max(score.values())
-        L = max(L for L in score if score[L] >= 0.85 * best)   # a half bar repeats too: take the longest that fits
+        if best <= 0:                                          # no bar periodicity (a stop, a break): keep the bar
+            L = cur
+        else:
+            L = max(L for L in score if score[L] >= 0.85 * best)   # a half bar repeats too: take the longest that fits
         if L != 16 and score[16] > 0.6 * best:                 # still 4-periodic at the bar: keep 4/4
             L = 16
         if L != cur:                                           # change metre only on two votes in a row
@@ -158,12 +161,23 @@ def plot(path, Ps, Rs, P, tt, ww, t0, acc, LM, dt, M, a, b):
     plt.tight_layout(); plt.savefig(path, dpi=50); plt.close(fig)
 
 
+def wide_tatum(tt, ww, lo=0.05, hi=0.30):
+    """the strongest grid period over the whole range: catches an analyzer beat that is not div tatums (2:3, 3:4)"""
+    Ps = np.arange(lo, hi, 2e-5)
+    Rs = np.array([np.abs(np.sum(ww * np.exp(2j * np.pi * tt / P))) for P in Ps]) / ww.sum()
+    return Ps[int(np.argmax(Rs))], float(Rs.max())
+
+
 def probe(y, bpm, div=4, first_down=None, sr=SR):
     tt, ww, e, dt, LM = onsets(y, sr)
     P, t0, Ps, Rs = tatum(tt, ww, 60.0 / bpm / div)
+    Pw, Rw = wide_tatum(tt, ww)
+    wide = Rs.max() < 0.5 * Rw                             # the beat's grid barely locks: the analyzer's tempo is off
+    if wide:
+        P, t0, Ps, Rs = tatum(tt, ww, Pw, span=0.005)
     acc = accents(e, dt, P, t0, len(y) / sr)
     M = draft(acc, P, t0, first_down if first_down is not None else t0)
-    return dict(tt=tt, ww=ww, e=e, dt=dt, LM=LM, P=P, t0=t0, Ps=Ps, Rs=Rs, acc=acc, draft=M)
+    return dict(tt=tt, ww=ww, e=e, dt=dt, LM=LM, P=P, t0=t0, Ps=Ps, Rs=Rs, acc=acc, draft=M, wide=wide)
 
 
 def selftest():
@@ -197,6 +211,12 @@ def selftest():
     assert abs(((R["t0"] - t0 + P / 2) % P) - P / 2) < 0.006, f"phase {R['t0']:.4f}"
     metres = [r[1] for r in R["draft"]["bars"]]
     assert "5/8" in metres and metres[0] == "4/4", f"draft metres {R['draft']['bars']}"
+    global acorr_map                                           # a stop: every lag anti-correlated -> no crash, 4/4 kept
+    real, acorr_map = acorr_map, lambda x, W=96, step=8, maxlag=40: (-np.ones((len(x) // step, maxlag)), np.arange(len(x) // step) * step)
+    try:
+        assert draft(np.ones(128), P, 0, 0)["bars"] == [[8, "4/4", [4, 4, 4, 4]]], "a stop"
+    finally:
+        acorr_map = real
     import analyze_audio as AA
     beats = np.arange(t0, t, P * 4)
     down, bars, gs = AA.meter_bars({"tatum": P, "t0": t0, "bars": rows}, beats, t)
@@ -235,6 +255,11 @@ def main():
     r = ((R["tt"] - R["t0"] + R["P"] / 2) % R["P"]) - R["P"] / 2
     print(f"tatum {R['P'] * 1000:.3f} ms (beat x{args.div} = {60 / R['P'] / args.div:.3f} BPM), phase {R['t0']:.4f} s, "
           f"median |residual| {np.median(np.abs(r)) * 1000:.1f} ms")
+    if R["wide"]:
+        tb = 60 / R["P"] / args.div
+        print(f"WARNING: the analyzer's {bpm:.1f} BPM beat is {60 / bpm / R['P']:.2f} tatums, not {args.div}: its beats and "
+              f"downbeats are off. Re-run python tools/analyze_audio.py --bpm-range {tb * 0.97:.0f},{tb * 1.03:.0f} "
+              f"(and curate meter.json from this probe), then check the beats again.")
     print("draft:", " ".join(f"{m}x{c}" for c, m, _ in R["draft"]["bars"]))
     print("(a draft: short odd runs inside breaks, stops and fills are usually false -- check each by ear and on the "
           "plot; a song that stays in 4/4 needs no meter.json at all)")
