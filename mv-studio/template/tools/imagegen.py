@@ -147,7 +147,6 @@ def run_job(job: dict, out_dir: Path, logs_dir: Path, timeout: float, effort: st
         cmd += ["-i", str(p)]
     cmd.append("-")  # prompt via stdin: `-i <FILE>...` is greedy and would swallow a positional prompt
     started = time.time()
-    before = {p.name for p in GEN_DIR.iterdir()} if GEN_DIR.is_dir() else set()
     try:
         proc = subprocess.run(cmd, input=worker_prompt(job), capture_output=True, text=True,
                               encoding="utf-8", errors="replace", timeout=timeout)
@@ -158,19 +157,12 @@ def run_job(job: dict, out_dir: Path, logs_dir: Path, timeout: float, effort: st
     (logs_dir / f"{jid}.stdout.jsonl").write_text(stdout or "", encoding="utf-8")
     (logs_dir / f"{jid}.stderr.log").write_text((stderr or "")[-20000:], encoding="utf-8")
     tid = find_thread_id(stdout or "")
+    # only this job's own thread folder: a scan of new folders could take a concurrent worker's image
     src = newest_image(GEN_DIR / tid, started) if tid else None
-    if src is None:
-        # fallback: any new generated_images subfolder created during this run with a fresh png
-        for d in (GEN_DIR.iterdir() if GEN_DIR.is_dir() else []):
-            if d.name not in before and d.is_dir():
-                cand = newest_image(d, started)
-                if cand is not None:
-                    src = cand
-                    break
     elapsed = round(time.time() - started, 1)
     if src is None:
         return {"id": jid, "status": "failed", "elapsed": elapsed, "code": code, "thread": tid,
-                "error": (stderr or "")[-400:]}
+                "error": ("" if tid else "no thread id in the codex output; ") + (stderr or "")[-400:]}
     raw = out.with_name(out.stem + ".raw.png") if job.get("transparent") else out
     shutil.copyfile(src, raw)
     result = {"id": jid, "status": "complete", "elapsed": elapsed, "thread": tid,

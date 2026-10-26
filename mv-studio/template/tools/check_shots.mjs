@@ -3,6 +3,7 @@
  * that failed to load. Fast (no video): run it after every change, before stills and renders.
  *
  *   node tools/check_shots.mjs [--url engine/index.html] [--samples 3] [--only s12,s13] [--json render/check_shots.json]
+ *   node tools/check_shots.mjs --url engine/vertical.html   the 9:16 build: frames of #vout, its own lyric layout
  *
  * Per shot it renders `samples` times spread over the shot (first frame, ..., last frame) and flags
  *   ERROR  a page error while drawing it · a BLACK frame (mean < 3 %, almost no detail) unless the shot says
@@ -155,7 +156,8 @@ if (flag('selftest')) {
 
 const n = Math.max(1, +arg('samples', 3));
 const only = arg('only', '') ? new Set(arg('only').split(',')) : null;
-const E = await openEngine({ url: arg('url', 'engine/index.html'), quiet: true });
+const url = arg('url', 'engine/index.html'), vertical = /vertical\.html/.test(url);   // the 9:16 build draws into #vout
+const E = await openEngine({ url, quiet: true, canvas: vertical ? 'vout' : 'out', width: vertical ? 1080 : 1920, height: vertical ? 1920 : 1080 });
 const P = await E.plan();
 const fps = P.fps || 30, shots = P.shots.slice().sort((a, b) => a.t0 - b.t0);
 const bootErrors = E.errors.splice(0);
@@ -224,20 +226,21 @@ if (spriteFps > 0) {                                           // which sprite i
           const b = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), W, H, edges };
           if (!fig || b.y1 - b.y0 > fig.y1 - fig.y0) fig = b;
         };
-        window.Z.onText = (c, shot, fgc, scene) => {
-          const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main');
-          const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
+        window.Z.onText = (c, shot, fgc, scene, vplan) => {           // vplan: the 9:16 plan (engine/vertical.js)
+          const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = vplan || (L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main'));
+          const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.OFFSET || 0) - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
           if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion
           // legibility: the words uncovered and apart from the picture around them (480 x 270)
-          const w = 480, h = 270, cv = k => window['__lg' + k] || (window['__lg' + k] = Object.assign(document.createElement('canvas'), { width: w, height: h }));
+          const w = 480, h = Math.round(480 * c.height / c.width), cv = k => window['__lg' + k] || (window['__lg' + k] = Object.assign(document.createElement('canvas'), { width: w, height: h }));
           const rd = (k, ...src) => { const x = cv(k).getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, w, h); for (const q of src) if (q) x.drawImage(q, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
           leg = window.__legib(rd(0, c), fgc ? rd(1, fgc) : null, rd(2, scene, c, fgc), w, h);
           if (shot && shot.crop) return;                          // a deliberate 見切れ: the shot says the frame crops its words
-          // lyric pixels outside the 90 % title-safe box
-          const s = window.__safe || (window.__safe = Object.assign(document.createElement('canvas'), { width: 192, height: 108 }));
-          const x = s.getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, 192, 108); x.drawImage(c, 0, 0, 192, 108);
-          const a = x.getImageData(0, 0, 192, 108).data;
-          for (let i = 3, n = 0; i < a.length; i += 4, n++) if (a[i] > 127) { all++; const u = n % 192, v = (n / 192) | 0; if (u < 10 || u >= 182 || v < 5 || v >= 103) out++; }
+          // lyric pixels outside the 90 % title-safe box (192 wide, the frame's own aspect)
+          const sw = 192, sh = Math.round(192 * c.height / c.width), m = Math.round(sh * 5 / 108);
+          const s = window.__safe || (window.__safe = Object.assign(document.createElement('canvas'), { width: sw, height: sh }));
+          const x = s.getContext('2d', { willReadFrequently: true }); x.clearRect(0, 0, sw, sh); x.drawImage(c, 0, 0, sw, sh);
+          const a = x.getImageData(0, 0, sw, sh).data;
+          for (let i = 3, n = 0; i < a.length; i += 4, n++) if (a[i] > 127) { all++; const u = n % sw, v = (n / sw) | 0; if (u < 10 || u >= sw - 10 || v < m || v >= sh - m) out++; }
         };
         try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; window.Z.onSpriteBox = null; }
         const sh = (window.Z.SHOTS || []).filter(x => x.t0 <= t).pop();

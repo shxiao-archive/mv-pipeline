@@ -10,7 +10,7 @@
                picture actually changes: the first frame at or after the cut time must be the first new frame.
                A late analyzer, a frame-rounding bug or an offset shows up as a constant lag. PASS when the median
                lag is under half a frame and >= 90 % of the measurable cuts are within one frame.
-3. LYRICS      the lyric line starts (analysis/lyrics_mv.lrc + project.json timing.lyricOffset) against the onsets of
+3. LYRICS      the lyric line starts as shown (analysis/lyrics_mv.lrc + project.json timing.offset + lyricOffset) against the onsets of
                the voice (harmonic part, 300-3400 Hz spectral flux): the best global shift and, per line, the nearest
                onset. PASS within 80 ms; estimated timings (estimate_lrc.py) usually fail here -- that is the point.
                Then PHRASES: every line should start after a breath; a line that starts inside a sung phrase is likely
@@ -156,7 +156,7 @@ def main() -> int:
         env = np.maximum(0, np.diff(np.log1p(band * 50).sum(axis=0), prepend=0))
         env_t = np.arange(len(env)) * hop / sr2
         lines = parse_lrc(LRC, len(y) / sr2)
-        starts = np.array([L["t"] + loff for L in lines])
+        starts = np.array([L["t"] + offset + loff for L in lines])     # the engine shows a line at t + offset + lyricOffset
         if len(starts):
             shifts = np.arange(-0.4, 0.4001, 0.005)
             score = np.array([np.interp(starts + s, env_t, env).mean() for s in shifts])

@@ -108,7 +108,7 @@ and the size of the colour areas must match the drawn puppets.
 
 ## 1. What to generate (derive it from the storyboard)
 
-Do not generate a generic library. Go through `docs/STORYBOARD.md` shot by shot and list what each shot needs; merge duplicates. The engine can re-frame, re-grade and re-light the same image, but a return is a new treatment, not the same shot again.
+Do not generate a generic library. Go through `plan/storyboard.md` (and in team mode `docs/STORYBOARD.md`) shot by shot and list what each shot needs; merge duplicates. The engine can re-frame, re-grade and re-light the same image, but a return is a new treatment, not the same shot again.
 
 **The picture budget:** count it from the shot list, never from a habit.
 - A film cut from pictures needs at least one per 2–3 pictured shots, and no picture in more than 4 shots.

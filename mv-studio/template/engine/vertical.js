@@ -98,11 +98,12 @@
     }
     // ---- lyrics, typeset by JIZURA at 9:16 in the bands around the picture
     const plan = shot ? lyricPlan(shot, t) : null;
-    if (plan) {
-      lx.setTransform(1, 0, 0, 1, 0, 0); lx.globalAlpha = 1; lx.globalCompositeOperation = 'source-over'; lx.filter = 'none'; lx.clearRect(0, 0, VW, VH);
-      JZ.drawPlan(plan, lx, t - (Z.LYRIC_OFFSET || 0), 'front');
-      vx.drawImage(lyr, 0, 0);
-    }
+    lx.setTransform(1, 0, 0, 1, 0, 0); lx.globalAlpha = 1; lx.globalCompositeOperation = 'source-over'; lx.filter = 'none'; lx.clearRect(0, 0, VW, VH);
+    if (plan) JZ.drawPlan(plan, lx, t - (Z.LYRIC_OFFSET || 0), 'front');
+    // tools/check_shots.mjs judges these 9:16 lyrics on the picture under them (main.js skips its hook here)
+    // shortcut: a shot's own code-drawn type (shot.text) is baked into the picture band and not judged as lyrics
+    if (Z.onText) Z.onText(lyr, shot, null, vout, plan);
+    if (plan) vx.drawImage(lyr, 0, 0);
     // ---- header / footer (quiet, out of the way of the title card and the end card)
     if (own) { if (CFG.chrome) { vx.save(); CFG.chrome(vx, t, { PIC, VW, VH, credits }); vx.restore(); } }
     else if (credits) {

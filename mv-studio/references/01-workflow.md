@@ -14,7 +14,7 @@ git commit`) at the end of every phase: `new_project.py` runs `git init`.
 | 0 setup | env report; the art generator, credit line, solo or team, a preset or the film's own style (`project.json`, scaffold `--style`) | the user agreed (one line each) |
 | 1 listen | `analysis/audio.json`, `overview.png`, `lyrics_mv.lrc`, `lyric_timing.json`, `cues.json` | `check_sync.py --lyrics-only`; `lyric_timing.py status` read; estimated lines listed for the user |
 | 2 direct ◆ | `docs/CONCEPT.md` (with the film's style), `docs/BRIEF.md` | **checkpoint with the user** |
-| 3 plan | the shot list in `engine/timeline.js` (`moment`, `line`, `cue` per shot) → `docs/STORYBOARD.md`, `plan/shots.json` | `node tools/storyboard.mjs` PASS |
+| 3 plan | the shot list in `engine/timeline.js` (`moment`, `line`, `cue` per shot) → `plan/storyboard.md`, `plan/shots.json` | `node tools/storyboard.mjs` PASS |
 | 4 art ◆ | images on review sheets, `docs/WANTED_ART.md`, `render/lineup.jpg` (2+ characters) | every check sheet looked at |
 | 5 build | the film's own `engine/scenes/<film>.js`, timeline | `node tools/verify.mjs --quick` PASS |
 | 6 render ◆ | `render/mv.mp4`, stills, review sheets | `node tools/verify.mjs render/mv.mp4` (09 §7 order); every sheet read |
@@ -75,7 +75,7 @@ ending idea. A cast summary only if the film has a cast.
 
 ## 3. Plan
 
-1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `docs/STORYBOARD.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated STORYBOARD.md: change the shots. Size the list from the concept's editing rhythm. Map each lyric line to an image that *answers* it (`direction.md` §4). Mark the signature moments.
+1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `plan/storyboard.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated `plan/storyboard.md`: change the shots. Size the list from the concept's editing rhythm. Map each lyric line to an image that *answers* it (`direction.md` §4). Mark the signature moments.
 2. `engine/timeline.js`: the edit. It starts as your `--style` starter (the blank one by default): keep its
    structure — film identity (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`), helpers, `Z.LOOK_DEFAULT`,
    `Z.VERTICAL_CFG` — and replace its placeholder values and shots with the film's. Helpers inside `Z.setup(audio)`:
@@ -174,7 +174,7 @@ the building session revises with the revise prompt and renders (a second round 
 ```
 project.json (mode, style, timing offsets, review tolerances)    art.config.json (image generator)
 audio/song.wav                       analysis/{audio.json, envelope_30fps.json, lyrics_mv.lrc, lyric_timing.json, cues.json}
-plan/shots.json (generated)          docs/{BRIEF.md, CONCEPT.md, STORYBOARD.md (generated), PROGRESS.md, REVIEW.md, WANTED_ART.md}
+plan/{shots.json, storyboard.md} (generated)   docs/{BRIEF.md, CONCEPT.md, PROGRESS.md, REVIEW.md, WANTED_ART.md; STORYBOARD.md: team mode, written by hand}
 assets/char/*.png (RGBA, trimmed)    assets/bg/*.png (opaque 16:9)    assets/style/{palettes.json, luts/}
 docs/CHARACTER.md (if the film has a cast)
 engine/timeline.js                   engine/scenes/*.js               engine/tests/*.js

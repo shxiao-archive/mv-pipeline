@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
-import { ROOT, cliArg, handleHelp, launchBrowser, gpuArgs } from './kit_env.mjs';
+import { ROOT, cliArg, handleHelp, launchBrowser, gpuArgs, underRoot } from './kit_env.mjs';
 
 handleHelp(`
 jz_cuts_at.mjs -- print the JIZURA cut active at each time, for every lyric plan of the engine page
@@ -20,7 +20,7 @@ const only = pos[1] || null;
 const pageUrl = cliArg('url', 'engine/index.html');
 if (!times.length) { console.error('usage: node tools/jz_cuts_at.mjs 196.8,203.5 [plan]   (see --help)'); process.exit(1); }
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.ttf': 'font/ttf', '.lrc': 'text/plain; charset=utf-8' };
-const server = http.createServer((req, res) => { const p = path.join(ROOT, decodeURIComponent(req.url.split('?')[0])); if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); });
+const server = http.createServer((req, res) => { const p = underRoot(ROOT, req.url); if (!p || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); } res.writeHead(200, { 'content-type': MIME[path.extname(p)] || 'application/octet-stream' }); fs.createReadStream(p).pipe(res); });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const browser = await launchBrowser({ headless: true, args: gpuArgs() });
 const page = await browser.newPage();

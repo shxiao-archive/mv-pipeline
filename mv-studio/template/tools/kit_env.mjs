@@ -49,6 +49,17 @@ export function handleHelp(usage, argv = process.argv) {
 
 /** relative paths are taken relative to the project root */
 export const fromRoot = (p) => path.resolve(ROOT, p);
+// the file a URL path names under root, or null when it leaves root (a sibling folder sharing root's name prefix too)
+export function underRoot(root, urlPath) {
+  let p; try { p = decodeURIComponent(urlPath.split('?')[0]); } catch { return null; }
+  const base = path.resolve(root), full = path.resolve(base, '.' + path.sep + p);
+  return full === base || full.startsWith(base + path.sep) ? full : null;
+}
+if (isMain(import.meta.url) && process.argv.includes('--selftest')) {   // node tools/kit_env.mjs --selftest
+  const r = path.resolve('proj'), bad = [['/engine/index.html', true], ['/', true], ['/../proj-secret/a', false],
+    ['/..%2Fproj-secret/a', false], ['/a/../../proj2/b', false], ['/%E0%A4%A', false]].filter(([u, ok]) => !!underRoot(r, u) !== ok);
+  console.log(`[kit_env] selftest ${bad.length ? 'FAIL ' + JSON.stringify(bad) : 'ok'}`); process.exit(bad.length ? 1 : 0);
+}
 
 export function browserChannel() {
   return process.env.BROWSER_CHANNEL || (IS_WIN ? 'msedge' : 'chrome');

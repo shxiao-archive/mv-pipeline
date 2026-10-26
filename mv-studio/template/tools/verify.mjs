@@ -4,21 +4,25 @@
  *   node tools/verify.mjs                  the same, then pops (a pre-render check: it renders the engine's frames small,
  *                                          not a video file, so it cannot see a render's worker seams)
  *   node tools/verify.mjs render/mv.mp4    all of that, then on the render: flash safety, sync, and static stretches
- *                                          (motion: listed as INFO, not a failure; stillness can be meant)
+ *                                          (motion: listed as INFO, not a failure; stillness can be meant). A portrait
+ *                                          render (mv_vertical.mp4) checks the shots on engine/vertical.html
  * Exit 1 when any check fails. A check that passes with warnings (sync: lyric lines to listen to) prints WARN and its
  * output: resolve or accept each item. The checks guard technical defects; none decides what the film should look like.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { FFPROBE } from './kit_env.mjs';
 
 const args = process.argv.slice(2), mp4 = args.find(a => a.endsWith('.mp4'));
 const py = process.platform === 'win32' ? 'python' : 'python3';
+const dims = mp4 ? `${spawnSync(FFPROBE, ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', mp4], { encoding: 'utf8' }).stdout || ''}`.trim().split(',').map(Number) : [];
+const vertical = dims[1] > dims[0];                              // a 9:16 render: its layout lives in engine/vertical.html
 const steps = [
   ['index', 'node', ['tools/build_index.mjs'], 'index/README.md in the skill'],
   ['lint', 'node', ['tools/lint.mjs'], 'references/09 §7'],
   ['no lyrics in code', 'node', ['tools/check_no_lyrics.mjs', '--strict'], 'SKILL.md "Laws"'],
   ['storyboard', 'node', ['tools/storyboard.mjs', '--quiet'], 'references/05 §3'],
-  ['shots', 'node', ['tools/check_shots.mjs', '--strict'], 'references/09 §6'],
+  ['shots' + (vertical ? ' (9:16)' : ''), 'node', ['tools/check_shots.mjs', '--strict', ...(vertical ? ['--url', 'engine/vertical.html'] : [])], 'references/09 §6'],
 ];
 if (!args.includes('--quick')) steps.push(['pops (engine, pre-render)', 'node', ['tools/pops.mjs', '--strict'], 'references/09 §7']);
 if (mp4) {

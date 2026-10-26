@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import { execFileSync } from 'node:child_process';
-import { ROOT, cliArg as arg, handleHelp, launchBrowser, gpuArgs, pythonCmd } from './kit_env.mjs';
+import { ROOT, cliArg as arg, handleHelp, launchBrowser, gpuArgs, pythonCmd, underRoot } from './kit_env.mjs';
 
 handleHelp(`
 stills.mjs -- render engine frames to PNG + a contact sheet
@@ -33,8 +33,8 @@ fs.mkdirSync(outDir, { recursive: true });
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff2': 'font/woff2', '.lrc': 'text/plain; charset=utf-8', '.wav': 'audio/wav' };
 const server = http.createServer((req, res) => {
-  const p = path.join(ROOT, decodeURIComponent(req.url.split('?')[0]));
-  if (!p.startsWith(ROOT) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
+  const p = underRoot(ROOT, req.url);
+  if (!p || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': MIME[path.extname(p).toLowerCase()] || 'application/octet-stream' });
   fs.createReadStream(p).pipe(res);
 });

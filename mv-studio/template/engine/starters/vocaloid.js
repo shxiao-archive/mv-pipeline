@@ -2,7 +2,7 @@
  * synthetic demo song (demo/make_demo_song.py + demo/lyrics_demo.lrc). It uses no image assets at all: only scenes
  * from the vocaloid pack (engine/styles/vocaloid/), the drawing toolkit (Z.draw) and the JIZURA lyric layer, so a fresh install can render
  * it end to end. It is also the STARTING POINT for a new film: keep the structure (helpers, JIZURA plans and
- * curation, looks, HUD, global FX, vertical config), replace the shots with your shot list (moment / line / cue per shot; node tools/storyboard.mjs writes docs/STORYBOARD.md).
+ * curation, looks, HUD, global FX, vertical config), replace the shots with your shot list (moment / line / cue per shot; node tools/storyboard.mjs writes plan/storyboard.md).
  *
  * How the engine uses this file (engine/core/main.js):
  *   - it is loaded after the scene files and before main.js; main.js calls `await Z.setup(audio)` once, with
@@ -339,7 +339,7 @@
     shot('s11', END, END + TAIL, 'afterimage', { text: Z.TITLE, sub: Z.TITLE_SUB.toLowerCase(), credit: Z.CREDIT, color: '#A88BFF', char: NO_IMAGE },
       { lyric: 'none', hud: false, post: S => Object.assign(Z.INTRO.post.afterimage(S), { boil: 0 }) });
 
-    // what each shot shows and which lyric line it answers (tools/storyboard.mjs builds docs/STORYBOARD.md from this)
+    // what each shot shows and which lyric line it answers (tools/storyboard.mjs builds plan/storyboard.md from this)
     const PLAN = {
       s01: ['the title in near silence'], s02: ['night sky, stars, hills, a few fireflies', 0],
       s03: ['one light ignites on the downbeat after the gap', 1], s04: ['star trails wheel around the pole', 2],

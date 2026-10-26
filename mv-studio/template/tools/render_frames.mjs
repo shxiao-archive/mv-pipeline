@@ -21,7 +21,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
-import { browserChannel, gpuArgs, launchBrowser, FFMPEG } from './kit_env.mjs';
+import { browserChannel, gpuArgs, launchBrowser, FFMPEG, underRoot } from './kit_env.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT = path.resolve(__dirname, '..');
@@ -123,9 +123,8 @@ function startServer(root, sinks) {
         res.writeHead(204); return res.end();
       } catch (e) { console.error('[server]', e); res.writeHead(500); return res.end(String(e)); }
     }
-    let p = decodeURIComponent(u.pathname);
-    const file = path.join(root, p);
-    if (!file.startsWith(path.resolve(root))) { res.writeHead(403); return res.end(); }
+    const p = u.pathname, file = underRoot(root, p);
+    if (!file) { res.writeHead(403); return res.end(); }
     let st; try { st = await fsp.stat(file); } catch { res.writeHead(404); return res.end('not found ' + p); }
     if (st.isDirectory()) { res.writeHead(404); return res.end(); }
     const type = MIME[path.extname(file).toLowerCase()] || 'application/octet-stream';

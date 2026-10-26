@@ -120,6 +120,7 @@ Render and check:
 ```bash
 node tools/stills.mjs --url engine/vertical.html --canvas vout --times 20,63,131,184,212 --out render/stills/v --sheet v
 node tools/render_final.mjs --name mv_vertical --url engine/vertical.html --selector canvas#vout --width 1080 --height 1920
+node tools/verify.mjs render/mv_vertical.mp4      # a portrait file: check_shots runs on engine/vertical.html (9:16 lyric layout)
 ```
 To adapt: set `Z.VERTICAL_CFG = { full, planMap, title, sub, artist, credits: [t0, t1], schemes, ambience, quiet, schemesOf, chrome }` in `engine/timeline.js` (mv-studio: `quiet` = shot ids whose big typography lives in the picture — hook slams, title, end card — get a deeper surround tint so the letters do not echo in the bands; `schemesOf: { v_main: 'light' }` overrides `schemes` per vertical plan) (inside `Z.setup`; fields you leave out fall back to the neutral defaults in `vertical.js`). Edit `vertical.js` only to change the crop if your shots are composed off-centre (per-shot crop offsets are an easy extension: a map `id → sx`). `engine/vertical.html?tl=tests/<file>.js` loads a test timeline, like `index.html`.
 

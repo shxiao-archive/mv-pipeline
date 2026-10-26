@@ -81,7 +81,8 @@
       if (r.ok) Z.LYR = parse(await r.text(), (Z.audio && Z.audio.duration) || 1e9);
     } catch (e) { /* no lyrics yet: Z.LYR stays empty */ }
     let timing = null;
-    try { const r = await fetch((Z.ROOT || '../') + timingPath); if (r.ok) timing = JSON.parse((await r.text()).replace(/^﻿/, '')); } catch (e) { /* optional */ }
+    const tr = await fetch((Z.ROOT || '../') + timingPath);     // optional, but a broken file is an error, not "no timing"
+    if (tr.ok) { const s = await tr.text(); try { timing = JSON.parse(s.replace(/^﻿/, '')); } catch (e) { throw new Error(`${timingPath}: ${e.message}`); } }
     const off = Z.LYRIC_OFFSET || 0;
     for (const L of Z.LYR) {
       const row = timing && timing.lines && timing.lines.find(x => x.i === L.i);

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* The storyboard, generated from the LIVE shot list (engine/timeline.js), so it can never drift from the film, and
- * checked. Writes plan/shots.json (text-free) and docs/STORYBOARD.md; exit 1 when a check fails.
+ * checked. Writes plan/shots.json (text-free) and plan/storyboard.md; exit 1 when a check fails. It never writes
+ * docs/: docs/STORYBOARD.md is the team's own document (references/11).
  *
  *   node tools/storyboard.mjs [--url engine/index.html] [--strict] [--quiet]
  *
@@ -36,7 +37,7 @@ import path from 'node:path';
 import { ROOT, cliArg as arg, cliFlag as flag, handleHelp } from './kit_env.mjs';
 import { openEngine } from './engine_page.mjs';
 
-handleHelp(`storyboard.mjs -- docs/STORYBOARD.md + plan/shots.json from the live shot list, with checks
+handleHelp(`storyboard.mjs -- plan/storyboard.md + plan/shots.json from the live shot list, with checks
   node tools/storyboard.mjs [--url engine/index.html] [--strict] [--quiet]`);
 
 const strict = flag('strict');
@@ -133,10 +134,9 @@ const md = [
   ...lines.map(L => { const c = cues.find(x => x.kind === 'line' && Math.abs(x.t - L.t) < 1e-3); return `| ${L.i} | ${fmt(L.t)} | ${(L.end - L.t).toFixed(2)} s | ${L.source || 'lrc'} | ${L.conf ?? ''} | ${esc(c ? c.hint : '')} |`; }),
   '', errors.length ? '## Errors\n\n' + errors.map(e => `- ${esc(e)}`).join('\n') : '', warns.length ? '\n## Warnings\n\n' + warns.map(e => `- ${esc(e)}`).join('\n') : '', '',
 ].join('\n');
-fs.mkdirSync(path.join(ROOT, 'docs'), { recursive: true });
-fs.writeFileSync(path.join(ROOT, 'docs', 'STORYBOARD.md'), md);
+fs.writeFileSync(path.join(ROOT, 'plan', 'storyboard.md'), md);
 for (const e of errors) console.log('ERROR ' + e);
 for (const w of warns.slice(0, 40)) console.log('WARN  ' + w);
-if (warns.length > 40) console.log(`WARN  ... ${warns.length - 40} more in docs/STORYBOARD.md`);
-console.log(`[storyboard] ${rows.length} shots, ${lines.length} lines -> docs/STORYBOARD.md, plan/shots.json: ${errors.length ? 'FAIL' : 'PASS'} (${errors.length} errors, ${warns.length} warnings)`);
+if (warns.length > 40) console.log(`WARN  ... ${warns.length - 40} more in plan/storyboard.md`);
+console.log(`[storyboard] ${rows.length} shots, ${lines.length} lines -> plan/storyboard.md, plan/shots.json: ${errors.length ? 'FAIL' : 'PASS'} (${errors.length} errors, ${warns.length} warnings)`);
 process.exit(errors.length ? 1 : 0);

@@ -30,7 +30,10 @@
   Z.scratch = [Z.canvas(W, H), Z.canvas(W, H), Z.canvas(W, H)];
 
   // ---------------------------------------------------------------- data
-  const loadJSON = async p => { const r = await fetch(Z.ROOT + p); if (!r.ok) throw new Error(p + ' ' + r.status); return JSON.parse((await r.text()).replace(/^﻿/, '')); };
+  const parseJSON = (p, s) => { try { return JSON.parse(s.replace(/^﻿/, '')); } catch (e) { throw new Error(`${p}: ${e.message}`); } };
+  const loadJSON = async p => { const r = await fetch(Z.ROOT + p); if (!r.ok) throw new Error(p + ' ' + r.status); return parseJSON(p, await r.text()); };
+  // an optional file: null when it is missing; a file that is there but broken is an error, never the defaults
+  const optionalJSON = async p => { const r = await fetch(Z.ROOT + p); if (r.status === 404) return null; if (!r.ok) throw new Error(p + ' ' + r.status); return parseJSON(p, await r.text()); };
 
   async function buildLutAtlas() {
     const pal = await loadJSON('assets/style/palettes.json');
@@ -159,7 +162,7 @@
       sceneX.drawImage(layerA, 0, 0);
       drawLyrics(act[0].shot, t);
       if (act[0].shot.text) { textX.save(); act[0].shot.text(textX, stateFor(act[0].shot, t)); textX.restore(); }
-      if (Z.onText) Z.onText(textC, act[0].shot, fgC, sceneC);   // the lyrics before the HUD (tools/check_shots.mjs)
+      if (Z.onText && !Z.VERTICAL) Z.onText(textC, act[0].shot, fgC, sceneC);   // the lyrics before the HUD (tools/check_shots.mjs; vertical.js calls it at 9:16)
       if (Z.hud && !Z.VERTICAL && act[0].shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(act[0].shot, t)); textX.restore(); }
       P = postFor(act[0].shot, t);
     } else if (act.length === 2) {
@@ -171,7 +174,7 @@
       // lyric layer follows the incoming shot (JIZURA already handles its own cut changes)
       drawLyrics(b.shot, t);
       if (b.shot.text) { textX.save(); b.shot.text(textX, stateFor(b.shot, t)); textX.restore(); }
-      if (Z.onText) Z.onText(textC, b.shot, fgC, sceneC);
+      if (Z.onText && !Z.VERTICAL) Z.onText(textC, b.shot, fgC, sceneC);
       if (Z.hud && !Z.VERTICAL && b.shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(b.shot, t)); textX.restore(); }
       const Pa = postFor(a.shot, t), Pb = postFor(b.shot, t), k = Z.ease.inOutSine(Z.clamp(b.k));
       P = Object.assign({}, Pb);
@@ -195,9 +198,9 @@
     Object.assign(Z, Z.makeHits(audio.onsets));                 // Z.hit / Z.lastHit / Z.hitCount ('kick' | 'snare' | 'hat' | 'vocal')
     try { Z.env = Z.makeEnv(await loadJSON('analysis/envelope_30fps.json')); } catch (e) { console.warn('no envelope', e); Z.env = Z.makeEnv(null); }
     await buildLutAtlas();
-    try { Z.setProject(await loadJSON('project.json')); } catch (e) { Z.setProject({}); }   // core/cues.js: timing offsets
+    Z.setProject(await optionalJSON('project.json') || {});    // core/cues.js: timing offsets
     if (Z.loadLyrics) await Z.loadLyrics();                     // core/lyrics.js: Z.LYR (lines with times), for code-drawn type
-    try { Z.setCues(await loadJSON('analysis/cues.json')); } catch (e) { Z.setCues(null); }  // Z.cue('L07'): tools/make_cues.py
+    Z.setCues(await optionalJSON('analysis/cues.json'));        // Z.cue('L07'): tools/make_cues.py
     if (Z.setup) await Z.setup(audio);                           // timeline.js: sections, looks, JIZURA plans, shots
     SHOTS = (Z.SHOTS || []).slice().sort((a, b) => a.t0 - b.t0);
     const urls = [];
