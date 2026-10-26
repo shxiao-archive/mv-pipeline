@@ -1675,8 +1675,11 @@ def main():
 
     bpm_bars = [b["bpm"] for b in fullbars]
     tempo_conf = float(np.clip(0.55 * agree + 0.45 * 0.85, 0, 1))
+    used = [audio_path] + [f for f in (sec_arg if sec_arg not in ("auto", "curated") else None, METER_FILE)
+                           if f and os.path.exists(kit_env.resolve(f))]
     A = {
         "source": kit_env.rel(audio_path), "generator": "tools/analyze_audio.py", "title": title,
+        "inputs": kit_env.inputs_of(*used),                      # tools/stale.mjs: re-run when one of them changes
         "duration": r3(duration), "sr": SR_NATIVE, "analysis_sr": SR, "frames_30fps": env["frames"],
         "music_start": r3(music_start), "music_cut": r3(cut), "tail_end": r3(tail_end),
         "bpm": r3(bpm_nom),

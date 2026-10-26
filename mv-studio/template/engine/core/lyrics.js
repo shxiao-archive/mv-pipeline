@@ -31,13 +31,18 @@
   const Z = (window.Z = window.Z || {});
   const GAP = /^\s*\[(間奏|interlude|inst|instrumental|間|gap|—|-)\]\s*$/i;
   const TIME = /\[(\d+):(\d+(?:\.\d+)?)\]/g;
+  const HEADER = /^\s*(\[[A-Za-z#][^\]]*\]|\{.*\})\s*$/;          // [ar:...] [offset:...], {"t":0,"c":...} credits: no lyric line
   const latin = s => /^[\x00-\x7FÀ-ɏ]*$/.test(s);
 
   function parse(src, duration = 1e9) {
     const rows = [];
-    for (const raw of src.replace(/^﻿/, '').split(/\r?\n/)) {
+    for (const [n, raw] of src.replace(/^﻿/, '').split(/\r?\n/).entries()) {
       const times = [...raw.matchAll(TIME)].map(m => +m[1] * 60 + +m[2]);
-      if (!times.length) continue;                                   // header tags ([ar:], [by:], [offset:]) and blank rows
+      if ([...raw.matchAll(TIME)].some(m => +m[2] >= 60)) throw new Error(`analysis/lyrics_mv.lrc row ${n + 1}: seconds of 60 or more in a time tag`);
+      if (!times.length) {                                           // header tags ([ar:], [by:], [offset:]) and blank rows
+        if (raw.trim() && !HEADER.test(raw)) throw new Error(`analysis/lyrics_mv.lrc row ${n + 1}: no time tag [mm:ss.xx] (lines without one are not shown)`);
+        continue;
+      }
       const body = raw.replace(TIME, '').trim();
       for (const t of times) rows.push({ t, body });
     }
@@ -76,13 +81,13 @@
   Z.lineHash = lineHash;
   Z.LYR = [];
   Z.loadLyrics = async (path = 'analysis/lyrics_mv.lrc', timingPath = 'analysis/lyric_timing.json') => {
-    try {
-      const r = await fetch((Z.ROOT || '../') + path);
-      if (r.ok) Z.LYR = parse(await r.text(), (Z.audio && Z.audio.duration) || 1e9);
-    } catch (e) { /* no lyrics yet: Z.LYR stays empty */ }
+    const r = await fetch((Z.ROOT || '../') + path);              // no lyrics yet (404): Z.LYR stays empty
+    if (r.ok) Z.LYR = parse(await r.text(), (Z.audio && Z.audio.duration) || 1e9);
     let timing = null;
     const tr = await fetch((Z.ROOT || '../') + timingPath);     // optional, but a broken file is an error, not "no timing"
     if (tr.ok) { const s = await tr.text(); try { timing = JSON.parse(s.replace(/^﻿/, '')); } catch (e) { throw new Error(`${timingPath}: ${e.message}`); } }
+    const bad = ((timing && timing.lines) || []).findIndex(x => !x || !Number.isInteger(x.i) || [x.start, x.end, ...(x.chars || []), ...(x.words || []).flat()].some(v => v != null && !Number.isFinite(v)));
+    if (bad >= 0) throw new Error(`${timingPath}: row ${bad} has a missing line index or a time that is not a number`);
     const off = Z.LYRIC_OFFSET || 0;
     for (const L of Z.LYR) {
       const row = timing && timing.lines && timing.lines.find(x => x.i === L.i);

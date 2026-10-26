@@ -108,15 +108,22 @@
   }
 
   // ---------------------------------------------------------------- lyric layer
-  function drawLyrics(shot, t) {
-    if (Z.NO_LYRICS) return;                                   // vertical build re-typesets the lyrics at 9:16
+  // the JIZURA layer a shot asks for at film time t: { plan, mode, safe? } or null. The one reading of shot.lyric
+  // ('front' by default | 'none' | a mode | { plan, mode, safe } | a function of the shot's state): vertical.js maps
+  // its plan to the 9:16 twin, and Z.onText (tools/check_shots.mjs) is told the plan instead of guessing it
+  Z.lyricSpec = (shot, t) => {
     let L = shot.lyric === undefined ? 'front' : shot.lyric;
-    if (!L || L === 'none' || !window.JZ || !Object.keys(JZ.plans).length) return;
     if (typeof L === 'function') L = L(stateFor(shot, t));
-    if (!L || L === 'none') return;
-    const spec = typeof L === 'string' ? { plan: shot.plan || 'main', mode: L } : L;
-    const plan = spec.plan || 'main';
-    const tl = lyricT(t);
+    if (!L || L === 'none') return null;
+    const spec = typeof L === 'string' ? { mode: L } : L;
+    return Object.assign({}, spec, { plan: spec.plan || shot.plan || 'main' });
+  };
+  function drawLyrics(shot, t) {
+    if (Z.NO_LYRICS || !window.JZ || !Object.keys(JZ.plans).length) return null;   // vertical build re-typesets them at 9:16
+    const spec = Z.lyricSpec(shot, t);
+    if (!spec) return null;
+    const plan = spec.plan;
+    const tl = Z.lyricT(t);
     if (spec.mode === 'backfront') { JZ.drawPlan(plan, textX, tl, 'back'); const c = Z.scratch[2], x = c.getContext('2d'); JZ.drawPlan(plan, x, tl, 'front'); textX.drawImage(c, 0, 0); }
     else JZ.drawPlan(plan, textX, tl, spec.mode === 'full' ? 'normal' : spec.mode);
     if (spec.safe) {   // lyric: { safe: 0.9 }: the lyric layer scaled into the title-safe box, for big layouts not meant to crop
@@ -125,9 +132,8 @@
       x.globalCompositeOperation = 'source-over';
       textX.clearRect(0, 0, W, H); textX.drawImage(c, W * (1 - k) / 2, H * (1 - k) / 2, W * k, H * k);
     }
+    return spec;
   }
-  // project.json timing.lyricOffset moves the JIZURA layer too (code-drawn type gets it in core/lyrics.js)
-  const lyricT = t => t - (Z.LYRIC_OFFSET || 0);
 
   // ---------------------------------------------------------------- post params
   function postFor(shot, t) {
@@ -160,9 +166,10 @@
     if (act.length === 1) {
       await drawShot(layerAX, act[0].shot, t, fgX);
       sceneX.drawImage(layerA, 0, 0);
-      drawLyrics(act[0].shot, t);
+      const spec = drawLyrics(act[0].shot, t);
       if (act[0].shot.text) { textX.save(); act[0].shot.text(textX, stateFor(act[0].shot, t)); textX.restore(); }
-      if (Z.onText && !Z.VERTICAL) Z.onText(textC, act[0].shot, fgC, sceneC);   // the lyrics before the HUD (tools/check_shots.mjs; vertical.js calls it at 9:16)
+      // the lyrics before the HUD, with the plan and lyric time that drew them (tools/check_shots.mjs; vertical.js at 9:16)
+      if (Z.onText && !Z.VERTICAL) Z.onText(textC, act[0].shot, fgC, sceneC, { plan: spec && spec.plan, t: Z.lyricT(t) });
       if (Z.hud && !Z.VERTICAL && act[0].shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(act[0].shot, t)); textX.restore(); }
       P = postFor(act[0].shot, t);
     } else if (act.length === 2) {
@@ -172,9 +179,9 @@
       const fn = Z.TRANS[tr.type] || Z.TRANS.xfade;
       fn(sceneX, layerA, layerB, Z.clamp(b.k), Object.assign({ t, W, H }, tr));
       // lyric layer follows the incoming shot (JIZURA already handles its own cut changes)
-      drawLyrics(b.shot, t);
+      const spec = drawLyrics(b.shot, t);
       if (b.shot.text) { textX.save(); b.shot.text(textX, stateFor(b.shot, t)); textX.restore(); }
-      if (Z.onText && !Z.VERTICAL) Z.onText(textC, b.shot, fgC, sceneC);
+      if (Z.onText && !Z.VERTICAL) Z.onText(textC, b.shot, fgC, sceneC, { plan: spec && spec.plan, t: Z.lyricT(t) });
       if (Z.hud && !Z.VERTICAL && b.shot.hud !== false) { textX.save(); Z.hud(textX, stateFor(b.shot, t)); textX.restore(); }
       const Pa = postFor(a.shot, t), Pb = postFor(b.shot, t), k = Z.ease.inOutSine(Z.clamp(b.k));
       P = Object.assign({}, Pb);
@@ -216,7 +223,7 @@
   // time, so a cut on a frame boundary never mixes two shots (a cut between frames blends one frame)
   window.renderFrame = async t => {
     await window.ready;
-    const ft = t - (Z.OFFSET || 0), { n, angle } = Z.SHUTTER;
+    const ft = Z.filmT(t), { n, angle } = Z.SHUTTER;
     if (n <= 1) return renderFrame(ft);
     const open = angle / 360 / ((window.__ZANKO_RENDER__ || {}).fps || window.__zankoMeta.fps || 30);
     for (let i = 0; i < n; i++) await renderFrame(ft + (i + 0.5) / n * open, { i, n });

@@ -301,7 +301,11 @@ by spaces, characters separated by `|` (kanji, English words). Without it CJK ch
 **Cues.** `python tools/make_cues.py` → `analysis/cues.json`: `L00…` per line (with `section`; a line that starts
 < 2 beats before a section and runs into it is that section's `pickup`), `sec:<label>`, `stop<n>`, `hit<n>`, `end`,
 plus your own `custom` cues. `hint` (the picture, your words), `fix` (a time corrected by ear) and `lock` survive a
-rebuild. Timelines use `Z.cue('L07')`. `python tools/measure_cues.py` prints, per cue, the nearest voice (line cues)
+rebuild. Timelines use `Z.cue('L07')`. A line's id is its position, so an inserted or deleted line renumbers the
+lines after it: their fields follow the line's text to its new id, and the rebuild lists each move, each dropped
+field and each `Z.cue('Lnn')` in your engine/ code that now means another line (fix those by hand). A malformed
+`cues.json` (an id used twice, a time that is not a number) is reported and not rewritten; the engine refuses it too.
+An LRC row without a readable `[mm:ss.xx]` tag is an error, not a silently missing line. `python tools/measure_cues.py` prints, per cue, the nearest voice (line cues)
 or drum onset, its strength and the half-beat it sits on: suggestions only.
 
 **Is each line on the right phrase?** `python tools/check_sync.py --lyrics-only` (no render needed) checks the LRC

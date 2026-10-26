@@ -118,6 +118,7 @@ Test a scene in isolation with its own timeline: `engine/tests/<name>.js` and
 | `npm run fonts` | `python tools/fetch_fonts.py` | (re)download fonts |
 | `npm run lyrics:estimate -- <txt> --start S` | `python tools/estimate_lrc.py` | plain-text lyrics → ESTIMATED `analysis/lyrics_mv.lrc` |
 | `npm run cues` | `python tools/make_cues.py` | cue table `analysis/cues.json` (lines, sections, stops, hits; your hints kept) |
+| `npm run stale` | `node tools/stale.mjs` | which analysis files and renders are older than what they were made from |
 | `npm run lyrics:status` / `lyrics:editor` / `lyrics:score -- <ust/mid>` | `tools/lyric_timing.py status` · `tools/lyric_editor/server.mjs` · `tools/score_timing.py` | lyric timing tiers, the tap editor (http://127.0.0.1:5178/), timing from the score |
 | `npm run lint` · `storyboard` · `check:shots` · `check:pops` · `sheet:cues` | `tools/lint.mjs` · `storyboard.mjs` · `check_shots.mjs` · `pops.mjs` · `cues_sheet.mjs` | the checks before a render (skill references/09 §7) |
 | `npm run check:sync` | `python tools/check_sync.py render/mv.mp4` | audio mux, cut frames and lyrics against the song |
@@ -166,6 +167,13 @@ one of your own backgrounds instead of the built-in dusk scene).
 - **Frames differ between render workers / flicker at 1/3 and 2/3 of the film**: something in a scene depends on
   wall-clock time, unseeded randomness or state from the previous frame (`references/05-engine.md`).
 - A tool prints `1 page errors/warnings`: read the line above it (missing asset path, JIZURA plan name …).
+- **Taking a newer skill version's fixes**: `python <skill>/scripts/new_project.py . --upgrade` lists which framework
+  files (engine/core, tools/ …) it would update; `--apply` does it. Files you changed are kept and listed (merge them
+  by hand from `<skill>/template/`); `engine/timeline.js`, `project.json`, `art.config.json` and the palettes are
+  never touched. `.mv-studio.json` records what was copied. Commit first, then `node tools/verify.mjs --quick`.
+- **Re-rendering the same video later**: `render/<name>.render.json` records the node, Playwright, browser, GPU and
+  ffmpeg versions it was made with; `npm install` takes the newest Playwright 1.x, so pin it in `package.json` if a
+  film must render byte for byte the same.
 
 ## 7. Credits and licences
 

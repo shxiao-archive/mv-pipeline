@@ -55,13 +55,10 @@
     return meta;
   })();
 
-  function lyricPlan(shot, t) {
-    let L = shot.lyric === undefined ? 'front' : shot.lyric;
-    if (typeof L === 'function') L = L(Z.stateFor(shot, t));
-    if (!L || L === 'none') return null;
-    const src = (typeof L === 'object' && L.plan) || shot.plan || 'main';
-    const name = CFG.planMap[src] || CFG.planMap.main || 'v_main';
-    return JZ.plans[name] ? name : null;
+  function lyricPlan(shot, t) {                              // the 9:16 twin of the plan main.js would draw
+    const spec = Z.lyricSpec(shot, t);
+    const name = spec && (CFG.planMap[spec.plan] || CFG.planMap.main || 'v_main');
+    return name && JZ.plans[name] ? name : null;
   }
 
   function compose(t) {
@@ -99,10 +96,10 @@
     // ---- lyrics, typeset by JIZURA at 9:16 in the bands around the picture
     const plan = shot ? lyricPlan(shot, t) : null;
     lx.setTransform(1, 0, 0, 1, 0, 0); lx.globalAlpha = 1; lx.globalCompositeOperation = 'source-over'; lx.filter = 'none'; lx.clearRect(0, 0, VW, VH);
-    if (plan) JZ.drawPlan(plan, lx, t - (Z.LYRIC_OFFSET || 0), 'front');
+    if (plan) JZ.drawPlan(plan, lx, Z.lyricT(t), 'front');
     // tools/check_shots.mjs judges these 9:16 lyrics on the picture under them (main.js skips its hook here)
     // shortcut: a shot's own code-drawn type (shot.text) is baked into the picture band and not judged as lyrics
-    if (Z.onText) Z.onText(lyr, shot, null, vout, plan);
+    if (Z.onText) Z.onText(lyr, shot, null, vout, { plan, t: Z.lyricT(t) });
     if (plan) vx.drawImage(lyr, 0, 0);
     // ---- header / footer (quiet, out of the way of the title card and the end card)
     if (own) { if (CFG.chrome) { vx.save(); CFG.chrome(vx, t, { PIC, VW, VH, credits }); vx.restore(); } }
@@ -124,5 +121,5 @@
   }
 
   const baseRender = window.renderFrame;
-  window.renderFrame = async t => { await window.ready; await baseRender(t); compose(t - (Z.OFFSET || 0)); };   // film time, as main.js
+  window.renderFrame = async t => { await window.ready; await baseRender(t); compose(Z.filmT(t)); };   // film time, as main.js
 })();

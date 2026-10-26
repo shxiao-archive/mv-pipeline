@@ -6,6 +6,7 @@
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
+  python scripts/new_project.py <project> --upgrade [--apply]
 
 What it does
   * copies template/ to <target_dir>, leaving out everything that setup fetches or a tool generates
@@ -24,12 +25,20 @@ What it does
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
-Then it prints the next steps. Stdlib only. Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
+  * writes .mv-studio.json: the skill commit and a hash of every framework file it copied
+Then it prints the next steps.
+
+--upgrade brings an existing project's framework files (engine/core, tools/, ...) up to this skill's template: a file
+the project never changed is updated, a new one is added; a file changed in the project is kept and listed (merge it
+by hand from template/), and one the template dropped is listed, never deleted. engine/timeline.js, project.json,
+art.config.json and assets/style/palettes.json are the film's and are never touched. It lists the plan; --apply
+does it. A project made before .mv-studio.json has no record: every file that differs is listed, none is changed. Stdlib only. Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 """
 from __future__ import annotations
 
 import argparse
 import fnmatch
+import hashlib
 import json
 import os
 import re
@@ -60,6 +69,8 @@ STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": 
                  "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own",
                  "zine": "magazine", "print": "magazine", "riso": "magazine", "雑誌": "magazine"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
+RECORD = ".mv-studio.json"
+FILM_FILES = {"engine/timeline.js", "project.json", "art.config.json", "assets/style/palettes.json"}   # the film's own
 
 
 def ignore_factory(src_root: Path):
@@ -80,6 +91,92 @@ def ignore_factory(src_root: Path):
     return ignore
 
 
+def sig(p: Path) -> str | None:
+    """16 hex of the file's SHA-1 (as template/tools/kit_env.py file_sig), None when missing."""
+    if not p.is_file():
+        return None
+    h = hashlib.sha1()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()[:16]
+
+
+def framework_files() -> dict[str, Path]:
+    """{project path: template source} for every file copy_template copies, the film's own files left out."""
+    root, ignore, out = TEMPLATE.resolve(), ignore_factory(TEMPLATE.resolve()), {}
+    for d, dirs, files in os.walk(root):
+        skip = ignore(d, dirs + files)
+        dirs[:] = [n for n in dirs if n not in skip]
+        for n in files:
+            if n not in skip:
+                rel = (Path(d) / n).relative_to(root).as_posix()
+                out["README.md" if rel == "PROJECT_README.md" else rel] = Path(d) / n
+    out["tools/check_env.py"] = HERE / "check_env.py"
+    return {k: v for k, v in out.items() if k not in FILM_FILES}
+
+
+def skill_commit() -> str | None:
+    r = subprocess.run(["git", "-C", str(HERE.parent), "rev-parse", "--short", "HEAD"], capture_output=True, text=True) \
+        if shutil.which("git") else None
+    return r.stdout.strip() if r and r.returncode == 0 else None
+
+
+def write_record(dst: Path, files: dict[str, str | None]):
+    (dst / RECORD).write_text(json.dumps({"version": 1, "skill_commit": skill_commit(), "files": dict(sorted(files.items()))},
+                                         indent=1) + "\n", encoding="utf-8")
+
+
+def make_exec(p: Path):
+    if not IS_WIN and p.is_file():
+        p.chmod(p.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def upgrade(dst: Path, apply: bool) -> int:
+    if not (dst / "engine" / "core" / "main.js").is_file():
+        sys.exit(f"{dst} is not an mv-studio project (no engine/core/main.js)")
+    rp = dst / RECORD
+    rec = json.loads(rp.read_text(encoding="utf-8")).get("files") if rp.is_file() else None
+    plan = {"update": [], "add": [], "keep (changed in the project)": [], "keep (deleted in the project)": [],
+            "differs (no record: compare by hand)": []}
+    new_rec = dict(rec or {})
+    src = framework_files()
+    for rel, s in sorted(src.items()):
+        up, cur = sig(s), sig(dst / rel)
+        if cur == up:
+            new_rec[rel] = up
+        elif rec is None:
+            plan["add" if cur is None else "differs (no record: compare by hand)"].append(rel)
+            if cur is None:
+                new_rec[rel] = up
+        elif cur is None:
+            plan["add" if rel not in rec else "keep (deleted in the project)"].append(rel)
+            if rel not in rec:
+                new_rec[rel] = up
+        elif rec.get(rel) == cur:
+            plan["update"].append(rel)
+            new_rec[rel] = up
+        else:
+            plan["keep (changed in the project)"].append(rel)     # its record stays the old hash: still "changed" next time
+    gone = sorted(set(rec or {}) - set(src))
+    print(f"template : {TEMPLATE.resolve()} ({skill_commit() or 'no git'})\nproject  : {dst}"
+          + ("" if rec is not None else f"\n  no {RECORD} (made before it): only missing files are added"))
+    for k, v in [*plan.items(), ("dropped by the template (left in place)", gone)]:
+        if v:
+            print(f"  {k}: {len(v)}\n    " + "\n    ".join(v[:40]) + (f"\n    ... {len(v) - 40} more" if len(v) > 40 else ""))
+    if not apply:
+        print("\nnothing changed: re-run with --apply to do it" if plan["update"] or plan["add"] else "\nup to date")
+        return 0
+    for rel in plan["update"] + plan["add"]:
+        (dst / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src[rel], dst / rel)
+        if rel.startswith(("tools/", "demo/")) or rel == "setup.sh":
+            make_exec(dst / rel)
+    write_record(dst, {k: v for k, v in new_rec.items() if k not in gone})
+    print(f"\nupdated {len(plan['update'])}, added {len(plan['add'])} -> {RECORD}. Then: node tools/verify.mjs --quick")
+    return 0
+
+
 def copy_template(dst: Path, force: bool):
     if not (TEMPLATE / "engine" / "core" / "main.js").is_file():
         sys.exit(f"template not found at {TEMPLATE} (run this script from the skill's scripts/ folder)")
@@ -90,10 +187,9 @@ def copy_template(dst: Path, force: bool):
     if readme.is_file():
         readme.replace(dst / "README.md")
     shutil.copy2(HERE / "check_env.py", dst / "tools" / "check_env.py")
-    if not IS_WIN:
-        for p in [dst / "setup.sh", *dst.glob("tools/*.py"), *dst.glob("tools/*.mjs"), *dst.glob("demo/*.py")]:
-            if p.is_file():
-                p.chmod(p.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    for p in [dst / "setup.sh", *dst.glob("tools/*.py"), *dst.glob("tools/*.mjs"), *dst.glob("demo/*.py")]:
+        make_exec(p)
+    write_record(dst, {rel: sig(s) for rel, s in framework_files().items()})   # what --upgrade may replace later
 
 
 def import_song(src: Path, dst: Path):
@@ -169,7 +265,9 @@ def run_setup(dst: Path, extra: list[str]) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("target", help="new project folder (must not exist, or be empty; see --force)")
+    ap.add_argument("target", help="new project folder (must not exist, or be empty; see --force); with --upgrade, the project")
+    ap.add_argument("--upgrade", action="store_true", help="update the project's unchanged framework files to this template")
+    ap.add_argument("--apply", action="store_true", help="with --upgrade: do it (default: list the plan)")
     ap.add_argument("--song", help="the song (WAV preferred; other formats are converted with ffmpeg)")
     ap.add_argument("--lyrics", help="lyrics: .lrc with time tags, or the official plain text")
     ap.add_argument("--title", help="film title for Z.TITLE in engine/timeline.js")
@@ -192,6 +290,8 @@ def main() -> int:
         except Exception:  # noqa: BLE001
             pass
     a = ap.parse_args()
+    if a.upgrade:
+        return upgrade(Path(a.target).expanduser().resolve(), a.apply)
     a.style = STYLE_ALIASES.get(a.style, a.style)
     starter = STYLES[a.style]
 

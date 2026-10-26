@@ -80,6 +80,11 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 
 ## 6. mv-studio checks (from blind reviews of eval films)
 
+`node tools/verify.mjs render/mv.mp4` runs these with the page and start the render used (its manifest,
+`render/mv.render.json`), and first lists what is out of date (`node tools/stale.mjs`): analysis made from an older
+song or lyrics, or a render made from older files, fails — re-run `analyze_audio.py` → `make_cues.py` →
+`render_final.mjs`. A video without a manifest (an older render) fails unless `--any-render`.
+
 Run on every full render (and on clips of fast sections while building):
 ```bash
 python tools/check_flash.py render/mv.mp4        # WCAG 2.3.1 approximation: general + red flashes <= 3/s -> PASS / FAIL (exit 1)

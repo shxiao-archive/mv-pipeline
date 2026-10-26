@@ -16,6 +16,7 @@ All commands run from the project root. Environment knobs (read by `tools/kit_en
 | `render/<name>_vertical_share.mp4` | 9:16 upload version, CRF 19 (~7.5 Mb/s) | ≈ 210 MB |
 | `render/<name>_preview720.mp4`, `<name>_vertical_preview720.mp4` | 1280×720 / 720×1280, CRF 25 `medium`, AAC 160 k | ≈ 70 / 50 MB |
 | `render/<name>_stats.json` | render statistics (per-worker ms per frame, fps, GPU) | |
+| `render/<name>.render.json` | the manifest: page URL, size, start / end, the hashes of everything the page read (`engine/`, `assets/`, `analysis/`, `project.json`, the song) and the toolchain (node, Playwright, browser, GPU, ffmpeg). `verify.mjs` checks the video on that page and start; `tools/stale.mjs` says when the files have changed since. A `--patch` render records the spans it redid and the base render's hashes | |
 
 Credits on screen (title lockup, outro, end card, vertical footer) and in the README: ask the user for the exact credit line (残光: 「Music / Lyrics / Movie：NikusonP」, set once as `Z.CREDIT` in the timeline) and the artist name for the 9:16 header (`Z.ARTIST`); `new_project.py --credit … --artist …` writes both.
 

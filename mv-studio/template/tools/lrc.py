@@ -29,6 +29,7 @@ TIMING = ROOT / "analysis" / "lyric_timing.json"
 PROJECT = ROOT / "project.json"
 GAP = re.compile(r"^\s*\[(間奏|interlude|inst|instrumental|間|gap|—|-)\]\s*$", re.I)
 TIME = re.compile(r"\[(\d+):(\d+(?:\.\d+)?)\]")
+HEADER = re.compile(r"^\s*(\[[A-Za-z#][^\]]*\]|\{.*\})\s*$")   # [ar:...] [offset:...], {"t":0,"c":...} credits: no lyric line
 SOURCES = ("lrc", "score", "align", "editor", "estimate", "by-ear")
 
 
@@ -38,9 +39,13 @@ def _latin(s: str) -> bool:
 
 def parse_lrc_text(src: str, duration: float = 1e9) -> list[dict]:
     rows = []
-    for raw in src.lstrip("﻿").splitlines():
+    for n, raw in enumerate(src.lstrip("﻿").splitlines(), 1):
         times = [int(m.group(1)) * 60 + float(m.group(2)) for m in TIME.finditer(raw)]
+        if any(float(m.group(2)) >= 60 for m in TIME.finditer(raw)):
+            raise ValueError(f"LRC row {n}: seconds of 60 or more in a time tag")
         if not times:
+            if raw.strip() and not HEADER.match(raw):     # a lyric row without a readable [mm:ss.xx] would vanish
+                raise ValueError(f"LRC row {n}: no time tag [mm:ss.xx] (lines without one are not shown)")
             continue
         body = TIME.sub("", raw).strip()
         rows += [{"t": t, "body": body} for t in times]
@@ -88,10 +93,21 @@ def line_hash(text: str) -> str:
     return f"{h:08x}"
 
 
+def _num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v == v and abs(v) != float("inf")
+
+
 def load_timing(path: Path = TIMING) -> dict:
-    if path.is_file():
-        return json.loads(path.read_text(encoding="utf-8-sig"))
-    return {"version": 1, "lines": []}
+    """analysis/lyric_timing.json, checked: a row with a non-numeric time is an error, not a silent fallback."""
+    if not path.is_file():
+        return {"version": 1, "lines": []}
+    d = json.loads(path.read_text(encoding="utf-8-sig"))
+    for k, r in enumerate(d.get("lines", []) if isinstance(d, dict) else [None]):
+        ok = (isinstance(r, dict) and isinstance(r.get("i"), int) and all(_num(r[f]) for f in ("start", "end") if f in r)
+              and all(_num(x) for x in r.get("chars") or []) and all(_num(x) for w in r.get("words") or [] for x in w))
+        if not ok:
+            raise ValueError(f"{path.name}: row {k} has a missing line index or a time that is not a number")
+    return d
 
 
 def save_timing(lines: list[dict], timing_rows: list[dict], path: Path = TIMING) -> Path:
@@ -142,6 +158,8 @@ def rewrite_lrc_times(path: Path, new_starts: dict[int, float]) -> int:
 
 
 def read_project(path: Path = PROJECT) -> dict:
-    if path.is_file():
-        return json.loads(path.read_text(encoding="utf-8-sig"))
-    return {}
+    p = json.loads(path.read_text(encoding="utf-8-sig")) if path.is_file() else {}
+    for k, v in (p.get("timing") or {}).items():
+        if k in ("offset", "lyricOffset") and not _num(v):
+            raise ValueError(f"project.json timing.{k} is not a number ({v!r})")
+    return p

@@ -31,19 +31,31 @@
   Z.PROJECT = {};
   Z.SHUTTER = { n: 1, angle: 180 };
 
+  // a value that is there must be a number: "0.1" or a typo never silently becomes 0
+  const num = (v, what) => {
+    if (v == null) return null;
+    if (typeof v !== 'number' || !Number.isFinite(v)) throw new Error(`${what} is not a number (${JSON.stringify(v)})`);
+    return v;
+  };
   Z.setProject = p => {
     Z.PROJECT = p || {};
     const tm = Z.PROJECT.timing || {};
-    Z.OFFSET = +tm.offset || 0;
-    Z.LYRIC_OFFSET = +tm.lyricOffset || 0;
+    Z.OFFSET = num(tm.offset, 'project.json timing.offset') || 0;
+    Z.LYRIC_OFFSET = num(tm.lyricOffset, 'project.json timing.lyricOffset') || 0;
     const sh = (Z.PROJECT.render || {}).shutter || {}, q = new URLSearchParams(location.search).get('shutter');
-    Z.SHUTTER = { n: Math.max(1, Math.round(q != null ? +q : +sh.samples || 1)), angle: Math.min(360, Math.max(1, +sh.angle || 180)) };
+    const n = q != null ? num(+q, '?shutter') : num(sh.samples, 'project.json render.shutter.samples');
+    Z.SHUTTER = { n: Math.max(1, Math.round(n || 1)), angle: Math.min(360, Math.max(1, num(sh.angle, 'project.json render.shutter.angle') || 180)) };
   };
+  // the one place the offsets apply: song time -> film time (every picture), film time -> lyric time
+  Z.filmT = t => t - Z.OFFSET;
+  Z.lyricT = ft => ft - Z.LYRIC_OFFSET;
   Z.setCues = data => {
     Z.CUES = {};
     for (const c of (data && data.cues) || []) {
-      const t = (c.fix != null ? +c.fix : +c.t) + (c.kind === 'line' ? Z.LYRIC_OFFSET : 0);
-      Z.CUES[c.id] = Object.assign({}, c, { t });
+      if (Z.CUES[c.id]) throw new Error(`analysis/cues.json: the id '${c.id}' is used twice`);
+      const t0 = num(c.fix != null ? c.fix : c.t, `analysis/cues.json ${c.id}: ${c.fix != null ? 'fix' : 't'}`);
+      if (t0 == null) throw new Error(`analysis/cues.json ${c.id}: no time`);
+      Z.CUES[c.id] = Object.assign({}, c, { t: t0 + (c.kind === 'line' ? Z.LYRIC_OFFSET : 0) });
     }
   };
   Z.cue = (id, dt = 0) => {

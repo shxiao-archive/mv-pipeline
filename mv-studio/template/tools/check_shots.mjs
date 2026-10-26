@@ -226,9 +226,8 @@ if (spriteFps > 0) {                                           // which sprite i
           const b = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), W, H, edges };
           if (!fig || b.y1 - b.y0 > fig.y1 - fig.y0) fig = b;
         };
-        window.Z.onText = (c, shot, fgc, scene, vplan) => {           // vplan: the 9:16 plan (engine/vertical.js)
-          const L = shot && (shot.lyric === undefined ? 'front' : shot.lyric), name = vplan || (L && typeof L === 'object' ? L.plan || 'main' : shot && (shot.plan || 'main'));
-          const P = window.JZ && window.JZ.plans && window.JZ.plans[name], tl = t - (window.Z.OFFSET || 0) - (window.Z.LYRIC_OFFSET || 0), cut = P && window.J.cutAt(P.plan, tl);
+        window.Z.onText = (c, shot, fgc, scene, info) => {            // info: { plan, t } the engine drew the lyrics with
+          const P = info.plan && window.JZ && window.JZ.plans && window.JZ.plans[info.plan], tl = info.t, cut = P && window.J.cutAt(P.plan, tl);
           if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion
           // legibility: the words uncovered and apart from the picture around them (480 x 270)
           const w = 480, h = Math.round(480 * c.height / c.width), cv = k => window['__lg' + k] || (window['__lg' + k] = Object.assign(document.createElement('canvas'), { width: w, height: h }));

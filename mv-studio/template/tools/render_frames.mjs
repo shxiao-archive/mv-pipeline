@@ -380,7 +380,7 @@ async function main() {
   // --- open worker pages
   const pages = await Promise.all(Array.from({ length: a.workers }, (_, w) => openPage(w)));
   const g0 = pages[0].gpu;
-  stats.gpu = g0; stats.pageInfo = pages[0].info; stats.loadMs = pages.map((p) => Math.round(p.loadMs));
+  stats.gpu = g0; stats.browser = browsers[0].version(); stats.pageInfo = pages[0].info; stats.loadMs = pages.map((p) => Math.round(p.loadMs));
   console.log(`[gpu] ${g0.vendor} | ${g0.renderer} | webcodecs=${g0.webcodecs} | load ${stats.loadMs.join('/')} ms`);
   if (pages[0].info) console.log('[page]', JSON.stringify(pages[0].info));
   if (!a.allowSoftware && /swiftshader|basic render|llvmpipe|warp|software/i.test(g0.renderer || '')) {

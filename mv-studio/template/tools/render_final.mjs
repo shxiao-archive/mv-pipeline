@@ -8,7 +8,9 @@
 //                               [--patch 62.4:66,120:121.5]
 //
 // Writes render/<name>_video.mp4 (picture only), render/<name>.mp4 (picture + AAC 320k / 48 kHz) and
-// render/<name>_stats.json, then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
+// render/<name>_stats.json and render/<name>.render.json (the manifest: what this video was made from -- url, size,
+// start, the hashes of engine/, assets/, analysis/ and the audio, and the toolchain -- which verify.mjs checks against
+// and tools/stale.mjs compares with the files now), then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
 // window.__zankoMeta.duration. Use --codec x264 on machines without an NVIDIA GPU.
 // --patch re-renders only those ranges (widened to the keyframes around them) into the existing render/<name>_video.mp4
 // and copies every other frame across: for fixes local to a few shots. A change to shared code (a palette, a helper
@@ -19,7 +21,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { ROOT, TOOLS_DIR, FFMPEG, FFPROBE } from './kit_env.mjs';
+import { ROOT, TOOLS_DIR, FFMPEG, FFPROBE, inputsOf } from './kit_env.mjs';
+
+// everything the engine page reads (engine/core/main.js, lyrics.js, assets.js): a change to one makes the video stale
+const RENDER_INPUTS = ['engine/', 'jizura/app/', 'assets/', 'project.json', 'analysis/audio.json',
+  'analysis/envelope_30fps.json', 'analysis/lyrics_mv.lrc', 'analysis/lyric_timing.json', 'analysis/cues.json', 'analysis/meter.json'];
 
 const HELP = `
 render_final.mjs -- full render (render_frames.mjs) + audio mux
@@ -138,6 +144,11 @@ function main() {
   const video = path.join(renderDir, `${a.name}_video.mp4`);
   const final = path.join(renderDir, `${a.name}.mp4`);
   const statsFile = path.join(renderDir, `${a.name}_stats.json`);
+  const manifestFile = path.join(renderDir, `${a.name}.render.json`);
+  const rel = p => path.relative(ROOT, p).split(path.sep).join('/');
+  const inputs = inputsOf([...RENDER_INPUTS, ...(a.noAudio ? [] : [rel(audio)])]);   // hashed before the render starts
+  let base = null;
+  if (a.patch) try { base = JSON.parse(fs.readFileSync(manifestFile, 'utf8')); } catch { /* an older render without one */ }
 
   const shutter = a.shutter ?? (a.preview ? 1 : null);
   const url = shutter == null ? a.url : a.url + (a.url.includes('?') ? '&' : '?') + 'shutter=' + shutter;
@@ -175,7 +186,8 @@ function main() {
     // audio: song from --start, padded with silence to the video length (the afterimage tail runs past the dead stop)
     run(FFMPEG, ['-y', '-hide_banner', '-loglevel', 'error', '-i', video, '-ss', String(a.start), '-i', audio,
       '-filter_complex', `[1:a]apad=whole_dur=${dur.toFixed(6)}[a]`, '-map', '0:v', '-map', '[a]', '-c:v', 'copy',
-      '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-t', dur.toFixed(6), '-movflags', '+faststart', final], 'mux');
+      '-c:a', 'aac', '-b:a', '320k', '-ar', '48000', '-t', dur.toFixed(6), '-metadata', `comment=mv_start=${a.start}`,
+      '-movflags', '+faststart', final], 'mux');     // mv_start: check_flash / motion_check / jury_pack read the song time
   }
   // the master must contain every rendered frame (guards against a truncated segment or a failed concat)
   if (expect == null) try { expect = JSON.parse(fs.readFileSync(statsFile, 'utf8')).frames; } catch { /* no stats */ }
@@ -186,7 +198,19 @@ function main() {
     const got = parseInt(String(r.stdout).trim(), 10);
     if (got !== expect) throw new Error(`${final} has ${Number.isFinite(got) ? got : '?'} video frames, expected ${expect}: re-run the render`);
   }
-  console.log(`done in ${((performance.now() - t0) / 60000).toFixed(1)} min -> ${final}`);
+  let st = {};
+  try { st = JSON.parse(fs.readFileSync(statsFile, 'utf8')); } catch { /* no stats */ }
+  const pw = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modules/playwright/package.json'), 'utf8')).version; } catch { return null; } })();
+  const ff = String(spawnSync(FFMPEG, ['-version'], { encoding: 'utf8' }).stdout || '').split('\n')[0].trim() || null;
+  fs.writeFileSync(manifestFile, JSON.stringify({
+    version: 1, generator: 'tools/render_final.mjs', video: rel(final), url, selector: a.selector,
+    width: a.width, height: a.height, fps: a.fps, start: a.start, end: a.end, shutter, preview: a.preview, codec: a.codec, audio: a.noAudio ? null : rel(audio),
+    // a patch re-rendered only these spans with today's files; the rest is the earlier render's (base_inputs)
+    patched: a.patch ? [...(base?.patched || []), ...a.patch] : null,
+    base_inputs: a.patch ? (base?.base_inputs || base?.inputs || null) : null,
+    inputs, env: { node: process.version, playwright: pw, browser: st.browser || null, gpu: st.gpu?.renderer || null, ffmpeg: ff, platform: `${process.platform}-${process.arch}` },
+  }, null, 1) + '\n');
+  console.log(`done in ${((performance.now() - t0) / 60000).toFixed(1)} min -> ${final} (+ ${rel(manifestFile)})`);
   spawnSync(FFPROBE, ['-v', 'error', '-show_entries', 'stream=codec_name,width,height,r_frame_rate:format=duration,size',
     '-of', 'compact', final], { stdio: 'inherit' });
 }

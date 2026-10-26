@@ -19,6 +19,8 @@ imports inside Blender's bundled Python):
   font_dirs(), find_font  env FONT_DIRS (os.pathsep-separated) first, then the system font folders, then engine/fonts
   add_nvidia_dll_dirs()   make pip-installed CUDA wheels (nvidia-cublas-cu12, cudnn) visible to ctranslate2 on Windows
   resolve(p)              user path -> absolute (absolute stays; existing relative-to-cwd wins; else relative to ROOT)
+  file_sig(p), inputs_of  content hash of a file (kit_env.mjs fileSig is the same); a generated file records its
+                          inputs' hashes ("inputs") so tools/stale.mjs can tell when it is out of date
 
   python tools/kit_env.py        print the resolved environment (no side effects)
 
@@ -27,6 +29,7 @@ Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 from __future__ import annotations
 
 import glob
+import hashlib
 import os
 import re
 import shutil
@@ -68,6 +71,23 @@ def rel(p) -> str:
         return Path(p).resolve().relative_to(ROOT).as_posix()
     except ValueError:
         return str(p)
+
+
+def file_sig(p) -> str | None:
+    """16 hex digits of the file's SHA-1, None when it is missing (kit_env.mjs fileSig computes the same)."""
+    p = resolve(p)
+    if not p.is_file():
+        return None
+    h = hashlib.sha1()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()[:16]
+
+
+def inputs_of(*paths) -> dict:
+    """{project path: file_sig} for the files a generated file was made from (its "inputs")."""
+    return {rel(p): file_sig(p) for p in paths}
 
 
 def _exe(value: str | None) -> str | None:

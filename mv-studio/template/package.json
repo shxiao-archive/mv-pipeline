@@ -21,6 +21,7 @@
     "demo:song": "python demo/make_demo_song.py",
     "analyze": "python tools/analyze_audio.py",
     "cues": "python tools/make_cues.py",
+    "stale": "node tools/stale.mjs",
     "measure:cues": "python tools/measure_cues.py",
     "stills": "node tools/stills.mjs",
     "preview": "node tools/jizura_serve.mjs 5179",

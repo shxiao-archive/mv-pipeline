@@ -13,6 +13,7 @@
 //   launchBrowser(o)  chromium.launch(o) on that channel; falls back to the bundled Chromium if the channel fails
 //   pythonCmd()       env PYTHON, else the first working 'python' / 'python3' (/ 'py -3' on Windows) -> [cmd, ...args]
 //   FFMPEG / FFPROBE  env FFMPEG / FFPROBE, default 'ffmpeg' / 'ffprobe' on PATH
+//   fileSig(rel)      content hash of a project file (as kit_env.py file_sig) or folder; inputsOf([rel]) -> {rel: sig}
 //
 //   node tools/kit_env.mjs            print the resolved environment (handy on a new machine)
 //
@@ -20,6 +21,7 @@
 // Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 // -----------------------------------------------------------------------------------------
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -49,6 +51,23 @@ export function handleHelp(usage, argv = process.argv) {
 
 /** relative paths are taken relative to the project root */
 export const fromRoot = (p) => path.resolve(ROOT, p);
+// 16 hex of SHA-1 over a file's bytes, or over a folder's sorted "path NUL sig" rows; null when missing. Generated files
+// record what they were made from this way ("inputs"); tools/stale.mjs compares
+export function fileSig(rel) {
+  const p = path.resolve(ROOT, rel);
+  if (!fs.existsSync(p)) return null;
+  const h = crypto.createHash('sha1');
+  if (fs.statSync(p).isDirectory()) {
+    for (const f of fs.readdirSync(p, { recursive: true }).map(String).sort()) {
+      if (fs.statSync(path.join(p, f)).isFile()) h.update(`${f.split(path.sep).join('/')}\0${fileSig(path.join(rel, f))}\n`);
+    }
+  } else {
+    const fd = fs.openSync(p, 'r'), buf = Buffer.alloc(1 << 20);
+    try { for (let n; (n = fs.readSync(fd, buf, 0, buf.length, null)) > 0;) h.update(buf.subarray(0, n)); } finally { fs.closeSync(fd); }
+  }
+  return h.digest('hex').slice(0, 16);
+}
+export const inputsOf = rels => Object.fromEntries(rels.map(r => [r, fileSig(r)]));
 // the file a URL path names under root, or null when it leaves root (a sibling folder sharing root's name prefix too)
 export function underRoot(root, urlPath) {
   let p; try { p = decodeURIComponent(urlPath.split('?')[0]); } catch { return null; }
