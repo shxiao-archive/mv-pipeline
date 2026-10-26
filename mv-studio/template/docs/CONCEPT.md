@@ -27,17 +27,16 @@ Each slot answered from the song (design-a-style.md §2):
 - **Cast** (none, or who, how many, how drawn, where in the frame):
 - **Picture source** (generated, code-drawn, the user's own, photographic, 3D, none):
 - **Ending** (the last idea the film leaves):
-- **Borrowed techniques** (library modules used, none of them a preset's look):
+- **Borrowed techniques and shared elements** (library modules and any preset elements used, restyled to this film):
 
-Distance check (design-a-style.md §4), judged on the look sheet's frames: the markers of each preset they show.
+Distance review (design-a-style.md §4) on the look sheet's frames: only the meaningful combinations of one preset's
+elements, each with the song's reason.
 
-| preset | markers seen (frame) | count |
+| combination (elements, preset) | frames | why the song wants it |
 |---|---|---|
-| vocaloid |  |  |
-| interface |  |  |
-| stage |  |  |
-| papercraft |  |  |
-| magazine |  |  |
+|  |  |  |
+
+Overall look of a preset? no / yes (why):
 
 ## Frame and arc
 

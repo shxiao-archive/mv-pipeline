@@ -42,7 +42,7 @@ textures, no one at all), and the cast slot is answered from the song like the o
 Before production, render a look sheet: 4–6 frames of signature moments, the palette with its roles, the type roles,
 a texture or material swatch. Show it to the user with the concept, and change the style now, while it is cheap.
 
-## 4. The distance check
+## 4. The distance review
 
 Slot answers in words pass too easily: "an anime art-film" is not "a ボカロPV" on paper and can be one on screen.
 So judge the look sheet's frames, not the text. For each preset, list which of its markers the frames show; a marker is
@@ -56,18 +56,20 @@ a thing you can point at in a frame.
 | papercraft | cut paper in multiplane depth · RPG menus, dialogue boxes, stat bars · a book that opens and closes |
 | magazine | vertical mincho lyric columns · pictures separated into a few inks on paper · folios, proof or register marks · a page with a fate |
 
-Three or more markers of one preset in the frames means the film is drifting into it: offer the user that preset by
-name, or redesign those slots from the song and render the sheet again. Record in `docs/CONCEPT.md` the markers each
-preset scores, with the frames that show them.
+Markers are a review prompt, not a score. A single shared element that serves the song needs no justification. Judge
+the combinations: where several of one preset's elements work together (its palette with its type system, its cast
+with its devices), write in `docs/CONCEPT.md` one line on why the song wants that combination, with the frames. Redesign
+those slots from the song and render the sheet again, or offer the user that preset by name, only when the frames read
+as a preset's overall look with no reason from the song, or conflict with the concept.
 
-## 5. Borrowing: techniques yes, looks no
+## 5. Borrowing: shared elements yes, a preset's overall look no
 
 - **Any film may use the library's techniques** (search `index/index.jsonl`): the JIZURA lyric layer, the
   transitions, camera and drawing helpers (`D.*`), `Z.withInserts`, the decay layer, shaders and hairlines
   (`Z.shade`, `Z.lineBatch`), written type (`Z.stroke`), the shape and type kits, paper and paint primitives. Each
   one is restyled to your slots; its defaults are not a look.
-- **Not borrowable without the user asking for that preset:** a preset's look as a whole, meaning its palette, type
-  system, cast and signature devices:
+- **What makes up each preset's overall look** (its palette, type system, cast and signature devices working
+  together; one item of it, restyled to your slots, is a shared element):
   - the ボカロPV look: an illustrated original singer at the centre of the frame, lyric columns flanking the subject,
     a band or plate behind the lyric line, the PV HUD, kanji slams, the 残光 palettes (P1–P5), and its light devices
     (crack webs, rays, embers, fireflies, feathers, a rim light: the preset's pack, `engine/styles/vocaloid/`);
@@ -78,7 +80,7 @@ preset scores, with the frames that show them.
   - the three-ink magazine press with its folios, proof marks and vertical lyric columns;
   - the heat-grade recording device.
 
-  If the song seems to want one of these, offer the preset to the user instead of drifting into it.
+  If the song wants most of one of these, offer the user that preset rather than drifting into it.
 
 ## 6. Process
 

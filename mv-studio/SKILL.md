@@ -39,9 +39,12 @@ merely sounds like a preset is not a request for it.
      | papercraft | a pop-up paper storybook told as a retro RPG quest | `papercraft` |
      | magazine | a Japanese experimental print magazine: three-ink press, vertical type, editorial marks that keep time, the page's fate | `magazine` |
 
-   **Techniques yes, looks no.** Any film may use single modules from the library (a transition, the lyric layer, a
-   camera helper, the decay layer, a shape kit). A film that designs its own style never adopts a preset's look —
-   its palette, type system or signature devices — and a preset film keeps to its own.
+   **Shared elements yes, a preset's overall look no.** Any film may use modules from the library (a transition, the
+   lyric layer, a camera helper, the decay layer, a shape kit) and shared elements, a preset's included, when they
+   serve the song and fit a coherent identity of its own. A film that designs its own style does not take on a
+   preset's overall look (its palette, type system, cast and signature devices working together) without a reason
+   from the song; similarity to a preset is a review prompt (`design-a-style.md` §4), not a failure. A preset film
+   keeps to its own.
 3. When you build, search the index first: `grep -i <words> index/index.jsonl` — one line per scene, transition,
    effect, helper, lyric plan and grade, with what it shows, the call, and `where` as `path:first-last`. Start with
    the indexed range (offset / limit). Read surrounding code or the full file when needed to understand dependencies,

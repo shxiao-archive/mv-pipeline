@@ -176,7 +176,8 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
    - style_fidelity: the film has a visual identity of its own, carried through every shot with finish (the style
      block of the concept: palette, type, shapes, motion feel); for a preset the user asked for, an expert names the
      tradition at once. Judge the identity, not a checklist: a departure the concept argues for is not a fault; a
-     preset's look adopted without being asked for is
+     preset's overall look adopted without being asked for and without a reason from the song is; shared elements
+     that serve the song are not
    - concept_story: the film does what its concept says; a visual idea about what the song is about; the lines
      answered the way the concept sets them; the moments the concept names as peaks land; an ending, not a stop
    - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; no dead or
@@ -191,7 +192,9 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
    a few big upgrades to many nitpicks. At least one fix must raise the wow factor, not just polish; at least one must
    lift the weakest section.
 4. Flag as critical: anything generic or AI-template, an existing character, brand or real UI imitated, wrong or
-   garbled lyric text, tofu, a failed check, an off-model character.
+   garbled lyric text, tofu, a failed check, an off-model character, a preset's overall look adopted without being
+   asked for or a reason from the song, a material conflict with the agreed concept. A minor inconsistency (one
+   element off the palette, a borrowed device not restyled) is a fix, not critical.
 5. List the 3 strongest things, so the revision keeps them.
 Return the score table, the critical issues, the fixes and the strengths, then one JSON block:
 {"round": N, "scores": {"style_fidelity": 0, "concept_story": 0, "motion_craft": 0, "composition_type": 0,

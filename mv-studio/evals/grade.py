@@ -62,10 +62,6 @@ STYLE = {
     "vocaloid": dict(scene=None, starter="starters/vocaloid.js"),
     "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
 }
-# the presets' signature scenes: an own-style film may borrow techniques, not a preset's look (SKILL.md)
-# the vocaloid demo's set pieces count too (illust, solid, seq, ref and jz are plain building blocks)
-PRESET_SCENES = (r"^(if|tr|pc|st|mz)[A-Z]|^sig(Shot|Term|Frag|Abs)$|^(afterimage|burst|converge|ember|fall|flame|heart|ink|kanjiSlam"
-                 r"|memories|panels|road|skyShatter|thread|titleRiff|train|tunnel|typeCard|wetFloor)$")
 V4 = {"withInserts": r"withInserts\(", "words": r"words\s*:\s*true", "inks": r"kind\s*:\s*['\"]inks", "limp": r"kind\s*:\s*['\"]limp",
       "fps": r"\bfps\s*:\s*\d", "replay": r"replay(Map)?\(", "tear": r"Z\.tear\(", "rays": r"\brays\s*:"}
 
@@ -120,9 +116,6 @@ def style_checks(proj, add, style):
         traits = [l for l in tail if re.match(r"\s*([-*]|\d+[.)])\s+\S", l)] or [t for t in re.split(r"[;,]", field("Traits")) if t.strip()]
         add("docs/CONCEPT.md defines the film's own style: a Reads-as line and >= 6 traits", bool(field("Reads as")) and len(traits) >= 6,
             f"reads as: {field('Reads as')[:60]!r}; {len(traits)} traits" if block else "no 'The film's style' block")
-        borrowed = [x for x in shots if re.search(PRESET_SCENES, x.get("scene") or "")]
-        add("no preset look adopted: <= 25% of the shots are a preset's signature scenes", shots and len(borrowed) <= 0.25 * len(shots),
-            f"{len(borrowed)}/{len(shots)} preset scenes: {sorted({x.get('scene') for x in borrowed})[:6]}")
     moments = [s.get("moment") or "" for s in shots]
     left = sum("REPLACE" in m for m in moments)
     add("the starter was replaced: no placeholder moments left and >= 80% of the moments are distinct",

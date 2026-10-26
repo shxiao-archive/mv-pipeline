@@ -4,8 +4,8 @@
  * ('own') with neutral grey placeholders — a beat tick, the section's progress, the current lyric line read from
  * Z.line(i).text (line indices only; no lyric text in code). None of it is a suggestion for the look.
  * Replace all of it with the style written in docs/CONCEPT.md: your palette and type roles, your shape and motif
- * grammar, your motion feel, your scenes in engine/scenes/<film>.js. Borrow single techniques from the library
- * (grep index/index.jsonl), never a preset's look.
+ * grammar, your motion feel, your scenes in engine/scenes/<film>.js. Borrow techniques and shared elements from the
+ * library (grep index/index.jsonl), restyled to your concept; not a preset's overall look.
  */
 (() => {
   'use strict';

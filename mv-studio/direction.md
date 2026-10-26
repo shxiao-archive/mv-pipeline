@@ -85,7 +85,7 @@ transition grammar, ending, pacing (some songs want long takes), type density (s
 
 Half a page; lyric lines by number only. The jury reads it and judges the film against it, so it says what the film
 is trying to do, not what the style usually does:
-- thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its §4 marker check on the look sheet, or
+- thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its §4 distance review on the look sheet, or
   the preset named by the user), and per section the methods the song asks for, and why;
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;
@@ -106,8 +106,8 @@ asked for. Make a switch work:
 - **one lyric voice at a time**: never two lyric systems on screen at once (`check_shots.mjs` catches overlaps);
 - **say it in the concept**: which sections use which methods, and why.
 
-A style of the film's own is the default (`design-a-style.md`); it is built from the shared engine's techniques, never
-from a preset's look.
+A style of the film's own is the default (`design-a-style.md`); it is built from the shared engine and any shared
+elements that serve the song, and does not take on a preset's overall look without a reason from the song.
 
 ## 7. Reading the library cheaply
 

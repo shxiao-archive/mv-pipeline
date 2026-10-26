@@ -68,7 +68,7 @@ the starter.
 
 Read `direction.md`, then `design-a-style.md` (or the preset's BRIEF.md and, for vocaloid, `styles/vocaloid/DIRECTION.md`).
 Produce `docs/CONCEPT.md` (≈1 page): thesis (one sentence about what the song is *about* visually), logline, arc per
-section, the style block (`design-a-style.md` §2 slots and the §4 marker check on the look sheet), signature moments mapped to times,
+section, the style block (`design-a-style.md` §2 slots and the §4 distance review on the look sheet), signature moments mapped to times,
 ending idea. A cast summary only if the film has a cast.
 
 **Checkpoint:** summarise to the user in a few lines.

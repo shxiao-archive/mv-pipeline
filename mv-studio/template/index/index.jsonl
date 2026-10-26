@@ -503,11 +503,11 @@
 {"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:85-98","lines":14}
 {"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:99-118","lines":20}
 {"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:119-136","lines":18}
-{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Shared scenes (`core/scenes.js`)","where":"<skill>/references/05-engine.md:137-154","lines":18}
-{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:155-200","lines":46}
-{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:201-206","lines":6}
-{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:207-218","lines":12}
-{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:219-323","lines":105}
+{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Shared scenes (`core/scenes.js`)","where":"<skill>/references/05-engine.md:137-155","lines":19}
+{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:156-201","lines":46}
+{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:202-207","lines":6}
+{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:208-219","lines":12}
+{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:220-324","lines":105}
 {"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
 {"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-50","lines":24}
@@ -544,7 +544,7 @@
 {"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:74-80","lines":7}
 {"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:81-105","lines":25}
 {"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:106-136","lines":31}
-{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:137-217","lines":81}
+{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:137-220","lines":84}
 {"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:10-29","lines":20}
 {"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:30-43","lines":14}
 {"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs (if the film has a cast)","where":"<skill>/references/10-craft.md:44-98","lines":55}

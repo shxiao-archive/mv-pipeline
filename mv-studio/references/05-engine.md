@@ -84,9 +84,9 @@ Math/easing: `Z.clamp lerp inv remap smooth fract quant hex rgba mix3 TAU`, `Z.t
 
 ## 5. Drawing toolkit (`Z.draw`, alias `D`)
 
-The rays, embers, fireflies, feathers, glass cracks and rim light carry the vocaloid preset's look; they live in its
+The rays, embers, fireflies, feathers, glass cracks and rim light carry the vocaloid look together; they live in its
 pack (`engine/styles/vocaloid/fx.js`, which adds them to `Z.draw`, to `illust` fx and chars) with its transitions
-(`trans.js`: `barrier`, `shatter`). In a film with its own style they are that preset's devices (`design-a-style.md` §5).
+(`trans.js`: `barrier`, `shatter`). In a film with its own style one of them, restyled, is a shared element (`design-a-style.md` §5).
 
 - Framing: `D.cover(ctx, img, {zoom, x, y, rot}, alpha)` (x/y in −1..1 of the spare margin), `D.viewLerp(a, b, k)`, `D.shake(t, amp, fps=24, seed)`.
 - Characters: `D.sprite(ctx, img, x, y, h, {anchor:[.5,1], rot, flip, sway, breathe, t, phase, alpha, wave:{amp, freq 2.2, speed 3.2, from .25, q}})` — `wave` is a hair-wind strip warp (keep `from` 0.25–0.4 so the face doesn't bend); `D.silhouette(…, color)`; vocaloid: `D.rim(…, color, [dx,dy])`.
@@ -138,7 +138,8 @@ LUT names: every palette in the film's `assets/style/palettes.json` gets two row
 
 `illust`, `solid` and `jz` are the shared scenes, for any film. A preset's scenes are documented in its pack's
 STYLE.md (vocaloid: the 21 scenes of its demo film 残光, `styles/vocaloid/STYLE.md` "Scene catalogue"); an own-style
-film reads them as API examples and borrows techniques, not scenes (`design-a-style.md` §5).
+film reads them as API examples and borrows techniques and elements, not the preset's look as a whole
+(`design-a-style.md` §5).
 
 The shared scenes' colour defaults come from that demo (ink `#140B1E` for `solid` and shadows, glow `#FFA552`): pass
 your own colours.
