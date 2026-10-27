@@ -210,11 +210,10 @@
   };
 
   // ---------------------------------------------------------------- camera: framings aimed at what is sung, a push inside each
-  // As pdoom-video frames a plate: cam.shots, framings switched on sung words (the caret, the typed word, the whole field),
-  // each pushing in by cam.push per second (0.04); cam.blend 0 snaps (driving passages), > 0 eases over that many seconds
-  // (quiet ones). Without shots: one eased move from -> to. cam.snap: a lift on each beat, more on downbeats (0.012, about
-  // pdoom-video's push on a kick; a bigger punch belongs to a named hit in the plate). No seeded offsets on a timer: a
-  // framing nobody aimed reads as shake.
+  // cam.shots: framings switched at given times (on sung words), each pushing in by cam.push per second (0.04); cam.blend 0
+  // snaps, > 0 eases over that many seconds. Without shots: one eased move from -> to. cam.snap: a small lift on each beat,
+  // more on downbeats (a bigger punch belongs to a named hit in the plate). No seeded offsets on a timer: a framing nobody
+  // aimed reads as shake.
   TR.cam = (c, S, cam = {}) => {
     const mix = (a, b, q) => ({ x: Z.lerp(a.x || 0, b.x || 0, q), y: Z.lerp(a.y || 0, b.y || 0, q), zoom: Z.lerp(a.zoom ?? 1, b.zoom ?? 1, q), rot: Z.lerp(a.rot || 0, b.rot || 0, q) });
     let f;

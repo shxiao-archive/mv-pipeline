@@ -87,7 +87,7 @@
     draw(c, S) {
       const a = S.args, X = 160, Y = 140, w = 1600, h = 760, cy = Y + h / 2;
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || { snap: 0 });   // locked off, as pdoom-video's oscilloscope: the trace is the motion
+      c.save(); TR.cam(c, S, a.cam || { snap: 0 });   // locked: the trace is the motion
       c.fillStyle = P.ink2; c.fillRect(X, Y, w, h);
       TR.grid(c, X, Y, w, h, 80, { major: 5, a: 0.28 });
       const wave = (t, x) => { const e = S.env.rms(t), v = S.env.vocal ? S.env.vocal(t) : 0, q = (x - X) / w; return cy - h * 0.32 * (0.25 + e) * Math.sin(q * TAU * (2 + 3 * v) + t * 7) * Math.sin(q * Math.PI) - 40 * S.clock.pulse(t, 9) * Math.sin(q * TAU * 9); };
@@ -147,12 +147,9 @@
       const fx = 260, fy = 600, fw = 1400, adv = wd => TR.measure(c, wd.w + ' ', 40, { face: 'mono' });
       const total = words.reduce((s, wd) => s + adv(wd), 0), shift = Math.max(0, total - (fw - 120));
       const x0 = fx + 30 - shift * Z.clamp((S.t - (words[0] ? words[0].t0 : 0)) / Math.max(0.1, L.end - L.t));
-      // the camera frames the caret, which eases after each sung word, and changes framing on the words (close, wider, the
-      // whole field on the last), as pdoom-video's prompt plate does
+      // the camera follows the caret, which eases after each sung word
       let caret = x0; for (const wd of words) if (S.t >= wd.t0) caret += adv(wd) * E.outExpo(Z.clamp((S.t - wd.t0) / 0.45));
-      const zs = [1.4, 1.65, 1.25], shots = [[S.shot.t0, { zoom: 1.8 }], ...words.filter((_, i) => i % 2).map((wd, j) => [wd.t0, { zoom: zs[j % 3] }])];
-      if (words.length > 2) shots.push([words[words.length - 1].t0, { zoom: 1.05 }]);
-      c.save(); TR.cam(c, S, a.cam || { shots, follow: [caret - 120, fy - 20], followK: 0.55 });
+      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.4 }, to: { zoom: 1.5 }, follow: [caret - 120, fy - 20], followK: 0.55 });
       // engraved rings behind, pulling in; on the return key they rush at the camera
       const ret = Z.clamp((S.t - (L.end || S.shot.t1)) / 0.35), rush = E.inExpo(Z.clamp((S.lt - (S.dur - 0.35)) / 0.35));
       c.save(); c.strokeStyle = P.graphite; c.lineWidth = 1;

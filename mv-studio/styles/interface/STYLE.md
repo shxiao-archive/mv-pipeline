@@ -132,7 +132,7 @@ post: S => Object.assign({}, Z.IF.post, Z.tear(S.t, B(40)), { rays: 0.8, raysAt:
 
 - **Frame the thread.** A full window at 1920 px shows tiny text: push the camera to the region that matters (the newest
   line, the composer while the user types, a toggle). Change framing on the words or the event; a slow push inside
-  every framing (the camera table under A.5).
+  every framing (the camera rules under A.5).
 - **Every line is a moment.** A line arrives (typing with the voice), the user answers (bubble, typing dots), the client
   reacts (status, toast, presence). Write the user's lines and system copy for the moment — short, original, English or
   the song's language; never invent extra lyrics.
@@ -155,31 +155,19 @@ What fixes it is something happening, on the music:
 - cut every line or two (chat → plate → chat) rather than holding one window framing past ~4 s;
 - a `backdrop` (the place, blurred) adds depth behind the window; it moves only if the place does.
 
-#### The camera, as the two reference films use it
+#### The camera
 
-Neither film holds the camera still by default, and neither moves it to fill time. In both, the camera is always
-*framing the thing the line is about*, and it moves when that thing changes or moves:
-
-| | world-execute-me (screen) | pdoom-video (treatise) |
-|---|---|---|
-| framing | each shot framed on one region (`frameRect`: the newest message, the composer, a toggle, a card), close (1.4–3×) or the whole client | each plate a list of framings on the sung words (the caret, the typed word, the whole field), zoom 1–2.7 |
-| inside a framing | a slow push: 3–7 % zoom and ≤ 30 px over the shot | a push of 3–6 % per second |
-| between framings | an eased move (0.4–1.5 s) timed to an event in the shot: a setting toggled, a message sent, "done" clicked | a hard snap on the word in driving passages; 1.2–1.6 s eased blends in the quiet breakdown |
-| following | the cursor or the newest line | the caret (smoothed, ~0.45 s), the spark it chases: hold, chase, brake, land |
-| big moves | a fly-in or pull-out as the transition to the next picture | named where the lyric asks: a whip-pan on a turn, a fall one block per beat, a rush at the camera on ⏎ |
-| hits | shake 5–9 px, decaying in ~0.1 s, on a click, a thud, a failed send; a little roll on a toggle | shake and a 2.5–6 % zoom punch on a slam, a stamp, an eye opening, set to zero at the still; ~1 % on kicks |
-| ambient | the bass breathes the frame by 0.5 %; nothing else | none: "no floaty, generic screensaver motion: strong eases, holds, then snaps" |
-| locked | a few shots have no camera | where the picture itself moves ("a still, locked-off oscilloscope") |
-
-So in this style:
-- **frame what the line is about** and change framing on its words or on the event (`ifChat` `'follow'` re-frames on
-  each new message; `camera.focus` for timed framings; `TR.cam` `shots` on the sung words, `blend: 0` to snap in a
-  driving passage, `blend: 1.4` in a quiet one); a slow push inside every framing;
-- **follow what moves** (`'follow'`, `TR.cam` `follow`: the caret, the spark, the pen);
-- **shake and punch only on a named hit**, decaying, and never while a line has to be read;
-- **lock it** where the picture's own motion carries the shot;
-- **never** a lateral drift between messages (`camera: { pan }` stays 0), framings changed on a timer, seeded
-  offsets, a constant sway or a float. Those are what made a test film read as shaky.
+The camera frames what the line is about and moves only when that changes or moves. It is never still by default and
+never moves to fill time.
+- **Frame the subject of the line** (the newest message, the composer, the caret, the typed word, a toggle) and change
+  framing when the line or the action does: snap on the word in a driving passage, ease over a second or so in a quiet
+  one. A slow push inside a framing is enough life. Tools: `ifChat` `'follow'`, `camera.focus` for timed framings,
+  `TR.cam` `shots` (`blend: 0` snaps).
+- **Follow what moves** (the cursor, the caret, the spark, the pen): `'follow'`, `TR.cam` `follow`.
+- **Shake or punch only on a hit you can name** in the shot or the music, decaying fast, never while a line is read.
+- **Lock it** when the picture's own motion carries the shot.
+- **Never** a lateral drift between events, framings changed on a timer, seeded offsets, a sway or a float: a camera
+  moving over a picture that does not change reads as shaky and is still a still.
 
 ---
 
@@ -224,7 +212,7 @@ line. Around that variety, everything shares one palette, one type system, one g
 - **Dynamic:** something is always being drawn, written, filled or stamped; big changes land on the beat. Hard cuts
   on downbeats; inside a plate, the camera frames what is sung and snaps to the next framing on a word (`cam.shots`),
   **tracks the action** (`cam.follow`: the caret, the spark, the pen), and punches only on a named hit (the camera
-  table under A.5). A camera drifting over hairlines is still a still picture (and `motion_check.py`, which takes the
+  rules under A.5). A camera drifting over hairlines is still a still picture (and `motion_check.py`, which takes the
   camera out, says so).
 
 ### B.3 Karaoke rules (every plate)
@@ -251,8 +239,8 @@ S.push({ id: 'p03', t0: B(6), t1: B(8), scene: 'trPlot', lyric: 'none', hud: fal
   drop | exp | walk`, `inv` for bone paper, axis labels), `trScope` (the song itself on an oscilloscope), `trForm` (form
   title, field label, `stamp` text, `stampWord` index), `trPrompt` (tokens + next-token distribution; the other candidates
   are other words of the song), `trHook` (`n` 1–4), `trContour` (survey map, `seed`). Every plate takes `cam` (`from / to /
-  ease`, or `shots / push / blend`; `follow / followK / snap`). `trPrompt` frames the caret on its words by default;
-  `trScope` is locked off.
+  ease`, or `shots / push / blend`; `follow / followK / snap`). Defaults: `trPrompt` follows its caret, `trScope` is
+  locked (the trace is the motion).
 - **GPU plates:** `trEngrave` (an engraved 3D form under a raking light: burin lines that wrap it, line WIDTH is the
   light; `form bulb | sphere | torus`, `turn`, `light [a0, a1]`, `freq`; the line is written under it) and `trField`
   (57 000 hairlines combed round a pole that is the pen writing the line; it swells with the music). Both write the
