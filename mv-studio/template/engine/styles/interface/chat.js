@@ -69,7 +69,7 @@
       const bd = typeof backdrop === 'string' ? { img: backdrop } : backdrop, img = Z.imgSync(bd.img);
       if (img) {
         const g = ink.g, c = blurred(img, bd.img, bd.blur ?? 24), W2 = 2400, H2 = W2 * img.height / img.width;
-        const dx = -240 + (bd.drift ?? 40) * Math.sin(t * 0.11) + (bd.pan ?? 26) * t % 480, dy = -160 + 30 * Math.sin(t * 0.07);
+        const dx = -240 + (bd.drift ?? 0) * Math.sin(t * 0.11) - ((bd.pan ?? 0) * t) % W2, dy = -160 + 0.75 * (bd.drift ?? 0) * Math.sin(t * 0.07);   // still unless the place moves
         g.save(); g.globalAlpha *= bd.alpha ?? 0.55; g.imageSmoothingEnabled = true; g.drawImage(c, dx - 240, dy, W2, H2); g.drawImage(c, dx - 240 + W2, dy, W2, H2); g.restore();
       }
     }

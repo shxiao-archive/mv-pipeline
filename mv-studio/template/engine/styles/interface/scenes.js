@@ -9,7 +9,7 @@
  *            toasts:[{ at, until, title, body, code, tone }], settings:[{ label, hint, kind:'toggle'|'slider'|'segmented', v, opts }],
  *            backdrop: 'assets/bg/room.png' | { img, blur 24, alpha .55, drift, pan } (the place, blurred, drifting behind / through
                     the window: the textured moving layer a dark UI needs), glass (window opacity, .86 with a backdrop),
-            camera: 'follow' (default: re-frames on every new message, frames the composer while the user types, floats)
+            camera: 'follow' (default: re-frames on every new message, frames the composer while the user types, pushes slowly between)
                     | { follow: true, zoom, move, beat, pan (0: a lateral drift between messages, off), focus: [[t, { x, y, zoom }], ...] } | { from:{x,y,zoom,rot}, to:{...}, ease },
             fx(ink, S, L, items) (extra drawing on top) }
  *     'me' lines type out with the voice (Z.charsAt; `words: true`: word by word, Z.wordsAt); a 'you' message in msgs simply arrives at `at`.
@@ -46,7 +46,7 @@
   const stateOf = (st, t) => (Array.isArray(st) && Array.isArray(st[0]) ? IF.stateAt(st, t) : st || 'on');
   const textOf = m => (m.line != null ? Z.line(m.line).text : m.text || '');
   const camera = (ctx, cam, S) => {
-    if (!cam) cam = { from: { zoom: 1.0, x: -60 }, to: { zoom: 1.1, x: 60 } };     // default: never still — a slide + push
+    if (!cam) cam = { from: { zoom: 1.0 }, to: { zoom: 1.05 } };     // default: a slow push; aim it at the shot's subject
     const k = (E[cam.ease || 'inOutSine'] || E.inOutSine)(S.p), a = cam.from || {}, b = cam.to || a;
     const z = Z.lerp(a.zoom ?? 1, b.zoom ?? 1, k), x = Z.lerp(a.x || 0, b.x || 0, k), y = Z.lerp(a.y || 0, b.y || 0, k), r = Z.lerp(a.rot || 0, b.rot || 0, k);
     const push = (cam.beat ?? 0) * S.clock.pulse(S.t, 8);
@@ -75,9 +75,8 @@
     const c = a.compose; if (c) { const from = c.from ?? c.at - 1.6, w = Z.smooth(from - 0.6, from, t) * (1 - Z.smooth(c.at + 0.2, c.at + 0.8, t)); cy = Z.lerp(cy, L.composer.y + 20, w); z = Z.lerp(z, base * 1.05, w); }
     const halfH = 540 / z; cy = Z.clamp(cy, win.y + halfH - 60, win.y + win.h - halfH + 60);
     if (cam.focus) { const f = IF.at(cam.focus, t, null); if (f) { cx = f.cx ?? cx; cy = f.cy ?? cy; z = f.zoom ?? z; } }
-    cx += 8 * Math.sin(t * 0.37 + 1.3); cy += 6 * Math.sin(t * 0.29 + 0.4);
-    const r = 0.004 * Math.sin(t * 0.23), push = (cam.beat ?? 0.008) * S.clock.pulse(t, 8);
-    ctx.translate(960, 540); ctx.rotate(r); ctx.scale(z * (1 + push), z * (1 + push)); ctx.translate(-cx, -cy);
+    const push = (cam.beat ?? 0.008) * S.clock.pulse(t, 8);
+    ctx.translate(960, 540); ctx.scale(z * (1 + push), z * (1 + push)); ctx.translate(-cx, -cy);
   };
   let fontsReady = null;
   const loadFonts = () => fontsReady || (fontsReady = Promise.all(IF.fontsToLoad.map(f => document.fonts.load(f, 'Aa0あ一'))));
@@ -145,7 +144,7 @@
     init: loadFonts,
     draw(ctx, S) {
       const a = S.args, t = S.t, ink = IF.ink(ctx, stateOf(a.state || 'paper', t));
-      ctx.save(); camera(ctx, a.camera || { from: { zoom: 1.0, x: -90 }, to: { zoom: 1.12, x: 90 }, ease: 'linear' }, S);   // default: a steady slide + push (a still plate reads as a slide)
+      ctx.save(); camera(ctx, a.camera || { from: { zoom: 1.0 }, to: { zoom: 1.06 } }, S);   // default: a slow push; the plate's own events are its motion
       IF.ground(ink, a.ground || {});
       // misregistration: a fixed slip per plate (misreg px, or [dx, dy]) with a slow drift; kicks (misregKick: [t, ...]) knock
       // the plates apart and they spring back over ~0.25 s. Never a random jitter per frame (it reads as noise, not print)
