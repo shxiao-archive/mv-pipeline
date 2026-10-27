@@ -91,14 +91,15 @@ song or lyrics, or a render made from older files, fails — re-run `analyze_aud
 Run on every full render (and on clips of fast sections while building):
 ```bash
 python tools/check_flash.py render/mv.mp4        # WCAG 2.3.1 approximation: general + red flashes <= 3/s -> PASS / FAIL (exit 1)
-python tools/motion_check.py render/mv.mp4       # stretches where nothing moves (< 0.006 for >= 1.5 s), with their times (not counting the song's stops, the tail, `hold: true` shots); verify lists it as INFO: a stillness the film means stays, one it doesn't is fixed in that shot
+python tools/motion_check.py render/mv.mp4       # stretches where nothing moves in the picture, the camera taken out (< 0.006 for >= 1.5 s), with their times (not counting the song's stops, the tail, `hold: true` shots); verify lists it as INFO: a stillness the film means stays, one it doesn't is fixed in that shot
 node tools/check_no_lyrics.mjs                   # lyric text only in analysis/ (code clean; --strict: docs too)
 ```
 What reviewers flagged in films that passed every automatic check — look for these in the contact sheets:
 
 | symptom | cause | fix |
 |---|---|---|
-| "a PPT", "a slideshow" | pictures held still behind slow crossfades | every shot moves: camera push / drift / parallax, typing, particles; motion_check |
+| "a PPT", "a slideshow" | pictures held still behind slow crossfades | something happens in every shot, on the music: typing, drawing, an arrival, a reaction, a limited-animation loop; motion_check (it takes the camera out) |
+| "too shaky", "restless" | the camera kept moving to make stills look alive: constant pans, floats, random reframes | the picture's own motion; the camera moves with a reason (follow the action, push into the moment, a hit) and holds between |
 | a train floating above its bridge, lanterns above the river | cut-outs placed by eye in frame coordinates while the plate pans | `art_grid.py` → `pin: [u, v]` on the plate, `ground`, `water`; or one image for things that touch |
 | "the sun looks like a glass marble" | a bright gradient disc with an edge | `fx: 'light'` / `D.softLight` pinned to the painted sun |
 | stiff, unnatural movement | linear moves at constant speed | eased arcs with anticipation / overshoot (`D.travel`), sway, secondary motion |
@@ -188,8 +189,9 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      that serve the song are not
    - concept_story: the film does what its concept says; a visual idea about what the song is about; the lines
      answered the way the concept sets them; the moments the concept names as peaks land; an ending, not a stop
-   - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; no dead or
-     jittery motion, no sprites flipping back and forth
+   - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; the motion
+     comes from what happens in the picture, on the music; the camera moves with a reason and holds otherwise; no dead
+     or jittery motion, no camera drifting or shaking to keep stills alive, no sprites flipping back and forth
    - composition_type: composition and type as the concept intends, carried out with control; lyrics legible and
      inside the safe area; CJK and Latin type set well
    - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts

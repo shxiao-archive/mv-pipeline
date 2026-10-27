@@ -184,14 +184,19 @@ falls. The picture tells the joke; text in the frame only when the joke needs a 
 - **One accent per cue**, landing at cue + 0.00…0.15 s; **anticipation** before it (0.1–0.4 s: a wind-up, a bulge, a
   squash); **follow-through** after it (overshoot `outBack`, settle `elastic`, secondary motion catching up).
 - Groups **stagger 30–80 ms**; after an action, **hold ≥ 0.2 s** before the next one; uniform speed only for travel.
-- Big changes land on beats; inside a phrase, reframe on half bars; a cut lands on a downbeat or on the cue.
+- Big changes land on beats; a cut lands on a downbeat or on the cue; a reframe inside a shot lands on a beat and shows
+  something new.
 - Name the phases inside a shot (hop → slide → teeter → fall → land) and give each its time from the cue sheet; a shot
   is a little sequence, not a pose that drifts.
 
 ### 6.3 Camera
 
-- Drift, tracking, pushes and shake are the motion-feel slot's choice (a locked camera is a choice too). The
-  reference films drifted 4–6 px at ~0.35 Hz.
+- **The picture moves, the camera serves it.** In the reference films the motion is what happens in the frame: a
+  character acts, a pen writes, a message arrives, a thing breaks. Their cameras drifted 4–6 px at ~0.35 Hz, tracked
+  the action and pushed on emotion; between those they held. A pan, float or reframe added to keep a still from looking
+  still reads as shaky and is still a still: `motion_check.py` takes the camera out before it measures.
+- Drift, tracking, pushes and shake are the motion-feel slot's choice (a locked camera is a choice too); each move has
+  a reason the shot list can name (follow this, reveal that, hit on this beat).
 - **Tracks the action with lag:** aim at the subject's position 0.1–0.15 s ago (`sledAt(t − 0.14)`), lead in the
   direction of travel; push in on emotion; shake on hits (§5); whip with speed lines between places.
 - Framing follows the scale table: full / medium / close-up are fixed zooms, so the cast keeps its size across cuts.
@@ -199,7 +204,8 @@ falls. The picture tells the joke; text in the frame only when the joke needs a 
 ### 6.4 Performance
 
 - In the reference films everyone on screen reacts on cues (blink, turn, flinch).
-- `motion_check.py` reports still 0.5 s windows; whether stillness is wanted is the film's.
+- `motion_check.py` reports stretches where nothing moves in the picture (the camera taken out); whether stillness is
+  wanted is the film's (`hold: true`).
 - Keep faces and key action out of the lyric band (karaoke / subtitle zone) whenever a line is sung.
 
 ## 7. Density of the reference films (a measure, not a target)

@@ -71,8 +71,8 @@ lyrics set into the interface as they are sung, with deadpan copy of the film's 
 | plate landing | the word takes over | keywords, concrete nouns, 1–4 per chorus | every line | off-beat cut: the word at the cut, the picture 0.23 s later on the strong beat |
 | pressed-on letters | ink hitting paper | keyword plates | — | 108 % → 100 % in ~2 frames |
 | cut-away that keeps time | the conversation went on without you | inserts into the chat | — | `Z.withInserts` |
-| reframe snap | precision | inside a plate, every half bar | slow verses | hard snap, outExpo |
-| tracking camera | following the pen or spark | plates with a moving point | — | ≥ 110 px/s, or it reads as static |
+| reframe snap | precision, a new detail | inside a plate, on a strong beat, onto what the line names | slow verses; as a default on every plate (it reads as shake) | hard snap, outExpo |
+| tracking camera | following the pen or spark | plates with a moving point | a camera with nothing to follow | lags the point slightly; the point's motion is the motion |
 | hand-off | one picture becomes the next | between plates | — | the curve plunges and the camera with it; the next plate under the burning page |
 | hook slam, escalating | a recurring blow, bigger each time | the hooks | — | 4 passes: clean → on a field → hairlines → strobing |
 | width press | pressure | on the kick in tense lines | — | width 125 → 62 |
@@ -129,7 +129,7 @@ section sits in the concept.
   central 90 % at the widest zoom.
 - A plate is ended by an event, never by a fade.
 - The user is never shown; no red before the first error.
-- `motion_check.py` on every render. UI frames need real travel or cuts.
+- `motion_check.py` on every render. It takes the camera out: UI frames need things happening in them, or cuts.
 
 ## 7. Avoid
 

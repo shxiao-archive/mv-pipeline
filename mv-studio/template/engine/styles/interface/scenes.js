@@ -10,7 +10,7 @@
  *            backdrop: 'assets/bg/room.png' | { img, blur 24, alpha .55, drift, pan } (the place, blurred, drifting behind / through
                     the window: the textured moving layer a dark UI needs), glass (window opacity, .86 with a backdrop),
             camera: 'follow' (default: re-frames on every new message, frames the composer while the user types, floats)
-                    | { follow: true, zoom, move, beat, focus: [[t, { x, y, zoom }], ...] } | { from:{x,y,zoom,rot}, to:{...}, ease },
+                    | { follow: true, zoom, move, beat, pan (0: a lateral drift between messages, off), focus: [[t, { x, y, zoom }], ...] } | { from:{x,y,zoom,rot}, to:{...}, ease },
             fx(ink, S, L, items) (extra drawing on top) }
  *     'me' lines type out with the voice (Z.charsAt; `words: true`: word by word, Z.wordsAt); a 'you' message in msgs simply arrives at `at`.
  * 'ifPlate' a full-frame print: { state ('paper'), ground:{...IF.ground options}, camera, misreg (px, or [dx, dy]: the plates' fixed
@@ -53,9 +53,9 @@
     ctx.translate(960, 540); ctx.rotate(r); ctx.scale(z * (1 + push), z * (1 + push)); ctx.translate(-960 - x, -540 - y);
   };
   // 'follow' camera for ifChat (the default): it frames the NEWEST message (from a dry layout of the thread), re-frames
-  // on every arrival (eased; alternating close / wider), frames the composer while the user types, and in between keeps
-  // travelling — a lateral pan inside the slack the text leaves (never cropping the lines) plus a slow push.
-  // Measured: a UI held in one framing reads, and measures, as a still picture.
+  // on every arrival (eased; alternating close / wider), frames the composer while the user types, and in between holds
+  // with a slow push (cam.pan > 0 adds a lateral drift inside the slack the text leaves). The messages move the camera:
+  // a drift over a window where nothing happens is still a still picture (motion_check.py takes the camera out).
   const follow = (ctx, S, a, L, items) => {
     const cam = typeof a.camera === 'object' ? a.camera : {}, t = S.t, base = cam.zoom ?? 1.26, th = L.thread, win = L.win;
     const live = items.filter(it => !it.thinking || true), n = live.length, last = live[n - 1];
@@ -70,7 +70,7 @@
     let z = Z.lerp(zf(n - 1), zf(n), e), cy = Z.lerp(cyOf(prev) - (last ? last.h + 22 : 0) * (1 - e) * 0, cyOf(last), e);
     const half = 960 / z, slack = Math.max(0, half - th.w / 2 - 40), dir = n % 2 ? 1 : -1;
     const hold = Z.clamp((since - mv * 0.5) / gap);
-    let cx = th.x + th.w / 2 + dir * slack * (0.5 - hold) * 1.1;              // a lateral pan across the slack, one way per line
+    let cx = th.x + th.w / 2 + (cam.pan ?? 0) * dir * slack * (0.5 - hold) * 1.1;   // a lateral drift across the slack, one way per line
     z *= 1 + (cam.creep ?? 0.07) * hold;
     const c = a.compose; if (c) { const from = c.from ?? c.at - 1.6, w = Z.smooth(from - 0.6, from, t) * (1 - Z.smooth(c.at + 0.2, c.at + 0.8, t)); cy = Z.lerp(cy, L.composer.y + 20, w); z = Z.lerp(z, base * 1.05, w); }
     const halfH = 540 / z; cy = Z.clamp(cy, win.y + halfH - 60, win.y + win.h - halfH + 60);

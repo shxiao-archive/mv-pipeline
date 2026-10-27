@@ -16,7 +16,7 @@
  *   TR.grid / axes / ticks / cropMarks / callout / stamp / hatch / contours / readout   hairline primitives (see below)
  *   TR.value(t)             the film's running number from TR.NUM.keys [[t, v], ...] (steps up on beats); TR.fmt(v)
  *   TR.cam(ctx, S, cam)     camera: { from: { x, y, zoom, rot }, to, ease ('outCubic': moves at once after the cut) } +
- *                           a push on downbeats (cam.snap) + a reframing snap every half bar (cam.reframe 0..1) +
+ *                           a push on downbeats (cam.snap) + a reframing snap every half bar (cam.reframe 0..1, off) +
  *                           cam.follow [x, y] (a world point the camera tracks, weight cam.followK 0.45: the spark, the pen)
  *
  * mv-studio (MIT). Style after pdoom-video by Giacomo Magnanini (MIT): the palette, the spark and its deterministic
@@ -209,12 +209,12 @@
   };
 
   // ---------------------------------------------------------------- camera: an eased move + snaps that land on downbeats
-  // cam.reframe (default 1): every half bar (on beats 1 and 3) the camera SNAPS to a new framing (outExpo over 0.35 s): the sub-cuts and
-  // reframings inside a plate. 0 = only the eased move. Hairlines on black need it: a slow drift barely changes a frame.
+  // cam.reframe (default 0 = only the eased move): every half bar (on beats 1 and 3) the camera SNAPS to a new framing (outExpo
+  // over 0.35 s). Seeded offsets, not aimed: for a driving passage only; on every plate it reads as shake.
   TR.cam = (c, S, cam = {}) => {
     const k = (Z.ease[cam.ease || 'outCubic'] || Z.ease.outCubic)(S.p), a = cam.from || {}, b = cam.to || a;
     const snap = (cam.snap ?? 0.03) * Math.exp(-14 * Math.max(0, S.clock.since(S.t))) * (S.clock.inBar(S.t) === 0 ? 1 : 0.35);
-    const R = cam.reframe ?? 1, half = n => Math.floor(n / 2), bar = half(S.clock.beat(S.t)) - half(S.clock.beat(S.shot.t0)), seed = S.shot.t0 * 100 | 0;
+    const R = cam.reframe ?? 0, half = n => Math.floor(n / 2), bar = half(S.clock.beat(S.t)) - half(S.clock.beat(S.shot.t0)), seed = S.shot.t0 * 100 | 0;
     const off = n => (n <= 0 ? [0, 0, 0] : [Z.rnds(seed, n, 1) * 70, Z.rnds(seed, n, 2) * 45, Z.rnds(seed, n, 3) * 0.06]);   // small: words near the edge must stay in frame
     const q = Z.ease.outExpo(Z.clamp((S.t - S.clock.at(half(S.clock.beat(S.t)) * 2)) / 0.35)), o0 = off(bar - 1), o1 = off(bar);
     const rf = [0, 1, 2].map(i => R * Z.lerp(o0[i], o1[i], q));

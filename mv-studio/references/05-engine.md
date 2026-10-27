@@ -296,7 +296,7 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
   color, spread, flicker, beat }`. `Z.pinPt(S, spec, k)` for custom fx.
 - **Tools:** `estimate_lrc.py` (plain text → estimated LRC), `art_grid.py` (labelled grid over a plate to read u, v),
   `grokgen.py` + `grok_run.sh` (Grok images), `check_flash.py` (WCAG 2.3.1 approximation; exit 1 on FAIL),
-  `motion_check.py` (static stretches; exit 1 above 10 %, which verify lists as information), `check_no_lyrics.mjs` (lyric text outside `analysis/`).
+  `motion_check.py` (static stretches, measured with the camera taken out; exit 1 above 10 %, which verify lists as information), `check_no_lyrics.mjs` (lyric text outside `analysis/`).
 
 ---
 Author: **NikusonP** · vocaloid-style-mv-pipeline (MIT) · §12: mv-studio (MIT)

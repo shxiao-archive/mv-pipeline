@@ -142,19 +142,20 @@ post: S => Object.assign({}, Z.IF.post, Z.tear(S.t, B(40)), { rays: 0.8, raysAt:
   (presence goes offline, a message fails, the window closes), the state goes `ash` / `dead`.
 - **Three layers in every picture** (room / window / content; paper / shadow plate / ink).
 
-#### Motion budget (measured — a UI is the hardest picture to keep alive)
+#### Motion: what happens in the window, not the camera
 
-A chat window is mostly flat dark surfaces with small text: typing, a blinking caret and glyph flicker are real motion
-to the eye but barely change the picture at a distance, and reviewers call such films "a slideshow". Measured with
-`tools/motion_check.py` on dark interface frames: a slow push (zoom 1.0 → 1.05 per shot), a gentle float or glyph
-decoding alone stay STATIC; a lateral pan of ≥ ~110–130 px/s, a plate that slides 300+ px while pushing in, a picture
-that enters with a 200 px move, and cuts between a close chat framing and a plate all register. So:
-- cut every line or two (chat → plate → chat), never hold one window framing for more than ~4 s;
-- `ifChat` default camera `'follow'` re-frames on every message and pans ~110 px/s in between (`camera: { follow: true,
-  pan, creep, zoom }`); keep it unless a shot needs a designed still (and then make that still an event);
-- plates move: default slide + push; give entrances real travel (`in: { dy: 200 }`), misregistration, landing letters;
-- a `backdrop` (the place, blurred, drifting) adds a textured layer behind / through the window (`glass` 0.86);
-- run `motion_check.py` on every render; the screen starter scores ~27 % static: your film must do better (≤ 10 %).
+A chat window is mostly flat dark surfaces with small text: reviewers call such films "a slideshow". Moving the
+camera over it does not fix that: a pan, a push, a float or a reframing snap over a window where nothing happens is a
+still picture moved around, reads as shaky, and `motion_check.py` measures it as static (it takes the camera out).
+What fixes it is something happening, on the music:
+- messages arrive, are typed, deleted, retyped, fail, are answered; the presence changes; a reaction lands;
+- a plate cuts in on a downbeat and something is drawn in it as the line is sung (a trace advancing, a chart filling,
+  a form being stamped); entrances with real travel (`in: { dy: 200 }`), misregistration, landing letters;
+- cut every line or two (chat → plate → chat) rather than holding one window framing past ~4 s;
+- the camera moves when it has a reason: `ifChat`'s `'follow'` re-frames on each new message (the conversation moves
+  it); a lateral drift between messages is off unless asked for (`camera: { pan: 1 }`); a push into the moment that
+  matters; a plunge from one picture into the next. Between those it holds;
+- a `backdrop` (the place, blurred) adds depth behind the window; it moves only if the place does.
 
 ---
 
@@ -196,9 +197,10 @@ line. Around that variety, everything shares one palette, one type system, one g
   probability bars. **No mascots, no cartoon faces, no emoji.**
 - **Not slop:** no purple / cyan neon, glowing brains, code rain, lens flares, particle nebulae or stock "AI" imagery.
   Never copy existing artworks, meme drawings, logos or real product UIs.
-- **Dynamic:** something always moves; big changes land on the beat. Hard cuts on downbeats; inside a plate, reframing
-  snaps every half bar (`TR.cam` does it) and a camera that **tracks the action** (`cam.follow`: the spark, the pen).
-  Hairlines on black change few pixels: a slow drift alone reads as a still (and fails `motion_check.py`).
+- **Dynamic:** something is always being drawn, written, filled or stamped; big changes land on the beat. Hard cuts
+  on downbeats; inside a plate, the camera **tracks the action** (`cam.follow`: the spark, the pen) and may snap to a
+  new framing on a strong beat when that framing shows something new (`cam.reframe`, off by default). A camera drifting
+  over hairlines is still a still picture (and `motion_check.py`, which takes the camera out, says so).
 
 ### B.3 Karaoke rules (every plate)
 
@@ -263,8 +265,9 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
   `Z.rnd(i, j)` (never `Math.random`), advance them through a field that is a function of t.
 - **Written type** (`TR.write`, `Z.stroke`): the pen writes the line as it is sung; the spark sits on the pen head; use
   the head as a pole, a light, a camera target (`cam.follow`).
-- **Motion on paper:** a bone-paper chart under a 75 px/s camera move measured as static (`motion_check.py`). The
-  screen budget (§A.5) holds here too: ≥ 110 px/s of travel, a slide-in, or something drawn moving in every 1.5 s.
+- **Motion on paper:** the plate itself moves: the pen writes, the curve runs, the field combs, the number rolls, the
+  stamp lands. A chart under a camera move with nothing drawn is static (`motion_check.py`). Something drawn moving
+  at least every 1.5 s, on the music (§A.5).
 - **Lyrics stay in frame:** cameras push and reframe; keep set words inside the central 90 % at the shot's widest
   zoom, and look at the stills for cropped words (`check_shots.mjs` warns for the lyric layer and `shot.text`; words a scene
   draws itself are not seen). `TR.write` lines in the GPU plates are drawn in
@@ -283,7 +286,7 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
   fails; silhouettes split into ink plates; every new shared effect off by default and checked with the regression
   sheets (`regress.mjs`).
 - **Treatise (pdoom-video, 17 plates):** one plate module per section, each with its own drawing idiom and its own
-  camera choreography (sub-cuts, half-bar reframes, a tracking camera), the spark and the running number threaded
+  camera choreography (sub-cuts that each frame a new detail, a tracking camera that follows the pen), the spark and the running number threaded
   through all of them, each plate's exit turning into the next plate's entry; type crafted per word (kerning, width
   animation, written strokes); a revision round per plate after the first cut (pdoom-video went through five).
 

@@ -129,7 +129,7 @@ def main():
     mo = subprocess.run([sys.executable, str(ROOT / "tools" / "motion_check.py"), str(video), "--start", f"{off:.3f}"],
                         capture_output=True, text=True, encoding="utf-8", errors="replace").stdout.strip()
     if mo:
-        lines += ["", "## Motion per second (tools/motion_check.py; a long bar = much changes on screen)", "", "```", mo, "```"]
+        lines += ["", "## Motion per second (tools/motion_check.py; # = moves in the picture, ~ = camera movement)", "", "```", mo, "```"]
     (out / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"[jury_pack] {len(sheets)} section sheets, {len(strips)} filmstrips, {len(cuts)} cut strips, {len(stills)} stills -> {out / 'index.md'}")
 

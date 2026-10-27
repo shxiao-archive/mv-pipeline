@@ -199,7 +199,7 @@ match outside the face (swapping redrawn copies reads as a jump cut).
 Timing (engine): blinks on a seeded clock (`seed` per character, `period` 3.7 s); the mouth opens for about half a second
 every 1.1–1.7 s while a line is sung and stays closed between lines (`sings: false` for a listener; `lipsync: true`
 opens it on every sung character, rarely wanted); expressions change on cues (`exprAt`). `motion_check.py` counts a
-living face under a slow push (≥ 40 % of its threshold) as motion, read from plan/shots.json `animFaces`.
+living face (≥ 40 % of its threshold, the camera taken out) as motion, read from plan/shots.json `animFaces`.
 
 Do not ask the generator for a changed version of a whole finished picture (a turned head, another pose): tested, it
 either drifts in style or does not change. Other poses are other pictures, cut to, not morphed. (`anim.tilt` /
