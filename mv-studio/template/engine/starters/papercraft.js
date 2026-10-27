@@ -35,7 +35,8 @@
     const S = [], END = audio.music_cut || audio.duration, L = Z.LYR, beat = 60 / (audio.bpm || 120);
     const isChorus = s => /^(chorus|sabi|hook)/i.test(s.label), isPre = s => /^pre/i.test(s.label);
     const shot = (id, t0, t1, scene, args, extra = {}) => { if (t1 > t0 + 0.05) S.push(Object.assign({ id, t0, t1, scene, args, lyric: 'none', hud: false }, extra)); };
-    const first = secs.length ? secs[0].start : 0, l0 = L.length ? nb(L[0].t - 0.05) : END, open = Math.min(l0, first > 0.5 ? first : l0);
+    const first = secs.length ? secs[0].start : 0, l0 = L.length ? nb(L[0].t - 0.05) : END, o0 = Math.min(l0, first > 0.5 ? first : l0);
+    const open = o0 < 1.5 ? 0 : o0;                                             // singing from the first second: no time to open the book, start inside it
     const journey = t => Z.clamp(t / END);                                     // the quest's progress = song time
 
     shot('s00', 0, open, 'pcBook', { mode: 'open' }, { moment: 'the storybook opens; the kingdom pops up' });
