@@ -8,8 +8,10 @@
  *   POP    for 1-3 frames the picture changes and then comes back to what it was: a short flash, a missing
  *          frame, a glitch that escaped (signal-style glitches are deliberate: check they are the planned ones)
  *   HIT    a jump or pop within one frame of a beat, a lyric cut, a line's start or end, or a cue, or on a frame where
- *          the scene's code reads a drum hit still ringing (Z.hit above 0.05): an accent the edit asked for (a beat pulse, a shake
- *          on the snare, a slam, a JIZURA entrance or exit). Listed, never a failure: a check that failed hits sanded
+ *          the scene's code reads a drum hit still ringing (Z.hit above 0.05) or a signal cut's burst (Z.SIG.kick above
+ *          0.05), or a change that goes away with the lyric layer off (the JIZURA part's own motion: its entrance, exit,
+ *          layout move, fx event): an accent the edit asked for (a beat pulse, a shake on the snare, a slam, a JIZURA
+ *          entrance or exit). Listed, never a failure: a check that failed hits sanded
  *          the punch out of the iteration-6 film (pulses replaced by soft waves, hard JIZURA parts denied)
  * Cuts come from the live shot list; the frames within one frame of a cut and inside a transition are exempt.
  * Grain is switched off while measuring. Writes render/pops.json; exit 1 with --strict on any JUMP or POP.
@@ -39,6 +41,8 @@ const onHit = (t, i) => drum.has(i) || hits.some(h => Math.abs(h - t) <= 1.01 / 
 await E.page.evaluate(() => {
   const Z = window.Z, h = Z.hit; window.__drum = 0;
   Z.hit = (k, t, tau) => { const v = h(k, t, tau); if (v > 0.05) window.__drum = 1; return v; };
+  const kick = Z.SIG && Z.SIG.kick;
+  if (kick) Z.SIG.kick = t => { const v = kick(t); if (v > 0.05) window.__drum = 1; return v; };
 });
 const drum = new Set();
 const shotAt = t => { let s = null; for (const x of P.shots) if (x.t0 <= t + 1e-6) s = x; return s; };
@@ -51,7 +55,6 @@ for (let i = Math.round(from * fps); i / fps < to; i++) {
   frames.push({ t, g: await E.thumb(96, 54) });
   if (frames.length % 300 === 0) console.log(`  ${t.toFixed(1)} s (${((Date.now() - t0) / frames.length).toFixed(0)} ms/frame)`);
 }
-await E.close();
 const diff = (a, b) => { let s = 0; for (let k = 0; k < a.length; k++) s += Math.abs(a[k] - b[k]); return s / a.length / 255; };
 const d = frames.map((f, i) => (i ? diff(frames[i - 1].g, f.g) : 0));
 const median = (xs) => { const s = xs.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)] || 0; };
@@ -65,9 +68,20 @@ for (let i = 1; i < frames.length; i++) {
   // a POP: within 1-3 frames the picture comes back to what it was before the change
   let back = 0;
   for (let k = 1; k <= 3 && i + k < frames.length; k++) if (diff(frames[i - 1].g, frames[i + k].g) < lim / 3) { back = k; break; }
-  if (back) { found.push({ kind: onHit(t, i) ? 'HIT' : 'POP', t: +t.toFixed(3), frames: back, d: +d[i].toFixed(3), shot: shotAt(t)?.id }); i += back; continue; }
-  found.push({ kind: onHit(t, i) ? 'HIT' : 'JUMP', t: +t.toFixed(3), d: +d[i].toFixed(3), local: +local.toFixed(3), shot: shotAt(t)?.id });
+  if (back) { found.push({ kind: onHit(t, i) ? 'HIT' : 'POP', t: +t.toFixed(3), frames: back, d: +d[i].toFixed(3), lim, i, shot: shotAt(t)?.id }); i += back; continue; }
+  found.push({ kind: onHit(t, i) ? 'HIT' : 'JUMP', t: +t.toFixed(3), d: +d[i].toFixed(3), local: +local.toFixed(3), lim, i, shot: shotAt(t)?.id });
 }
+// the change gone with the lyric layer off: the JIZURA part's own motion (entrance, exit, layout move, fx event)
+// shortcut: a glitch in the lyric layer itself passes too; if one slips through, check that part with jz_cuts_at.mjs + stills
+await E.page.evaluate(() => { window.Z.NO_LYRICS = true; });
+for (const f of found) {
+  if (f.kind === 'HIT') { delete f.lim; delete f.i; continue; }
+  const g = [];
+  for (const k of [f.i - 1, f.i]) { await E.frame(frames[k].t); g.push(await E.thumb(96, 54)); }
+  if (diff(g[0], g[1]) <= f.lim) f.kind = 'HIT';
+  delete f.lim; delete f.i;
+}
+await E.close();
 fs.mkdirSync(path.join(ROOT, 'render'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'render', 'pops.json'), JSON.stringify({ fps, thresh, from, to, found }, null, 1));
 for (const f of found.filter(f => f.kind !== 'HIT')) console.log(`${f.kind.padEnd(4)}  ${f.t.toFixed(3)} s  shot ${f.shot}  change ${(f.d * 100).toFixed(1)} %${f.frames ? ` for ${f.frames} frame(s)` : ''}${f.local != null ? ` (around it ${(f.local * 100).toFixed(1)} %)` : ''}`);
