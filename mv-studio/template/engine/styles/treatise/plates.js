@@ -30,7 +30,7 @@
     draw(c, S) {
       const a = S.args, k = a.close ? 1 - E.inOutCubic(Z.clamp(S.lt / S.dur)) : E.outExpo(Z.clamp(S.lt / 0.9));
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || (a.close ? { from: { zoom: 1.0 }, to: { zoom: 1.4 }, reframe: 0, ease: 'inOutCubic' } : { from: { zoom: 1.4 }, to: { zoom: 1.0 }, ease: 'inOutSine' }));   // the close ends on the opening's first framing: the film loops
+      c.save(); TR.cam(c, S, a.cam || (a.close ? { from: { zoom: 1.0 }, to: { zoom: 1.4 }, ease: 'inOutCubic' } : { from: { zoom: 1.4 }, to: { zoom: 1.0 }, ease: 'inOutSine' }));   // the close ends on the opening's first framing: the film loops
       const X = 220, Y = 150, w = 1480, h = 780;
       c.fillStyle = P.ink2; c.fillRect(X, Y, w, h);
       TR.grid(c, X, Y, w, h, 40, { major: 5, reveal: E.outExpo(Z.clamp((S.lt - 0.2) / 1.2)) * k });
@@ -87,7 +87,7 @@
     draw(c, S) {
       const a = S.args, X = 160, Y = 140, w = 1600, h = 760, cy = Y + h / 2;
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.0, x: -120 }, to: { zoom: 1.12, x: 120, y: -20 } });
+      c.save(); TR.cam(c, S, a.cam || { snap: 0 });   // locked off, as pdoom-video's oscilloscope: the trace is the motion
       c.fillStyle = P.ink2; c.fillRect(X, Y, w, h);
       TR.grid(c, X, Y, w, h, 80, { major: 5, a: 0.28 });
       const wave = (t, x) => { const e = S.env.rms(t), v = S.env.vocal ? S.env.vocal(t) : 0, q = (x - X) / w; return cy - h * 0.32 * (0.25 + e) * Math.sin(q * TAU * (2 + 3 * v) + t * 7) * Math.sin(q * Math.PI) - 40 * S.clock.pulse(t, 9) * Math.sin(q * TAU * 9); };
@@ -144,18 +144,23 @@
     draw(c, S) {
       const a = S.args, words = a.line != null ? TR.words(a.line) : [], L = Z.line(a.line ?? -1);
       ground(c, false);
-      c.save(); TR.cam(c, S, a.cam || { from: { zoom: 1.0, x: -60 }, to: { zoom: 1.12, x: 60 } });
+      const fx = 260, fy = 600, fw = 1400, adv = wd => TR.measure(c, wd.w + ' ', 40, { face: 'mono' });
+      const total = words.reduce((s, wd) => s + adv(wd), 0), shift = Math.max(0, total - (fw - 120));
+      const x0 = fx + 30 - shift * Z.clamp((S.t - (words[0] ? words[0].t0 : 0)) / Math.max(0.1, L.end - L.t));
+      // the camera frames the caret, which eases after each sung word, and changes framing on the words (close, wider, the
+      // whole field on the last), as pdoom-video's prompt plate does
+      let caret = x0; for (const wd of words) if (S.t >= wd.t0) caret += adv(wd) * E.outExpo(Z.clamp((S.t - wd.t0) / 0.45));
+      const zs = [1.4, 1.65, 1.25], shots = [[S.shot.t0, { zoom: 1.8 }], ...words.filter((_, i) => i % 2).map((wd, j) => [wd.t0, { zoom: zs[j % 3] }])];
+      if (words.length > 2) shots.push([words[words.length - 1].t0, { zoom: 1.05 }]);
+      c.save(); TR.cam(c, S, a.cam || { shots, follow: [caret - 120, fy - 20], followK: 0.55 });
       // engraved rings behind, pulling in; on the return key they rush at the camera
       const ret = Z.clamp((S.t - (L.end || S.shot.t1)) / 0.35), rush = E.inExpo(Z.clamp((S.lt - (S.dur - 0.35)) / 0.35));
       c.save(); c.strokeStyle = P.graphite; c.lineWidth = 1;
       for (let r = 0; r < 24; r++) { const rr = ((r * 60 - S.t * 140) % 1440 + 1440) % 1440 * (1 + 6 * rush); c.globalAlpha = 0.8 * (1 - rr / 2200); c.beginPath(); c.arc(960, 540, rr + 20, 0, TAU); c.stroke(); }
       c.restore();
-      const fx = 260, fy = 600, fw = 1400;
       c.strokeStyle = P.bone; c.lineWidth = 1.5; c.strokeRect(fx, fy - 70, fw, 100);
-      let x = fx + 30, cur = null;
+      let x = x0, cur = null;
       c.save(); c.beginPath(); c.rect(fx, fy - 70, fw, 100); c.clip();
-      const total = words.reduce((s, wd) => s + TR.measure(c, wd.w + ' ', 40, { face: 'mono' }), 0), shift = Math.max(0, total - (fw - 120));
-      x -= shift * Z.clamp((S.t - (words[0] ? words[0].t0 : 0)) / Math.max(0.1, L.end - L.t));
       for (const wd of words) {
         if (S.t < wd.t0) break;
         const ww = TR.measure(c, wd.w, 40, { face: 'mono' });

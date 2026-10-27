@@ -99,7 +99,7 @@ What reviewers flagged in films that passed every automatic check — look for t
 | symptom | cause | fix |
 |---|---|---|
 | "a PPT", "a slideshow" | pictures held still behind slow crossfades | something happens in every shot, on the music: typing, drawing, an arrival, a reaction, a limited-animation loop; motion_check (it takes the camera out) |
-| "too shaky", "restless" | the camera kept moving to make stills look alive: constant pans, floats, random reframes | the picture's own motion; the camera moves with a reason (follow the action, push into the moment, a hit) and holds between |
+| "too shaky", "restless" | the camera kept moving to make stills look alive: constant pans, floats, random reframes | the picture's own motion; the camera frames what the line is about and moves with a reason (a new framing on a word or event, follow the action, a hit), as the preset's reference films do (STYLE.md) |
 | a train floating above its bridge, lanterns above the river | cut-outs placed by eye in frame coordinates while the plate pans | `art_grid.py` → `pin: [u, v]` on the plate, `ground`, `water`; or one image for things that touch |
 | "the sun looks like a glass marble" | a bright gradient disc with an edge | `fx: 'light'` / `D.softLight` pinned to the painted sun |
 | stiff, unnatural movement | linear moves at constant speed | eased arcs with anticipation / overshoot (`D.travel`), sway, secondary motion |

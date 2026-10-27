@@ -71,8 +71,11 @@ lyrics set into the interface as they are sung, with deadpan copy of the film's 
 | plate landing | the word takes over | keywords, concrete nouns, 1–4 per chorus | every line | off-beat cut: the word at the cut, the picture 0.23 s later on the strong beat |
 | pressed-on letters | ink hitting paper | keyword plates | — | 108 % → 100 % in ~2 frames |
 | cut-away that keeps time | the conversation went on without you | inserts into the chat | — | `Z.withInserts` |
-| reframe snap | precision, a new detail | inside a plate, on a strong beat, onto what the line names | slow verses; as a default on every plate (it reads as shake) | hard snap, outExpo |
-| tracking camera | following the pen or spark | plates with a moving point | a camera with nothing to follow | lags the point slightly; the point's motion is the motion |
+| framing on the words | precision, a new detail | every UI shot and plate: the region the line is about (newest message, composer, caret, typed word) | framings changed on a timer, seeded or unaimed | snap on the word (driving), 1.2–1.6 s blend (quiet); push 3–7 % inside |
+| eased move on an event | the action moves the view | a toggle set, a message sent, "done" | between events (no lateral drift) | 0.4–1.5 s, inOut |
+| tracking camera | following the pen, spark, caret | a moving point | a camera with nothing to follow | lags the point slightly; the point's motion is the motion |
+| hit shake / punch | impact | a slam, a stamp, a click, a failed send | while a line must be read; as an ambient sway | 5–9 px, zoom 2.5–6 %, decaying ~0.1 s |
+| locked off | the picture moves itself | a trace, a typed field, a held word | — | no camera |
 | hand-off | one picture becomes the next | between plates | — | the curve plunges and the camera with it; the next plate under the burning page |
 | hook slam, escalating | a recurring blow, bigger each time | the hooks | — | 4 passes: clean → on a field → hairlines → strobing |
 | width press | pressure | on the kick in tense lines | — | width 125 → 62 |

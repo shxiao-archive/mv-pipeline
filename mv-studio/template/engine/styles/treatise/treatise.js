@@ -15,9 +15,10 @@
  *   TR.trail(ctx, pts, o)   the hairline the spark drags (o: { col, w, glow })
  *   TR.grid / axes / ticks / cropMarks / callout / stamp / hatch / contours / readout   hairline primitives (see below)
  *   TR.value(t)             the film's running number from TR.NUM.keys [[t, v], ...] (steps up on beats); TR.fmt(v)
- *   TR.cam(ctx, S, cam)     camera: { from: { x, y, zoom, rot }, to, ease ('outCubic': moves at once after the cut) } +
- *                           a push on downbeats (cam.snap) + a reframing snap every half bar (cam.reframe 0..1, off) +
- *                           cam.follow [x, y] (a world point the camera tracks, weight cam.followK 0.45: the spark, the pen)
+ *   TR.cam(ctx, S, cam)     camera: { from: { x, y, zoom, rot }, to, ease ('outCubic': moves at once after the cut) }, or
+ *                           framings switched on sung words: cam.shots [[t, { x, y, zoom, rot }], ...] (cam.push, cam.blend) +
+ *                           a lift on each beat (cam.snap) + cam.follow [x, y] (a world point the camera tracks, weight
+ *                           cam.followK 0.45: the caret, the spark, the pen)
  *
  * mv-studio (MIT). Style after pdoom-video by Giacomo Magnanini (MIT): the palette, the spark and its deterministic
  * particles, per-word karaoke rules. Written for this Canvas2D engine; see licenses/LICENSE-pdoom-video.txt.
@@ -208,20 +209,26 @@
     TR.text(c, TR.fmt(TR.value(t)), x, y + px * 0.95, px, { face: 'mono', weight: 600, col: o.hot || P.signal });
   };
 
-  // ---------------------------------------------------------------- camera: an eased move + snaps that land on downbeats
-  // cam.reframe (default 0 = only the eased move): every half bar (on beats 1 and 3) the camera SNAPS to a new framing (outExpo
-  // over 0.35 s). Seeded offsets, not aimed: for a driving passage only; on every plate it reads as shake.
+  // ---------------------------------------------------------------- camera: framings aimed at what is sung, a push inside each
+  // As pdoom-video frames a plate: cam.shots, framings switched on sung words (the caret, the typed word, the whole field),
+  // each pushing in by cam.push per second (0.04); cam.blend 0 snaps (driving passages), > 0 eases over that many seconds
+  // (quiet ones). Without shots: one eased move from -> to. cam.snap: a lift on each beat, more on downbeats (0.012, about
+  // pdoom-video's push on a kick; a bigger punch belongs to a named hit in the plate). No seeded offsets on a timer: a
+  // framing nobody aimed reads as shake.
   TR.cam = (c, S, cam = {}) => {
-    const k = (Z.ease[cam.ease || 'outCubic'] || Z.ease.outCubic)(S.p), a = cam.from || {}, b = cam.to || a;
-    const snap = (cam.snap ?? 0.03) * Math.exp(-14 * Math.max(0, S.clock.since(S.t))) * (S.clock.inBar(S.t) === 0 ? 1 : 0.35);
-    const R = cam.reframe ?? 0, half = n => Math.floor(n / 2), bar = half(S.clock.beat(S.t)) - half(S.clock.beat(S.shot.t0)), seed = S.shot.t0 * 100 | 0;
-    const off = n => (n <= 0 ? [0, 0, 0] : [Z.rnds(seed, n, 1) * 70, Z.rnds(seed, n, 2) * 45, Z.rnds(seed, n, 3) * 0.06]);   // small: words near the edge must stay in frame
-    const q = Z.ease.outExpo(Z.clamp((S.t - S.clock.at(half(S.clock.beat(S.t)) * 2)) / 0.35)), o0 = off(bar - 1), o1 = off(bar);
-    const rf = [0, 1, 2].map(i => R * Z.lerp(o0[i], o1[i], q));
-    const z = Z.lerp(a.zoom ?? 1, b.zoom ?? 1, k) * (1 + snap) * (1 + rf[2]);
+    const mix = (a, b, q) => ({ x: Z.lerp(a.x || 0, b.x || 0, q), y: Z.lerp(a.y || 0, b.y || 0, q), zoom: Z.lerp(a.zoom ?? 1, b.zoom ?? 1, q), rot: Z.lerp(a.rot || 0, b.rot || 0, q) });
+    let f;
+    if (cam.shots && cam.shots.length) {
+      const L = cam.shots, push = cam.push ?? 0.04, bl = cam.blend ?? 0;
+      const at = j => ({ ...L[j][1], zoom: (L[j][1].zoom ?? 1) * (1 + push * Math.max(0, S.t - L[j][0])) });
+      let i = 0; while (i + 1 < L.length && L[i + 1][0] <= S.t) i++;
+      f = i > 0 && bl > 0 ? mix(at(i - 1), at(i), Z.ease.inOutCubic(Z.clamp((S.t - L[i][0]) / bl))) : mix(at(i), at(i), 1);
+    } else f = mix(cam.from || {}, cam.to || cam.from || {}, (Z.ease[cam.ease || 'outCubic'] || Z.ease.outCubic)(S.p));
+    const snap = (cam.snap ?? 0.012) * Math.exp(-14 * Math.max(0, S.clock.since(S.t))) * (S.clock.inBar(S.t) === 0 ? 1 : 0.35);
+    const z = f.zoom * (1 + snap);
     const fk = cam.follow ? cam.followK ?? 0.45 : 0, fx = cam.follow ? cam.follow[0] - 960 : 0, fy = cam.follow ? cam.follow[1] - 540 : 0;   // track the action
-    c.translate(960, 540); c.rotate(Z.lerp(a.rot || 0, b.rot || 0, k)); c.scale(z, z);
-    c.translate(-960 - Z.lerp(Z.lerp(a.x || 0, b.x || 0, k), fx, fk) - rf[0], -540 - Z.lerp(Z.lerp(a.y || 0, b.y || 0, k), fy, fk) - rf[1]);
+    c.translate(960, 540); c.rotate(f.rot); c.scale(z, z);
+    c.translate(-960 - Z.lerp(f.x, fx, fk), -540 - Z.lerp(f.y, fy, fk));
   };
   // the engine's post: glow only on the signal colour (bright orange), crisp bone type, fine grain
   TR.post = { boil: 0, bloom: 0.35, bloomThreshold: 0.95, grain: 0.05, vignette: 0.22, lutMix: 0, ca: 0 };

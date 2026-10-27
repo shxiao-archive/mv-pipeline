@@ -192,9 +192,11 @@ falls. The picture tells the joke; text in the frame only when the joke needs a 
 ### 6.3 Camera
 
 - **The picture moves, the camera serves it.** In the reference films the motion is what happens in the frame: a
-  character acts, a pen writes, a message arrives, a thing breaks. Their cameras drifted 4–6 px at ~0.35 Hz, tracked
-  the action and pushed on emotion; between those they held. A pan, float or reframe added to keep a still from looking
-  still reads as shaky and is still a still: `motion_check.py` takes the camera out before it measures.
+  character acts, a pen writes, a message arrives, a thing breaks. Their cameras frame what the line is about, change
+  framing on a word or an event, push slowly inside a framing, track the action and shake on hits; how much they move
+  differs by film (the interface films reframe on nearly every phrase; others drift a few px and hold), so take it from
+  your preset's STYLE.md. A pan, float or reframe added to keep a still from looking still reads as shaky and is still
+  a still: `motion_check.py` takes the camera out before it measures.
 - Drift, tracking, pushes and shake are the motion-feel slot's choice (a locked camera is a choice too); each move has
   a reason the shot list can name (follow this, reveal that, hit on this beat).
 - **Tracks the action with lag:** aim at the subject's position 0.1–0.15 s ago (`sledAt(t − 0.14)`), lead in the
