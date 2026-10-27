@@ -36,7 +36,8 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
   are for a full-body picture that needs one more face; big changes by variant drift in style (tested): avoid them.
   Prompt = the row's locks (default: char -> STYLE + CHAR, world -> STYLE + WORLD, + ISO when transparent, + EMPTY for
   world rows that are not transparent) + "New image: " + subject. References: the style reference first, then the
-  character references (char rows) and the row's own "refs". Prefix of the id before the first digit or '-' = the
+  character references (char rows) and the row's own "refs"; a row's "ref_strength" / "fidelity" / "ref_mode" /
+  "nai" go to the generator as they are (NovelAI: loosen the reference for a back view or a close-up crop). Prefix of the id before the first digit or '-' = the
   review-sheet category (BG, CH, OBJ ...). A variant is generated FROM its base (the base is the reference image and
   the prompt says to change only the edit); `post` aligns it to the base (scale + offset, refuses a misfit) and writes
     patch  only the pixels that changed (the blobs centred in `region`, if given), on the base's canvas: drawn over the base
@@ -189,7 +190,7 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
         ch = char_of(t, r) or char_of(t, next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {}))
         if ch:
             job["char"] = ch                                              # NovelAI: a V4 character caption
-        for k in ("size", "aspect", "seed", "negative", "noise"):        # passed through to the generator wrapper
+        for k in ("size", "aspect", "seed", "negative", "noise", "ref_mode", "ref_strength", "fidelity", "nai"):   # passed through to the generator wrapper
             if k in r:
                 job[k] = r[k]
         if r.get("view") == "back":
