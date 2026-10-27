@@ -82,12 +82,13 @@
       if (lit) { ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fillRect(0, y, W, h); ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fillRect(0, y, W, 1); }
     }
   }
+  SIG.vhold = (f, d) => Z.rnd(f, 711) < 0.006 + d * 0.03;      // a vertical-hold jump on frame f (tools/pops.mjs reads it as planned)
   SIG.layerFX = (L, t) => {
     const c = SIG.cfg, P = L.P, f = Math.floor(t * 30 + 1e-6), d = SIG.distort(t), kick = SIG.kick(t), h = SIG.heat(t);
     if (c.grade) SIG.grade(P, t);
     P.hca = (P.hca || 0) + 2 + d * 10 + kick * 10;                // chroma shift: a floor of 2 px, more when hot and on cuts
     P.grain = Math.max(P.grain || 0, 0.05 + 0.06 * d);
-    if (Z.rnd(f, 711) < 0.006 + d * 0.03) P.shake = [(P.shake ? P.shake[0] : 0), (P.shake ? P.shake[1] : 0) + Z.rnds(f, 712) * (40 + 120 * d)];   // vertical-hold jump
+    if (SIG.vhold(f, d)) P.shake = [(P.shake ? P.shake[0] : 0), (P.shake ? P.shake[1] : 0) + Z.rnds(f, 712) * (40 + 120 * d)];   // vertical-hold jump
     const sc = L.scene, snap = Z.scratch[0], sx = snap.getContext('2d');
     sx.setTransform(1, 0, 0, 1, 0, 0); sx.globalAlpha = 1; sx.globalCompositeOperation = 'copy'; sx.drawImage(sc.canvas, 0, 0); sx.globalCompositeOperation = 'source-over';
     sc.save(); sc.setTransform(1, 0, 0, 1, 0, 0);
