@@ -40,7 +40,7 @@
     const first = secs.length ? secs[0].start : 0, open = first > 0.5 ? first : nb(Math.min(2.5, END));
 
     // ---- 0. curtain up: the title on the backdrop, the lead pops up through the trapdoor and waves
-    shot('s00', 0, open, 'stTitle', { lead: LEAD, open: Math.min(1.6, open * 0.6) }, { moment: 'curtain up: the title on the backdrop, the lead pops up and waves' });
+    shot('s00', 0, open, 'stTitle', { lead: LEAD, open: Math.min(1.6, open * 0.6) }, { line: linesIn(0, open), moment: 'curtain up: the title on the backdrop, the lead pops up and waves' });
 
     let k = 0, chorusN = 0;
     const skies = ['day', 'dusk', 'sea', 'room', 'night'];
