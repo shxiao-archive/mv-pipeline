@@ -143,7 +143,7 @@
       DENY.layout += ' stack depthStack perspective tyCross knFlowSnap';   // the line again: stacked, receding, crossing itself, a cascade of copies
       DENY.decor += ' romajiLine watermarkKanji';   // codepoints under kanji lines; one of the line's glyphs huge behind it
       DENY.decor += ' tyBigPunct'; DENY.layout += ' kanjiFocus';   // faint giant brackets / a faint giant kanji (low contrast, at the frame edge)
-      DENY.layout += ' lowerThird';                                 // a rule drawn from the frame edge
+      DENY.layout += ' lowerThird'; DENY.decor += ' circuit';       // a rule / circuit traces drawn from the frame edge
       DENY.hold += ' zoomSlow stretchPulse pulse heartbeat echoTrail';   // holds that scale a full-width line past the safe area
       DENY.layout += ' knRhythmCuts columnsBig'; DENY.decor += ' speedCorner';   // a word thrown off the edge; edge-to-edge columns; speed lines from the corners
       // Optional mood filter on JIZURA's part tags; null = off, e.g. a night ballad ['emotional', 'calm', 'editorial', 'glitch']
