@@ -139,18 +139,18 @@
     ctx.font = font(size);
     let tw = ctx.measureText(txt).width;
     if (tw > 1580) { size = Math.floor(size * 1580 / tw); ctx.font = font(size); tw = ctx.measureText(txt).width; }
-    const w = (tw + 120) * open, x0 = 960 - w / 2, x1 = 960 + w / 2, top = 946, bot = 1018;   // inside the 5 % safe margin
+    const w = (tw + 1.2 * size) * open, x0 = 960 - w / 2, x1 = 960 + w / 2, top = 946, bot = 1018;   // inside the 5 % safe margin
     const band = [[x0, top]];
     for (let j = 1; j < 6; j++) band.push([Z.lerp(x0, x1, j / 6), top - 5 * Math.sin(j / 6 * Math.PI)]);
     band.push([x1, top], [x1 - 10, (top + bot) / 2], [x1, bot]);
     for (let j = 5; j > 0; j--) band.push([Z.lerp(x0, x1, j / 6), bot + 4 * Math.sin(j / 6 * Math.PI)]);
     band.push([x0, bot], [x0 + 10, (top + bot) / 2]);
     ST.paint(band, { wash: P().ink, washOp: 0.86, fill: P().indigo, fillOp: 0.3, tex: 0.6, border: 0.3, ink: null });
-    for (const [ex, d] of [[x0, -1], [x1, 1]])                                 // the ribbon's folded tails, behind
+    for (const [ex, d] of [[x0, -open], [x1, open]])                           // the ribbon's folded tails, behind (unfolding with it)
       ST.paint([[ex, top + 8], [ex + d * 46, top + 22], [ex + d * 30, (top + bot) / 2 + 6], [ex + d * 48, bot + 10], [ex, bot - 6]], { wash: ST.mix(P().ink, P().violet, 0.3), washOp: 0.8, ink: null });
-    if (open < 0.85) return;
+    // the words ride on the ribbon as it unrolls and rolls up: never a blank plate
     const chars = [...txt], sung = Z.charsAt(i, S.t, { lead: 0 }), x = 960 - tw / 2, y = (top + bot) / 2 + 2;
-    ctx.save(); ctx.font = font(size); ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, top - 10, w, bot - top + 20); ctx.clip(); ctx.font = font(size); ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     ctx.fillStyle = P().cream; ctx.fillText(txt, x, y);
     if (sung > 0) { const sw = ctx.measureText(chars.slice(0, sung).join('')).width; ctx.beginPath(); ctx.rect(x - 2, y - 50, sw + 2, 100); ctx.clip(); ctx.fillStyle = P().ochre; ctx.fillText(txt, x, y); }
     ctx.restore();
