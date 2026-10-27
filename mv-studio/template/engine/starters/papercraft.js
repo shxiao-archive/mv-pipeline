@@ -39,7 +39,7 @@
     const journey = t => Z.clamp(t / END);                                     // the quest's progress = song time
 
     shot('s00', 0, open, 'pcBook', { mode: 'open' }, { moment: 'the storybook opens; the kingdom pops up' });
-    let k = 0, chorusN = 0, land = 0, coins = 0;
+    let k = 0, chorusN = 0, land = 0, coins = 0, prevLi = null;
     secs.forEach((sec, si) => {
       const a = Math.max(open, sec.start), b = Math.min(END, sec.end ?? END);
       if (b <= a + 0.3) return;
@@ -47,8 +47,12 @@
       const cuts = [a].concat(ls.map(l => nb(l.t - 0.05)).filter(t => t > a + 0.4 && t < b - 0.4));
       const turn = { type: 'pageTurn', dur: 2 * beat };
       cuts.forEach((c0, j) => {
-        const c1 = cuts[j + 1] ?? b, line = ls.find(l => Math.abs(nb(l.t - 0.05) - c0) < 0.01) || ls[j], li = line ? line.i : null;
-        const enter = j === 0 ? { trans: ci >= 0 ? { type: 'shapeReveal', shape: ['star', 'heart', 'circle', 'keyhole'][ci % 4], dur: 2 * beat } : turn } : {};
+        // a section that starts mid-line carries the line still being sung, not the next one (sung from the next cut)
+        const c1 = cuts[j + 1] ?? b, line = ls.find(l => Math.abs(nb(l.t - 0.05) - c0) < 0.01) || (j ? ls[j] : L.find(l => l.t < c0 && l.end > c0 + 0.1)), li = line ? line.i : null;
+        // a turn shows both pages: cut hard when the outgoing dialogue would meet this page's line (the same one, or one popping in during the turn)
+        const clash = prevLi !== null && line && (li === prevLi || line.t - 0.35 < c0 + 2 * beat);
+        prevLi = li;
+        const enter = j === 0 && !clash ? { trans: ci >= 0 ? { type: 'shapeReveal', shape: ['star', 'heart', 'circle', 'keyhole'][ci % 4], dur: 2 * beat } : turn } : {};
         const meta = (m) => Object.assign({ line: li ?? undefined, moment: m }, enter);
         if (ci >= 0 && j === 0) {
           shot(`s${++k}`, c0, c1, 'pcBattle', { line: li, speaker: SPEAKER, hero: HERO }, meta(`chorus ${ci + 1}: a battle on the paper stage (REPLACE: what this chorus fights)`));
