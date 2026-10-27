@@ -2,7 +2,7 @@
 """new_project.py -- scaffold an mv-studio (lyric-MV) project from the skill's template (base: vocaloid-style-mv).
 
   python scripts/new_project.py <target_dir> [--song song.wav] [--lyrics lyrics.lrc] [--title NAME] [--title-sub LATIN]
-                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid[:signal]|interface[:treatise]|stage|papercraft|magazine]
+                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid|interface|stage|papercraft|magazine]
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
@@ -17,11 +17,10 @@ What it does
   * --lyrics -> analysis/lyrics_mv.lrc when the file has LRC time tags, else analysis/lyrics_official.txt
                 (plain official text: timings come later, see references/03-audio-and-lyrics.md)
   * --title / --title-sub / --artist / --credit set Z.TITLE / Z.TITLE_SUB / Z.ARTIST / Z.CREDIT in engine/timeline.js
-                (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB (the demo's 'HOTARUBI');
+                (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB;
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
-                asked for: vocaloid (the tegaki demo) | vocaloid:signal | interface | interface:treatise |
-                stage | papercraft | magazine (engine/timeline.js is a copy of engine/starters/<starter>.js)
+                asked for: vocaloid | interface | stage | papercraft | magazine (engine/timeline.js is a copy of engine/starters/<starter>.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -62,11 +61,10 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
                    "Thumbs.db", ".DS_Store", "desktop.ini", "npm-debug.log*"]
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
-# --style -> starter in engine/starters; <style>:<treatment> picks a treatment (where each lives: references/05-engine.md §12)
-STYLES = {"own": "blank", "vocaloid": "vocaloid", "vocaloid:signal": "signal", "interface": "interface", "interface:treatise": "treatise",
-          "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
-STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid:signal",
-                 "interface:screen": "interface", "screen": "interface", "treatise": "interface:treatise", "none": "own", "blank": "own",
+# --style -> starter in engine/starters (where each style's code lives: references/05-engine.md §12)
+STYLES = {"own": "blank", "vocaloid": "vocaloid", "interface": "interface", "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
+STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid", "vocaloid:signal": "vocaloid",
+                 "interface:screen": "interface", "screen": "interface", "treatise": "interface", "interface:treatise": "interface", "none": "own", "blank": "own",
                  "zine": "magazine", "print": "magazine", "riso": "magazine", "雑誌": "magazine"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
 RECORD = ".mv-studio.json"
@@ -221,7 +219,7 @@ def import_lyrics(src: Path, dst: Path):
 
 def timeline_values(a) -> dict:
     """--title / --title-sub / --artist / --credit -> {Z key: new string or None (= keep the template's value)}."""
-    sub = a.title_sub if a.title_sub is not None else ("" if a.title else None)   # a new title drops 'HOTARUBI'
+    sub = a.title_sub if a.title_sub is not None else ("" if a.title else None)   # a new title drops the template's sub-title
     artist = a.artist
     if artist is None and a.credit:
         # the name after the FIRST role: 'Music / Lyrics / Movie：Name' -> 'Name';
@@ -346,11 +344,6 @@ def main() -> int:
                   "           exact timings: forced alignment, references/03-audio-and-lyrics.md §9")
     values = timeline_values(a)
     set_timeline_strings(dst, values)
-    if song or lyrics:
-        keep = [f"Z.{k}" for k, v in values.items() if v is None]
-        if keep and starter == "vocaloid":
-            print(f"  note: {', '.join(keep)} still hold the demo's values (蛍火 / HOTARUBI / NikusonP): set them in "
-                  "engine/timeline.js (or pass --title / --title-sub / --artist / --credit)")
 
     if not a.no_git and shutil.which("git") and not (dst / ".git").exists():
         r = subprocess.run(["git", "init", "-q", str(dst)], capture_output=True, text=True)

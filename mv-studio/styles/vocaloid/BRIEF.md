@@ -202,5 +202,5 @@ film doesn't have: a missing file stops the preload). Reaching for them first be
 - the grade (shot `post`);
 - the film's own `engine/scenes/<film>.js`.
 
-Starters: `--style vocaloid` (an illustrated demo) and `--style vocaloid:signal` (a fast-cut first cut). Both are
-examples to rewrite.
+Starter: `--style vocaloid`, a first cut that cycles illustrated shots and signal runs through the lyric lines (a
+hand-built tegaki film: `demo/hotarubi.js`). An example to rewrite.

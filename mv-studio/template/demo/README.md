@@ -13,11 +13,12 @@ roll and a half-beat stop; bars 7–10 chorus (full drums, side-chained pad, hig
 stop at 22.5 s. `tools/analyze_audio.py` finds 128.1 BPM, 12 bars (numbered 1–12 in `audio.json`, the pre-chorus
 stop at 12.83 s and the final cut at 22.51 s).
 
-The film is the vocaloid starter `engine/starters/vocaloid.js` (its header lists the eleven shots), the `engine/timeline.js` of a `--style vocaloid` project. It uses only procedural scenes
+The film is `hotarubi.js` (its header lists the eleven shots): copy it to `engine/timeline.js` first. It uses only procedural scenes
 (`typeCard`, `illust` with gradients and custom fx, `converge`, `kanjiSlam` without character art, `afterimage`)
 plus the JIZURA lyric layer, so it also shows how the pieces of a real timeline fit together.
 
 ```bash
+cp demo/hotarubi.js engine/timeline.js
 python demo/make_demo_song.py
 cp demo/lyrics_demo.lrc analysis/lyrics_mv.lrc
 cp demo/sections_demo.json analysis/sections.json

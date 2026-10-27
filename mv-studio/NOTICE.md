@@ -11,7 +11,7 @@ adapter, the Blender scripts, the palettes and LUTs, the demo song 「蛍火」,
 librosa, …): `THIRD_PARTY_NOTICES.md`. The 「残光」 song, lyrics, character and frames are © NikusonP, all rights
 reserved, and are not part of this skill.
 
-## Interface style (screen treatment): adapted from world-execute-me-lyric-mv — © 2026 Nyankomint, code MIT
+## Interface style (screen kit): adapted from world-execute-me-lyric-mv — © 2026 Nyankomint, code MIT
 
 https://github.com/Nyankomintsu/world-execute-me-lyric-mv. `template/engine/styles/interface/` ports and adapts its
 chat, cursor, plate, code and glyph components and its role-palette drawing context; `styles/interface/kit.js` (ink-plate
@@ -22,7 +22,7 @@ separation, parts, sagging type, masks), the time helpers in `core/util.js` (`wi
 chat script, the song and lyrics (© Mili and rights holders), and its product branding (the interface here is generic;
 the default palettes are new).
 
-## Signal treatment (vocaloid style): original code, inspired by netsu-ijou-pv
+## Signal kit (vocaloid style): original code, inspired by netsu-ijou-pv
 
 The look of v1Ta44/netsu-ijou-pv (a fan PV, CC BY-NC 4.0) — tiered cut speeds with filler frames, a heat-driven grade,
 analog signal degradation, a recorder HUD — inspired `template/engine/styles/signal/`, which was written for this skill
@@ -70,7 +70,7 @@ their films. All tools listed above were written for this skill.
 watercolour stage-show MV painted with p5.brush; no licence published, so ideas only: no code, art or characters). Its
 mascot belongs to another company and is not drawn; the default puppet is an original design.
 
-## The treatise treatment (interface style)
+## The treatise kit (interface style)
 
 `styles/interface/` (§B) and `template/engine/styles/treatise/` follow **pdoom-video** by Giacomo Magnanini (MIT; licence in
 `licenses/LICENSE-pdoom-video.txt`): its palette, the spark and its deterministic particles, the plate idioms and the

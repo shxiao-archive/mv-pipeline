@@ -1,56 +1,36 @@
-/* engine/timeline.js -- THE EDIT. The vocaloid starter is the procedural demo film 「蛍火」 (HOTARUBI) for the
- * synthetic demo song (demo/make_demo_song.py + demo/lyrics_demo.lrc). It uses no image assets at all: only scenes
- * from the vocaloid pack (engine/styles/vocaloid/), the drawing toolkit (Z.draw) and the JIZURA lyric layer, so a fresh install can render
- * it end to end. It is also the STARTING POINT for a new film: keep the structure (helpers, JIZURA plans and
- * curation, looks, HUD, global FX, vertical config), replace the shots with your shot list (moment / line / cue per shot; node tools/storyboard.mjs writes plan/storyboard.md).
+/* engine/timeline.js — STARTER for the VOCALOID style (read <skill>/styles/vocaloid/BRIEF.md, then STYLE.md).
+ * The ボカロPV tradition, from two equal libraries a film takes shots from freely:
+ *   TEGAKI (styles/vocaloid: illust typeCard kanjiSlam converge afterimage …) — an illustrated 手書き story: light,
+ *          colour script, signature set pieces; lyrics by JIZURA plans
+ *   SIGNAL (styles/signal, Z.SIG: sigShot sigTerm sigFrag sigAbs, SIG.cuts) — footage from a device failing in heat:
+ *          speed is editing, heat grades the picture, the device HUD sets the lyrics
+ * The signal grade, decay and HUD run only where signal shots are (SIG.spans), so the two lyric layers never meet.
  *
- * How the engine uses this file (engine/core/main.js):
- *   - it is loaded after the scene files and before main.js; main.js calls `await Z.setup(audio)` once, with
- *     analysis/audio.json already loaded (beats, bars, sections, stops, impacts ... see references/03)
- *   - setup fills Z.SHOTS = [{ id, t0, t1, scene, args, lyric, plan, post, trans, text, hud }] and sets
- *     window.__zankoMeta.duration (the render length; render_final.mjs reads it when --end is not given)
- *   - every frame is a pure function of song time t: no Date.now(), no unseeded Math.random (use Z.rnd / S.rng)
- * Shot fields, scene args, post params and transitions: references/05-engine.md. JIZURA: references/06-jizura.md.
+ * This starter builds a plain first cut from the song's lyric lines so a new project renders at once: the title,
+ * then one shot (or one run of cuts) per line from POOL (both libraries, cycled in order), then the title's
+ * afterimage. It is scaffolding, not the film: replace the pool, or pick a builder per line yourself, from YOUR shot
+ * list (moment / line / cue per shot; node tools/storyboard.mjs). The hand-built demo film 「蛍火」 is demo/hotarubi.js.
+ * Lyric text never appears here: shots take line indices (Z.LYR / Z.line(i)); tools/check_no_lyrics.mjs checks it.
+ * Run tools/check_flash.py on every render (signal runs cut fast).
  *
- * Demo storyboard (bar numbers = audio.json bars[].index, the same numbers as analysis/sections.json):
- *   s01  intro   bar 1      typeCard     the title in near silence
- *   s02  verse   bars 2-3   illust       night sky, stars, hills, a few fireflies              lyric line 0
- *   s03  verse   bars 4-5   illust       one light ignites on the downbeat after the gap        lyric line 1
- *   s04  pre     bar 6      illust       star trails wheel around the pole                     lyric line 2
- *   s05  pre     bar 7      converge     every light spirals into one point -> white            lyric line 3
- *   s06  chorus  bar 8      kanjiSlam    灯 / れ slammed on each beat                           lyric line 4
- *   s07  chorus  bar 9      illust       a field of rising fireflies                            lyric line 5
- *   s08  chorus  bar 10     illust       the fireflies gather into the kanji 蛍                  lyric line 6
- *   s09  chorus  bar 11     illust       dawn                                                   lyric line 7
- *   s10  post    bar 12     kanjiSlam    蛍 / 火 on fire (the chorus motif returns), dead stop
- *   s11  tail    +2 s       afterimage   the title's retinal afterimage + credit (song is silent)
- * (Lyric text never appears in code: the LRC is the one place it lives; tools/check_no_lyrics.mjs checks it.)
- * On another song this timeline still runs: it covers bars 1-12 and the end card, so it doubles as a quick look
- * at a new song's beat grid before you write the real edit.
- *
- * Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
+ * Sky helpers and the JIZURA curation come from the demo 「蛍火」 — NikusonP, vocaloid-style-mv-pipeline, MIT licence.
  */
 (() => {
   'use strict';
-  const Z = window.Z, D = Z.draw, E = Z.ease;
+  const Z = window.Z, D = Z.draw, SIG = Z.SIG;
   const W = 1920, H = 1080;
+  Z.TITLE = 'untitled';
+  Z.TITLE_SUB = '';
+  Z.ARTIST = '';
+  Z.CREDIT = '';
+  const IMGS = [];             // signal motifs, e.g. ['assets/bg/ruins.png', ...] (NEUTRAL colour: the heat grade tints them)
 
-  // ------------------------------------------------------------------ film identity (new_project.py --title / --title-sub / --artist / --credit set these)
-  Z.TITLE = '蛍火';                                   // HUD, vertical header, end card
-  Z.TITLE_SUB = 'HOTARUBI';                           // small Latin line under the title ('' = none)
-  Z.ARTIST = 'NikusonP';                              // artist name, used by the 9:16 header -- ask the artist
-  Z.CREDIT = 'Music / Lyrics / Movie：NikusonP';      // title lockups, end card, vertical footer -- ask the artist
-
-  // ------------------------------------------------------------------ colour script of the demo (one palette, kept everywhere)
-  // firefly yellow-green on a navy night, a warm accent only at dawn. Scenes that take a palette object (Z.INTRO.ember,
-  // Z.INTRO.fireRing) get FF instead of their 残光 default (orange fire).
-  const FF = { void: '#020308', ink: '#0B1524', shadow: '#16324A', dusk: '#1E5A4A', verm: '#5E9E34', sunset: '#9BD86A',
-    glow: '#DDFF7A', hi: '#F2FFC8', core: '#FFFFFF' };
+  // one palette for both libraries: firefly yellow-green on a navy night (the HUD accent is its glow)
+  const FF = { glow: '#DDFF7A', sunset: '#9BD86A', hi: '#F2FFC8' };
   const NIGHT = [[0, '#02040b'], [0.5, '#081429'], [0.85, '#10284a'], [1, '#173458']];
 
-  // ================================================================== small custom fx (illust `fx: [{ type: 'custom', fn }]`)
-  // Each factory returns an fx spec; fn(ctx, S) draws on the scene layer and must be a pure function of S.t.
-  // twinkling star field (stars twinkle on 12 fps = hand-drawn 2コマ timing; positions are fixed per seed)
+  // ---- small custom fx (illust `fx: [{ type: 'custom', fn }]`); fn(ctx, S) must be a pure function of S.t
+  // twinkling star field (12 fps twinkle = hand-drawn 2コマ timing; positions fixed per seed)
   const stars = (n = 170, seed = 5, top = 0.72, color = '#E8F0FF', alpha = 1) => ({ type: 'custom', fn: (ctx, S) => {
     const tq = Z.quant(S.t, 12);
     ctx.save(); ctx.fillStyle = color;
@@ -73,111 +53,47 @@
     if (rim) { ctx.beginPath(); pts.forEach(([x, yy], i) => (i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy))); ctx.strokeStyle = rim; ctx.lineWidth = 1.6; ctx.stroke(); }
     ctx.restore();
   } });
-  // star trails turning around a celestial pole (cx, cy): arcs that lengthen with the shot's time, fading tails
+  // star trails turning around a celestial pole (cx, cy): arcs that lengthen with the shot's time
   const starTrails = (cx, cy, { n = 340, seed = 13, speed = 0.16, reach = 2100 } = {}) => ({ type: 'custom', fn: (ctx, S) => {
     const turn = speed * S.t, len = speed * (0.8 + S.lt);
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
     for (let i = 0; i < n; i++) {
       const r = 40 + Math.sqrt(Z.rnd(i, seed)) * reach, a1 = Z.rnd(i, seed + 1) * Z.TAU + turn, w = 0.9 + 2.0 * Math.pow(Z.rnd(i, seed + 2), 3);
       const col = Z.rnd(i, seed + 3) < 0.12 ? '#FFD9A0' : Z.rnd(i, seed + 3) < 0.3 ? '#BFD4FF' : '#EEF3FF', al = 0.35 + 0.65 * Z.rnd(i, seed + 4);
-      for (let k = 0; k < 3; k++) {                                   // three segments, fading toward the tail
+      for (let k = 0; k < 3; k++) {
         ctx.strokeStyle = Z.rgba(col, al * (1 - k * 0.33)); ctx.lineWidth = w;
         ctx.beginPath(); ctx.arc(cx, cy, r, a1 - len * (k + 1) / 3, a1 - len * k / 3); ctx.stroke();
       }
     }
     ctx.restore();
   } });
-  // the first light: a faint glow breathing in the dark that ignites at tOn (ember + a ring of light, firefly palette)
-  const firstLight = (x, y, tOn) => ({ type: 'custom', fn: (ctx, S) => {
-    const t = S.t, on = Z.clamp((t - tOn) / 0.06), dt = Math.max(0, t - tOn);
-    const wx = x + 34 * Z.fbm1(t * 0.3, 7), wy = y + 22 * Z.fbm1(t * 0.27, 8);              // it wanders a little
-    const I = (1 - on) * (0.1 + 0.07 * Math.sin(t * 2.6)) + on * (0.75 + 0.9 * Math.exp(-dt * 2.5) + 0.25 * S.clock.pulse(t, 6));
-    if (on > 0) Z.INTRO.fireRing(ctx, wx, wy, 26 + 980 * E.outExpo(Z.clamp(dt / 1.5)), 1.1 * Math.exp(-dt * 1.4), t, FF, { w: 0.45 });
-    if (on > 0) D.glow(ctx, wx, wy, 260 + 140 * S.clock.pulse(t, 5), FF.sunset, 0.35 * on);    // soft halo once it is lit
-    Z.INTRO.ember(ctx, wx, wy, I, t, { pal: FF, streak: on * (180 + 1100 * Math.exp(-dt * 3)) });
-  } });
-  // fireflies that gather into the shape of a glyph between t0 and t1 (points sampled once from the rendered glyph)
-  const glyphCache = new Map();
-  const glyphPoints = (ch, n, fam = 'minchoHeavy') => {
-    const key = ch + n + fam; if (glyphCache.has(key)) return glyphCache.get(key);
-    const s = 256, c = Z.canvas(s, s), x = c.getContext('2d', { willReadFrequently: true });
-    D.font(x, s * 0.9, fam, 900); x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.fillText(ch, s / 2, s / 2);
-    const d = x.getImageData(0, 0, s, s).data, pts = [], R = Z.rng(Z.hash(ch.codePointAt(0)));
-    for (let guard = 0; pts.length < n && guard < n * 80; guard++) {
-      const px = Math.floor(R() * s), py = Math.floor(R() * s);
-      if (d[(py * s + px) * 4 + 3] > 128) pts.push([px / s - 0.5, py / s - 0.5]);
-    }
-    glyphCache.set(key, pts); return pts;
-  };
-  const swarmGlyph = (ch, cx, cy, size, t0, t1, n = 460) => ({ type: 'custom', fn: (ctx, S) => {
-    const pts = glyphPoints(ch, n), k = E.inOutCubic(Z.inv(t0, t1, S.t));
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    pts.forEach(([u, v], i) => {
-      const sx = Z.rnd(i, 7) * W, sy = H * (0.35 + 0.65 * Z.rnd(i, 8));                      // where it starts, scattered
-      const x = Z.lerp(sx, cx + u * size, k) + Z.fbm1(S.t * 0.4 + i, 3) * 24 * (1 - 0.75 * k);
-      const y = Z.lerp(sy, cy + v * size, k) + Z.fbm1(S.t * 0.4 + i * 1.3, 5) * 24 * (1 - 0.75 * k);
-      const a = (0.45 + 0.55 * Math.abs(Math.sin(S.t * 2.2 + i))) * (0.4 + 0.6 * k);
-      const r = 7 + 4 * Z.rnd(i, 9);
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, Z.rgba(FF.hi, a)); g.addColorStop(0.3, Z.rgba(FF.glow, a * 0.6)); g.addColorStop(1, Z.rgba(FF.glow, 0));
-      ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
-    });
-    ctx.restore();
-  } });
-  // a 1x1 transparent image: `afterimage` always cuts a character silhouette out of its sun disc; the demo has no
-  // character art, so it gets an empty one. With a real character, pass assets/char/REF_master.png (the default).
+  // `afterimage` cuts a character silhouette out of its sun disc: no character art yet, so an empty one
+  // (with a character, pass assets/char/REF_master.png, the default)
   const NO_IMAGE = (() => Z.canvas(1, 1).toDataURL('image/png'))();
 
-  // ================================================================== setup: runs once, after analysis/audio.json is loaded
   Z.setup = async (audio) => {
-    // ---- timing helpers: cuts always come from the analysed grid, never from n * 60 / bpm (tempo drifts in real songs)
-    const lastBar = audio.bars.length ? audio.bars[audio.bars.length - 1].index : 0;
-    const B = n => { const b = audio.bars.find(x => x.index === n); if (b) return b.start; if (n < lastBar) return 0;
-      const db = audio.downbeats || [], k = db.findIndex(d => Math.abs(d - B(lastBar)) < 1e-3) + n - lastBar;   // a bar the song cuts into
-      return k > 0 && db[k] < audio.music_cut ? db[k] : audio.music_cut; };
     const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);   // nearest beat
-    const END = B(13);                                     // the demo's last bar ends on the dead stop (music_cut on the demo song)
-    const TAIL = 2.0;                                      // end card runs past the music; render_final pads the audio with silence
-
-    // ---- sections -> looks. main.js merges Z.LOOK_DEFAULT, then Z.LOOKS[section.look], then the shot's own post.
     const secs = audio.sections || [];
-    for (const s of secs) s.look = s.label;                // analysis/sections.json labels: intro verse pre-chorus chorus ...
+    for (const s of secs) s.look = s.label;
     Z.sectionAt = t => { let s = secs[0] || null; for (const x of secs) if (x.start <= t + 1e-6) s = x; return s; };
-    Z.LOOK_DEFAULT = { boil: 1.0, bloom: 0.32, bloomThreshold: 0.72, grain: 0.05, vignette: 0.35, lutMix: 0 };   // night / dusk film
-    // Daylight film: { boil: 1.0, bloom: 0.15, bloomThreshold: 0.93, grain: 0.04, vignette: 0.1, lutMix: 0 } -- the bloom
-    // bright-pass keys on max(R,G,B), so with a 0.72 threshold every sky / cloud pixel blooms and the frame turns milky.
-    Z.LOOKS = {
-      verse: { boil: 0.9, grain: 0.06 },
-      'pre-chorus': { boil: 1.1, beatCA: 1.5 },
-      chorus: { boil: 1.2, bloom: 0.42, beatBloom: 0.15, beatCA: 2 },
-      'post-chorus': { boil: 1.2, bloom: 0.45, beatCA: 3 },
-    };
+    const all = Z.LYR.map(l => l.text).join('');
+    if (/[一-鿿]/.test(all) && !/[぀-ヿ]/.test(all)) SIG.useChinese();
+    // a night film (daylight: bloom 0.15, bloomThreshold 0.93, vignette 0.1 — a 0.72 threshold turns a sky milky)
+    Z.LOOK_DEFAULT = { boil: 1.0, bloom: 0.32, bloomThreshold: 0.72, grain: 0.05, vignette: 0.35, lutMix: 0 };
+    Z.LOOKS = { verse: { boil: 0.9, grain: 0.06 }, 'pre-chorus': { boil: 1.1, beatCA: 1.5 }, chorus: { boil: 1.2, bloom: 0.42, beatBloom: 0.15, beatCA: 2 } };
+    await Promise.all(['400 32px "DotGothic16"', '600 64px "Shippori Mincho B1"', '800 64px "Shippori Mincho B1"', '600 64px "Noto Serif SC"', '800 64px "Noto Serif SC"',
+      '400 24px "Zen Kaku Gothic New"'].map(f => document.fonts.load(f, Z.TITLE + Z.CREDIT + 'A0字')));
+    const END = audio.music_cut || audio.duration, TAIL = 3;
 
-    // ---- global punctuation: one flash on the chorus downbeat, a kick-driven shake only inside the chorus
-    // (keep full-frame flashes rare and in ONE place: <= 3 per second, never strobing -- references/09)
-    const FLASH = [[B(8), 0.85], [B(10), 0.45]];
-    const CHORUS = [B(8), END];
-    Z.globalFX = (P, t) => {
-      for (const [ft, a] of FLASH) { const d = t - ft; if (d >= 0 && d < 0.35) P.flash = Math.max(P.flash || 0, a * Math.exp(-d * 11)); }
-      if (t >= CHORUS[0] && t < CHORUS[1]) {
-        const q = Math.floor(t * 12), amp = 4 * Math.pow(Z.env.low(t), 3);       // only the kicks move the frame
-        P.shake = [(P.shake ? P.shake[0] : 0) + Z.rnds(q, 91) * amp, (P.shake ? P.shake[1] : 0) + Z.rnds(q, 92) * amp];
-        P.exposure = (P.exposure || 0) + 0.06 * Z.clock.downPulse(t, 7);
-      }
-    };
-
-    // ---- JIZURA lyric plans from analysis/lyrics_mv.lrc (the demo: copy demo/lyrics_demo.lrc there). Without the
-    // file the film renders with no lyric layer (and shots that name a plan simply draw no text).
+    // ---- JIZURA lyric plans (tegaki shots) from analysis/lyrics_mv.lrc; without it tegaki shots draw no text
     let lrc = '';
     try { const r = await fetch(Z.ROOT + 'analysis/lyrics_mv.lrc'); if (r.ok) lrc = await r.text(); } catch (e) { /* no lyrics yet */ }
     if (!lrc.trim()) console.warn('analysis/lyrics_mv.lrc missing: rendering without the JIZURA lyric layer');
     lrc = lrc.replace(/^﻿/, '').replace(/^\[ti:.*\]\s*$/m, '');   // no [ti:]: JIZURA would add its own title card
     if (lrc.trim() && window.J) {
       JZ.setAudio({ duration: audio.duration, beats: audio.beats, energy: null, energyRate: 0 });
-      // Curate JIZURA's ~860 parts for the film's tone: deny novelty objects, UI gimmicks, horror and 和 props, opaque
-      // plates and full-frame effects (our post pass owns flashes). These lists come from 残光 (examples/zanko/timeline.js
-      // in the kit repo); adapt them per film -- references/06 §5.
-      // Any change here (or to `seed`, MOODS) re-rolls every cut of the plan: re-render the stills afterwards.
+      // Curate JIZURA's ~860 parts for the film's tone (references/06 §5). Any change here (or to `seed`, MOODS)
+      // re-rolls every cut of the plan: re-render the stills afterwards.
       const DENY = {
         layout: 'scatter ring wave labels pill knSeesaw knGearWords knTumble knPadGrid knPathRide zigzag arcTop ' +
                 'gridCells bubble ticker searchBar chat notification ticket hanging wordCloud bounceLine elastic ' +
@@ -207,7 +123,7 @@
             'sunburst bigStripes isoCubes seigaiha asanoha tvBars splitDiag spiralArms squareTunnel moire',
         trans: 'knCornerSwing knStripSlam checker cubeTurn spinOut doorsOpen pixelate',
       };
-      DENY.decor += ' dataColumns timecodeBar rainStreaks';           // this film: no data tables / timecodes (the HUD has them), no rain
+      DENY.decor += ' dataColumns timecodeBar rainStreaks';           // no data tables / timecodes (the signal HUD has them), no rain
       DENY.layout += ' shadowPlay glitchGrid';                        // opaque plates: a grey floor (9:16) / beige glyph tiles
       DENY.trans += ' knStutterCut zoomThrough inkBlob';              // black out / cover the picture under the lyric in front mode
       DENY.layout += ' curtain'; DENY.fx += ' filmAdvance';           // an opaque theatre curtain; black film frames (pops.mjs flags them)
@@ -216,32 +132,25 @@
       DENY.layout += ' marquee diag filmstrip contour knZoomDive knTypeSlam sliceStack';
       DENY.treat += ' ransom monoGrid';
       DENY.layout += ' huge gloss zoomRepeat';                         // the noir / mono plans: giant type over 40 % of the frame
-      // editorial captions (No.06, LINE 06, 0:26.00, 13 x 37, rulers, reticles) read as a debug layer over an illustrated
-      // film (a jury round, references/09 §8); measured: parts that draw digits with hideNo / hideTime on (references/06 §5)
+      // editorial captions (No.06, LINE 06, 0:26.00, rulers, reticles) read as a debug layer over an illustrated film (references/09 §8)
       DENY.decor += ' atomOrbit barcode constellation counter crosshair dimension glitchRects glyphLock guides headingTape hexGrid indexNum knWordTicks leaders progressRing radar registration reticle rings ruledLines rulerEdge spectrumRing tyGlyphBody tyRunningHead verticalStrip';
       DENY.layout += ' corners crossBands ruler swissGrid type';
       // stacked repeats: the line drawn 4x more often than a plain layout draws it (a wall of copies, echoes, rings)
-      DENY.layout += ' circleWords credits edgeFrame justified mirror orbit rain tunnel tyBandHide vcols'; DENY.hold = 'shadowSway';   // vcols: three columns of the same words (seen after fullLine went off)
+      DENY.layout += ' circleWords credits edgeFrame justified mirror orbit rain tunnel tyBandHide vcols'; DENY.hold = 'shadowSway';
       DENY.layout += ' circle';   // words set on a dark disc that hides them in the centre-free side bands
       DENY.layout += ' condensed'; DENY.exit = (DENY.exit || '') + ' tyToIndex';   // a short word repeated to fill the width; letters turned into index numbers
-      DENY.layout += ' tyCropGiant sideways knQuarterTurn';   // words set against the frame edge or thrown off it while they hold (check_shots safe area)
-      DENY.layout += ' stack perspective tyCross knFlowSnap';   // the line again: four stacked copies, copies receding, the line crossing itself, a cascade of outline copies
-      DENY.decor += ' romajiLine watermarkKanji';   // codepoints (U+591C ...) under kanji lines; one of the line's glyphs huge behind it, cut by the frame
-      // Optional mood filter on JIZURA's part tags (J.registry(group)[key].tags: glitch calm pop graphic editorial
-      // emotional ...). null = off: only the deny-lists curate (the demo and 残光 render this way). An array keeps only
-      // parts tagged with one of the moods (parts without tags -- the plain cut / none -- stay on), e.g.
-      // night / ballad film ['emotional', 'calm', 'editorial', 'glitch'], bright / upbeat film ['pop', 'emotional', 'graphic', 'calm'].
+      DENY.layout += ' tyCropGiant sideways knQuarterTurn';   // words against the frame edge or thrown off it (check_shots safe area)
+      DENY.layout += ' stack perspective tyCross knFlowSnap';   // the line again: stacked, receding, crossing itself, a cascade of copies
+      DENY.decor += ' romajiLine watermarkKanji';   // codepoints under kanji lines; one of the line's glyphs huge behind it
+      // Optional mood filter on JIZURA's part tags; null = off, e.g. a night ballad ['emotional', 'calm', 'editorial', 'glitch']
       const MOODS = null;
-      // JIZURA's own transitions between lyric cuts draw the old and the new line on top of each other for a few frames
-      // (a viewer saw 'hums below' over 'my window'); off, each line leaves by its exit and the next comes in by its
-      // enter. The engine's shot transitions (shot.trans) are not affected. true = JIZURA picks its transitions again
+      // JIZURA's own transitions draw the old and the new line on top of each other: off (shot.trans is not affected)
       const TEXT_TRANS = false;
       const enabled = {};
       for (const g of J.GROUP_KEYS) {
         enabled[g] = {}; const deny = new Set((DENY[g] || '').split(/\s+/).filter(Boolean));
         for (const k of J.order(g)) {
           const d = J.registry(g)[k] || {}, tags = Array.isArray(d.tags) ? d.tags : null;
-          // horror set: hr* keys / set 'horror' (not the 'horror' tag: JIZURA also puts it on core parts like center, blur)
           let ok = !deny.has(k) && !/^hr[A-Z]/.test(k) && d.set !== 'horror';
           if (ok && MOODS && tags && !tags.some(m => MOODS.includes(m))) ok = false;
           if (g === 'trans' && !TEXT_TRANS) ok = false;
@@ -250,139 +159,94 @@
         }
       }
       const common = {
-        // fullLine: false = a cut of a line split with '/' shows only its words, not the whole line small beside them
         enabled, fullLine: false, lyrics: lrc, fps: 30, res: 1080, aspect: '16:9', seed: 128, unify: true, typeset: true, extra: true, wa: false, horror: false,
-        colors: { accentOn: true, accent: FF.glow, ghostA: '#39C6E0', ghostB: '#9BD86A' }, schemes: 'dark',   // daylight film: schemes: 'light' (dark text) -- references/06 §4
+        colors: { accentOn: true, accent: FF.glow, ghostA: '#39C6E0', ghostB: FF.sunset }, schemes: 'dark',   // daylight film: schemes: 'light'
         fx: { motion: 0.7, glitch: 0.4, chroma: 0.55, decor: 0.4, density: 0.5, texture: 0.5, flash: false, koma: 12, hud: 'off', bgSwitch: 0.3,
-              hideNo: true, hideTime: true } };   // no 'No.06 — 0:26.00' captions under the lines (an editorial / HUD film: false)
-      // one plan per look; a shot picks one with `plan:` (default 'main'). 'cf' = centre-free: text in bands left /
-      // right of the centre, for shots whose subject sits in the middle (a face, the first light, the 蛍 glyph).
-      // `mood` is a label only: J.plan ignores it (JIZURA's おまかせ randomiser is the only reader). The tone comes from
-      // `style`, `fx` (motion / glitch / chroma / decor / density), `enabled` (DENY, MOODS) and `schemes`.
+              hideNo: true, hideTime: true } };
+      // one plan per look; a shot picks one with `plan:` (default 'main'). 'cf' = centre-free (subject in the middle)
       await JZ.addPlan('main', Object.assign({}, common, { style: 'gold', mood: 'emotional' }));
       await JZ.addPlan('cf', Object.assign({}, common, { style: 'gold', mood: 'emotional', centerFree: true }));
       await JZ.addPlan('noir', Object.assign({}, common, { style: 'noir', mood: 'glitch', fx: Object.assign({}, common.fx, { glitch: 0.65, chroma: 0.8 }) }));
       await JZ.addPlan('mono', Object.assign({}, common, { style: 'mono', mood: 'graphic', seed: 129, fx: Object.assign({}, common.fx, { motion: 0.85, chroma: 0.9 }) }));
     }
-    // fonts used outside the scenes' own init (swarmGlyph samples Zen Old Mincho; HUD + end-card credit): a face that is
-    // first requested mid-render loads asynchronously and the first frames of each worker would differ
-    const TXT = Z.TITLE + Z.TITLE_SUB + Z.CREDIT + '蛍火灯れ0123456789:/.—♩=';
-    await Promise.all(['900 100px "Zen Old Mincho"', '400 17px "DotGothic16"', '400 24px "Zen Kaku Gothic New"'].map(f => document.fonts.load(f, TXT)));
 
-    // ================================================================== shots
-    // shot(id, t0, t1, scene, args, extra):  extra = { lyric, plan, post, trans, text, hud }
-    //   lyric: 'front' (default: JIZURA text over the scene) | 'full' | 'backfront' | 'none' (the scene IS the typography)
-    //   post : object or S => object (WebGL post params, merged over the section look)
-    //   trans: { type, dur, ... } transition INTO this shot: cut xfade flash black iris irisClose barrier wipe slices push zoom ink shatter
     const S = [];
-    const shot = (id, t0, t1, scene, args, extra = {}) => { if (t1 > t0 + 1e-3) S.push(Object.assign({ id, t0, t1, scene, args }, extra)); };
+    const shot = (id, t0, t1, scene, args, extra = {}) => { if (t1 > t0 + 0.05) S.push(Object.assign({ id, t0, t1, scene, args }, extra)); };
+    const L = Z.LYR, first = L.length ? nb(L[0].t - 0.4) : Math.min(4, END);
+    // ---- the title in the quiet
+    shot('s00', 0, first, 'typeCard', { lines: [Z.TITLE], size: 112, fam: 'minchoHeavy', weight: 700, ruleColor: FF.glow, sub: Z.TITLE_SUB, lead: 0.25 },
+      { lyric: 'none', hud: false, post: { boil: 0, bloom: 0.4, grain: 0.04 }, moment: 'the title in near silence' });
 
-    // ===== INTRO (bar 1): the title in the quiet
-    shot('s01', 0, B(2), 'typeCard', { lines: [Z.TITLE], size: 112, fam: 'minchoHeavy', weight: 700, ruleColor: FF.glow, sub: [Z.TITLE_SUB, 'a vocaloid-style-mv-pipeline demo'].filter(Boolean).join('  ·  '), lead: 0.25 },
-      { lyric: 'none', hud: false, post: { boil: 0, bloom: 0.4, grain: 0.04 } });
-
-    // ===== VERSE (bars 2-5)
-    shot('s02', B(2), B(4), 'illust', {
-      grad: NIGHT,
-      fxBack: [stars(), { type: 'glow', x: 1480, y: 230, r: 420, color: '#BFD4FF', a: 0.32 }, { type: 'rays', x: 1480, y: 230, n: 14, len: 1700, color: '#BFD4FF', a: 0.05 },
-        ridge(820, 150, '#0a1a2c', { drift: 10, seed: 3, scale: 520 }), ridge(930, 120, '#050c16', { drift: 22, seed: 9, scale: 380 })],
-      fx: [{ type: 'fireflies', n: 16, area: [0, H * 0.62, W, H], alpha: 0.75, color: FF.glow }, { type: 'dust', n: 36, color: 'rgba(190,210,255,0.35)' }],
-      vignette: 0.55,
-    }, { trans: { type: 'xfade', dur: 0.5 }, post: { lutA: 'night', lutMix: 0.2 } });
-    shot('s03', B(4), B(6), 'illust', {
-      grad: [[0, '#010207'], [0.7, '#050b16'], [1, '#0b1a2a']],
-      fxBack: [stars(90, 11, 0.6, '#DDE6FF', 0.6), ridge(900, 110, '#03070d', { drift: 6, seed: 4 })],
-      fx: [firstLight(960, 560, B(5)), { type: 'fireflies', n: 6, area: [200, H * 0.7, W - 200, H], alpha: 0.4, color: FF.glow }],
-      vignette: 0.6,
-    }, { plan: 'cf', trans: { type: 'black', dur: 0.3 }, post: { lutMix: 0, bloom: 0.55, bloomThreshold: 0.55 } });
-
-    // ===== PRE-CHORUS (bars 6-7)
-    shot('s04', B(6), B(7), 'illust', {
-      grad: [[0, '#01030a'], [0.6, '#06112a'], [1, '#0d2244']],
-      fxBack: [starTrails(1460, 140), { type: 'glow', x: 1460, y: 140, r: 260, color: '#BFD4FF', a: 0.18 }],
-      fx: [ridge(930, 120, '#02050b', { drift: 4, seed: 15, rim: 'rgba(191,212,255,0.18)' })], vignette: 0.5,
-    }, { plan: 'noir', trans: { type: 'slices', dur: 0.3 }, post: { lutA: 'night', lutMix: 0.15, bloom: 0.4 } });
-    shot('s05', B(7), B(8), 'converge', { seed: 7 }, { plan: 'cf', post: S => Object.assign(Z.INTRO.post.converge(S), { lutA: 'P4', lutMix: 0.12 }) });
-
-    // ===== CHORUS (bars 8-11)
-    const slamSlots = [{ x: 960, y: 560, s: 1.25, r: -0.035 }, { x: 980, y: 540, s: 1.4, r: 0.05 }, { x: 940, y: 580, s: 1.5, r: 0.06 }, { x: 960, y: 520, s: 1.45, r: -0.06 }];
-    shot('s06', B(8), B(9), 'kanjiSlam', { glyphs: ['灯', 'れ', '灯', 'れ'], variant: 'night', char: null, bg: null, color: '#D2F56A', slots: slamSlots },
-      { lyric: 'none', hud: false, post: S => Object.assign(Z.typo.post.kanjiSlam(S), { lutA: 'night', lutMix: 0.12 }) });
-    shot('s07', B(9), B(10), 'illust', {
-      grad: [[0, '#02060c'], [0.55, '#0a2030'], [1, '#14423f']],
-      fxBack: [stars(120, 21, 0.55), { type: 'glow', x: 960, y: 1080, r: 900, color: FF.sunset, a: 0.35, beat: 0.5 }, { type: 'rays', x: 960, y: 1150, n: 22, len: 1800, color: FF.glow, a: 0.07 }],
-      fx: [ridge(960, 90, '#020509', { drift: 30, seed: 12 }), { type: 'embers', n: 130, color: FF.glow, rise: 150, size: 3.2, area: [0, 300, W, H + 80], wind: 0.15 },
-        { type: 'fireflies', n: 40, alpha: 0.8, color: FF.glow }],
-      vignette: 0.4,
-    }, { plan: 'mono', trans: { type: 'flash', dur: 0.16, color: '#F2FFC8' }, post: { lutA: 'P4', lutMix: 0.12, bloom: 0.55 } });
-    shot('s08', B(10), B(11), 'illust', {
-      grad: NIGHT,
-      fxBack: [stars(150, 31), ridge(940, 100, '#03080f', { drift: 12, seed: 6, rim: 'rgba(221,255,122,0.25)' })],
-      fx: [swarmGlyph('蛍', 960, 470, 600, B(10) + 0.1, B(10) + 1.25), { type: 'fireflies', n: 30, alpha: 0.7, color: FF.glow },
-        { type: 'glow', x: 960, y: 470, r: 520, color: FF.sunset, a: 0.22, beat: 0.6 }],
-      vignette: 0.5,
-    }, { plan: 'cf', trans: { type: 'iris', dur: 0.35, cx: 960, cy: 470, color: FF.glow }, post: { lutMix: 0, bloom: 0.6, bloomThreshold: 0.6 } });
-    shot('s09', B(11), B(12), 'illust', {
-      grad: [[0, '#1b1640'], [0.4, '#4f3670'], [0.72, '#d9908f'], [0.9, '#ffd2a6'], [1, '#fff0d8']],
-      fxBack: [stars(60, 41, 0.35, '#FFF2E0', 0.4), { type: 'glow', x: 960, y: 960, r: 680, color: '#FFD9B0', a: 0.32, beat: 0.25 },
-        { type: 'rays', x: 960, y: 960, n: 24, len: 2000, color: '#FFE3B0', a: 0.08 }],
-      fx: [ridge(900, 130, '#1a1030', { drift: 14, seed: 8 }), ridge(980, 90, '#0b0718', { drift: 30, seed: 2 }),
-        { type: 'fireflies', n: 18, alpha: 0.45, color: FF.glow }, { type: 'dust', n: 50, color: 'rgba(255,236,210,0.55)' }],
-      vignette: 0.3,
-    }, { plan: 'cf', trans: { type: 'flash', dur: 0.25, color: '#FFE9C8' }, post: { lutA: 'dawn', lutMix: 0.15, bloom: 0.38, bloomThreshold: 0.8 } });
-
-    // ===== POST-CHORUS (bar 12): the chorus motif comes back on fire, and the song stops dead on the next downbeat
-    shot('s10', B(12), END, 'kanjiSlam', { glyphs: ['蛍', '火', '蛍', '火'], variant: 'night', char: null, bg: null, fire: true, color: '#B8E05A', slots: slamSlots },
-      { lyric: 'none', hud: false, trans: { type: 'flash', dur: 0.12, color: '#F2FFC8' }, post: Z.typo.post.kanjiSlam });
-
-    // ===== END CARD (after the dead stop): hard cut to the title's afterimage (the colour is the complement of FF.glow)
-    shot('s11', END, END + TAIL, 'afterimage', { text: Z.TITLE, sub: Z.TITLE_SUB.toLowerCase(), credit: Z.CREDIT, color: '#A88BFF', char: NO_IMAGE },
-      { lyric: 'none', hud: false, post: S => Object.assign(Z.INTRO.post.afterimage(S), { boil: 0 }) });
-
-    // what each shot shows and which lyric line it answers (tools/storyboard.mjs builds plan/storyboard.md from this)
-    const PLAN = {
-      s01: ['the title in near silence'], s02: ['night sky, stars, hills, a few fireflies', 0],
-      s03: ['one light ignites on the downbeat after the gap', 1], s04: ['star trails wheel around the pole', 2],
-      s05: ['every light spirals into one point, then white', 3], s06: ['the chorus word slammed on each beat', 4],
-      s07: ['a field of rising fireflies', 5], s08: ['the fireflies gather into one kanji', 6], s09: ['dawn', 7],
-      s10: ['the chorus motif returns on fire; dead stop'], s11: ["the title's afterimage and the credit (song silent)"],
+    // ---- the shot builders: each takes a line and its span [a, b)
+    let k = 0;
+    const spans = [], hudLyrics = [], signalIds = [];
+    // TEGAKI: an illustrated shot, the line set by a JIZURA plan over it (REPLACE the sky with the film's pictures).
+    // Out of a signal run: a hard cut (a blending transition would draw the run's WORD frame under the JIZURA line)
+    const tegaki = (moment, plan, args, extra = {}) => (l, a, b) => shot(`s${++k}`, a, b, 'illust', args, Object.assign(
+      { line: l.i, plan, hud: false, moment: `line ${l.i}: ${moment} (REPLACE: what this line shows)` }, extra));
+    // SIGNAL: a run of cuts at a tier (1 sprint · 2 one gear lower · 3 slow); the HUD sets the line (1 stamp · 2 centre ·
+    // 3 vertical), a WORD frame slams it (or its emphasised word) in tiers 1-2
+    const signal = tier => (l, a, b) => {
+      const motifs = IMGS.map((img, i) => ({ scene: 'sigShot', args: { mode: ['full', 'crop', 'split'][i % 3], img, imgs: IMGS.slice(i, i + 3) } }));
+      if (tier < 3) motifs.unshift({ scene: 'sigShot', args: { mode: 'word', line: l.i } });
+      if (!motifs.length) motifs.push({ scene: 'sigAbs', args: { mode: 'scan' } }, { scene: 'sigTerm', args: { mode: 'coord' } });
+      const run = SIG.cuts({ t0: a, t1: b, tier, motifs, seed: 11 + l.i, id: `s${++k}_`, moment: `line ${l.i}: tier ${tier} signal run (REPLACE: the motifs for this line)` });
+      run.forEach(x => { x.line = l.i; signalIds.push(x.id); });
+      S.push(...run);
+      const last = spans[spans.length - 1];
+      if (last && last[1] >= a - 1e-3) last[1] = b; else spans.push([a, b]);
+      hudLyrics.push({ from: a, to: b, mode: ['stamp', 'center', 'vertical'][tier - 1] });
     };
-    for (const x of S) if (PLAN[x.id]) { x.moment = PLAN[x.id][0]; if (PLAN[x.id][1] != null) x.line = PLAN[x.id][1]; }
+    // REPLACE: the film's own order (or choose a builder per line). Any line may come from either library.
+    const POOL = [
+      tegaki('night sky, stars, hills, fireflies', 'main', { grad: NIGHT, vignette: 0.55,
+        fxBack: [stars(), { type: 'glow', x: 1480, y: 230, r: 420, color: '#BFD4FF', a: 0.32 }, ridge(820, 150, '#0a1a2c', { drift: 10, seed: 3, scale: 520 }), ridge(930, 120, '#050c16', { drift: 22, seed: 9, scale: 380 })],
+        fx: [{ type: 'fireflies', n: 16, area: [0, H * 0.62, W, H], alpha: 0.75, color: FF.glow }, { type: 'dust', n: 36, color: 'rgba(190,210,255,0.35)' }] },
+        { post: { lutA: 'night', lutMix: 0.2 } }),
+      signal(3),
+      tegaki('star trails wheel around the pole', 'noir', { grad: [[0, '#01030a'], [0.6, '#06112a'], [1, '#0d2244']], vignette: 0.5,
+        fxBack: [starTrails(1460, 140), { type: 'glow', x: 1460, y: 140, r: 260, color: '#BFD4FF', a: 0.18 }],
+        fx: [ridge(930, 120, '#02050b', { drift: 4, seed: 15, rim: 'rgba(191,212,255,0.18)' })] },
+        { post: { lutA: 'night', lutMix: 0.15, bloom: 0.4 } }),
+      signal(2),
+      tegaki('a field of rising fireflies', 'mono', { grad: [[0, '#02060c'], [0.55, '#0a2030'], [1, '#14423f']], vignette: 0.4,
+        fxBack: [stars(120, 21, 0.55), { type: 'glow', x: 960, y: 1080, r: 900, color: FF.sunset, a: 0.35, beat: 0.5 }, { type: 'rays', x: 960, y: 1150, n: 22, len: 1800, color: FF.glow, a: 0.07 }],
+        fx: [ridge(960, 90, '#020509', { drift: 30, seed: 12 }), { type: 'embers', n: 130, color: FF.glow, rise: 150, size: 3.2, area: [0, 300, W, H + 80], wind: 0.15 }, { type: 'fireflies', n: 40, alpha: 0.8, color: FF.glow }] },
+        { post: { lutA: 'P4', lutMix: 0.12, bloom: 0.55 } }),
+      signal(1),
+      tegaki('dawn', 'cf', { grad: [[0, '#1b1640'], [0.4, '#4f3670'], [0.72, '#d9908f'], [0.9, '#ffd2a6'], [1, '#fff0d8']], vignette: 0.3,
+        fxBack: [stars(60, 41, 0.35, '#FFF2E0', 0.4), { type: 'glow', x: 960, y: 960, r: 680, color: '#FFD9B0', a: 0.32, beat: 0.25 }],
+        fx: [ridge(900, 130, '#1a1030', { drift: 14, seed: 8 }), ridge(980, 90, '#0b0718', { drift: 30, seed: 2 }), { type: 'dust', n: 50, color: 'rgba(255,236,210,0.55)' }] },
+        { post: { lutA: 'dawn', lutMix: 0.15, bloom: 0.38, bloomThreshold: 0.8 } }),
+      signal(2),
+    ];
+
+    const lines = L.filter(l => l.t >= first - 0.3 && l.t < END - 0.3);
+    let cur = first;
+    lines.forEach((l, i) => {
+      const next = lines[i + 1] ? nb(lines[i + 1].t - 0.3) : END;
+      if (next > cur + 0.2) POOL[i % POOL.length](l, cur, next);
+      cur = Math.max(cur, next);
+    });
+    // ---- the end: hard cut to the title's afterimage (its colour is the complement of FF.glow)
+    shot('end', END, END + TAIL, 'afterimage', { text: Z.TITLE, sub: Z.TITLE_SUB.toLowerCase(), credit: Z.CREDIT, color: '#A88BFF', char: NO_IMAGE },
+      { lyric: 'none', hud: false, post: St => Object.assign(Z.INTRO.post.afterimage(St), { boil: 0 }), moment: "the title's afterimage and the credit", cue: Z.CUES.end ? 'end' : null });
+
+    // ---- signal: grade, decay and HUD only inside its spans; heat rises over the film (REPLACE: the film's heat curve)
+    SIG.spans = spans;
+    SIG.heatKeys = [[0, 0.1], [END, 0.95]];
+    SIG.boost = { chorus: 0.14, 'pre-chorus': 0.06, 'post-chorus': 0.1 };
+    SIG.install();
+    if (IMGS.length) SIG.useImages(IMGS);
+    Object.assign(SIG.hudCfg, { title: (Z.TITLE || 'UNIT') + ' / LOG', accent: FF.glow, lyrics: hudLyrics,
+      log: spans.length ? [[spans[0][0] + 0.2, 'boot'], [spans[0][0] + 0.6, 'sensor check ... ok'], [spans[0][0] + 1.0, 'rec start']] : [] });
+    Z.hud = (ctx, St) => { if (SIG.on(St.t)) SIG.hud(ctx, St); };
+    Z.hudShowsLyrics = true;                               // the HUD sets the lyrics of signal shots (tools/storyboard.mjs counts it)
+
     Z.SHOTS = S;
-    window.__zankoMeta.duration = END + TAIL;                  // render length (frames = duration * 30)
-
-    // ---- HUD: tiny corner typography on the text layer (skipped on shots with hud:false and in the vertical build)
-    const SEC_NAME = { intro: 'INTRO', verse: 'A-MELO', 'pre-chorus': 'B-MELO', chorus: 'SABI', 'post-chorus': 'POST', bridge: 'C-MELO', outro: 'OUTRO', tail: '—' };
-    Z.hud = (ctx, St) => {
-      const t = St.t, fade = Z.clamp((t - B(2)) / 0.6) * Z.clamp((END - t) / 0.3);
-      if (fade <= 0) return;
-      const sec = Z.sectionAt(t), si = Math.max(0, secs.indexOf(sec)), bar = Math.max(0, St.clock.bar(t) + 1);
-      const f = Math.floor(t * 30), tc = [Math.floor(t / 60) % 60, Math.floor(t) % 60, f % 30].map(n => String(n).padStart(2, '0')).join(':');
-      ctx.globalAlpha = 0.5 * fade; ctx.fillStyle = '#F4EFE6'; ctx.strokeStyle = '#F4EFE6'; ctx.lineWidth = 1;
-      ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 4; ctx.textBaseline = 'top';
-      D.font(ctx, 17, 'dot', 400); ctx.textAlign = 'left';
-      ctx.fillText(Z.TITLE_SUB ? `${Z.TITLE} / ${Z.TITLE_SUB}` : Z.TITLE, 44, 36);
-      ctx.beginPath(); ctx.moveTo(44, 60); ctx.lineTo(44 + 150 + 40 * St.clock.pulse(t, 6), 60); ctx.stroke();
-      if (sec) ctx.fillText(`SEC.${String(si).padStart(2, '0')}  ${SEC_NAME[sec.label] || String(sec.label).toUpperCase()}`, 44, 68);
-      ctx.textAlign = 'right';
-      ctx.fillText(tc, W - 44, 36);
-      ctx.fillText(`BAR ${String(bar).padStart(3, '0')} / ${String(lastBar).padStart(3, '0')}`, W - 44, 58);
-      ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-      ctx.fillText('♩=' + (60 / (St.clock.spb || 0.5)).toFixed(1), 44, H - 38);
-      const ib = St.clock.inBar(t);                            // beat tick: 4 squares, the current beat filled
-      for (let i = 0; i < 4; i++) { const x = W - 44 - (4 - i) * 16; ctx.strokeRect(x, H - 52, 10, 10); if (i === ib) ctx.fillRect(x, H - 52, 10, 10); }
-      ctx.globalAlpha = 0.35 * fade; ctx.fillRect(44, H - 30, (W - 88) * Z.clamp(t / END), 1);   // song progress hairline
-    };
-
-    // ---- 9:16 vertical build (engine/vertical.html + vertical.js): which shots keep the whole 16:9 composition
-    // (pure typography / graphics), which vertical JIZURA plan each 16:9 plan maps to, header / footer text and when
-    // the header + credit footer are shown (the footer is Z.CREDIT), the lyric schemes of the vertical plans and the
-    // [r, g, b] tint of the blurred surround (a daylight film: schemes: 'light', ambience: a light tint).
-    Z.VERTICAL_CFG = {
-      full: ['s01', 's04', 's06', 's10', 's11'],
-      planMap: { main: 'v_main', cf: 'v_main', noir: 'v_noir', mono: 'v_mono' },
-      title: Z.TITLE, sub: Z.TITLE_SUB, artist: Z.ARTIST, credits: [B(2), END],
-      schemes: 'dark', ambience: [10, 6, 18],
-    };
+    window.__zankoMeta.duration = END + TAIL;
+    // 9:16 (engine/vertical.html): signal runs and type cards keep the whole 16:9 frame; tegaki plans map to vertical ones
+    Z.VERTICAL_CFG = { full: ['s00', 'end', ...signalIds], planMap: { main: 'v_main', cf: 'v_main', noir: 'v_noir', mono: 'v_mono' },
+      title: Z.TITLE, sub: Z.TITLE_SUB, artist: Z.ARTIST, credits: [first, END], schemes: 'dark', ambience: [10, 6, 18] };
   };
 })();

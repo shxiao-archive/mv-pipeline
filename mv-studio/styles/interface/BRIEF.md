@@ -147,4 +147,5 @@ Search `grep '"interface"' index/index.jsonl`, or by word:
   NUM);
 - shaders and hairlines: `helper:Z.shade`, `helper:Z.lineBatch`, `Z.stroke`.
 
-Starters: `--style interface` (a chat) and `--style interface:treatise` (plates). Both are examples to rewrite.
+Starter: `--style interface`, a first cut that cycles chat shots and treatise plates through the lyric lines. An
+example to rewrite.

@@ -15,7 +15,7 @@
       "id": 2,
       "name": "signal-zh-glitch",
       "prompt": "帮我给 test_song.wav 做一个故障风、信号劣化的PV，歌词是 lyrics_zh.lrc（带时间轴）。要很强的疾走感快剪，画面像一台快坏掉的录像设备，越到副歌越“热”。可以用 Grok 生图。1920x1080，整首。",
-      "expected_output": "A 1920x1080 MP4 of the whole song in the vocaloid style's signal treatment: tiered fast cuts with filler frames that speed up in the chorus, a heat grade that rises toward the chorus, analog tearing / sensor noise, a recorder HUD, correctly rendered Chinese lyrics (no tofu), 回家 lines as peaks; passes the flash check.",
+      "expected_output": "A 1920x1080 MP4 of the whole song in the vocaloid style, mostly its signal kit: tiered fast cuts with filler frames that speed up in the chorus, a heat grade that rises toward the chorus, analog tearing / sensor noise, a recorder HUD, correctly rendered Chinese lyrics (no tofu), 回家 lines as peaks; passes the flash check.",
       "files": [
         "fixtures/test_song.wav",
         "fixtures/lyrics_zh.lrc"
@@ -45,7 +45,7 @@
       "id": 5,
       "name": "treatise-en-plates",
       "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make a deadpan lyric video that looks like the plates of an old technical treatise or instruction manual: charts, diagrams, engraved illustrations, the words set into each plate. No image generator. Whole song, 1920x1080.",
-      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the interface style's treatise treatment: ink and bone plates with one signal colour, a different plate idiom per line (chart, scope, form, map, engraved 3D form, hairline field), per-word lyrics set into each plate, at least one shader-drawn engraved plate and a line written by the pen, a running number raised by the hooks; cuts on the beat; no lyric text in code.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the interface style, mostly its treatise plates: ink and bone plates with one signal colour, a different plate idiom per line (chart, scope, form, map, engraved 3D form, hairline field), per-word lyrics set into each plate, at least one shader-drawn engraved plate and a line written by the pen, a running number raised by the hooks; cuts on the beat; no lyric text in code.",
       "files": [
         "fixtures/test_song.wav",
         "fixtures/lyrics_en.lrc"

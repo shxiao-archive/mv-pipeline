@@ -16,13 +16,13 @@ SPEC = {
     "signal-zh-glitch": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_zh.lrc", pops=False),   # 1-2 frame inserts are the style
     "tegaki-vertical-plain": dict(size=(1080, 1920), span=(0.5, 33.5), fps=30, lyr="lyrics_en_plain.txt", estimated=True, pops=True),
     "stage-en-show": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, stage=True, style="stage"),
-    "treatise-en-plates": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="treatise"),
+    "treatise-en-plates": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="interface", look="treatise"),
     "papercraft-en-quest": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="papercraft"),
     "vocaloid-en-singer": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="vocaloid"),
     "own-en-film": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="own"),   # no preset asked for
     "magazine-en-press": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=False, style="magazine"),   # one-tatum MZ.flash inserts are the style
 }
-SPEC["interface-en-chat"]["style"] = "screen"
+SPEC["interface-en-chat"].update(style="interface", look="screen")   # look: which of the style's two kits the prompt asks for
 STARTER = Path(__file__).resolve().parents[1] / "template" / "engine" / "starters" / "stage.js"
 PAINT = re.compile(r"\bST\.(paint|ink|puppet|dancer)\(")
 
@@ -54,8 +54,7 @@ ENGINE = Path(__file__).resolve().parents[1] / "template" / "engine"
 # per style: its scenes (None = the scene library), its starter timeline, and what its depth work looks like in code
 STYLE = {
     # use: a film's own scene file that builds on the style (its scenes or its kit) counts as the style's scenes
-    "screen": dict(scene=r"^if[A-Z]", starter="starters/interface.js", use=r"\bIF\.|['\"]if[A-Z]"),
-    "treatise": dict(scene=r"^tr[A-Z]", starter="starters/treatise.js", use=r"\bTR\.|['\"]tr[A-Z]"),
+    "interface": dict(scene=r"^(if|tr)[A-Z]", starter="starters/interface.js", use=r"\b(IF|TR)\.|['\"](if|tr)[A-Z]"),
     "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
     "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
     "magazine": dict(scene=r"^mz[A-Z]", starter="starters/magazine.js", use=r"\bMZ\.|['\"]mz[A-Z]"),
@@ -87,7 +86,7 @@ def own_files(proj):
     return out
 
 
-def style_checks(proj, add, style):
+def style_checks(proj, add, style, look=None):
     """Every style: its scenes are used, every line is answered, the starter was replaced, and the project carries code
     of its own (references/10 §7: 80-150 lines per shot in the reference films, 5-15 in a first pass)."""
     cfg = STYLE[style]
@@ -128,10 +127,10 @@ def style_checks(proj, add, style):
         f"{n} own lines / {len(shots)} shots = {per:.0f} per shot; files: {', '.join(f'{k} {len(v)}' for k, v in files[:8])}")
     text = "\n".join(l for _, ls in files for l in ls)
     shot_names = {s.get("scene") for s in shots}
-    if style == "screen":
+    if look == "screen":
         used = [k for k, rx in V4.items() if re.search(rx, text)]
         add("uses >= 2 of the v4 screen tools (inserts, words, ink plates, limp type, fps, replay, tear, rays)", len(used) >= 2, f"used: {used}")
-    if style == "treatise":
+    if look == "treatise":
         plates = sorted(x for x in shot_names if x and x.startswith("tr"))
         # in the project's OWN code: the starter's plate cycle already names trEngrave / trField
         gpu = bool(re.search(r"trEngrave|trField|Z\.(shade|lineBatch|glScene)\(", text))
@@ -336,7 +335,7 @@ def main():
     if sp.get("stage"):
         stage_checks(out / "project", add)
     if sp.get("style"):
-        style_checks(out / "project", add, sp["style"])
+        style_checks(out / "project", add, sp["style"], sp.get("look"))
     if sp.get("estimated"):
         sm = (out / "summary.md").read_text(encoding="utf-8", errors="ignore") if (out / "summary.md").exists() else ""
         add("summary tells the user the lyric timing is estimated / approximate", re.search(r"estimat|approximat|rough", sm, re.I), "found" if re.search(r"estimat|approximat|rough", sm, re.I) else "not mentioned")

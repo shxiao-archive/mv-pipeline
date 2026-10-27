@@ -64,7 +64,7 @@ The examples in §5–7 come from illustrated-character films; other kinds of pi
 the same (`jobs` → generate → `post` → review sheets). These examples compile with `gen_table.py jobs`; they have not
 been through a full film yet, so take a second batch after the first review sheet. Write your own words in the locks.
 
-**Signal** (`vocaloid:signal`, STYLE.md B.4): NEUTRAL images that the code recolours (heat ramps, channel splits), so
+**Signal** (the vocaloid style's signal shots, STYLE.md B.4): NEUTRAL images that the code recolours (heat ramps, channel splits), so
 no colour cast, mid contrast, no grade in the picture. Places and objects read best from Codex or Grok (NovelAI is weak
 at photographic plates and legible objects, §12); the character can stay on the film's generator.
 ```json

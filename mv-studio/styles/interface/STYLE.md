@@ -4,26 +4,27 @@
 elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
 that the build needs.
 
-One code-drawn, typography-led style with two treatments that a film can switch between by section. In both, the words
-are part of the picture, the pictures are drawn in code (no generated art needed), and the copy around the lyric (system
-messages, form titles, stamps, axis labels) is your own, written per film.
+One code-drawn, typography-led style with two equal libraries: two kits a film takes shots from freely, per shot, as
+the song asks. Neither is the default, and no rule ties a kit to a section. In both, the words are part of the
+picture, the pictures are drawn in code (no generated art needed), and the copy around the lyric (system messages,
+form titles, stamps, axis labels) is your own, written per film.
 
-| treatment | the film IS | engine | lyrics | starter |
-|---|---|---|---|---|
-| **screen** (default) | one session on a screen: "me" (the singer) talks to "you" (never shown), the client itself reacts | `engine/styles/interface/` (`Z.IF`: `ifChat ifPlate ifCode`) | the conversation: lines are messages, keywords become plates | `engine/starters/interface.js` (`--style interface`) |
-| **treatise** | plates from an illustrated technical treatise on the song's subject: each plate its own idiom, one spark and one running number tie them together, deadpan | `engine/styles/treatise/` (`Z.TR`: `trSheet trPlot trScope trForm trPrompt trHook trContour`) | per word, set into each plate its own way | `engine/starters/treatise.js` (`--style interface:treatise`) |
+| kit | its shots ARE | engine | lyrics |
+|---|---|---|---|
+| **screen** | one session on a screen: "me" (the singer) talks to "you" (never shown), the client itself reacts | `engine/styles/interface/` (`Z.IF`: `ifChat ifPlate ifCode`) | the conversation: lines are messages, keywords become plates |
+| **treatise** | plates from an illustrated technical treatise on the song's subject: each plate its own idiom, one spark and one running number tie them together, deadpan | `engine/styles/treatise/` (`Z.TR`: `trSheet trPlot trScope trForm trPrompt trHook trContour`) | per word, set into each plate its own way |
 
-Pick by the song: a song addressed to someone / about machines → screen; a song about an idea, science or technology →
-treatise. Mixing:
-- **A conversation that turns into a treatise:** the chorus (or the bridge) cuts from the chat to plates that diagram
-  what "me" is saying (a chart of the feeling, a form it must fill, a map of where "you" went); the plates return
-  broken in the final chorus. `ifPlate` and the treatise plates are both "plates": pick one family per film, or give
-  each section one.
-- **One palette.** In a mixed film the two treatments share inks: set the screen's states from the treatise palette, or
-  the other way round, in `Z.setup` (e.g. `Z.IF.STATES.on.me = Z.TR.PAL.signal`, `Z.IF.STATES.on.text = Z.TR.PAL.bone`),
-  so accent = "me" = the spark, cream = "you" = bone.
-- **One look per treatment:** `Z.LOOK_DEFAULT = Object.assign({}, Z.IF.post)` and `post: Z.TR.post` on each treatise
-  shot (or the other way round in a treatise film with chat shots).
+The starter (`--style interface`, `engine/starters/interface.js`) is a first cut that cycles shots from both kits
+through the song's lines; rewrite it from the shot list. Combining them:
+- **A conversation and a treatise in one film:** a line arrives in the chat and the next is diagrammed on a plate (a
+  chart of the feeling, a form it must fill, a map of where "you" went); a passage can stay on plates and come back to
+  the chat. `ifPlate` and the treatise plates are both "plates": give them different jobs (what "me" means / the idea
+  diagrammed), or use one family.
+- **One palette.** The two kits share inks: set the screen's states from the treatise palette, or the other way
+  round, in `Z.setup` (e.g. `Z.IF.STATES.on.me = Z.TR.PAL.signal`, `Z.IF.STATES.on.text = Z.TR.PAL.bone`), so accent =
+  "me" = the spark, cream = "you" = bone. The starter does this.
+- **One look per kit:** `Z.LOOK_DEFAULT = Object.assign({}, Z.IF.post)` and `post: Z.TR.post` on each treatise shot (or
+  the other way round in a film that is mostly plates).
 - **The running number and the spark** can live in the chat too (a counter in the status bar, the cursor's trail) — set
   them up there, pay them off in the plates.
 
@@ -159,8 +160,8 @@ that enters with a 200 px move, and cuts between a close chat framing and a plat
 
 ## B. Treatise — the song as plates from an illustrated technical treatise
 
-Engine code: `template/engine/styles/treatise/` (`treatise.js`, `plates.js`). Starter: `engine/starters/treatise.js`
-(`new_project.py --style interface:treatise`). After *pdoom-video* by Giacomo Magnanini (MIT, see
+Engine code: `template/engine/styles/treatise/` (`treatise.js`, `plates.js`). Starter: `engine/starters/interface.js`
+(`new_project.py --style interface`; both kits). After *pdoom-video* by Giacomo Magnanini (MIT, see
 `licenses/LICENSE-pdoom-video.txt`): its palette, the spark, the plate idioms and the karaoke rules, rewritten for this
 Canvas2D engine. Its song, lyrics, timing data and its film's jokes are not ours: make your own film from your song.
 
@@ -190,7 +191,7 @@ line. Around that variety, everything shares one palette, one type system, one g
 - **Type:** Archivo (the lyric voice; animate its **width** 62–125 and weight: condense under pressure, stretch on held
   notes), IBM Plex Mono (the machine: tokens, labels, forms, footnotes), Cormorant Garamond italic (the rare prophetic
   register). Swiss-grid discipline: asymmetric layouts, negative space, hairline rules, small mono annotations next to
-  big display type. Fonts come with `npm run fonts` (Archivo, Cormorant Garamond added for this treatment).
+  big display type. Fonts come with `npm run fonts` (Archivo, Cormorant Garamond added for this kit).
 - **Tone:** impressive, not cute; funny the way a straight-faced scientist is funny: deadpan captions, footnotes, stamps,
   probability bars. **No mascots, no cartoon faces, no emoji.**
 - **Not slop:** no purple / cyan neon, glowing brains, code rain, lens flares, particle nebulae or stock "AI" imagery.

@@ -4,33 +4,35 @@
 elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
 that the build needs.
 
-One style with two treatments that share a cast, a lyric voice and an engine, and that a film can switch between by
-section:
+One style with two equal libraries: two kits that share a cast, a lyric voice and an engine. A film takes each shot
+from either one, as the song asks. Neither is the default, and no rule ties a kit to a section or a tempo.
 
-| treatment | the film IS | pictures | lyrics | starter |
-|---|---|---|---|---|
-| **tegaki** (default) | an illustrated 手書き story with an original character: light, colour script, signature set pieces | generated character + backgrounds (+ Blender toon 3D), `engine/styles/vocaloid/*.js` | JIZURA plans + custom type scenes | the demo 「蛍火」 (`--style vocaloid`) |
-| **signal** | footage from a device being destroyed while it records: speed is editing, heat colours everything, the signal decays | generated NEUTRAL images + code fillers, `engine/styles/signal/` | the device's type: vertical mincho, beat-stamped lines, big WORD frames | `engine/starters/signal.js` (`--style vocaloid:signal`) |
+| kit | its shots ARE | pictures | lyrics |
+|---|---|---|---|
+| **tegaki** | an illustrated 手書き story with an original character: light, colour script, signature set pieces | generated character + backgrounds (+ Blender toon 3D), `engine/styles/vocaloid/*.js` | JIZURA plans + custom type scenes |
+| **signal** | footage from a device being destroyed while it records: speed is editing, heat colours everything, the signal decays | generated NEUTRAL images + code fillers, `engine/styles/signal/` | the device's type: vertical mincho, beat-stamped lines, big WORD frames |
 
-Pick by the song: a story or a ballad → tegaki; a frantic, high-BPM song → signal. Mixing is the point of the merge:
-- **A tegaki film that breaks down:** the bridge (or the last chorus) collapses into signal. Set `Z.SIG.spans =
-  [[B(49), B(65)]]` before `Z.SIG.install()`: the grade and the degradation run only there, the tegaki look everywhere
-  else. Prepare it: the colour script heats up before the span, hot pixels appear a line earlier, and the shot after the
-  span shows the damage (or the recovery).
-- **A signal film with an illustrated heart:** T3 sections (§B.2) are full tegaki shots (`illust`, JIZURA), with the
-  signal layer quiet (`SIG.spans` leaves them out, or low `heat`), so the character is seen whole before the sprint.
+The starter (`--style vocaloid`, `engine/starters/vocaloid.js`) is a first cut that cycles shots from both kits through
+the song's lines; rewrite it from the shot list. A hand-built tegaki film, the demo 「蛍火」, is `demo/hotarubi.js`.
+Combining them:
+- **Signal spans.** The heat grade, the decay layer and the device HUD run only inside `Z.SIG.spans = [[t0, t1], ...]`
+  (with `Z.SIG.install()`; the starter derives the spans from where its signal shots fell). A span can be one line in
+  an illustrated verse or a whole bridge that breaks down. Prepare a long one: the colour script heats up before it,
+  hot pixels appear a line earlier, and the shot after it shows the damage (or the recovery).
+- **The character seen whole:** tegaki shots show the character whole; signal shots cut to crops of the same one, so
+  the sprint means something.
 - **One character for both:** design the cast once (character bible, references/04). Signal needs extra crops of the
   same character (eye, mouth, hand, back, silhouette), generated neutral; tegaki uses the coloured master and poses.
-- Lyrics: JIZURA in tegaki sections, the signal HUD (`SIG.hudCfg.lyrics` spans) in signal sections; never both at once.
+- Lyrics: JIZURA on tegaki shots, the signal HUD (`SIG.hudCfg.lyrics` spans) on signal shots; never both at once.
 
 ---
 
 ## A. Tegaki — illustrated MV with an original character (the base kit's style)
 
-This is the treatment vocaloid-style-mv-pipeline (NikusonP, MIT) was built for and documented in full; its references
+This is the kit vocaloid-style-mv-pipeline (NikusonP, MIT) was built for and documented in full; its references
 are the guide. Engine: the pack `template/engine/styles/vocaloid/` (its scenes, light devices `fx.js`, transitions
-`trans.js`, palettes P1–P5 and LUTs, cookbook tools), JIZURA lyric layer, Blender toon 3D. Starter: the demo 「蛍火」
-(`engine/starters/vocaloid.js`).
+`trans.js`, palettes P1–P5 and LUTs, cookbook tools), JIZURA lyric layer, Blender toon 3D. Starter: `engine/starters/vocaloid.js` (both kits); a
+hand-built tegaki film: the demo 「蛍火」, `demo/hotarubi.js`.
 Case study 「残光」: https://github.com/EGSECDA/vocaloid-style-mv-pipeline/tree/main/examples/zanko (© NikusonP — learn
 from it, do not reuse its motifs, character or palettes).
 
@@ -75,7 +77,7 @@ Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline,
 ## B. Signal — a recording device failing
 
 Engine code: `template/engine/styles/signal/` (`signal.js`, `cuts.js`, `fill.js`, `shot.js`, `hud.js`). Starter:
-`engine/starters/signal.js` (`new_project.py --style vocaloid:signal`). An original implementation for this kit, inspired
+`engine/starters/vocaloid.js` (`new_project.py --style vocaloid`; both kits). An original implementation for this kit, inspired
 by the "signal degradation" look of a fan PV (v1Ta44/netsu-ijou-pv, CC BY-NC 4.0): no code, art, character or lyrics
 from it are used, and none may be — that PV uses a real song, real lyrics and an existing character. Make your own film
 from your song.
@@ -145,7 +147,7 @@ a tower, sea, a field), objects (a recorder, cables, a CRT, a chair, a bell), on
 close-ups: eye, mouth, hand, neck — for crops), a few silhouettes. Pick crop focus points with `tools/art_grid.py`.
 Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer positions); lyrics use mincho.
 
-### B.5 Safety — this treatment is where flashes happen
+### B.5 Safety — this kit is where flashes happen
 
 - Full-frame white flashes / inversions only at 3–6 key points of the film (a section's first hit, the title word),
   each a single event, never repeated within a second.
@@ -158,7 +160,7 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ---
 
-## Characters with a living face (optional, both treatments)
+## Characters with a living face (optional, both kits)
 
 A character may stay completely still; that is fine. If the film wants more, now and then she blinks, opens the mouth
 or changes expression: a swap of the face, not an animation and not lip-sync (a viewer who watched the eval film: the mouth flapping on every syllable looked

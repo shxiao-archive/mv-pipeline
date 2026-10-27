@@ -41,6 +41,7 @@ Run it in a throwaway project scaffolded without `--song` (`python <skill>/scrip
 refuses to replace a different existing file unless `--force`), `analysis/lyrics_mv.lrc` and `analysis/sections.json`.
 
 ```bash
+cp demo/hotarubi.js engine/timeline.js       # the demo film (Windows: copy demo\hotarubi.js engine\timeline.js)
 python demo/make_demo_song.py                    # synthesizes audio/song.wav (24 s, 128 BPM, original)
 cp demo/lyrics_demo.lrc analysis/lyrics_mv.lrc   # Windows: copy demo\lyrics_demo.lrc analysis\lyrics_mv.lrc
 cp demo/sections_demo.json analysis/sections.json   # optional: curated section labels for the demo
@@ -52,7 +53,7 @@ python tools/review_sheets.py render/demo.mp4 --step 1 --out render/review
 python tools/review_sheets.py render/demo_vertical.mp4 --step 1 --out render/review_v   # 9:16: 216x384 thumbnails
 ```
 
-In a `--style vocaloid` project `engine/timeline.js` is that demo (a machine test, not a model for your film): 「蛍火」 (HOTARUBI), eleven shots built only from procedural scenes
+The demo film `demo/hotarubi.js` (a machine test, not a model for your film) is 「蛍火」 (HOTARUBI), eleven shots built only from procedural scenes
 and the JIZURA lyric layer. Look at `render/stills/smoke.jpg`: a night sky with a firefly light igniting, star
 trails, a vortex, kanji slams, fireflies forming 蛍, a dawn and a violet end card mean the machine renders correctly
 (reference: `docs/images/demo_sheet.jpg` in the kit repo,

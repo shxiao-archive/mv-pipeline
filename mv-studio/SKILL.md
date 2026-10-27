@@ -31,10 +31,10 @@ merely sounds like a preset is not a request for it.
    - **a preset asked for:** its brief, `styles/<preset>/BRIEF.md` (the feel, the art construction, the motion
      vocabulary of that tradition), and its starter as an example to rewrite:
 
-     | preset | in one line | starters (`--style`; code and docs: references/05 §12) |
+     | preset | in one line | starter (`--style`; code and docs: references/05 §12) |
      |---|---|---|
-     | vocaloid | the ボカロPV: lyrics as the subject, motion-graphics layers, rhythm-driven editing, limited animation, symbols over plot | `vocaloid`, `vocaloid:signal` |
-     | interface | a digital-tech look: the song on an AI chat screen and on high-precision technical plates | `interface`, `interface:treatise` |
+     | vocaloid | the ボカロPV: lyrics as the subject, motion-graphics layers, rhythm-driven editing, limited animation, symbols over plot | `vocaloid` |
+     | interface | a digital-tech look: the song on an AI chat screen and on high-precision technical plates | `interface` |
      | stage | a watercolour picture-book show by an original puppet troupe | `stage` |
      | papercraft | a pop-up paper storybook told as a retro RPG quest | `papercraft` |
      | magazine | a Japanese experimental print magazine: three-ink press, vertical type, editorial marks that keep time, the page's fate | `magazine` |

@@ -68,7 +68,7 @@ after a change to shared code, the timeline's timing or a JIZURA part pool (09 �
 for one render; `--preview` renders with 1). The engine draws N sub-frames across the open shutter and averages them in
 a float buffer (`core/gl.js`), so fast pans, whip moves and spinning type smear like film. The shutter opens AT the frame
 time, so a cut on a frame boundary never mixes two shots. Cost: N times the render time; stills and checks show the
-same blur as the export. Use it for camera-heavy films; skip it for the signal treatment (its point is crisp frames).
+same blur as the export. Use it for camera-heavy films; skip it for signal shots (its point is crisp frames).
 (`powershell -File tools\render_final.ps1 …` forwards to the same script; old `-Workers 3 -Preview` spellings are accepted.) Options: `--workers 3 --start 0 --end <s> --name mv --preview --url --selector canvas#out --width --height --fps 30 --codec nvenc --cq 16 --audio audio/song.wav --no-audio --patch A:B`.
 
 Steps: `render_frames.mjs --mode blob --codec nvenc --cq 16 --stats render/<name>_stats.json` → `render/<name>_video.mp4` (picture only) → mux, equivalent to:
@@ -92,7 +92,7 @@ ffmpeg -i render/mv.mp4 -vf "scale=1280:-2,setparams=color_primaries=bt709:color
 # verify
 ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,bit_rate:format=duration,size -of compact render/mv_share.mp4
 ```
-**Photosensitivity preroll** for films with flashes or fast cuts (vocaloid's signal treatment, glitch passages): `check_flash.py`
+**Photosensitivity preroll** for films with flashes or fast cuts (vocaloid's signal shots, glitch passages): `check_flash.py`
 writes `render/mv_flash.json` with its **warning ranges** (every stretch with >= 2 flashes or >= 4 hard cuts in one
 second), then
 ```bash
