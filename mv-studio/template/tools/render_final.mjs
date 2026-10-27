@@ -5,7 +5,7 @@
 //   node tools/render_final.mjs [--workers 3] [--start 0] [--end 226.54] [--name mv] [--preview]
 //                               [--url engine/index.html] [--selector canvas#out] [--width 1920] [--height 1080]
 //                               [--audio audio/song.wav] [--codec nvenc|x264|hevc] [--cq 16] [--fps 30] [--shutter 6]
-//                               [--patch 62.4:66,120:121.5]
+//                               [--patch 62.4:66,s07,s12] [--full]
 //
 // Writes render/<name>_video.mp4 (picture only), render/<name>.mp4 (picture + AAC 320k / 48 kHz) and
 // render/<name>_stats.json and render/<name>.render.json (the manifest: what this video was made from -- url, size,
@@ -13,8 +13,9 @@
 // and tools/stale.mjs compares with the files now), then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
 // window.__zankoMeta.duration. Use --codec x264 on machines without an NVIDIA GPU.
 // --patch re-renders only those ranges (widened to the keyframes around them) into the existing render/<name>_video.mp4
-// and copies every other frame across: for fixes local to a few shots. A change to shared code (a palette, a helper
-// many shots use, the engine) changes frames outside the ranges: render the whole film then.
+// and copies every other frame across: for fixes local to a few shots (a shot id takes its t0:t1 from plan/shots.json).
+// Once a master exists, a full re-render needs --full: try a shared change on a few of its shots first
+// (--start A --end B --name probe), then re-render the whole film once.
 // Cross-platform replacement of the old render_final.ps1 (which is now a thin wrapper around this file).
 // Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 // -----------------------------------------------------------------------------------------
@@ -46,19 +47,23 @@ render_final.mjs -- full render (render_frames.mjs) + audio mux
   --shutter N        motion-blur sub-frames per frame (overrides project.json render.shutter.samples; 1 = off)
                      [project.json; 1 with --preview]
   --no-audio         skip the mux (render/NAME.mp4 = the picture-only file)
-  --patch A:B[,C:D]  re-render only these ranges (seconds of the film) into the existing render/NAME_video.mp4,
-                     widened to its keyframes; pass the same --start, --codec, --preview and size as that render
+  --patch A:B[,C:D]  re-render only these ranges (seconds of the film, or shot ids such as s07 from plan/shots.json)
+                     into the existing render/NAME_video.mp4, widened to its keyframes; pass the same --start, --codec,
+                     --preview and size as that render
+  --full             render the whole film again although render/NAME.render.json exists (after a shared change,
+                     checked first on a range render: --start A --end B --name probe)
 Env: BROWSER_CHANNEL, BROWSER_ANGLE, FFMPEG, FFPROBE (see tools/kit_env.mjs)`;
 
 function parseArgs(argv) {
   const a = { workers: 3, start: 0, end: null, name: 'mv', preview: false, url: 'engine/index.html', selector: 'canvas#out',
-    width: 1920, height: 1080, fps: 30, codec: 'nvenc', cq: 16, crf: 18, audio: 'audio/song.wav', noAudio: false, shutter: null, patch: null };
+    width: 1920, height: 1080, fps: 30, codec: 'nvenc', cq: 16, crf: 18, audio: 'audio/song.wav', noAudio: false, shutter: null, patch: null, full: false };
   const nums = new Set(['workers', 'start', 'end', 'width', 'height', 'fps', 'cq', 'crf', 'shutter']);
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (k === '--help' || k === '-h') { console.log(HELP.replace(/^\n/, '')); process.exit(0); }
     if (k === '--preview') { a.preview = true; continue; }
     if (k === '--no-audio') { a.noAudio = true; continue; }
+    if (k === '--full') { a.full = true; continue; }
     // also accept the old PowerShell spelling (-Workers 3, -End 226.54, -Preview ...)
     const key = k.replace(/^--?/, '').toLowerCase();
     if (key === 'preview') { a.preview = true; continue; }
@@ -69,7 +74,14 @@ function parseArgs(argv) {
     if (nums.has(key) && !Number.isFinite(a[key])) throw new Error(`bad number for ${k}: ${v}`);
   }
   if (a.patch != null) {
-    a.patch = String(a.patch).split(',').map(r => r.split(':').map(Number));
+    let shots = null;
+    a.patch = String(a.patch).split(',').map(r => {
+      if (!/^[A-Za-z]/.test(r)) return r.split(':').map(Number);
+      shots ??= JSON.parse(fs.readFileSync(path.join(ROOT, 'plan', 'shots.json'), 'utf8')).shots;   // storyboard.mjs writes it
+      const s = shots.find(x => x.id === r);
+      if (!s) throw new Error(`--patch: no shot ${r} in plan/shots.json (run node tools/storyboard.mjs)`);
+      return [s.t0, s.t1];
+    });
     if (a.patch.some(r => r.length !== 2 || !r.every(Number.isFinite) || r[1] <= r[0])) throw new Error('--patch wants A:B[,C:D] in seconds, B > A');
   }
   return a;
@@ -147,6 +159,10 @@ function main() {
   const manifestFile = path.join(renderDir, `${a.name}.render.json`);
   const rel = p => path.relative(ROOT, p).split(path.sep).join('/');
   const inputs = inputsOf([...RENDER_INPUTS, ...(a.noAudio ? [] : [rel(audio)])]);   // hashed before the render starts
+  // re-render what changed, not the film: a master already exists and this would redo all of it
+  if (!a.patch && !a.full && a.end == null && fs.existsSync(manifestFile))
+    throw new Error(`${rel(manifestFile)} exists: re-render only what changed with --patch <shot ids or A:B> (09 §1). `
+      + 'Try a shared change on a few of its shots first (--start A --end B --name probe); pass --full for the one whole re-render after it.');
   let base = null;
   if (a.patch) try { base = JSON.parse(fs.readFileSync(manifestFile, 'utf8')); } catch { /* an older render without one */ }
 

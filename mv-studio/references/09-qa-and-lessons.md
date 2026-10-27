@@ -11,10 +11,13 @@ Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pip
 4. **One full render** (~4 min on NVENC, much longer on x264): `node tools/render_final.mjs --name mv`.
 5. **Review sheets** from the MP4: `python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/reviewN` (5×5 timestamped frames per sheet). Portrait videos work the same (216×384 thumbnails): `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.8 --out render/reviewN_v`.
 6. **Fix in ranges, not in passes.** Check each fix with stills and `pops.mjs --from --to` over its range, then
-   `node tools/render_final.mjs --name mv --patch <a>:<b>[,<c>:<d>]` re-renders only those ranges into the master
-   (widened to its keyframes) and copies every other frame across. Render the whole film again only after a change that
-   reaches beyond the ranges: shared code (a palette, a helper many shots use, the engine, `globalFX`), the timeline's
-   timing, or a JIZURA plan's part pool (it re-rolls all its cuts).
+   `node tools/render_final.mjs --name mv --patch s07,s12` (shot ids, or `<a>:<b>` in seconds) re-renders only those
+   shots into the master (widened to its keyframes) and copies every other frame across. Once a master exists,
+   `render_final.mjs` refuses a whole render without `--full`. Prefer fixes local to the shots that are wrong over a
+   change to shared code. When a change does reach beyond its shots (a palette, a helper many shots use, the engine,
+   `globalFX`, the timeline's timing, a JIZURA plan's part pool, which re-rolls all its cuts), try it on two or three
+   affected shots first (`--start <a> --end <b> --name probe`, then the checks on `render/probe.mp4`), and re-render
+   the whole film with `--full` once, after the fixes of that round are in, never once per fix.
 
 A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め black before the riff). Before "fixing", render dense stills around it.
 
@@ -215,8 +218,8 @@ Raise the film to award level (target >= 8 in every dimension, 9 where the style
 - Implement every critical issue and every high-impact fix. You may replace a listed fix with a better solution if you
   are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
   weakest section. Do not regress anything the jury listed as a strength.
-- Run the checks of references/09 §7 again, re-render (`render_final.mjs --patch` for fixes local to some shots; the
-  whole film after a shared change, 09 §1), build a new pack and look at the frames until the fixes have truly landed.
+- Run the checks of references/09 §7 again, re-render (`render_final.mjs --patch <shot ids>`; one `--full` render
+  for all the round's shared changes, each tried on a range first, 09 §1), build a new pack and look at the frames until the fixes have truly landed.
 - Write docs/REVIEW.md: each fix applied or skipped, and why. Name lyric lines by number (L05), never quote them:
   tools/check_no_lyrics.mjs scans docs/ (only the jury's own files in docs/review/ are skipped).
 ```

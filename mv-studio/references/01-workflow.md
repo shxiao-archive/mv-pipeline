@@ -125,10 +125,10 @@ pictures; no green fringes; nothing imitates an existing character.
 
 ```bash
 node tools/stills.mjs --times <midpoints of all shots> --out render/stills/pass1 --sheet pass1
-node tools/render_final.mjs --name mv                       # full render + audio (≈4 min on RTX 3080)
+node tools/render_final.mjs --name mv                       # the first master + audio (≈4 min on RTX 3080); then --patch <shot ids>
 python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/review1
 ```
-Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboard.mjs`, `node tools/check_shots.mjs`, `node tools/pops.mjs`; after it: `python tools/check_flash.py render/mv.mp4`, `python tools/motion_check.py render/mv.mp4`, `python tools/check_sync.py render/mv.mp4` (the full order and what each catches: 09 §7). Before changing a shared file, `node tools/regress.mjs snap before`; after it, `snap after` and `python tools/compare_sheets.py before after`. Query JIZURA when a lyric frame looks wrong: `node tools/jz_cuts_at.mjs 196.8,203.5 main`. Render the whole film once; after that, fix in ranges: check each with stills and `pops.mjs --from --to`, then `render_final.mjs --patch <a>:<b>` (09 §1).
+Read every sheet. Before the render: `node tools/lint.mjs`, `node tools/storyboard.mjs`, `node tools/check_shots.mjs`, `node tools/pops.mjs`; after it: `python tools/check_flash.py render/mv.mp4`, `python tools/motion_check.py render/mv.mp4`, `python tools/check_sync.py render/mv.mp4` (the full order and what each catches: 09 §7). Before changing a shared file, `node tools/regress.mjs snap before`; after it, `snap after` and `python tools/compare_sheets.py before after`. Query JIZURA when a lyric frame looks wrong: `node tools/jz_cuts_at.mjs 196.8,203.5 main`. Render the whole film once; after that, fix in ranges: check each with stills and `pops.mjs --from --to`, then `render_final.mjs --patch <shot ids>` (09 §1). A change to shared code is tried on a range render first and goes into at most one `--full` re-render per review round.
 
 **Checkpoint:** show the user a few stills and the verify summary.
 
