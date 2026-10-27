@@ -68,14 +68,18 @@ the starter.
 
 Read `direction.md`, then `design-a-style.md` (or the preset's BRIEF.md and, for vocaloid, `styles/vocaloid/DIRECTION.md`).
 Produce `docs/CONCEPT.md` (≈1 page): thesis (one sentence about what the song is *about* visually), logline, arc per
-section, the style block (`design-a-style.md` §2 slots and the §4 distance review on the look sheet), signature moments mapped to times,
-ending idea. A cast summary only if the film has a cast.
+section, the style block (`design-a-style.md` §2 slots and the §4 distance review on the look sheet; for a preset, the
+study of its reference film), signature moments mapped to times, ending idea, and the **section-by-section table**:
+for each section, from its lines and its music, the picture idea, composition and scale, how the lines are set, the
+motif's state, what moves and on what, and the hand-over. A preset is a vocabulary to design with, not a set of
+effects to apply: each section's row comes from the song, and two sections never get the same row. A cast summary
+only if the film has a cast.
 
-**Checkpoint:** summarise to the user in a few lines.
+**Checkpoint:** summarise to the user in a few lines, with the section table.
 
 ## 3. Plan
 
-1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `plan/storyboard.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated `plan/storyboard.md`: change the shots. Size the list from the concept's editing rhythm. Map each lyric line to an image that *answers* it (`direction.md` §4). Mark the signature moments.
+1. **The shot list is the storyboard** (mv-studio): write the shots straight into `engine/timeline.js`, each with `moment` (what it shows and why, your words), `line` (the lyric line number it answers) and, where the cut belongs to a cue, `cue: 'L07'`; then `node tools/storyboard.mjs` writes `plan/storyboard.md` and `plan/shots.json` and checks coverage, the grid and the cues (09 §7). Never edit the generated `plan/storyboard.md`: change the shots. Size the list from the concept's editing rhythm. Map each lyric line to an image that *answers* it (`direction.md` §4), inside its section's row of the concept: each `moment` says what happens in the shot and on which beat, hit or sung word. Mark the signature moments.
 2. `engine/timeline.js`: the edit. It starts as your `--style` starter (the blank one by default): keep its
    structure — film identity (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`), helpers, `Z.LOOK_DEFAULT`,
    `Z.VERTICAL_CFG` — and replace its placeholder values and shots with the film's. Helpers inside `Z.setup(audio)`:

@@ -188,7 +188,9 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      preset's overall look adopted without being asked for and without a reason from the song is; shared elements
      that serve the song are not
    - concept_story: the film does what its concept says; a visual idea about what the song is about; the lines
-     answered the way the concept sets them; the moments the concept names as peaks land; an ending, not a stop
+     answered the way the concept sets them; each section designed from its own lines and music (its own picture
+     idea, composition, type, motif state and hand-over), not one treatment repeated; the moments the concept names
+     as peaks land; an ending, not a stop
    - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; the motion
      comes from what happens in the picture, on the music; the camera moves with a reason and holds otherwise; no dead
      or jittery motion, no camera drifting or shaking to keep stills alive, no sprites flipping back and forth
@@ -203,7 +205,8 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
    lift the weakest section.
 4. Flag as critical: anything generic or AI-template, an existing character, brand or real UI imitated, wrong or
    garbled lyric text, tofu, a failed check, an off-model character, a preset's overall look adopted without being
-   asked for or a reason from the song, a material conflict with the agreed concept. A minor inconsistency (one
+   asked for or a reason from the song, sections that could be swapped without anyone noticing (the same layout and
+   effects whatever the lines say), a material conflict with the agreed concept. A minor inconsistency (one
    element off the palette, a borrowed device not restyled) is a fix, not critical.
 5. List the 3 strongest things, so the revision keeps them.
 Return the score table, the critical issues, the fixes and the strengths, then one JSON block:
