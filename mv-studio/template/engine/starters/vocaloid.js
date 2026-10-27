@@ -200,9 +200,10 @@
       const run = SIG.cuts({ t0: a, t1: b, tier, motifs, seed: 11 + l.i, id: `s${++k}_`, moment: `line ${l.i}: tier ${tier} signal run (REPLACE: the motifs for this line)` });
       run.forEach(x => { x.line = l.i; signalIds.push(x.id); });
       S.push(...run);
+      const r0 = run[0].t0, r1 = run[run.length - 1].t1;   // SIG.cuts snaps to frames: the span is the run's, or its first frame is ungraded
       const last = spans[spans.length - 1];
-      if (last && last[1] >= a - 1e-3) last[1] = b; else spans.push([a, b]);
-      hudLyrics.push({ from: a, to: b, mode: ['stamp', 'center', 'vertical'][tier - 1] });
+      if (last && last[1] >= r0 - 1e-3) last[1] = r1; else spans.push([r0, r1]);
+      hudLyrics.push({ from: r0, to: r1, mode: ['stamp', 'center', 'vertical'][tier - 1] });
     };
     // REPLACE: the film's own order (or choose a builder per line). Any line may come from either library.
     const POOL = [
