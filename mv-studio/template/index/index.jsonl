@@ -411,6 +411,7 @@
 {"id":"tool:fetch_fonts","kind":"tool","fits":["shared"],"does":"Download full (non-subset) Japanese/Chinese (+ Latin UI / mono) font files from github.com/google/fonts into <ROOT>/engine/fonts/ and write engine/fonts/fonts.css (@font-face rules) + manifest.json.","where":"tools/fetch_fonts.py","use":"python tools/fetch_fonts.py"}
 {"id":"tool:gen_table","kind":"tool","fits":["shared"],"does":"gen_table.py -- the film's assets as ONE generation table (references/10 §3; the netsu-ijou-pv method), plus VARIANTS: small edits of an approved image (eyes closed, mouth open, a head turn, wind in the hair) that are aligned to it so …","where":"tools/gen_table.py","use":"python tools/gen_table.py"}
 {"id":"tool:gigafile_upload","kind":"tool","fits":["shared"],"does":"OPTIONAL EXTRA: upload files to GigaFile便 (gigafile.nu, a public file-sharing site) through its normal web page and * print the download links. Only run it when the owner of the video asked for a public share link. * node …","where":"tools/gigafile_upload.mjs","use":"node tools/gigafile_upload.mjs"}
+{"id":"tool:glyph_track","kind":"tool","fits":["shared"],"does":"The glyph tracker: hooks fillText/strokeText/drawImage in the page so every glyph's box on every canvas is known * (window.__glyph). Run as a page init script (page.addInitScript(glyphTracker)): check_shots.mjs, jizura_cover.mjs. * …","where":"tools/glyph_track.mjs","use":"node tools/glyph_track.mjs"}
 {"id":"tool:grokgen","kind":"tool","fits":["shared"],"does":"Image generation through the Grok Build CLI (`grok`, signed in by the user) — the same jobs file as tools/imagegen.py.","where":"tools/grokgen.py","use":"python tools/grokgen.py"}
 {"id":"tool:imagegen","kind":"tool","fits":["shared"],"does":"Batch image generation through the local Codex CLI (native image_gen tool).","where":"tools/imagegen.py","use":"python tools/imagegen.py"}
 {"id":"tool:jizura_cover","kind":"tool","fits":["shared"],"does":"Which JIZURA parts cover the picture in front mode (the lyric layer over a scene): measured, not guessed. * node tools/jizura_cover.mjs [--style gold] [--groups trans,layout,decor,fx,treat,cam] [--max 0.3] [--out jizura/cover.json] * …","where":"tools/jizura_cover.mjs","use":"node tools/jizura_cover.mjs"}
@@ -513,13 +514,13 @@
 {"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:220-322","lines":103}
 {"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
-{"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-50","lines":24}
-{"id":"manual:references/06-jizura#4","kind":"manual","does":"4. Styles","where":"<skill>/references/06-jizura.md:51-84","lines":34}
-{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:85-144","lines":60}
-{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Shots with a subject & text-behind","where":"<skill>/references/06-jizura.md:145-150","lines":6}
-{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:151-155","lines":5}
-{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:156-159","lines":4}
-{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:160-163","lines":4}
+{"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-54","lines":28}
+{"id":"manual:references/06-jizura#4","kind":"manual","does":"4. Styles","where":"<skill>/references/06-jizura.md:55-88","lines":34}
+{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:89-149","lines":61}
+{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Shots with a subject & text-behind","where":"<skill>/references/06-jizura.md:150-155","lines":6}
+{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:156-160","lines":5}
+{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:161-164","lines":4}
+{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:165-168","lines":4}
 {"id":"manual:references/07-blender-3d#1","kind":"manual","does":"1. What is worth doing in 3D","where":"<skill>/references/07-blender-3d.md:9-18","lines":10}
 {"id":"manual:references/07-blender-3d#2","kind":"manual","does":"2. Files and commands","where":"<skill>/references/07-blender-3d.md:19-60","lines":42}
 {"id":"manual:references/07-blender-3d#3","kind":"manual","does":"3. The look recipe (\"not default-grey 3D\")","where":"<skill>/references/07-blender-3d.md:61-71","lines":11}

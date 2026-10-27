@@ -92,7 +92,7 @@ rewrite, not a look to keep.
 - `shot(id, t0, t1, scene, args, { lyric, plan, post, trans, text, hud })` — one call per shot, ids `s01…` in film order.
 - If the film uses the JIZURA lyric layer: its plans (`Z.addPlan`) and curation lists are the film's own; re-check the
   stills after any change (any change re-rolls the cuts). Find a bad lyric frame with `node tools/jz_cuts_at.mjs 12.5 main`;
-  list the parts that cover the picture with `node tools/jizura_cover.mjs`.
+  list the parts that cover the picture or blow glyphs past half the frame with `node tools/jizura_cover.mjs`.
 - `Z.LOOK_DEFAULT` / `Z.LOOKS` (per section label), `Z.globalFX` (flashes, kick shake), `Z.hud`.
 - `Z.VERTICAL_CFG`: which shots keep the whole 16:9 composition in the 9:16 version (`full`), the plan map, header text
   (`title` / `sub` / `artist` = `Z.TITLE` / `Z.TITLE_SUB` / `Z.ARTIST`), when header and footer show (`credits`), the

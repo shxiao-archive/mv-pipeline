@@ -46,6 +46,10 @@ await JZ.addPlan('mono', { ...common, style: 'mono', mood: 'graphic', seed: 2610
 - Lyrics: LRC with markup — `/` forces a cut break, `*word*` emphasis (bigger, impact parts), trailing `!` = キメ line (flash + shake), `[間奏]` = instrumental line (keeps the previous line from lingering).
 - Remove `[ti:]` from the LRC unless you want JIZURA's own title card.
 - Turn JIZURA's own flashes off (`flash: false`) and let the engine's post pass own full-frame flashes, so the 3-flashes-per-second rule is enforced in one place.
+- JIZURA has no type size: a line of 5-8 characters fills ~0.4-0.5 H, and a camera punch or a big enter pushes it past half
+  the frame (check_shots OVERSIZED TYPE / GLYPH NEVER WHOLE all through the film). Draw the film's lyric shots with
+  `lyric: { safe: 0.8 }` (below), then deny what still goes giant: `node tools/jizura_cover.mjs --safe 0.8` prints the
+  parts whose glyphs pass 0.5 H (and those that cover the frame) as DENY lines. The film's own peaks (kanjiSlam) are code shots.
 - Changing the part pool or seed **re-rolls every cut** in that plan — re-review after any curation change.
 
 ## 4. Styles
@@ -135,7 +139,8 @@ English film may meet more parts that split or repeat words: look at the cut str
 
 **Measure, don't guess, which parts cover the picture:** `node tools/jizura_cover.mjs [--style gold]` plans sample
 words with one part at a time (every other group pinned to its plain part), renders front mode where that part is used
-and prints the parts that cover more than 30 % of the frame as ready `DENY.<group> += '...'` lines (`jizura/cover.json`
+and prints the parts that cover more than 30 % of the frame, or draw a glyph near half the frame high (`--giant`, 0.42 H: a margin under the check's 0.5,
+with `--safe` as the shots use), as ready `DENY.<group> += '...'` lines (`jizura/cover.json`
 has every value). Three rounds of hand-made lists each missed some (`uncover`, `whipPan`, …); the template's lists
 now include every plate it measured over 40 % in the gold, noir and mono styles the template's plans use. Run it again after changing styles, schemes or the JIZURA pin, and add what it
 prints; big-type layouts it lists are a choice (they cover with letters, not plates): keep the ones the film wants.

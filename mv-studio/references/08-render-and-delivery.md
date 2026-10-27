@@ -135,7 +135,7 @@ To adapt: set `Z.VERTICAL_CFG = { full, planMap, title, sub, artist, credits: [t
 | `python tools/review_sheets.py render/mv.mp4 --step 1.5 --out render/review1 [--start --end --cols 5]` | contact sheets of a rendered video: one 384×216 thumbnail (216×384 for a 9:16 video) every `step` s, `cols×cols` per sheet, `m:ss.xx` labels — 残光: 7 sheets per pass at 1.5 s. Read every sheet. |
 | `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.5 --out render/review_v` | portrait videos get 216×384 thumbnails automatically (or a denser strip: `ffmpeg -v error -i render/mv_vertical.mp4 -vf "fps=1/3,scale=144:256,tile=16x3:padding=4:color=black" -q:v 3 render/review_v/vsheet_%02d.jpg` — 48 frames per sheet, 2 sheets for 3:46) |
 | `node tools/jz_cuts_at.mjs 196.8,203.5 main` | which JIZURA parts a lyric frame uses (06-jizura) |
-| `node tools/jizura_cover.mjs` | which JIZURA parts cover the picture in front mode, as DENY lines (06 §5) |
+| `node tools/jizura_cover.mjs` | which JIZURA parts cover the picture in front mode or draw glyphs past half the frame, as DENY lines (06 §5) |
 | `python tools/jury_pack.py render/mv.mp4` | the jury's pack: a contact sheet per section, filmstrips at the hooks, every frame around each shot and lyric cut, full-resolution stills, motion per second (09 §8) |
 | `ffmpeg -ss 62.4 -i render/mv.mp4 -frames:v 12 render/check/f_%02d.png` | a burst of consecutive frames to check motion, seams, flashes |
 
