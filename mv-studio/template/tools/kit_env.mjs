@@ -52,13 +52,15 @@ export function handleHelp(usage, argv = process.argv) {
 /** relative paths are taken relative to the project root */
 export const fromRoot = (p) => path.resolve(ROOT, p);
 // 16 hex of SHA-1 over a file's bytes, or over a folder's sorted "path NUL sig" rows; null when missing. Generated files
-// record what they were made from this way ("inputs"); tools/stale.mjs compares
+// record what they were made from this way ("inputs"); tools/stale.mjs compares. A folder's starters/ is left out: the
+// engine/starters/ timelines are copied once by new_project.py and never loaded, so an upgrade of one stales nothing
 export function fileSig(rel) {
   const p = path.resolve(ROOT, rel);
   if (!fs.existsSync(p)) return null;
   const h = crypto.createHash('sha1');
   if (fs.statSync(p).isDirectory()) {
     for (const f of fs.readdirSync(p, { recursive: true }).map(String).sort()) {
+      if (f.startsWith('starters' + path.sep)) continue;
       if (fs.statSync(path.join(p, f)).isFile()) h.update(`${f.split(path.sep).join('/')}\0${fileSig(path.join(rel, f))}\n`);
     }
   } else {

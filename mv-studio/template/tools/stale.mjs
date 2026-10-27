@@ -60,9 +60,11 @@ function selftest() {
     const ok = [!Object.keys(s.stale).length, s.unknown.join() === `${r}/d.json`, `${r}/c.render.json` in s.manifests];
     w('song.wav', 'b'); s = run();                                 // the song changed: a is stale, so b is too
     ok.push(s.stale[`${r}/a.json`]?.[0] === `${r}/song.wav changed`, s.stale[`${r}/b.json`]?.[0] === `${r}/a.json is stale`);
+    fs.mkdirSync(path.join(tmp, 'sub/starters')); w('sub/starters/y.js', '1'); s = run();   // starters/ is never loaded
+    ok.push(!s.stale[`${r}/c.render.json`]);
     w('sub/x.js', '2'); s = run();                                 // a file inside a tracked folder
     ok.push(!!s.stale[`${r}/c.render.json`], fileSig(`${r}/nope`) === null);
-    if (ok.every(Boolean)) console.log('[stale] selftest ok'); else { console.error('[stale] selftest FAIL', ok); process.exit(1); }
+    if (ok.every(Boolean)) console.log('[stale] selftest ok'); else { console.error('[stale] selftest FAIL', ok); process.exitCode = 1; }   // not exit(): the finally removes the temp folder
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 }
 
