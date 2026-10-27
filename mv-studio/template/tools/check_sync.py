@@ -12,7 +12,7 @@
                lag is under half a frame and >= 90 % of the measurable cuts are within one frame (a cut with another
                cut, or no clear picture change, within 4 frames of it is not measurable).
 3. LYRICS      the lyric line starts as shown (analysis/lyrics_mv.lrc + project.json timing.offset + lyricOffset) against the onsets of
-               the voice (harmonic part, 300-3400 Hz spectral flux): the best global shift and, per line, the nearest
+               the voice (harmonic part, 300-3400 Hz spectral flux; of analysis/stems/vocals_*.wav when separated): the best global shift and, per line, the nearest
                onset. PASS within 80 ms; estimated timings (estimate_lrc.py) usually fail here -- that is the point.
                Then PHRASES: every line should start after a breath; a line that starts inside a sung phrase is likely
                on the wrong phrase (a correct onset of the wrong line). Run it before rendering:
@@ -151,7 +151,9 @@ def main() -> int:
     # ---- 3. lyrics vs voice
     if LRC.is_file():
         import librosa  # after kit_env
-        y, sr2 = librosa.load(str(song), sr=22050, mono=True)
+        # the separated vocal stem when there is one: on a dense mix the drums win and the best shift locks to a beat
+        stem = next((p for p in (kit_env.STEMS / "vocals_kim.wav", kit_env.STEMS / "vocals_vocft.wav") if p.is_file()), None)
+        y, sr2 = librosa.load(str(stem or song), sr=22050, mono=True)
         hop = 128                                                # 1024 / 128: onsets ~2 ms early (2048 reads ~25 ms early)
         harm = librosa.effects.harmonic(y, margin=2.0)
         S = np.abs(librosa.stft(harm, n_fft=1024, hop_length=hop))
@@ -175,7 +177,8 @@ def main() -> int:
             ok = abs(best) <= 0.08
             res["lyrics"] = {"best_shift_ms": round(best * 1000), "peak_z": round(z, 1), "median_nearest_ms": round(float(np.median(near_a)) * 1000),
                              "lines_off_120ms": [i for i, v in enumerate(near) if abs(v) > 0.12]}
-            print(f"[3] lyrics      best shift {best * 1000:+.0f} ms (z {z:.1f}; > 0 = the voice comes AFTER the LRC time), "
+            res["lyrics"]["against"] = kit_env.rel(stem) if stem else "the mix"
+            print(f"[3] lyrics      ({res['lyrics']['against']}) best shift {best * 1000:+.0f} ms (z {z:.1f}; > 0 = the voice comes AFTER the LRC time), "
                   f"per-line nearest onset median {np.median(near_a) * 1000:+.0f} ms   {'PASS' if ok else 'WARN'}")
             # a line should start a sung PHRASE: a breath (little voice-band energy) just before it, voice right after.
             # A line placed on the right onset of the wrong phrase passes the shift test above but fails here.
