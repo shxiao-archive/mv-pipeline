@@ -9,7 +9,8 @@
 2. CUTS        every planned hard cut (plan/shots.json, written by tools/storyboard.mjs) against the frame where the
                picture actually changes: the first frame at or after the cut time must be the first new frame.
                A late analyzer, a frame-rounding bug or an offset shows up as a constant lag. PASS when the median
-               lag is under half a frame and >= 90 % of the measurable cuts are within one frame.
+               lag is under half a frame and >= 90 % of the measurable cuts are within one frame (a cut with another
+               cut, or no clear picture change, within 4 frames of it is not measurable).
 3. LYRICS      the lyric line starts as shown (analysis/lyrics_mv.lrc + project.json timing.offset + lyricOffset) against the onsets of
                the voice (harmonic part, 300-3400 Hz spectral flux): the best global shift and, per line, the nearest
                onset. PASS within 80 ms; estimated timings (estimate_lrc.py) usually fail here -- that is the point.
@@ -113,6 +114,7 @@ def main() -> int:
             shots = json.loads(shots_p.read_text(encoding="utf-8"))["shots"]
             d = frame_diffs(mp4)
             rows = []
+            cut_f = [int(np.ceil((s["t0"] + offset - a.start) * fps - 1e-6)) for s in shots[1:]]
             for k, s in enumerate(shots[1:], 1):
                 if s.get("trans"):
                     continue                                         # a transition is not a frame-exact change
@@ -120,6 +122,8 @@ def main() -> int:
                 f0 = int(np.ceil(tc * fps - 1e-6))
                 if f0 < 5 or f0 > len(d) - 6:
                     continue
+                if any(abs(g - f0) <= 4 for i, g in enumerate(cut_f) if i != k - 1):
+                    continue                                         # another cut inside the search window: which change is whose is a guess
                 w = np.arange(f0 - 4, f0 + 5)
                 j = int(w[int(np.argmax(d[w]))])
                 around = np.median(np.concatenate([d[max(1, f0 - 20):f0 - 4], d[f0 + 5:f0 + 20]])) if len(d) > f0 + 20 else np.median(d)
