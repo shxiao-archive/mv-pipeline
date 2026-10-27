@@ -277,23 +277,26 @@
     return c;
   }
 
-  // lay out one word for beat k: returns [{ch, x, y, s (ink height / H), r}]
+  // lay out one word for beat k: returns [{ch, x, y, s (ink height / H), r}]. Every glyph comes to rest whole in the
+  // frame (ink <= FIT x H, the row kept inside): the slam's overshoot and the push may crop it, the rest shows it whole
+  const FIT = 0.82;
+  const inside = (v, half, max) => Math.min(Math.max(v, half), max - half);
   function layoutWord(word, slot, k) {
     const chars = [...word];
-    if (chars.length === 1) return [{ ch: chars[0], x: slot.x, y: slot.y, s: slot.s, r: slot.r }];
+    if (chars.length === 1) { const s = Math.min(slot.s, FIT), h = 0.56 * s * H; return [{ ch: chars[0], x: inside(slot.x, h, W), y: inside(slot.y, h, H), s, r: slot.r }]; }
     if (chars.length === 2 && SMALL.has(chars[0])) {
-      // small kana + monument kana (って): the big kana is kept ≤ 1.1 H so its defining strokes stay in frame;
-      // the small one sits low-left or high-left, alternating on each occurrence
-      const alt = Math.floor(k / 2) % 2;
-      const big = { ch: chars[1], x: slot.x + 260, y: 600 + (alt ? 20 : 0), s: Math.min(slot.s, 1.1), r: slot.r };
+      // small kana + monument kana (って): the small one sits low-left or high-left, alternating on each occurrence
+      const alt = Math.floor(k / 2) % 2, bs = Math.min(slot.s, FIT), bh = 0.56 * bs * H;
+      const big = { ch: chars[1], x: inside(slot.x + 260, bh, W), y: inside(600 + (alt ? 20 : 0), bh, H), s: bs, r: slot.r };
       const small = alt === 0
         ? { ch: chars[0], x: 215, y: 470, s: 0.4, r: slot.r * 1.8 }
         : { ch: chars[0], x: 230, y: 800, s: 0.38, r: -slot.r * 1.5 };
       return [small, big];
     }
-    // generic: horizontal row that bleeds past the frame
-    const n = chars.length, s = slot.s * (n === 2 ? 0.95 : 0.8), adv = s * H * 0.95;
-    return chars.map((ch, i) => ({ ch, x: slot.x + (i - (n - 1) / 2) * adv, y: slot.y, s: s * (PARTICLE.has(ch) || SMALL.has(ch) ? 0.7 : 1), r: slot.r }));
+    // generic: a horizontal row, as big as fits across the frame
+    const n = chars.length, s = Math.min(slot.s * (n === 2 ? 0.95 : 0.8), FIT, 0.92 * W / (n * 0.95 * H)), adv = s * H * 0.95;
+    const cx = inside(slot.x, (n - 1) / 2 * adv + 0.56 * s * H, W), cy = inside(slot.y, 0.56 * s * H, H);
+    return chars.map((ch, i) => ({ ch, x: cx + (i - (n - 1) / 2) * adv, y: cy, s: s * (PARTICLE.has(ch) || SMALL.has(ch) ? 0.7 : 1), r: slot.r }));
   }
   const glyphXform = (ctx, g, A, scale, rot = 0) => { const sc = (g.s * H / A.inkH) * scale; ctx.translate(g.x, g.y); ctx.rotate(g.r + rot); ctx.scale(sc, sc); };
 
