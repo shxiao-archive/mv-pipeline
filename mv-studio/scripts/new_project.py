@@ -68,6 +68,7 @@ STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": 
                  "zine": "magazine", "print": "magazine", "riso": "magazine", "雑誌": "magazine"}  # incl. the names before the merge
 LRC_TAG = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]", re.M)
 RECORD = ".mv-studio.json"
+INDEX = "index/index.jsonl"   # built from the project's code by tools/build_index.mjs
 FILM_FILES = {"engine/timeline.js", "project.json", "art.config.json", "assets/style/palettes.json"}   # the film's own
 
 
@@ -140,6 +141,8 @@ def upgrade(dst: Path, apply: bool) -> int:
     new_rec = dict(rec or {})
     src = framework_files()
     for rel, s in sorted(src.items()):
+        if rel == INDEX:
+            continue                                               # generated: rebuilt below, never "changed in the project"
         up, cur = sig(s), sig(dst / rel)
         if cur == up:
             new_rec[rel] = up
@@ -170,6 +173,9 @@ def upgrade(dst: Path, apply: bool) -> int:
         shutil.copy2(src[rel], dst / rel)
         if rel.startswith(("tools/", "demo/")) or rel == "setup.sh":
             make_exec(dst / rel)
+    shutil.copy2(src[INDEX], dst / INDEX)                          # the skill's manual rows, then the project's own code
+    r = subprocess.run(["node", "tools/build_index.mjs"], cwd=dst, capture_output=True, text=True)
+    print(r.stdout.strip() or f"index not rebuilt ({r.stderr.strip()[:200]}): run node tools/build_index.mjs")
     write_record(dst, {k: v for k, v in new_rec.items() if k not in gone})
     print(f"\nupdated {len(plan['update'])}, added {len(plan['add'])} -> {RECORD}. Then: node tools/verify.mjs --quick")
     return 0

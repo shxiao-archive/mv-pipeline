@@ -11,6 +11,8 @@ rec = json.loads((P / ".mv-studio.json").read_text(encoding="utf-8"))
 assert "engine/core/main.js" in rec["files"] and "engine/timeline.js" not in rec["files"] and "README.md" in rec["files"]
 assert "tools/check_env.py" in rec["files"] and not any(k.startswith(("node_modules", "analysis/a")) for k in rec["files"])
 r = run(str(P), "--upgrade"); assert "up to date" in r.stdout, r.stdout
+(P / "index/index.jsonl").write_text('{"id":"scene:mine"}\n', encoding="utf-8")   # a rebuilt index is not a project change
+r = run(str(P), "--upgrade"); assert "up to date" in r.stdout and "index" not in r.stdout.split("project  :")[1], r.stdout
 # old-but-untouched (update), edited (keep), deleted+unrecorded (add), dropped upstream, the film's file untouched
 (P / "tools/stale.mjs").write_text("// old\n", encoding="utf-8"); rec["files"]["tools/stale.mjs"] = N.sig(P / "tools/stale.mjs")
 (P / "tools/lint.mjs").write_text("// mine\n", encoding="utf-8")
@@ -26,6 +28,7 @@ r = run(str(P), "--upgrade", "--apply"); assert r.returncode == 0, r.stdout + r.
 assert N.sig(P / "tools/stale.mjs") == N.sig(N.TEMPLATE / "tools/stale.mjs") and (P / "engine/core/cues.js").is_file()
 assert (P / "tools/lint.mjs").read_text() == "// mine\n" and (P / "engine/timeline.js").read_text() == "// my film\n"
 rec2 = json.loads((P / ".mv-studio.json").read_text(encoding="utf-8"))["files"]
+assert '"id":"check:check_env"' in (P / "index/index.jsonl").read_text(encoding="utf-8"), "index not rebuilt"
 assert "tools/gone.mjs" not in rec2 and rec2["tools/lint.mjs"] == rec["files"]["tools/lint.mjs"]
 r = run(str(P), "--upgrade"); assert "keep (changed in the project): 1" in r.stdout and "update" not in r.stdout.split("project  :")[1], r.stdout
 # a project without a record: nothing replaced
