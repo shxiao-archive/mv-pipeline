@@ -356,7 +356,7 @@
 {"id":"helper:TR.value","kind":"helper","fits":["interface"],"does":"the film's running number from TR.NUM.keys [[t, v], ...] (steps up on beats); TR.fmt(v)","where":"engine/styles/treatise/treatise.js:200-204","use":"TR.value(t)","lines":5}
 {"id":"helper:TR.fmt","kind":"helper","fits":["interface"],"does":"(in styles/treatise — treatise.js: the house kit of a TREATISE film (the song as plates from an illustrated technical)","where":"engine/styles/treatise/treatise.js:205-205","use":"TR.fmt(v)","lines":1}
 {"id":"helper:TR.readout","kind":"helper","fits":["interface"],"does":"(in styles/treatise — treatise.js: the house kit of a TREATISE film (the song as plates from an illustrated technical)","where":"engine/styles/treatise/treatise.js:206-213","use":"TR.readout(c, x, y, px, t, o = {})","lines":8}
-{"id":"helper:TR.cam","kind":"helper","fits":["interface"],"does":"camera: { from: { x, y, zoom, rot }, to, ease ('outCubic': moves at once after the cut) } + a push on downbeats (cam.snap) + a reframing snap every half bar (cam.reframe 0..1) + cam.follow [x, y] (a world point the camera tracks, weight …","where":"engine/styles/treatise/treatise.js:214-229","use":"TR.cam(c, S, cam = {})","lines":16}
+{"id":"helper:TR.cam","kind":"helper","fits":["interface"],"does":"camera: { from: { x, y, zoom, rot }, to, ease ('outCubic': moves at once after the cut) } + a push on downbeats (cam.snap) + a reframing snap every half bar (cam.reframe 0..1, off) + cam.follow [x, y] (a world point the camera tracks, …","where":"engine/styles/treatise/treatise.js:214-229","use":"TR.cam(c, S, cam = {})","lines":16}
 {"id":"scene:thread","kind":"scene","fits":["vocaloid"],"does":"{hand, light, stops, kickAt, arriveAt} shot 06 ribbon → one travelling thread toward a far point of light","where":"engine/styles/vocaloid/dark.js:241-385","use":"shot(id, t0, t1, 'thread', { … })","lines":145,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"scene:fall","kind":"scene","fits":["vocaloid"],"does":"{char, freeze:[[t0,t1]], pulse:[t], vp:[x,y], speed, h} shot 12 falling toward a tiny square of dawn; time-freeze on the stop","where":"engine/styles/vocaloid/dark.js:386-535","use":"shot(id, t0, t1, 'fall', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"scene:flame","kind":"scene","fits":["vocaloid"],"does":"{mode:'breathe'|'grow'|'dark', img, face, stops:[[t0,t1]], flameAt, zoomAt, zoomTo, igniteAt} shots 15 / 31 / 50","where":"engine/styles/vocaloid/dark.js:754-848","use":"shot(id, t0, t1, 'flame', { … })","lines":95,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
@@ -461,16 +461,16 @@
 {"id":"manual:references/01-workflow#Phases","kind":"manual","does":"Phases at a glance (mv-studio)","where":"<skill>/references/01-workflow.md:7-25","lines":19}
 {"id":"manual:references/01-workflow#0","kind":"manual","does":"0. Setup","where":"<skill>/references/01-workflow.md:26-40","lines":15}
 {"id":"manual:references/01-workflow#1","kind":"manual","does":"1. Listen (analysis)","where":"<skill>/references/01-workflow.md:41-61","lines":21}
-{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Direct","where":"<skill>/references/01-workflow.md:62-75","lines":14}
-{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Plan","where":"<skill>/references/01-workflow.md:76-89","lines":14}
-{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Art","where":"<skill>/references/01-workflow.md:90-112","lines":23}
-{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:113-123","lines":11}
-{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Render","where":"<skill>/references/01-workflow.md:124-134","lines":11}
-{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:135-144","lines":10}
-{"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:145-152","lines":8}
-{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:153-164","lines":12}
-{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:165-171","lines":7}
-{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:172-184","lines":13}
+{"id":"manual:references/01-workflow#2","kind":"manual","does":"2. Direct","where":"<skill>/references/01-workflow.md:62-79","lines":18}
+{"id":"manual:references/01-workflow#3","kind":"manual","does":"3. Plan","where":"<skill>/references/01-workflow.md:80-93","lines":14}
+{"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Art","where":"<skill>/references/01-workflow.md:94-116","lines":23}
+{"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:117-127","lines":11}
+{"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Render","where":"<skill>/references/01-workflow.md:128-138","lines":11}
+{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:139-148","lines":10}
+{"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:149-156","lines":8}
+{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:157-168","lines":12}
+{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:169-175","lines":7}
+{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:176-188","lines":13}
 {"id":"manual:references/03-audio-and-lyrics#1","kind":"manual","does":"1. Prepare the audio","where":"<skill>/references/03-audio-and-lyrics.md:9-17","lines":9}
 {"id":"manual:references/03-audio-and-lyrics#2","kind":"manual","does":"2. Run the analysis","where":"<skill>/references/03-audio-and-lyrics.md:18-39","lines":22}
 {"id":"manual:references/03-audio-and-lyrics#3","kind":"manual","does":"3. `audio.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:40-63","lines":24}
@@ -533,31 +533,31 @@
 {"id":"manual:references/07-blender-3d#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/07-blender-3d.md:159-171","lines":13}
 {"id":"manual:references/08-render-and-delivery#1","kind":"manual","does":"1. Deliverables (what 残光 shipped, 3:46 at 30 fps)","where":"<skill>/references/08-render-and-delivery.md:9-22","lines":14}
 {"id":"manual:references/08-render-and-delivery#2","kind":"manual","does":"2. `tools/render_frames.mjs` (the renderer)","where":"<skill>/references/08-render-and-delivery.md:23-52","lines":30}
-{"id":"manual:references/08-render-and-delivery#3","kind":"manual","does":"3. Final render + audio mux (`tools/render_final.mjs`)","where":"<skill>/references/08-render-and-delivery.md:53-80","lines":28}
-{"id":"manual:references/08-render-and-delivery#4","kind":"manual","does":"4. Encodes (master, share, previews)","where":"<skill>/references/08-render-and-delivery.md:81-110","lines":30}
-{"id":"manual:references/08-render-and-delivery#5","kind":"manual","does":"5. Vertical 9:16 re-layout (`engine/vertical.html` + `engine/vertical.js`)","where":"<skill>/references/08-render-and-delivery.md:111-127","lines":17}
-{"id":"manual:references/08-render-and-delivery#6","kind":"manual","does":"6. Review tooling","where":"<skill>/references/08-render-and-delivery.md:128-142","lines":15}
-{"id":"manual:references/08-render-and-delivery#7","kind":"manual","does":"7. Optional upload (`tools/gigafile_upload.mjs`)","where":"<skill>/references/08-render-and-delivery.md:143-150","lines":8}
-{"id":"manual:references/08-render-and-delivery#8","kind":"manual","does":"8. Portability","where":"<skill>/references/08-render-and-delivery.md:151-157","lines":7}
-{"id":"manual:references/08-render-and-delivery#9","kind":"manual","does":"9. Pitfalls","where":"<skill>/references/08-render-and-delivery.md:158-170","lines":13}
-{"id":"manual:references/09-qa-and-lessons#1","kind":"manual","does":"1. The loop","where":"<skill>/references/09-qa-and-lessons.md:5-20","lines":16}
-{"id":"manual:references/09-qa-and-lessons#2","kind":"manual","does":"2. Checklist (per pass)","where":"<skill>/references/09-qa-and-lessons.md:21-36","lines":16}
-{"id":"manual:references/09-qa-and-lessons#3","kind":"manual","does":"3. Failure modes & fixes (visual) — met on the vocaloid demo film 残光","where":"<skill>/references/09-qa-and-lessons.md:37-56","lines":20}
-{"id":"manual:references/09-qa-and-lessons#4","kind":"manual","does":"4. Pipeline & tooling pitfalls","where":"<skill>/references/09-qa-and-lessons.md:57-73","lines":17}
-{"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:74-80","lines":7}
-{"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:81-110","lines":30}
-{"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:111-141","lines":31}
-{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:142-225","lines":84}
+{"id":"manual:references/08-render-and-delivery#3","kind":"manual","does":"3. Final render + audio mux (`tools/render_final.mjs`)","where":"<skill>/references/08-render-and-delivery.md:53-81","lines":29}
+{"id":"manual:references/08-render-and-delivery#4","kind":"manual","does":"4. Encodes (master, share, previews)","where":"<skill>/references/08-render-and-delivery.md:82-111","lines":30}
+{"id":"manual:references/08-render-and-delivery#5","kind":"manual","does":"5. Vertical 9:16 re-layout (`engine/vertical.html` + `engine/vertical.js`)","where":"<skill>/references/08-render-and-delivery.md:112-128","lines":17}
+{"id":"manual:references/08-render-and-delivery#6","kind":"manual","does":"6. Review tooling","where":"<skill>/references/08-render-and-delivery.md:129-143","lines":15}
+{"id":"manual:references/08-render-and-delivery#7","kind":"manual","does":"7. Optional upload (`tools/gigafile_upload.mjs`)","where":"<skill>/references/08-render-and-delivery.md:144-151","lines":8}
+{"id":"manual:references/08-render-and-delivery#8","kind":"manual","does":"8. Portability","where":"<skill>/references/08-render-and-delivery.md:152-158","lines":7}
+{"id":"manual:references/08-render-and-delivery#9","kind":"manual","does":"9. Pitfalls","where":"<skill>/references/08-render-and-delivery.md:159-171","lines":13}
+{"id":"manual:references/09-qa-and-lessons#1","kind":"manual","does":"1. The loop","where":"<skill>/references/09-qa-and-lessons.md:5-23","lines":19}
+{"id":"manual:references/09-qa-and-lessons#2","kind":"manual","does":"2. Checklist (per pass)","where":"<skill>/references/09-qa-and-lessons.md:24-39","lines":16}
+{"id":"manual:references/09-qa-and-lessons#3","kind":"manual","does":"3. Failure modes & fixes (visual) — met on the vocaloid demo film 残光","where":"<skill>/references/09-qa-and-lessons.md:40-59","lines":20}
+{"id":"manual:references/09-qa-and-lessons#4","kind":"manual","does":"4. Pipeline & tooling pitfalls","where":"<skill>/references/09-qa-and-lessons.md:60-76","lines":17}
+{"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:77-83","lines":7}
+{"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:84-114","lines":31}
+{"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:115-145","lines":31}
+{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:146-233","lines":88}
 {"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:10-29","lines":20}
 {"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:30-43","lines":14}
 {"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs (if the film has a cast)","where":"<skill>/references/10-craft.md:44-98","lines":55}
 {"id":"manual:references/10-craft#3","kind":"manual","does":"3. Characters and assets from an image generator (if the film uses one)","where":"<skill>/references/10-craft.md:99-125","lines":27}
 {"id":"manual:references/10-craft#4","kind":"manual","does":"4. Sets","where":"<skill>/references/10-craft.md:126-144","lines":19}
 {"id":"manual:references/10-craft#5","kind":"manual","does":"5. Props, effects and transitions","where":"<skill>/references/10-craft.md:145-168","lines":24}
-{"id":"manual:references/10-craft#6","kind":"manual","does":"6. Choreography of a shot","where":"<skill>/references/10-craft.md:169-204","lines":36}
-{"id":"manual:references/10-craft#7","kind":"manual","does":"7. Density of the reference films (a measure, not a target)","where":"<skill>/references/10-craft.md:205-234","lines":30}
-{"id":"manual:references/10-craft#8","kind":"manual","does":"8. Review","where":"<skill>/references/10-craft.md:235-249","lines":15}
-{"id":"manual:references/10-craft#9","kind":"manual","does":"9. Scale it to the budget","where":"<skill>/references/10-craft.md:250-259","lines":10}
+{"id":"manual:references/10-craft#6","kind":"manual","does":"6. Choreography of a shot","where":"<skill>/references/10-craft.md:169-210","lines":42}
+{"id":"manual:references/10-craft#7","kind":"manual","does":"7. Density of the reference films (a measure, not a target)","where":"<skill>/references/10-craft.md:211-240","lines":30}
+{"id":"manual:references/10-craft#8","kind":"manual","does":"8. Review","where":"<skill>/references/10-craft.md:241-255","lines":15}
+{"id":"manual:references/10-craft#9","kind":"manual","does":"9. Scale it to the budget","where":"<skill>/references/10-craft.md:256-265","lines":10}
 {"id":"manual:references/11-team#1","kind":"manual","does":"1. Roles","where":"<skill>/references/11-team.md:17-33","lines":17}
 {"id":"manual:references/11-team#2","kind":"manual","does":"2. Phases and gates","where":"<skill>/references/11-team.md:34-47","lines":14}
 {"id":"manual:references/11-team#3","kind":"manual","does":"3. Engine side: blocks","where":"<skill>/references/11-team.md:48-72","lines":25}
@@ -573,9 +573,9 @@
 {"id":"manual:styles/interface/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/interface/BRIEF.md:126-133","lines":8}
 {"id":"manual:styles/interface/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/interface/BRIEF.md:134-140","lines":7}
 {"id":"manual:styles/interface/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/interface/BRIEF.md:141-152","lines":12}
-{"id":"manual:styles/interface/STYLE#A","kind":"manual","does":"A. Screen — the song as a conversation on a screen","where":"<skill>/styles/interface/STYLE.md:33-160","lines":128}
-{"id":"manual:styles/interface/STYLE#B","kind":"manual","does":"B. Treatise — the song as plates from an illustrated technical treatise","where":"<skill>/styles/interface/STYLE.md:161-277","lines":117}
-{"id":"manual:styles/interface/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10, team: 11)","where":"<skill>/styles/interface/STYLE.md:278-298","lines":21}
+{"id":"manual:styles/interface/STYLE#A","kind":"manual","does":"A. Screen — the song as a conversation on a screen","where":"<skill>/styles/interface/STYLE.md:33-161","lines":129}
+{"id":"manual:styles/interface/STYLE#B","kind":"manual","does":"B. Treatise — the song as plates from an illustrated technical treatise","where":"<skill>/styles/interface/STYLE.md:162-280","lines":119}
+{"id":"manual:styles/interface/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10, team: 11)","where":"<skill>/styles/interface/STYLE.md:281-301","lines":21}
 {"id":"manual:styles/magazine/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/magazine/BRIEF.md:13-44","lines":32}
 {"id":"manual:styles/magazine/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/magazine/BRIEF.md:45-71","lines":27}
 {"id":"manual:styles/magazine/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/magazine/BRIEF.md:72-102","lines":31}
