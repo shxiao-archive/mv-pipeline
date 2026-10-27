@@ -35,7 +35,8 @@ behind the locks (§5–7) and the generators' own fields.
    negative. A back view prompted with the full `CHAR` comes back with eyes on the back of the head.
 2. **Masters first:** three char rows with no `refs.char`; `jobs` → generate → `post`; pick one with the user; then
    `"refs": { "char": ["assets/gen/CH00b.png"] }` carries the character's face into every later char row (Codex, Grok). On
-   NovelAI a character reference costs Anlas: leave `refs.char` empty there and lean on `CHAR` plus takes (§12).
+   NovelAI a character reference costs Anlas: ask the user once whether Anlas may be spent. If yes, use `refs.char` as
+   above; if not, leave it empty and lean on `CHAR` plus takes (§12).
 3. **Faces that live (optional, a cast only):** if the film wants a character to blink or sing, per framing (bust, half body), the approved picture plus variant rows
    that repaint only its eye or mouth box (`"ref_mode": "inpaint", "mode": "full"`), swapped whole by the engine
    (`anim.whole`); an expression sheet is the fallback (styles/vocaloid/STYLE.md, Characters with a living face). A
@@ -115,7 +116,9 @@ Do not generate a generic library. Go through `plan/storyboard.md` (and in team 
 - A fast song cuts more, so it needs more.
 - Iteration 7 made 15–16 for 64–81 shots, so one background appeared in 21 shots and the films felt repetitive.
 - `storyboard.mjs` warns about both, counting the image paths in the shots' args.
-- NovelAI at 1 MP or less costs no Anlas on Opus, so generate in batches by section until the budget is met.
+- NovelAI at 1 MP or less costs no Anlas on Opus, so generate in batches by section until the budget is met. When the
+  user has said Anlas may be spent, spend it where it shows: character references for the cast, a larger `max_pixels`
+  for the key plates, `upscale` for close-ups; drafts and takes stay at the free size.
 
 Rules of thumb: one image per *lyric image* the song insists on; generate the **time-of-day variants** the colour script needs for the key locations — a LUT can shift a plate's mood, but light sources (sun position, cast shadows, lamps, windows) must be painted; make close-ups as separate generations (cropping a full body gives soft, low-detail faces). A face that blinks
 or sings comes from an expression-sheet row (§0), one per framing.
