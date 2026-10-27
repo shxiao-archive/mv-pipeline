@@ -30,6 +30,13 @@
  *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
  *            cut's exit running into the next shot, the same line set by JIZURA and by the film's own type; an ERROR
  *            with --strict
+ *          · GLYPH NEVER WHOLE: a character of the lyrics or the title shows in a shot but is never once wholly on screen
+ *            there: always past the frame edge, cut by a canvas it was drawn through, or over 25 % under a figure drawn
+ *            after it. Every glyph lands whole at least once, then may crop or push (見切れ). Seen wherever the
+ *            film draws text (fillText / strokeText, followed through drawImage into the frame), scene type included;
+ *            crop: true does not exempt it. Suspect shots are sampled again at full fps. An ERROR with --strict
+ *          · OVERSIZED TYPE: glyphs over half the frame high in more than 2 places (adjacent shots are one place): a
+ *            peak move, kept for the song's emotional peaks, once each. An ERROR with --strict
  * Exit 1 on any ERROR.
  *
  * mv-studio (MIT).
@@ -123,6 +130,104 @@ export function drawnOverlaps(frames) {
 // a cut's words come in or go out (enter / exit, plus a frame or two of ghost lag)
 export const moving = (c, t) => !!c && (t - c.start < c.inDur + 0.1 || c.end - t < c.outDur + 0.1);
 
+// one sighting of a glyph { x0, y0, x1, y1 (frame px), cut, layer, seq } is whole: inside the W x H frame, not cut by a
+// canvas it passed through, and not over 25 % under a figure box drawn after it (or in the foreground layer)
+export function glyphWhole(g, W, H, figs = []) {
+  if (g.cut || g.x0 < -1 || g.y0 < -1 || g.x1 > W + 1 || g.y1 > H + 1) return false;
+  const area = Math.max(1, (g.x1 - g.x0) * (g.y1 - g.y0));
+  return !figs.some(f => (f.layer === 'fg' ? g.layer !== 'fg' || f.seq > g.seq : f.layer === g.layer && f.seq > g.seq)
+    && Math.max(0, Math.min(g.x1, f.x1) - Math.max(g.x0, f.x0)) * Math.max(0, Math.min(g.y1, f.y1) - Math.max(g.y0, f.y0)) > 0.25 * area);
+}
+// per character of a shot, the sizes (round(4 log2 px)) it showed at whole / not whole -> how many characters showed at
+// a size never seen whole: a whole sighting within 4x counts (the glyph pushed in or pulled back), a small copy does not
+// a glyph cut on every frame of a shot, at a size never seen whole there (within 4x); `near` are the neighbouring
+// shots' sightings, since a slam's lead-in or a transition puts the next shot's type on this shot's frames
+export const neverWhole = (seen, ...near) => [...seen].filter(([ch, o]) => [...o.not].some(q => ![o, ...near.map(m => m && m.get(ch))]
+  .some(x => x && [...x.whole].some(w => Math.abs(w - q) <= 8)))).length;
+// shots with oversized type [{ k: shot index, id, t }] sorted by k -> places (runs of adjacent shots)
+export function oversizeMoments(hits) {
+  const out = [];
+  for (const h of hits) { const m = out[out.length - 1]; if (m && h.k - m[m.length - 1].k <= 1) m.push(h); else out.push([h]); }
+  return out;
+}
+
+// In the page, before the engine loads: every fillText / strokeText records a box per character on its canvas, and
+// drawImage carries a canvas's boxes into the canvas it is drawn on (mapped, cut where the source rect cuts them), so
+// the frame's layers know where each glyph landed, however many offscreen caches it went through.
+// shortcut: maxWidth squeeze, rtl, putImageData, OffscreenCanvas and WebGL passes are not followed, and a partial erase
+// keeps its boxes; upgrade if a film's type is drawn that way.
+function glyphTracker() {
+  const R = new WeakMap(), G = window.__glyph = { R, seq: 0, final: new Set(), fg: null, want: new Set() };
+  const P = CanvasRenderingContext2D.prototype;
+  // a canvas keeps its last 1000 boxes; past that, copies already cut go first (a flame or smear pass copies a glyph many times)
+  const add = (c, g) => {
+    let r = R.get(c); if (!r) R.set(c, r = []); r.push(g);
+    if (r.length > 1000) { const k = r.filter(q => !q.cut); R.set(c, k.length > 800 ? k.slice(-800) : k); }
+  };
+  const box = (m, x0, y0, x1, y1) => {
+    const xs = [], ys = [];
+    for (const [x, y] of [[x0, y0], [x1, y0], [x0, y1], [x1, y1]]) { xs.push(m.a * x + m.c * y + m.e); ys.push(m.b * x + m.d * y + m.f); }
+    return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+  };
+  const covers = (x, a, b, w, h) => { const q = box(x.getTransform(), a, b, a + w, b + h); return q.x0 <= 0 && q.y0 <= 0 && q.x1 >= x.canvas.width && q.y1 >= x.canvas.height; };
+  for (const fn of ['fillText', 'strokeText']) {
+    const orig = P[fn];
+    P[fn] = function (str, x, y, ...rest) {
+      const s = String(str), al = this.textAlign;
+      if (/\S/.test(s)) try {
+        this.textAlign = 'left';
+        const m = this.getTransform(), tw = this.measureText(s).width;
+        const x0 = al === 'center' ? x - tw / 2 : al === 'right' || al === 'end' ? x - tw : x;
+        let pre = '';
+        for (const ch of s) {
+          if (/\S/.test(ch)) {
+            const q = this.measureText(ch), px = x0 + this.measureText(pre).width;
+            add(this.canvas, { ch, ...box(m, px - q.actualBoundingBoxLeft, y - q.actualBoundingBoxAscent, px + q.actualBoundingBoxRight, y + q.actualBoundingBoxDescent), cut: false, a: this.globalAlpha, seq: ++G.seq });
+          }
+          pre += ch;
+        }
+      } catch (e) { /* measuring never breaks the draw */ } finally { this.textAlign = al; }
+      return orig.call(this, str, x, y, ...rest);
+    };
+  }
+  const di = P.drawImage;
+  P.drawImage = function (img, ...a) {
+    const src = R.get(img), op = this.globalCompositeOperation;
+    if (op === 'copy') R.delete(this.canvas);
+    if (src && src.length && !/^destination-(in|out|atop)$/.test(op)) try {
+      const iw = img.width, ih = img.height;
+      const [sx, sy, sw, sh, dx, dy, dw, dh] = a.length >= 8 ? a : a.length >= 4 ? [0, 0, iw, ih, ...a] : [0, 0, iw, ih, a[0], a[1], iw, ih];
+      const kx = dw / sw, ky = dh / sh, m = this.getTransform(), fin = G.final.has(this.canvas), al = this.globalAlpha;
+      for (const g of src.slice()) {
+        const cut = g.cut || g.x0 < sx - 1 || g.y0 < sy - 1 || g.x1 > sx + sw + 1 || g.y1 > sy + sh + 1;
+        // a frame layer keeps the order the glyph had in the layer it came from (a figure drawn after it covers it)
+        add(this.canvas, { ...g, ...box(m, dx + (g.x0 - sx) * kx, dy + (g.y0 - sy) * ky, dx + (g.x1 - sx) * kx, dy + (g.y1 - sy) * ky), cut, a: g.a * al, seq: fin ? g.seq : ++G.seq });
+      }
+    } catch (e) { /* as above */ }
+    return di.call(this, img, ...a);
+  };
+  const cr = P.clearRect, fr = P.fillRect;
+  P.clearRect = function (x, y, w, h) { if (covers(this, x, y, w, h)) R.delete(this.canvas); return cr.call(this, x, y, w, h); };
+  // an opaque fill over the whole canvas (the getter gives '#rrggbb' for an opaque colour) paints the glyphs out
+  P.fillRect = function (x, y, w, h) { if (this.globalAlpha >= 0.999 && this.globalCompositeOperation === 'source-over' && String(this.fillStyle)[0] === '#' && covers(this, x, y, w, h)) R.delete(this.canvas); return fr.call(this, x, y, w, h); };
+  for (const k of ['width', 'height']) {
+    const d = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, k);
+    Object.defineProperty(HTMLCanvasElement.prototype, k, { ...d, set(v) { R.delete(this); d.set.call(this, v); } });
+  }
+  // the frame's visible glyphs of the lyrics and the title, per layer
+  G.read = (text, fg, scene) => {
+    const out = [];
+    for (const [layer, cv] of [['scene', scene], ['text', text], ['fg', fg]]) for (const g of (cv && R.get(cv)) || []) if (g.a >= 0.5 && G.want.has(g.ch)) out.push({ ...g, layer });
+    return out;
+  };
+  // the figure boxes of a frame (Z.onSpriteBox), in the order drawn
+  G.fig = (figs, img, c, x0, y0, w, h) => {
+    const a = window.__abox && window.__abox(img); if (!a) return;
+    const m = c.getTransform(), q = box(m, x0 + a.u0 * w, y0 + a.v0 * h, x0 + a.u1 * w, y0 + a.v1 * h);
+    figs.push({ ...q, layer: c.canvas === G.fg ? 'fg' : 'scene', seq: ++G.seq });
+  };
+}
+
 if (flag('selftest')) {
   const seq = (ps, id = 's1', dt = 0.25) => ps.map((p, i) => ({ t: i * dt, p, id }));
   const ok = [
@@ -136,6 +241,17 @@ if (flag('selftest')) {
     /above/.test(figureCut({ x0: 600, y0: -200, x1: 1300, y1: 1200, W: 1920, H: 1080 })),                   // head off the top
     figureCut({ x0: 600, y0: 40, x1: 1300, y1: 1500, W: 1920, H: 1080, edges: { top: 0.05 } }) === null,    // a waist shot
     /left 60/.test(figureCut({ x0: 600, y0: 40, x1: 1300, y1: 1080, W: 1920, H: 1080, edges: { left: 0.6 } })),  // a cropped cut-out
+    glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'scene', seq: 5 }, 1920, 1080),                          // a big glyph, whole
+    !glyphWhole({ x0: 100, y0: -80, x1: 1300, y1: 1100, layer: 'scene', seq: 5 }, 1920, 1080),                        // 見切れ
+    !glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, cut: true, layer: 'scene', seq: 5 }, 1920, 1080),               // cut by its canvas
+    !glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'scene', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'scene', seq: 9 }]),  // a figure over half of it
+    glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'scene', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'scene', seq: 2 }]),   // the figure behind it
+    glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'text', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'scene', seq: 9 }]),   // lyrics over the picture
+    !glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'text', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'fg', seq: 1 }]),     // under the foreground
+    oversizeMoments([{ k: 2 }, { k: 3 }, { k: 7 }]).length === 2,                                                     // shots 2-3 are one place
+    neverWhole(new Map([['a', { whole: new Set([39]), not: new Set([42]) }]])) === 0,                                  // landed whole, then pushed in
+    neverWhole(new Map([['a', { whole: new Set([19]), not: new Set([42]) }]])) === 1,                                  // only a small copy was whole
+    neverWhole(new Map([['a', { whole: new Set(), not: new Set([42]) }]]), null, new Map([['a', { whole: new Set([41]), not: new Set() }]])) === 0, // whole across the cut
   ];
   {                                                             // legibility: a 20x10 glyph block on a 60x40 picture
     const w = 60, h = 40, img = (f) => { const a = new Uint8ClampedArray(w * h * 4); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) a.set(f(x, y), 4 * (y * w + x)); return a; };
@@ -157,7 +273,7 @@ if (flag('selftest')) {
 const n = Math.max(1, +arg('samples', 3));
 const only = arg('only', '') ? new Set(arg('only').split(',')) : null;
 const url = arg('url', 'engine/index.html'), vertical = /vertical\.html/.test(url);   // the 9:16 build draws into #vout
-const E = await openEngine({ url, quiet: true, canvas: vertical ? 'vout' : 'out', width: vertical ? 1080 : 1920, height: vertical ? 1920 : 1080 });
+const E = await openEngine({ url, quiet: true, canvas: vertical ? 'vout' : 'out', width: vertical ? 1080 : 1920, height: vertical ? 1920 : 1080, init: glyphTracker });
 const P = await E.plan();
 const fps = P.fps || 30, shots = P.shots.slice().sort((a, b) => a.t0 - b.t0);
 const bootErrors = E.errors.splice(0);
@@ -190,6 +306,22 @@ const spriteFps = +arg('sprite-fps', 4);
 const LEG = { hidden: 0.05, contrast: 3 };                     // the lyric: <= 5 % covered; WCAG 3:1 (large text)
 if (spriteFps > 0) {                                           // which sprite is the main one, every 1/spriteFps s
   const samples = [], unsafe = new Map(), hidden = new Map(), dim = new Map(), cut = new Map();
+  const glyphs = new Map(), big = new Map();                  // shot id -> Map(char -> sizes seen whole / not); shot index -> oversized
+  await E.page.evaluate(async t => {                          // the frame layers, and the characters judged (lyrics + title)
+    const G = window.__glyph, Z = window.Z;
+    G.want = new Set([...(Z.LYR || []).map(l => l.text || '').join('') + (Z.TITLE || '')].filter(ch => /[\p{L}\p{N}]/u.test(ch)));
+    Z.onText = (c, s, fg, scene) => { G.final = new Set([c, fg, scene]); G.fg = fg; };
+    try { await window.renderFrame(t); } finally { Z.onText = null; }
+  }, shots[0] ? shots[0].t0 : 0);
+  const seeGlyphs = (s, k, t, gl) => {
+    if (!gl) return;
+    const seen = glyphs.get(s.id) || new Map(); glyphs.set(s.id, seen);
+    for (const g of gl.gs) {
+      const h = Math.max(g.x1 - g.x0, g.y1 - g.y0), o = seen.get(g.ch) || { whole: new Set(), not: new Set() };
+      seen.set(g.ch, o); o[glyphWhole(g, gl.W, gl.H, gl.figs) ? 'whole' : 'not'].add(Math.round(4 * Math.log2(Math.max(1, h))));
+      if (h > 0.5 * gl.H && !big.has(k)) big.set(k, { k, id: s.id, t });
+    }
+  };
   await E.page.evaluate(src => { window.__legib = (0, eval)('(' + src + ')'); }, legibility.toString());
   await E.page.evaluate(() => {                                 // a picture's opaque box in 0..1, and each edge's opaque share
     const C = new WeakMap();
@@ -210,8 +342,9 @@ if (spriteFps > 0) {                                           // which sprite i
     const s = shots[k], end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
     if (only && !only.has(s.id)) continue;
     for (let t = s.t0 + 0.5 / fps; t < end; t += 1 / spriteFps) {
-      const { p, out, all, leg, fig } = await E.page.evaluate(async t => {
-        let best = null, out = 0, all = 0, leg = null, fig = null;
+      const { p, out, all, leg, fig, gl } = await E.page.evaluate(async t => {
+        let best = null, out = 0, all = 0, leg = null, fig = null, gl = null;
+        const G = window.__glyph, figs = [];
         window.Z.onSprite = (p, h) => { if (p && (!best || h > best.h)) best = { p, h }; };
         // shortcut: a layer the scene scales after drawing the sprite into it (a camera on a whole canvas) is not seen
         window.Z.onSpriteBox = (img, c, x0, y0, w, h) => {
@@ -224,9 +357,11 @@ if (spriteFps > 0) {                                           // which sprite i
             if (X > 2 && X < W - 2 && Y > 2 && Y < H - 2) edges[k] = a.edges[k];
           }
           const b = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys), W, H, edges };
+          G.fig(figs, img, c, x0, y0, w, h);
           if (!fig || b.y1 - b.y0 > fig.y1 - fig.y0) fig = b;
         };
         window.Z.onText = (c, shot, fgc, scene, info) => {            // info: { plan, t } the engine drew the lyrics with
+          gl = { gs: G.read(c, fgc, scene), figs, W: c.width, H: c.height };   // every glyph, before any early return
           const P = info.plan && window.JZ && window.JZ.plans && window.JZ.plans[info.plan], tl = info.t, cut = P && window.J.cutAt(P.plan, tl);
           if (cut && (tl - cut.start < cut.inDur + 0.1 || cut.end - tl < cut.outDur + 0.1)) return;   // = moving(): words in motion
           // legibility: the words uncovered and apart from the picture around them (480 x 270)
@@ -243,9 +378,10 @@ if (spriteFps > 0) {                                           // which sprite i
         };
         try { await window.renderFrame(t); } finally { window.Z.onSprite = null; window.Z.onText = null; window.Z.onSpriteBox = null; }
         const sh = (window.Z.SHOTS || []).filter(x => x.t0 <= t).pop();
-        return { p: best && best.p, out, all, leg, fig: sh && sh.crop ? null : fig };
+        return { p: best && best.p, out, all, leg, fig: sh && sh.crop ? null : fig, gl };
       }, t);
       samples.push({ t, p, id: s.id });
+      seeGlyphs(s, k, t, gl);
       const fc = fig && figureCut(fig);
       if (fc && !cut.has(s.id)) cut.set(s.id, { t, msg: fc });
       if (out >= 6 && out > 0.02 * all && !unsafe.has(s.id)) unsafe.set(s.id, { t, share: out / all });
@@ -255,6 +391,33 @@ if (spriteFps > 0) {                                           // which sprite i
       }
     }
   }
+  const lastGlyph = new Map();
+  for (let k = 0; k < shots.length; k++) {                     // a glyph not yet seen whole: every frame of its shot
+    const s = shots[k], seen = glyphs.get(s.id);
+    if (!seen || !neverWhole(seen)) continue;
+    const end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
+    let last = null;
+    for (let t = s.t0 + 0.5 / fps; t < end && neverWhole(seen); t += 1 / fps) {
+      const gl = await E.page.evaluate(async t => {
+        const G = window.__glyph, figs = []; let gl = null;
+        window.Z.onSpriteBox = (img, c, x0, y0, w, h) => G.fig(figs, img, c, x0, y0, w, h);
+        window.Z.onText = (c, shot, fgc, scene) => { gl = { gs: G.read(c, fgc, scene), figs, W: c.width, H: c.height }; };
+        try { await window.renderFrame(t); } finally { window.Z.onText = null; window.Z.onSpriteBox = null; }
+        return gl;
+      }, t);
+      seeGlyphs(s, k, t, gl);
+      if (gl && gl.gs.length) last = t;
+    }
+    lastGlyph.set(s.id, last);
+  }
+  for (let k = 0; k < shots.length; k++) {
+    const s = shots[k], seen = glyphs.get(s.id), last = lastGlyph.get(s.id);
+    if (!seen) continue;
+    const never = neverWhole(seen, glyphs.get(shots[k - 1]?.id), glyphs.get(shots[k + 1]?.id));
+    if (never) (flag('strict') ? errors : warns).push(`${s.id} @${(last ?? s.t0).toFixed(2)}: GLYPH NEVER WHOLE (${never} character${never > 1 ? 's' : ''} of the lyrics / title past the frame, cut or covered on every frame they show; let each land whole once, then crop or push)`);
+  }
+  const places = oversizeMoments([...big.values()].sort((a, b) => a.k - b.k));
+  if (places.length > 2) (flag('strict') ? errors : warns).push(`OVERSIZED TYPE in ${places.length} places (${places.map(m => `${m[0].id} @${m[0].t.toFixed(2)}`).join(', ')}; glyphs over half the frame high): a peak move, keep it for the song's emotional peaks, one or two in a film, never the same move twice`);
   for (const [id, u] of unsafe) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS OUTSIDE THE SAFE AREA (${(u.share * 100).toFixed(0)} % of the lyric pixels in the outer 5 %; a camera push or a big layout crops words there)`);
   for (const [id, u] of hidden) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS HIDDEN (${(u.v * 100).toFixed(0)} % of the lyric under the foreground: the foreground covers the words there)`);
   for (const [id, u] of dim) (flag('strict') ? errors : warns).push(`${id} @${u.t.toFixed(2)}: LYRICS LOW CONTRAST (${u.v.toFixed(1)}:1 against the picture around them, needs ${LEG.contrast}:1 there; how the words reach it is the film's choice)`);

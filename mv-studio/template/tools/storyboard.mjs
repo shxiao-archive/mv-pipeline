@@ -13,7 +13,7 @@
  *   offgrid: 'reason'     this cut is deliberately off the beat grid (a pickup, a rubato hold): skip the grid check
  *   insert: true          a 1-2 frame insert: skip the minimum-length check
  *   allowBlack: true      a deliberately black shot (check_shots.mjs)
- *   crop: true            the frame or the picture's edge cuts the figure on purpose (check_shots.mjs FIGURE CUT)
+ *   crop: true            the frame or the picture's edge cuts the figure on purpose (check_shots.mjs FIGURE CUT; never exempts a glyph from GLYPH NEVER WHOLE)
  *   hold: true            a deliberate still (a held breath, a stop): motion_check.py does not count it, up to 8 % of the film
  * Checks (ERROR fails the run, WARN is listed):
  *   ERROR  unknown scene · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)

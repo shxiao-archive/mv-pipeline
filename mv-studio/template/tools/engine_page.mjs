@@ -27,7 +27,7 @@ export function serveRoot(root = ROOT) {
   return new Promise(r => server.listen(0, '127.0.0.1', () => r({ server, origin: `http://127.0.0.1:${server.address().port}` })));
 }
 
-export async function openEngine({ url = 'engine/index.html', width = 1920, height = 1080, canvas = 'out', quiet = false } = {}) {
+export async function openEngine({ url = 'engine/index.html', width = 1920, height = 1080, canvas = 'out', quiet = false, init = null } = {}) {
   const { server, origin } = await serveRoot();
   const browser = await launchBrowser({ headless: true, args: [...gpuArgs(), '--enable-gpu-rasterization'] });
   const page = await browser.newPage({ viewport: { width, height } });
@@ -38,6 +38,7 @@ export async function openEngine({ url = 'engine/index.html', width = 1920, heig
   page.on('response', r => { if (r.status() >= 400 && !OPTIONAL.test(new URL(r.url()).pathname)) { errors.push({ t: at, msg: `HTTP ${r.status()} ${new URL(r.url()).pathname}` }); if (!quiet) console.log(`[page] HTTP ${r.status()} ${r.url()}`); } });
   page.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) { errors.push({ t: at, msg: m.text().slice(0, 300) }); if (!quiet) console.log(`[page error] ${m.text().slice(0, 200)}`); } });
   page.on('pageerror', e => { errors.push({ t: at, msg: String(e).slice(0, 300) }); if (!quiet) console.log('[pageerror]', String(e).slice(0, 200)); });
+  if (init) await page.addInitScript(init);             // runs before the engine's own scripts (check_shots' glyph tracker)
   await page.goto(`${origin}/${url.replace(/^\/+/, '')}`);
   const meta = await page.evaluate(() => window.ready);
   return {
