@@ -140,8 +140,12 @@
       DENY.layout += ' circle';   // words set on a dark disc that hides them in the centre-free side bands
       DENY.layout += ' condensed'; DENY.exit = (DENY.exit || '') + ' tyToIndex';   // a short word repeated to fill the width; letters turned into index numbers
       DENY.layout += ' tyCropGiant sideways knQuarterTurn';   // words against the frame edge or thrown off it (check_shots safe area)
-      DENY.layout += ' stack perspective tyCross knFlowSnap';   // the line again: stacked, receding, crossing itself, a cascade of copies
+      DENY.layout += ' stack depthStack perspective tyCross knFlowSnap';   // the line again: stacked, receding, crossing itself, a cascade of copies
       DENY.decor += ' romajiLine watermarkKanji';   // codepoints under kanji lines; one of the line's glyphs huge behind it
+      DENY.decor += ' tyBigPunct'; DENY.layout += ' kanjiFocus';   // faint giant brackets / a faint giant kanji (low contrast, at the frame edge)
+      DENY.layout += ' lowerThird';                                 // a rule drawn from the frame edge
+      DENY.hold += ' zoomSlow stretchPulse pulse heartbeat echoTrail';   // holds that scale a full-width line past the safe area
+      DENY.layout += ' knRhythmCuts columnsBig'; DENY.decor += ' speedCorner';   // a word thrown off the edge; edge-to-edge columns; speed lines from the corners
       // Optional mood filter on JIZURA's part tags; null = off, e.g. a night ballad ['emotional', 'calm', 'editorial', 'glitch']
       const MOODS = null;
       // JIZURA's own transitions draw the old and the new line on top of each other: off (shot.trans is not affected)
@@ -163,11 +167,14 @@
         colors: { accentOn: true, accent: FF.glow, ghostA: '#39C6E0', ghostB: FF.sunset }, schemes: 'dark',   // daylight film: schemes: 'light'
         fx: { motion: 0.7, glitch: 0.4, chroma: 0.55, decor: 0.4, density: 0.5, texture: 0.5, flash: false, koma: 12, hud: 'off', bgSwitch: 0.3,
               hideNo: true, hideTime: true } };
+      // the plans keep the common chroma: a stronger colour split on a cut blurs the line under 3:1 (check_shots)
       // one plan per look; a shot picks one with `plan:` (default 'main'). 'cf' = centre-free (subject in the middle)
       await JZ.addPlan('main', Object.assign({}, common, { style: 'gold', mood: 'emotional' }));
       await JZ.addPlan('cf', Object.assign({}, common, { style: 'gold', mood: 'emotional', centerFree: true }));
-      await JZ.addPlan('noir', Object.assign({}, common, { style: 'noir', mood: 'glitch', fx: Object.assign({}, common.fx, { glitch: 0.65, chroma: 0.8 }) }));
-      await JZ.addPlan('mono', Object.assign({}, common, { style: 'mono', mood: 'graphic', seed: 129, fx: Object.assign({}, common.fx, { motion: 0.85, chroma: 0.9 }) }));
+      await JZ.addPlan('noir', Object.assign({}, common, { style: 'noir', mood: 'glitch', fx: Object.assign({}, common.fx, { glitch: 0.65 }) }));
+      await JZ.addPlan('mono', Object.assign({}, common, { style: 'mono', mood: 'graphic', seed: 129, fx: Object.assign({}, common.fx, { motion: 0.85 }) }));
+      // the 統一感 morph melts one part of a line into the next (both drawn, blurred): off with the text transitions
+      if (!TEXT_TRANS) for (const name of ['main', 'cf', 'noir', 'mono']) for (const c of JZ.plans[name].plan.cuts) delete c.morph;
     }
 
     const S = [];
@@ -214,8 +221,9 @@
         fx: [ridge(960, 90, '#020509', { drift: 30, seed: 12 }), { type: 'embers', n: 130, color: FF.glow, rise: 150, size: 3.2, area: [0, 300, W, H + 80], wind: 0.15 }, { type: 'fireflies', n: 40, alpha: 0.8, color: FF.glow }] },
         { post: { lutA: 'P4', lutMix: 0.12, bloom: 0.55 } }),
       signal(1),
-      tegaki('dawn', 'cf', { grad: [[0, '#1b1640'], [0.4, '#4f3670'], [0.72, '#d9908f'], [0.9, '#ffd2a6'], [1, '#fff0d8']], vignette: 0.3,
-        fxBack: [stars(60, 41, 0.35, '#FFF2E0', 0.4), { type: 'glow', x: 960, y: 960, r: 680, color: '#FFD9B0', a: 0.32, beat: 0.25 }],
+      // the light of dawn stays low, behind the hills: the light lyric type needs 3:1 against the sky (check_shots)
+      tegaki('dawn', 'cf', { grad: [[0, '#140f33'], [0.45, '#3a2860'], [0.75, '#7a4a6e'], [0.88, '#d9908f'], [0.95, '#ffd2a6'], [1, '#fff0d8']], vignette: 0.3,
+        fxBack: [stars(60, 41, 0.35, '#FFF2E0', 0.4), { type: 'glow', x: 960, y: 1040, r: 620, color: '#FFD9B0', a: 0.24, beat: 0.25 }],
         fx: [ridge(900, 130, '#1a1030', { drift: 14, seed: 8 }), ridge(980, 90, '#0b0718', { drift: 30, seed: 2 }), { type: 'dust', n: 50, color: 'rgba(255,236,210,0.55)' }] },
         { post: { lutA: 'dawn', lutMix: 0.15, bloom: 0.38, bloomThreshold: 0.8 } }),
       signal(2),
