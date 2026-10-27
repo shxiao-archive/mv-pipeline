@@ -5,6 +5,7 @@
  *
  *   JUMP   the picture changes a lot between two frames inside a shot (not at a cut, not inside a transition):
  *          a layer popping in, a camera snapping, a scene restarting, a parameter switching
+ *          (a lot: over --thresh and over 4x the median change of the 30 frames around it in the same shot)
  *   POP    for 1-3 frames the picture changes and then comes back to what it was: a short flash, a missing
  *          frame, a glitch that escaped (signal-style glitches are deliberate: check they are the planned ones)
  *   HIT    a jump or pop within one frame of a beat, a lyric cut, a line's start or end, or a cue, or on a frame where
@@ -57,12 +58,15 @@ for (let i = Math.round(from * fps); i / fps < to; i++) {
 }
 const diff = (a, b) => { let s = 0; for (let k = 0; k < a.length; k++) s += Math.abs(a[k] - b[k]); return s / a.length / 255; };
 const d = frames.map((f, i) => (i ? diff(frames[i - 1].g, f.g) : 0));
+const sh = frames.map(f => shotAt(f.t));
 const median = (xs) => { const s = xs.slice().sort((a, b) => a - b); return s[Math.floor(s.length / 2)] || 0; };
 const found = [];
 for (let i = 1; i < frames.length; i++) {
   const t = frames[i].t;
   if (planned(t)) continue;
-  const local = median(d.slice(Math.max(1, i - 15), i + 15));
+  // the motion around it, inside this shot only: a still (or black) shot next door must not lower the bar for a moving one
+  const win = []; for (let j = Math.max(1, i - 15); j < Math.min(d.length, i + 15); j++) if (sh[j] === sh[i] && sh[j - 1] === sh[i]) win.push(d[j]);
+  const local = median(win);
   const lim = Math.max(thresh, 4 * local);
   if (d[i] <= lim) continue;
   // a POP: within 1-3 frames the picture comes back to what it was before the change
