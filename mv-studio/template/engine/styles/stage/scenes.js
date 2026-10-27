@@ -118,14 +118,13 @@
       ST.backdrop(S.t, { a: a.a, b: a.b });
       ST.floor({});
       ST.spot(960, pal.cream);
-      const title = a.title ?? Z.TITLE ?? '';
-      if (title) {
-        ST.paint(ST.rr(360, 210, 1200, 230, 40, 3), { wash: pal.cream, fill: pal.ochre, fillOp: 0.25, tex: 0.6, sw: 1.6 });
+      const title = a.title ?? Z.TITLE ?? '', credit = a.credit ?? Z.CREDIT ?? '';
+      if (title) {   // the credit rides on the plate: below it, the lead pops up over it
+        ST.paint(ST.rr(360, 180, 1200, credit ? 270 : 230, 40, 3), { wash: pal.cream, fill: pal.ochre, fillOp: 0.25, tex: 0.6, sw: 1.6 });
         ctx.save(); ctx.font = `400 ${Math.min(150, 2100 / Math.max(4, [...title].length))}px ${ST.FONTS.sfx}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = pal.ink; ctx.fillText(title, 966, 333); ctx.fillStyle = pal.crimson; ctx.fillText(title, 960, 326); ctx.restore();
+        ctx.fillStyle = pal.ink; ctx.fillText(title, 966, 303); ctx.fillStyle = pal.crimson; ctx.fillText(title, 960, 296); ctx.restore();
       }
-      const credit = a.credit ?? Z.CREDIT ?? '';
-      if (credit) ST.letter(credit, 960, 478, 34, pal.ink, { ink: false, font: ST.FONTS.sing, weight: 800, alpha: Z.smooth(0.3, 0.9, S.lt) });
+      if (credit) ST.letter(credit, 960, title ? 392 : 478, 34, pal.ink, { ink: false, font: ST.FONTS.sing, weight: 800, alpha: Z.smooth(0.3, 0.9, S.lt) });
       const pop = Z.ease.outBack(Z.clamp((S.lt - open * 0.6) / 0.5), 2.2), L = a.lead || {};
       if (pop > 0.01) ST.puppet(960, 880, 46, Object.assign({ dy: (1 - pop) * 6, eyes: 'happy', mouth: 'grin', aR: 1.4 + 0.4 * Math.sin(S.t * 9), aL: 0.2, blush: true }, L));
       ST.curtains(S.t, 1 - k);
