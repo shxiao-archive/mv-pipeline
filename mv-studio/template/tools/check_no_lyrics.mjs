@@ -44,6 +44,7 @@ function walk(dir) {
     if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name) && rel !== path.join('jizura', 'app', 'jizura_engine.js')) walk(p); continue; }
     const ext = path.extname(e.name).toLowerCase();
     if (rel === path.join('docs', 'AUDIO_MAP.md')) continue;   // generated from analysis/sections.json (analysis/ is skipped)
+    if (/^tools[\\/]transcribe_(lines|translation)\.py$/.test(rel)) continue;   // per-song lyric data the transcribe_*.py tools read (filled per song)
     if (rel.startsWith(path.join('docs', 'review') + path.sep)) continue;   // the jury's reviews quote the lines they judge (references/09 §8)
     if (!EXT.has(ext) || e.name === 'jizura_engine.js') continue;
     const bucket = isDoc(rel) && !strict ? warnings : errors;
