@@ -11,19 +11,30 @@ limited animation; one visual idea about the song runs through it all.
 ## 1. The feel
 
 1. **The lyrics are the subject** (文字PV). Text isn't a subtitle. It rotates, scales, bounces, stacks, shatters,
-   stands huge beside the character and fills the frame as one monument kanji, in time with the beat. *Why:* ボカロ
+   stands big beside the character and, at the song's peak, fills the frame as one monument kanji, in time with the
+   beat. *Why:* ボカロ
    audiences read the song; the typography *is* the performance. *Shows as:*
    - a word slammed on the chorus downbeat;
    - a line cascading down vertically on 8th notes;
-   - a kanji too big for the frame (見切れ);
+   - at a peak, one kanji as big as the frame, landing whole, then pushed past the edge (見切れ);
    - a word decoded from noise;
    - ruby as a second voice.
 
-   **Size is the point.** Every section has at least one frame where the type *is* the picture: a word or a line that
-   fills half the frame or more, cropped by the edge, the character small beside it or gone. Every chorus has several,
-   and the chorus downbeat is one. Lyrics at caption size beside a centred girl, shot after shot, is the commonest
-   failure. In iteration 6, two of three films did exactly that and read as an illustrated karaoke. The film that
-   felt like a ボカロPV filled the frame with `kanjiSlam`, `titleRiff` and full-frame JIZURA layouts.
+   **Type is part of the picture, never caption size.** Every section has frames where the words are composed as
+   big as the picture: a line or a JIZURA layout across a large part of the frame, the character small beside it.
+   Lyrics at caption size beside a centred girl, shot after shot, is the commonest failure; in iteration 6, two of
+   three films did exactly that and read as an illustrated karaoke.
+
+   **Oversized type is a peak move, used sparingly.** A glyph taller than half the frame (`kanjiSlam`, `titleRiff`,
+   a monument word) goes only where the song is emotionally at its height: one or two places in a film, never the
+   same move twice. Repeated, it stops being a peak and becomes wallpaper. `check_shots.mjs` (OVERSIZED TYPE) counts
+   the places.
+
+   **Every character is seen whole at least once.** Each glyph of the lyrics and the title lands fully on screen,
+   inside the frame and uncovered, on at least one frame of its shot. Only then may it be pushed past the edge,
+   cropped or covered (or the other way: cropped first, then the camera pulls back to show it whole). A glyph that
+   is only ever cut is a shape nobody can read. `check_shots.mjs` (GLYPH NEVER WHOLE) checks every frame;
+   `crop: true` does not exempt it.
 2. **One thesis, told in symbols rather than plot.** A full story isn't required. There is a motif bank where each
    motif has one meaning, a master shape and a secondary one, and a "red thread" that returns changed each chorus.
    *Why:* symbols carry feeling faster than plot in 3–4 minutes, and they let the film rhyme with itself. *Shows as:*
@@ -77,7 +88,7 @@ limited animation; one visual idea about the song runs through it all.
     frames.
   - Motivated inversions; colour-block punctuation frames.
 - **A type system.** Roles such as:
-  - monument mincho (huge, cropped);
+  - monument mincho (huge, at a peak; lands whole, then may crop);
   - lyric mincho;
   - gothic impact;
   - a hand;
@@ -104,7 +115,7 @@ limited animation; one visual idea about the song runs through it all.
 |---|---|---|---|---|
 | per-mora pop | playful, sung | verse lines, ruby | over a busy picture | backOut, 4–6 frames, drawn at 12 fps |
 | word slam | the キメ lands | chorus キメ and section entries, ≤ 2 per bar | every verse line (it cheapens) | scale 3 → 1 in 2 frames, 1-frame flash, 6 px shake over 6 frames |
-| monument kanji | weight, awe | chorus downbeats and the title on the riff, cropped by the frame | small or centred | lands on the downbeat −1 frame, not on the first sung word |
+| monument kanji | weight, awe | the song's one or two emotional peaks (the title riff counts as one); lands whole, then may push past the frame | small or centred; repeated on every chorus | lands on the downbeat −1 frame, not on the first sung word |
 | vertical cascade | falling, flowing | lines about falling, rain, time | fast choruses | staggered by 8th notes |
 | decode / weight bloom / glyph morph | a word forming or changing its mind | a turn in the lyric | every line | scramble 6–10 frames; morph over 1 beat |
 | chaos lyric | panic, overload | the sprint | quiet sections | a new layout each beat, 3-frame overshoot, ghosts of earlier lines at 10–24 % |
@@ -164,7 +175,7 @@ Many films travel along these ranges, and the travel is the story.
 - Lyrics are readable for ≥ max(0.7 s, 0.09 s × characters).
 - **Every sung word is whole and stands apart from the picture.**
   - The character never covers the words (`check_shots.mjs`: LYRICS HIDDEN, ≤ 5 %). Only decoration and monument
-    shapes go behind her.
+    shapes go behind her, and a monument glyph only after it has been seen whole.
   - Contrast is at least 3:1 against what surrounds the words (LYRICS LOW CONTRAST). On a busy or same-hue picture,
     give them an outline, a shadow or a plate, or a value from the other end of the palette. In iteration 6, purple
     and gold type on purple neon read as texture, not words.
@@ -188,8 +199,10 @@ Search `grep '"vocaloid"' index/index.jsonl`, or by word. In a vocaloid film the
 pass your own art, glyphs and colours in their args (their default image paths name the demo's files, which a new
 film doesn't have: a missing file stops the preload). Reaching for them first beats rewriting them in a film file:
 - `scene:illust` (the character on a plate, lit, grounded);
-- `scene:titleRiff` (the title as cropped monument glyphs on the riff; `glyphs`, `ruby`, `sky`, `final`, `char`);
-- `type-scene:kanjiSlam` (one kanji per beat, full frame; `char`, `bg`), `type-scene:typeCard` (a line as the whole picture),
+- `scene:titleRiff` (the title as monument glyphs on the riff, ending whole in the lockup; one of the film's oversized
+  places; `glyphs`, `ruby`, `sky`, `final`, `char`);
+- `type-scene:kanjiSlam` (one kanji per beat, landing whole at up to 0.82 of the frame height; a peak move;
+  `char`, `bg`), `type-scene:typeCard` (a line as the whole picture),
   `type-scene:tunnel`;
 - `scene:burst` (one framing per beat), `scene:panels` (split panels), `scene:ref` (freeze / rewind / melt of
   another shot), `scene:converge`, `scene:afterimage` (the end card);

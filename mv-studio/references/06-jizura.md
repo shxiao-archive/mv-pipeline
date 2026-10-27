@@ -125,9 +125,10 @@ ghost passes, which lag a frame or two, are off on the frames where they would d
 keeps the centre-free bands inside the 90 % title-safe box. Other plans can run to the edge; `tools/check_shots.mjs`
 measures that box while a cut's words hold. Two ways out:
 - `lyric: { mode: 'front', plan, safe: 0.9 }` scales that shot's lyric layer into the box;
-- `crop: true` on a shot that crops on purpose (a monument kanji, 見切れ).
+- `crop: true` on a shot that crops on purpose (a monument kanji, 見切れ). It does not exempt GLYPH NEVER WHOLE:
+  each glyph of the lyrics and the title must still be whole and uncovered on one frame of its shot.
 
-Shrinking every shot's lyrics is not the only way to pass: big cropped type, where the film wants it, is marked `crop`. The check also records which lyrics
+Shrinking every shot's lyrics is not the only way to pass: big type that crops after it lands whole, where the film wants it, is marked `crop`. The check also records which lyrics
 every frame around each cut draws (LYRIC OVERLAP): the JIZURA cuts and the lines the film's own type reads with
 `Z.line(i).text`. The deny lists were found on the demo's Japanese lines; an
 English film may meet more parts that split or repeat words: look at the cut strips.

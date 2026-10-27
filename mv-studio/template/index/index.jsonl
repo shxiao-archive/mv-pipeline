@@ -389,9 +389,9 @@
 {"id":"scene:train","kind":"scene","fits":["vocaloid"],"does":"shot 33 {bg, chars, freeze, exitAt, dir, hero, heroX} night crossing, lamps alternating per beat (small elements, bloom + spill), a train strobes through the foreground with her images in the lit windows, freezes on the stop, and leaves …","where":"engine/styles/vocaloid/night.js:980-998","use":"shot(id, t0, t1, 'train', { … })","lines":19,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"transition:barrier","kind":"transition","fits":["vocaloid"],"does":"crossing barrier arm: a striped bar sweeps down (pivot at left) wiping in B","where":"engine/styles/vocaloid/trans.js:9-21","use":"{ trans: { type: 'barrier', dur } }","lines":13}
 {"id":"transition:shatter","kind":"transition","fits":["vocaloid"],"does":"glass shatter: A breaks into voronoi-ish shards that fall away revealing B","where":"engine/styles/vocaloid/trans.js:22-44","use":"{ trans: { type: 'shatter', dur } }","lines":23}
-{"id":"type-scene:kanjiSlam","kind":"type-scene","fits":["vocaloid"],"does":"chorus-downbeat monument kanji slammed per beat behind a character (shots 16, 38, 52, 56)","where":"engine/styles/vocaloid/typo.js:388-537","use":"shot(id, t0, t1, 'kanjiSlam', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
-{"id":"type-scene:typeCard","kind":"type-scene","fits":["vocaloid"],"does":"'quiet' single mincho line on black (shot 29) · 'flicker' glitching 救って per beat → white (shot 37)","where":"engine/styles/vocaloid/typo.js:564-713","use":"shot(id, t0, t1, 'typeCard', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
-{"id":"type-scene:tunnel","kind":"type-scene","fits":["vocaloid"],"does":"one-take push through rings of lyric text toward a point of light that blooms into dawn (shot 61) Post helpers for the timeline (shot.post): Z.typo.post.kanjiSlam · Z.typo.post.typeCard · Z.typo.post.tunnel Everything is a pure function …","where":"engine/styles/vocaloid/typo.js:783-932","use":"shot(id, t0, t1, 'tunnel', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
+{"id":"type-scene:kanjiSlam","kind":"type-scene","fits":["vocaloid"],"does":"chorus-downbeat monument kanji slammed per beat behind a character (shots 16, 38, 52, 56)","where":"engine/styles/vocaloid/typo.js:391-540","use":"shot(id, t0, t1, 'kanjiSlam', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
+{"id":"type-scene:typeCard","kind":"type-scene","fits":["vocaloid"],"does":"'quiet' single mincho line on black (shot 29) · 'flicker' glitching 救って per beat → white (shot 37)","where":"engine/styles/vocaloid/typo.js:567-716","use":"shot(id, t0, t1, 'typeCard', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
+{"id":"type-scene:tunnel","kind":"type-scene","fits":["vocaloid"],"does":"one-take push through rings of lyric text toward a point of light that blooms into dawn (shot 61) Post helpers for the timeline (shot.post): Z.typo.post.kanjiSlam · Z.typo.post.typeCard · Z.typo.post.tunnel Everything is a pure function …","where":"engine/styles/vocaloid/typo.js:786-935","use":"shot(id, t0, t1, 'tunnel', { … })","lines":150,"status":"demo-specific: written for the demo film; learn from it, or call it with care"}
 {"id":"tool:alpha_matte","kind":"tool","fits":["shared"],"does":"Alpha-matte utilities for generated illustration assets (characters / props on a flat key colour).","where":"tools/alpha_matte.py","use":"python tools/alpha_matte.py"}
 {"id":"tool:analyze_audio","kind":"tool","fits":["shared"],"does":"-*- coding: utf-8 -*-","where":"tools/analyze_audio.py","use":"python tools/analyze_audio.py"}
 {"id":"tool:artgen","kind":"tool","fits":["shared"],"does":"One entry point for image generation: the same jobs file goes to whichever generator the USER chose.","where":"tools/artgen.py","use":"python tools/artgen.py"}
@@ -515,11 +515,11 @@
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
 {"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-50","lines":24}
 {"id":"manual:references/06-jizura#4","kind":"manual","does":"4. Styles","where":"<skill>/references/06-jizura.md:51-84","lines":34}
-{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:85-143","lines":59}
-{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Shots with a subject & text-behind","where":"<skill>/references/06-jizura.md:144-149","lines":6}
-{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:150-154","lines":5}
-{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:155-158","lines":4}
-{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:159-162","lines":4}
+{"id":"manual:references/06-jizura#5","kind":"manual","does":"5. Curation (deny-lists)","where":"<skill>/references/06-jizura.md:85-144","lines":60}
+{"id":"manual:references/06-jizura#6","kind":"manual","does":"6. Shots with a subject & text-behind","where":"<skill>/references/06-jizura.md:145-150","lines":6}
+{"id":"manual:references/06-jizura#7","kind":"manual","does":"7. Debugging","where":"<skill>/references/06-jizura.md:151-155","lines":5}
+{"id":"manual:references/06-jizura#8","kind":"manual","does":"8. Vertical 9:16","where":"<skill>/references/06-jizura.md:156-159","lines":4}
+{"id":"manual:references/06-jizura#9","kind":"manual","does":"9. Licence","where":"<skill>/references/06-jizura.md:160-163","lines":4}
 {"id":"manual:references/07-blender-3d#1","kind":"manual","does":"1. What is worth doing in 3D","where":"<skill>/references/07-blender-3d.md:9-18","lines":10}
 {"id":"manual:references/07-blender-3d#2","kind":"manual","does":"2. Files and commands","where":"<skill>/references/07-blender-3d.md:19-60","lines":42}
 {"id":"manual:references/07-blender-3d#3","kind":"manual","does":"3. The look recipe (\"not default-grey 3D\")","where":"<skill>/references/07-blender-3d.md:61-71","lines":11}
@@ -618,14 +618,14 @@
 {"id":"manual:styles/stage/STYLE#4","kind":"manual","does":"4. Building it","where":"<skill>/styles/stage/STYLE.md:59-89","lines":31}
 {"id":"manual:styles/stage/STYLE#5","kind":"manual","does":"5. Escalation and the finale","where":"<skill>/styles/stage/STYLE.md:90-96","lines":7}
 {"id":"manual:styles/stage/STYLE#6","kind":"manual","does":"6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)","where":"<skill>/styles/stage/STYLE.md:97-112","lines":16}
-{"id":"manual:styles/vocaloid/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/vocaloid/BRIEF.md:11-65","lines":55}
-{"id":"manual:styles/vocaloid/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/vocaloid/BRIEF.md:66-100","lines":35}
-{"id":"manual:styles/vocaloid/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/vocaloid/BRIEF.md:101-131","lines":31}
-{"id":"manual:styles/vocaloid/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/vocaloid/BRIEF.md:132-146","lines":15}
-{"id":"manual:styles/vocaloid/BRIEF#5","kind":"manual","does":"5. How the reference films were made","where":"<skill>/styles/vocaloid/BRIEF.md:147-161","lines":15}
-{"id":"manual:styles/vocaloid/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/vocaloid/BRIEF.md:162-176","lines":15}
-{"id":"manual:styles/vocaloid/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/vocaloid/BRIEF.md:177-184","lines":8}
-{"id":"manual:styles/vocaloid/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/vocaloid/BRIEF.md:185-207","lines":23}
+{"id":"manual:styles/vocaloid/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/vocaloid/BRIEF.md:11-76","lines":66}
+{"id":"manual:styles/vocaloid/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/vocaloid/BRIEF.md:77-111","lines":35}
+{"id":"manual:styles/vocaloid/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/vocaloid/BRIEF.md:112-142","lines":31}
+{"id":"manual:styles/vocaloid/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/vocaloid/BRIEF.md:143-157","lines":15}
+{"id":"manual:styles/vocaloid/BRIEF#5","kind":"manual","does":"5. How the reference films were made","where":"<skill>/styles/vocaloid/BRIEF.md:158-172","lines":15}
+{"id":"manual:styles/vocaloid/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/vocaloid/BRIEF.md:173-187","lines":15}
+{"id":"manual:styles/vocaloid/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/vocaloid/BRIEF.md:188-195","lines":8}
+{"id":"manual:styles/vocaloid/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/vocaloid/BRIEF.md:196-220","lines":25}
 {"id":"manual:styles/vocaloid/COOKBOOK#0","kind":"manual","does":"0. How to use this menu","where":"<skill>/styles/vocaloid/COOKBOOK.md:9-17","lines":9}
 {"id":"manual:styles/vocaloid/COOKBOOK#1","kind":"manual","does":"1. Timing conventions","where":"<skill>/styles/vocaloid/COOKBOOK.md:18-24","lines":7}
 {"id":"manual:styles/vocaloid/COOKBOOK#2","kind":"manual","does":"2. Palette system","where":"<skill>/styles/vocaloid/COOKBOOK.md:25-51","lines":27}
@@ -637,16 +637,16 @@
 {"id":"manual:styles/vocaloid/DIRECTION#2","kind":"manual","does":"2. Find the thesis","where":"<skill>/styles/vocaloid/DIRECTION.md:16-23","lines":8}
 {"id":"manual:styles/vocaloid/DIRECTION#3","kind":"manual","does":"3. Colour script","where":"<skill>/styles/vocaloid/DIRECTION.md:24-29","lines":6}
 {"id":"manual:styles/vocaloid/DIRECTION#4","kind":"manual","does":"4. Shapes & motifs","where":"<skill>/styles/vocaloid/DIRECTION.md:30-35","lines":6}
-{"id":"manual:styles/vocaloid/DIRECTION#5","kind":"manual","does":"5. Lyric → image mapping","where":"<skill>/styles/vocaloid/DIRECTION.md:36-54","lines":19}
-{"id":"manual:styles/vocaloid/DIRECTION#6","kind":"manual","does":"6. Structure & escalation","where":"<skill>/styles/vocaloid/DIRECTION.md:55-72","lines":18}
-{"id":"manual:styles/vocaloid/DIRECTION#7","kind":"manual","does":"7. Character","where":"<skill>/styles/vocaloid/DIRECTION.md:73-78","lines":6}
-{"id":"manual:styles/vocaloid/DIRECTION#8","kind":"manual","does":"8. Typography voice","where":"<skill>/styles/vocaloid/DIRECTION.md:79-84","lines":6}
-{"id":"manual:styles/vocaloid/DIRECTION#9","kind":"manual","does":"9. Signature moments","where":"<skill>/styles/vocaloid/DIRECTION.md:85-88","lines":4}
-{"id":"manual:styles/vocaloid/DIRECTION#10","kind":"manual","does":"10. Variation matrix — make it different","where":"<skill>/styles/vocaloid/DIRECTION.md:89-109","lines":21}
-{"id":"manual:styles/vocaloid/DIRECTION#11","kind":"manual","does":"11. Worked example: 残光 in brief","where":"<skill>/styles/vocaloid/DIRECTION.md:110-113","lines":4}
-{"id":"manual:styles/vocaloid/DIRECTION#12","kind":"manual","does":"12. Anti-patterns","where":"<skill>/styles/vocaloid/DIRECTION.md:114-123","lines":10}
-{"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:124-141","lines":18}
-{"id":"manual:styles/vocaloid/DIRECTION#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/styles/vocaloid/DIRECTION.md:142-156","lines":15}
+{"id":"manual:styles/vocaloid/DIRECTION#5","kind":"manual","does":"5. Lyric → image mapping","where":"<skill>/styles/vocaloid/DIRECTION.md:36-55","lines":20}
+{"id":"manual:styles/vocaloid/DIRECTION#6","kind":"manual","does":"6. Structure & escalation","where":"<skill>/styles/vocaloid/DIRECTION.md:56-73","lines":18}
+{"id":"manual:styles/vocaloid/DIRECTION#7","kind":"manual","does":"7. Character","where":"<skill>/styles/vocaloid/DIRECTION.md:74-79","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#8","kind":"manual","does":"8. Typography voice","where":"<skill>/styles/vocaloid/DIRECTION.md:80-85","lines":6}
+{"id":"manual:styles/vocaloid/DIRECTION#9","kind":"manual","does":"9. Signature moments","where":"<skill>/styles/vocaloid/DIRECTION.md:86-89","lines":4}
+{"id":"manual:styles/vocaloid/DIRECTION#10","kind":"manual","does":"10. Variation matrix — make it different","where":"<skill>/styles/vocaloid/DIRECTION.md:90-110","lines":21}
+{"id":"manual:styles/vocaloid/DIRECTION#11","kind":"manual","does":"11. Worked example: 残光 in brief","where":"<skill>/styles/vocaloid/DIRECTION.md:111-114","lines":4}
+{"id":"manual:styles/vocaloid/DIRECTION#12","kind":"manual","does":"12. Anti-patterns","where":"<skill>/styles/vocaloid/DIRECTION.md:115-124","lines":10}
+{"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:125-142","lines":18}
+{"id":"manual:styles/vocaloid/DIRECTION#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/styles/vocaloid/DIRECTION.md:143-157","lines":15}
 {"id":"manual:styles/vocaloid/STYLE#A","kind":"manual","does":"A. Tegaki — illustrated MV with an original character (the base kit's style)","where":"<skill>/styles/vocaloid/STYLE.md:30-76","lines":47}
 {"id":"manual:styles/vocaloid/STYLE#B","kind":"manual","does":"B. Signal — a recording device failing","where":"<skill>/styles/vocaloid/STYLE.md:77-162","lines":86}
 {"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both kits)","where":"<skill>/styles/vocaloid/STYLE.md:163-207","lines":45}

@@ -50,7 +50,8 @@ For each line, choose an image that *answers* it — literal, symbolic, or ironi
 | わたしは行くよ | she runs along that road, in front of the giant lyric | resolve; text-behind-character |
 | 黒闇の果てで / あなたに会いたい | tunnel of lyric rings toward a dawn point → reaching hand → smile at sunrise | arrival; colour script resolves to dawn |
 
-Leave space for **pure typography** (文字PV moments): a chorus slam of one giant kanji, a quiet type card, a full-frame JIZURA moment.
+Leave space for **pure typography** (文字PV moments): a quiet type card, a full-frame JIZURA moment, and at the song's
+peak (once or twice in the film, never the same move twice) a slam of one giant kanji that lands whole before it crops.
 
 ## 6. Structure & escalation
 
@@ -61,7 +62,7 @@ Map J-pop form to visual intensity (budget, not volume knob):
 | intro | promise the world | sparse, one image/idea; title sequence on the riff |
 | A-melo (verse) | narrative | slower cuts, long shots, small/vertical type, one effect at a time |
 | B-melo (pre) | tension | faster cuts, close-ups, colour shift, alarm palette, 溜め (hold/black) before the hook |
-| サビ (chorus) | payoff | full palette, giant type, key visual, fastest cuts, キメ on downbeats |
+| サビ (chorus) | payoff | full palette, big type, key visual, fastest cuts, キメ on downbeats; oversized type only on the chorus that is the peak |
 | post-chorus / interlude | showcase | no vocals → 3D flythrough, pure motion graphics |
 | 2番 | variation | verse-1 grammar + one new element (night, rain) |
 | C-melo (bridge) | contrast/reveal | memory montage, stripped colour, the film's turn |

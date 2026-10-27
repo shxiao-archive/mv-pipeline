@@ -53,7 +53,7 @@ Keep `lutMix` 0.08–0.25 on daylight plates. The rest of a bright film's settin
 
 | role | fonts in `engine/fonts` (Z.FONT key) | carries |
 |---|---|---|
-| R1 Monument (huge single kanji, title) | Zen Old Mincho 900 (`minchoHeavy`), Kaisei Tokumin 800 (`tokumin`) | 110–160 % frame height, cropped (見切れ); one per shot |
+| R1 Monument (huge single kanji, title) | Zen Old Mincho 900 (`minchoHeavy`), Kaisei Tokumin 800 (`tokumin`) | at most ~80 % of the frame height so it lands whole, then may push or crop (見切れ); one per shot, one or two places per film, at the emotional peaks |
 | R2 Lyric mincho (default voice) | Shippori Mincho B1 500–800 (`mincho`), Noto Serif JP variable (`serif`) | feeling: verses, vertical lines |
 | R3 Lyric gothic (impact) | Dela Gothic One (`dela`), Zen Kaku Gothic New 700/900 (`gothic`), Noto Sans JP variable (`sans`) | slams, alarms; weight animation |
 | R4 Hand (memory, inner voice) | Klee One 400/600 (`hand`), Yuji Syuku brush (`brush`) | captions, diaries, one brush word |
@@ -61,7 +61,7 @@ Keep `lutMix` 0.08–0.25 on daylight plates. The rest of a bright film's settin
 | R6 Ruby / small annotation | Zen Kaku Gothic New 500, Noto Sans JP 500 | ruby at 0.45–0.5 em, credits |
 | Chinese lyrics | Noto Sans SC / Noto Serif SC variable | same roles |
 
-Scale at 1080p: monument 1200–1700 px · hero word 200–300 · horizontal lyric 96–120 (leading 1.35) · vertical lyric 84–104 (column pitch 1.6 em) · secondary/English 38–44 · HUD 20–24 at 60–70 % opacity. Particles (は が を に の も…) at 72–80 % of the line size; line-initial character 115–130 %. **≤ 3 families per section, ≤ 2 weights per shot; never synthesise bold/italic for CJK** (load the real weight). Title-safe 90 % for readable lyrics; 縦書き for verses and introspection, 横書き for choruses, a vertical × horizontal cross for キメ frames; centre-free bands (JIZURA `centerFree`) when the face is the point. Main lines stay ≥ max(0.7 s, 0.09 s × characters). Vertical text in Canvas2D: rotate ー―…〜（）「」 90°, move 、。 to the upper right (+0.5 em, −0.5 em), nudge small kana (+0.1 em, −0.1 em) — `D.vtext` handles the basics.
+Scale at 1080p: monument up to ~900 px of ink (whole in frame) · hero word 200–300 · horizontal lyric 96–120 (leading 1.35) · vertical lyric 84–104 (column pitch 1.6 em) · secondary/English 38–44 · HUD 20–24 at 60–70 % opacity. Particles (は が を に の も…) at 72–80 % of the line size; line-initial character 115–130 %. **≤ 3 families per section, ≤ 2 weights per shot; never synthesise bold/italic for CJK** (load the real weight). Title-safe 90 % for readable lyrics; 縦書き for verses and introspection, 横書き for choruses, a vertical × horizontal cross for キメ frames; centre-free bands (JIZURA `centerFree`) when the face is the point. Main lines stay ≥ max(0.7 s, 0.09 s × characters). Vertical text in Canvas2D: rotate ー―…〜（）「」 90°, move 、。 to the upper right (+0.5 em, −0.5 em), nudge small kana (+0.1 em, −0.1 em) — `D.vtext` handles the basics.
 
 ## 4. Recipes
 
@@ -72,7 +72,7 @@ Each row: recipe · what the viewer sees · how (engine hooks in **bold**). IDs 
 |---|---|---|
 | T01 一画ずつ stroke-order write-on | the character writes itself, then settles into the font glyph | KanjiVG strokes (CC BY-SA, credit it) as `Path2D`, `setLineDash([drawn, len+1])` per stroke, 60–120 ms/stroke; crossfade 3 frames to `fillText`. Last stroke ends on the vocal onset |
 | T02 一文字ずつ per-mora pop | glyphs pop in (0 → 1.12 → 1, y +8 %) with a stagger | per-glyph `backOut(1.4)` over 4–6 frames on 12 fps; stagger from `lyrics.json chars[].start` |
-| T03 巨大一文字 monument kanji | one kanji at 110–160 % height, cropped, a wall not a word | **`kanjiSlam`** (one glyph per beat, spring kicks; `sky: 'sunset'`\|`'night'`\|`'day'`), `titleRiff` (`glyphs: [first, second]`); or a glyph mask filled with the scene (`source-in`) |
+| T03 巨大一文字 monument kanji | one kanji nearly the frame's height, a wall not a word; it lands whole, then the push crops it; only at the song's one or two peaks | **`kanjiSlam`** (one glyph per beat, spring kicks; `sky: 'sunset'`\|`'night'`\|`'day'`), `titleRiff` (`glyphs: [first, second]`); or a glyph mask filled with the scene (`source-in`) |
 | T05 縦書きの滝 vertical cascade | columns slide down into place right to left | `D.vtext` per column, expo-out 10 frames, columns staggered by 8th notes |
 | T07 細→太 weight bloom | a word grows from hairline to black while held | variable Noto Serif/Sans JP: `ctx.font = (100+800·e) + " 120px 'Noto Serif JP'"`, re-centre each frame |
 | T08 文字化け→解読 scramble decode | random glyphs resolve left to right into the line | pool of theme kanji + kana, cycle at 12 fps, resolution front `p·(n+2)−2` (used in `titleRiff` HUD) |
