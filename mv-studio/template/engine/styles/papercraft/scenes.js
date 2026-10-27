@@ -55,7 +55,7 @@
       g.save(); PC.applyCam(g, PC.lerpCam(PC.cam(lerp(1260, 960, open), 560, 1.0), PC.cam(960, 600, 1.6), E.inOutSine(close ? q : clamp(S.lt / S.dur))), 1);   // centred on the closed book, then pushing into the pop-up
       const bx = 360, by = 230, bw = 1200, bh = 700, sx = 960;
       // the spread (inside)
-      g.save(); if (open < 0.5) { g.beginPath(); g.rect(sx, 0, W, H); g.clip(); }       // closed: only the right half (under the cover) exists
+      g.save(); if (open < 1) { g.beginPath(); g.rect(sx + Math.min(0, Math.cos(open * Math.PI)) * (bw / 2 + 10), 0, W, H); g.clip(); }   // the left half exists only where the swinging cover already lies
       PC.cut(g, PC.poly([[bx, by], [bx + bw, by], [bx + bw, by + bh], [bx, by + bh]], { seed: 3, amp: 1 }), P.redDark, { shadow: 30, stroke: P.ink, lw: 4 });
       PC.cut(g, PC.poly([[bx + 20, by + 16], [bx + bw - 20, by + 16], [bx + bw - 20, by + bh - 16], [bx + 20, by + bh - 16]], { seed: 4 }), P.paper, { rim: P.white });
       g.save(); g.fillStyle = PC.lin(g, sx - 40, 0, sx + 40, 0, [PC.rgba(P.shadow, 0), PC.rgba(P.shadow, 0.25), PC.rgba(P.shadow, 0)]); g.fillRect(sx - 40, by + 16, 80, bh - 32); g.restore();
