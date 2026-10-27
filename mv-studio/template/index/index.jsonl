@@ -484,21 +484,21 @@
 {"id":"manual:references/03-audio-and-lyrics#10","kind":"manual","does":"10. Writing `analysis/lyrics_mv.lrc`","where":"<skill>/references/03-audio-and-lyrics.md:232-265","lines":34}
 {"id":"manual:references/03-audio-and-lyrics#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/03-audio-and-lyrics.md:266-277","lines":12}
 {"id":"manual:references/03-audio-and-lyrics#12","kind":"manual","does":"12. mv-studio: timing ground truth","where":"<skill>/references/03-audio-and-lyrics.md:278-336","lines":59}
-{"id":"manual:references/04-asset-generation#0","kind":"manual","does":"0. Start here: the generation table (`tools/gen_table.py`)","where":"<skill>/references/04-asset-generation.md:9-60","lines":52}
-{"id":"manual:references/04-asset-generation#0b","kind":"manual","does":"0b. Other styles: one lock and one table per style","where":"<skill>/references/04-asset-generation.md:61-108","lines":48}
-{"id":"manual:references/04-asset-generation#1","kind":"manual","does":"1. What to generate (derive it from the storyboard)","where":"<skill>/references/04-asset-generation.md:109-122","lines":14}
-{"id":"manual:references/04-asset-generation#2","kind":"manual","does":"2. `tools/imagegen.py`","where":"<skill>/references/04-asset-generation.md:123-154","lines":32}
-{"id":"manual:references/04-asset-generation#3","kind":"manual","does":"3. Codex CLI gotchas (why the wrapper exists)","where":"<skill>/references/04-asset-generation.md:155-164","lines":10}
-{"id":"manual:references/04-asset-generation#4","kind":"manual","does":"4. Alpha: native vs chroma key (`tools/alpha_matte.py`)","where":"<skill>/references/04-asset-generation.md:165-191","lines":27}
-{"id":"manual:references/04-asset-generation#5","kind":"manual","does":"5. Character consistency method (if the film has a cast)","where":"<skill>/references/04-asset-generation.md:192-211","lines":20}
-{"id":"manual:references/04-asset-generation#6","kind":"manual","does":"6. Style-block templates (write new ones per project)","where":"<skill>/references/04-asset-generation.md:212-224","lines":13}
-{"id":"manual:references/04-asset-generation#7","kind":"manual","does":"7. Backgrounds and props","where":"<skill>/references/04-asset-generation.md:225-234","lines":10}
-{"id":"manual:references/04-asset-generation#8","kind":"manual","does":"8. Review","where":"<skill>/references/04-asset-generation.md:235-243","lines":9}
-{"id":"manual:references/04-asset-generation#9","kind":"manual","does":"9. Other image models","where":"<skill>/references/04-asset-generation.md:244-247","lines":4}
-{"id":"manual:references/04-asset-generation#10","kind":"manual","does":"10. Pitfalls","where":"<skill>/references/04-asset-generation.md:248-258","lines":11}
-{"id":"manual:references/04-asset-generation#11","kind":"manual","does":"11. Grok Build CLI (mv-studio: `tools/grokgen.py` + `tools/grok_run.sh`)","where":"<skill>/references/04-asset-generation.md:259-280","lines":22}
-{"id":"manual:references/04-asset-generation#12","kind":"manual","does":"12. NovelAI (mv-studio: `tools/novelaigen.py`)","where":"<skill>/references/04-asset-generation.md:281-348","lines":68}
-{"id":"manual:references/04-asset-generation#13","kind":"manual","does":"13. Choosing the generator (`tools/artgen.py`)","where":"<skill>/references/04-asset-generation.md:349-372","lines":24}
+{"id":"manual:references/04-asset-generation#0","kind":"manual","does":"0. Start here: the generation table (`tools/gen_table.py`)","where":"<skill>/references/04-asset-generation.md:9-61","lines":53}
+{"id":"manual:references/04-asset-generation#0b","kind":"manual","does":"0b. Other styles: one lock and one table per style","where":"<skill>/references/04-asset-generation.md:62-109","lines":48}
+{"id":"manual:references/04-asset-generation#1","kind":"manual","does":"1. What to generate (derive it from the storyboard)","where":"<skill>/references/04-asset-generation.md:110-125","lines":16}
+{"id":"manual:references/04-asset-generation#2","kind":"manual","does":"2. `tools/imagegen.py`","where":"<skill>/references/04-asset-generation.md:126-157","lines":32}
+{"id":"manual:references/04-asset-generation#3","kind":"manual","does":"3. Codex CLI gotchas (why the wrapper exists)","where":"<skill>/references/04-asset-generation.md:158-167","lines":10}
+{"id":"manual:references/04-asset-generation#4","kind":"manual","does":"4. Alpha: native vs chroma key (`tools/alpha_matte.py`)","where":"<skill>/references/04-asset-generation.md:168-194","lines":27}
+{"id":"manual:references/04-asset-generation#5","kind":"manual","does":"5. Character consistency method (if the film has a cast)","where":"<skill>/references/04-asset-generation.md:195-214","lines":20}
+{"id":"manual:references/04-asset-generation#6","kind":"manual","does":"6. Style-block templates (write new ones per project)","where":"<skill>/references/04-asset-generation.md:215-227","lines":13}
+{"id":"manual:references/04-asset-generation#7","kind":"manual","does":"7. Backgrounds and props","where":"<skill>/references/04-asset-generation.md:228-237","lines":10}
+{"id":"manual:references/04-asset-generation#8","kind":"manual","does":"8. Review","where":"<skill>/references/04-asset-generation.md:238-246","lines":9}
+{"id":"manual:references/04-asset-generation#9","kind":"manual","does":"9. Other image models","where":"<skill>/references/04-asset-generation.md:247-250","lines":4}
+{"id":"manual:references/04-asset-generation#10","kind":"manual","does":"10. Pitfalls","where":"<skill>/references/04-asset-generation.md:251-261","lines":11}
+{"id":"manual:references/04-asset-generation#11","kind":"manual","does":"11. Grok Build CLI (mv-studio: `tools/grokgen.py` + `tools/grok_run.sh`)","where":"<skill>/references/04-asset-generation.md:262-283","lines":22}
+{"id":"manual:references/04-asset-generation#12","kind":"manual","does":"12. NovelAI (mv-studio: `tools/novelaigen.py`)","where":"<skill>/references/04-asset-generation.md:284-351","lines":68}
+{"id":"manual:references/04-asset-generation#13","kind":"manual","does":"13. Choosing the generator (`tools/artgen.py`)","where":"<skill>/references/04-asset-generation.md:352-375","lines":24}
 {"id":"manual:references/05-engine#1","kind":"manual","does":"1. Architecture","where":"<skill>/references/05-engine.md:7-26","lines":20}
 {"id":"manual:references/05-engine#2","kind":"manual","does":"2. Hard rules","where":"<skill>/references/05-engine.md:27-35","lines":9}
 {"id":"manual:references/05-engine#3","kind":"manual","does":"3. The timeline (`engine/timeline.js`)","where":"<skill>/references/05-engine.md:36-69","lines":34}
