@@ -12,8 +12,8 @@ story are not ours: make your own film.
 ## 1. The spread: `pcStory`
 
 ```js
-const SC = 0.7, STRIDE = 127 * SC / 0.5;                         // puppet scale; px per walk cycle (feet do not slide)
-const walker = (who, x0, v, t0) => S => { const x = x0 + (S.t - t0) * v; return { who, x, face: 1, walk: 1, phase: x / STRIDE, s: SC }; };
+const WIDE = 1.35;                                               // folk-rig scale: s 1 ~ 186 px (§2)
+const walker = (who, x0, v, t0) => S => ({ who, x: x0 + (S.t - t0) * v, face: 1, walk: 1, s: WIDE });  // the rig plants the feet from x
 S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: false, line: 3, post: PC.post,
   trans: { type: 'pageTurn', dur: 2 * beat },
   moment: 'line 3: the two of them reach the market town',
@@ -74,7 +74,7 @@ ink line and pins of `PC.doll`; without it the doll is the flat stand-in.
 4. Until a role is cut, `pcStory` draws a flat `PC.doll` stand-in (`look`: its options), so the film renders from day one.
    A role in `PC.story.looks` is always drawn as the doll, cut or not.
 
-Keep scale consistent: the starter's `s: 0.7` puts a 640-px `tall` role at ~450 px on the page.
+Keep scale consistent: a doll or cut puppet at `s: 0.7` puts a 640-px `tall` role at ~450 px on the page.
 
 ## 3. Motion
 
