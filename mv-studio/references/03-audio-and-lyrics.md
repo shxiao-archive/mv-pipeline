@@ -247,7 +247,7 @@ Merging official text with aligned timings:
 | `[間奏]` row | an instrumental line: stops the previous line from lingering through a gap | `[01:19.49][間奏]` |
 | blank line | ignored; use it to separate sections for humans | |
 
-5. Header: keep only `[ar:]`, `[by:…]`, `[offset:0]` (any other `[xx:…]` tag would be read as lyric text; `[ti:]` is stripped by the timeline unless you want JIZURA's title card).
+5. Header: keep only `[ar:]`, `[by:…]`, `[offset:0]` (any other `[xx:…]` tag would be read as lyric text; `[ti:]` and `{"t":..,"c":..}` credit rows are stripped before JIZURA sees them (`Z.jizuraLrc`), so it shows neither as a lyric; keep `[ti:]` only if you want JIZURA's title card).
 
 Excerpt of the shipped file:
 ```

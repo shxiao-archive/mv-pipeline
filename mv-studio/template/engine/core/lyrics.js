@@ -17,6 +17,8 @@
  *   Z.wordsAt(i, t, o)        like charsAt, but whole words: a word is out once its first character is sung
  *   Z.wordIndex(i, word, last) index of a word in line i (letters only, any case); -1 if absent
  *   Z.charTimes(i)            per-character start times of line i from analysis/lyric_timing.json (or null)
+ *   Z.jizuraLrc(src)          the LRC text to hand JIZURA: no [ti:] (JIZURA would add its own title card) and no
+ *                             {"t":..,"c":..} credit rows (JIZURA would show them as lyric lines)
  *
  * analysis/lyric_timing.json (text-free; tools/lrc.py) adds, per line, where its timing came from (`source`), how sure
  * it is (`conf`) and optional per-character / per-word times. A timing row is used only while its character count and
@@ -78,6 +80,7 @@
   const lineHash = text => { let h = 2166136261; for (const ch of text) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(16).padStart(8, '0'); };
 
   Z.parseLyrics = parse;
+  Z.jizuraLrc = src => src.replace(/^﻿/, '').split(/\r?\n/).filter(r => !/^\s*(\[ti:.*\]|\{.*\})\s*$/.test(r)).join('\n');
   Z.lineHash = lineHash;
   Z.LYR = [];
   Z.loadLyrics = async (path = 'analysis/lyrics_mv.lrc', timingPath = 'analysis/lyric_timing.json') => {

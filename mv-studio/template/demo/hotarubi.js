@@ -171,7 +171,7 @@
     let lrc = '';
     try { const r = await fetch(Z.ROOT + 'analysis/lyrics_mv.lrc'); if (r.ok) lrc = await r.text(); } catch (e) { /* no lyrics yet */ }
     if (!lrc.trim()) console.warn('analysis/lyrics_mv.lrc missing: rendering without the JIZURA lyric layer');
-    lrc = lrc.replace(/^﻿/, '').replace(/^\[ti:.*\]\s*$/m, '');   // no [ti:]: JIZURA would add its own title card
+    lrc = Z.jizuraLrc(lrc);   // no [ti:] title card, no JSON credit rows shown as lyrics
     if (lrc.trim() && window.J) {
       JZ.setAudio({ duration: audio.duration, beats: audio.beats, energy: null, energyRate: 0 });
       // Curate JIZURA's ~860 parts for the film's tone: deny novelty objects, UI gimmicks, horror and 和 props, opaque
