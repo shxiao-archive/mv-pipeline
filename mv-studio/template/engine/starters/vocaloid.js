@@ -237,7 +237,7 @@
       if (next > cur + 0.2) POOL[i % POOL.length](l, cur, next);
       cur = Math.max(cur, next);
     });
-    // ---- the end: hard cut to the title's afterimage (its colour is the complement of FF.glow)
+    // ---- the end: a placeholder (残光's afterimage card). REPLACE it with an ending from this film's own motif
     shot('end', END, END + TAIL, 'afterimage', { text: Z.TITLE, sub: Z.TITLE_SUB.toLowerCase(), credit: Z.CREDIT, color: '#A88BFF', char: NO_IMAGE },
       { lyric: 'none', hud: false, post: St => Object.assign(Z.INTRO.post.afterimage(St), { boil: 0 }), moment: "the title's afterimage and the credit", cue: Z.CUES.end ? 'end' : null });
 

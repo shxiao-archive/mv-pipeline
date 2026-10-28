@@ -72,7 +72,8 @@ limited animation; one visual idea about the song runs through it all.
    - Effects on a reserve list that unlocks by section.
    - Choruses call back the first chorus's layouts with one thing raised (boil, zoom, afterimage, cut density).
    - At least three real holds.
-   - The ending is an idea (a hard cut on the dead stop, then an afterimage).
+   - The ending is an idea taken from this film's own motif. 残光's hard cut to an afterimage was its own: never a
+     default to copy.
 
 ## 2. Art construction (what makes a frame look finished)
 

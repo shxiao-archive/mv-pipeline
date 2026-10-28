@@ -69,7 +69,7 @@ Map J-pop form to visual intensity (budget, not volume knob):
 | ラスサビ | maximum | earlier layouts return "on fire" + one move never seen before |
 | outro | resolution | bookend the intro image, transformed; credits |
 
-Also: put **stops** to work (freeze frames, black, a held breath), keep **at least three real holds**, and design the **ending as an idea** (残光: hard cut on the dead stop → a 3 s silent cyan afterimage of the title).
+Also: put **stops** to work (freeze frames, black, a held breath), keep **at least three real holds**, and design the **ending as an idea** from this film's own motif (残光's was a hard cut on the dead stop → a 3 s silent cyan afterimage of the title; an example, not a default to reuse).
 
 ## 7. Character
 
