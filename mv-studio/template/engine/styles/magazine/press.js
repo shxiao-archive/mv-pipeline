@@ -14,7 +14,7 @@
  *   paper '#efebe2', outside (round a shrunk page), inkK / inkA / inkB (MZ.INKS: riso-like inks)
  *   mode   0 spot (K + A + B separated from the proof) | 1 process CMYK | 2 mono (monoInk 0 K | 1 A | 2 B) |
  *          3 raw (the proof unscreened: a colour photograph glued in) | 4 duotone (K + duoInk 1 A | 2 B; duo ranges)
- *   screen scrType 0 euclidean dot | 1 line | 2 riso grain; cell 7 (px), ang [K, A, B] rad, scrMix 1 (0 = contone), grain 2.2
+ *   screen scrType 0 euclidean dot | 1 line | 2 riso grain; cell 5 (px), ang [K, A, B] rad, scrMix 0.8 (0 = contone), grain 1.7
  *   offK / offA / offB [dx, dy] px     misregistration per plate (snare: MZ.react)
  *   tone [contrast, gamma, lo, hi]     the proof's tone curve before separation; photoAmt, inkAmt
  *   xf [zoom, rot, dx, dy]             the page under the camera (kick punch: MZ.react)
@@ -48,10 +48,10 @@
 
   MZ.defaults = () => ({
     paper: MZ.INKS.paper, outside: '#141312', inkK: MZ.INKS.black, inkA: MZ.INKS.red, inkB: MZ.INKS.teal,
-    mode: 0, monoInk: 0, duoInk: 2, duo: [0.25, 1, 0, 0.8], cell: 7, scrType: 0, scrMix: 1, grain: 2.2,
+    mode: 0, monoInk: 0, duoInk: 2, duo: [0.25, 1, 0, 0.8], cell: 5, scrType: 0, scrMix: 0.8, grain: 1.7,
     ang: [0.7854, 0.2618, 1.309], offK: [0, 0], offA: [0, 0], offB: [0, 0], tone: [1, 1, 0, 1], photoAmt: 1, inkAmt: 1,
     xf: [1, 0, 0, 0], bleed: 0, paperAmt: 1, backMode: 0, inkLight: 0, lightK: '#f4f1ea', lightA: '#ff3b30', lightB: '#47d6e6',
-    neg: 0, ca: 0, xerox: 0, vig: 0.35, grainAmt: 0.035, gain: 1, flash: [1, 1, 1, 0],
+    neg: 0, ca: 0, xerox: 0, vig: 0.35, grainAmt: 0.025, gain: 1, flash: [1, 1, 1, 0],
   });
 
   // ---------------------------------------------------------------- the two layers

@@ -35,10 +35,10 @@ Z.scene('myPage', { init: () => MZ.loadFonts(), draw(ctx, S) {
 | `paper`, `outside` | `#efebe2`, `#141312` | warm off-white; `outside` is what shows round a page that is zoomed out |
 | `inkK`, `inkA`, `inkB` | black, red, teal | `MZ.INKS` names or `#hex`. Dark key; spots of different hue and similar density separate best |
 | `mode` | 0 | 0 spot (K + A + B by density) · 1 process CMYK · 2 mono (`monoInk` 0/1/2) · 3 raw proof · 4 duotone (K + `duoInk` 1 A / 2 B, `duo` = [K from, K to, spot from, spot to] in darkness 0..1) |
-| `scrType` | 0 | 0 euclidean dot · 1 line · 2 riso grain (`grain` px) |
-| `cell` | 7 | 5–6 magazine, 8–10 zine, 12–16 a poster or a transition |
+| `scrType` | 0 | 0 euclidean dot · 1 line · 2 riso grain (`grain` px, 1.7) |
+| `cell` | 5 | 5–6 magazine, 8–10 zine, 12–16 a poster or a transition |
 | `ang` | [45°, 15°, 75°] | radians; the classic angles avoid moiré |
-| `scrMix` | 1 | 0 = contone (no dots) |
+| `scrMix` | 0.8 | 0 = contone (no dots), 1 = pure dots. Photos need some contone to keep their detail: at 1 with a 7 px cell they read blurry at 1080p |
 | `offK`, `offA`, `offB` | [0, 0] | px; misregistration. A slip is 4–8 px; a broken reprise 10–28 px |
 | `tone` | [1, 1, 0, 1] | contrast, gamma, black point, white point of the proof before separation |
 | `photoAmt`, `inkAmt` | 1 | fade the picture or the type out of the plate |
@@ -49,7 +49,7 @@ Z.scene('myPage', { init: () => MZ.loadFonts(), draw(ctx, S) {
 | `neg` | 0 | 0..1 negative reprint |
 | `ca` | 0 | px of chromatic split (use sparingly) |
 | `xerox` | 0 | copier streaks 0.2–0.5 |
-| `vig`, `grainAmt` | 0.35, 0.035 | the press's own vignette and grain |
+| `vig`, `grainAmt` | 0.35, 0.025 | the press's own vignette and grain |
 | `gain` | 1 | overall exposure |
 | `flash` | [1, 1, 1, 0] | rgb + amount |
 
