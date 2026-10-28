@@ -30,14 +30,20 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
 6. **Literal and warm.** The pages show what the song is about, readable cold: who is travelling, where, with whom.
    One colour script across the book (a land or a light per section), a few gentle continuity devices (a satchel, a
    path that keeps going).
+7. **Every line is its own picture.** Stage each lyric line as the concrete thing it says, the way a picture book
+   illustrates each sentence: an object changes hands, something appears, someone new enters, the weather or the
+   light changes. Vary the shot size (wide, medium, close on a face or a hand) and bring in props and townsfolk.
+   *Why:* two figures walking through eighteen spreads is one picture repeated; the reader turns the page to see
+   what happens next.
 
 ## 2. Art construction
 
 - **Sets** after the reference film's journey: sky gradient, a sun on the side away from the text, two far ranges,
   near hills with trees, the ground, the path the cast walks on, tissue flowers, the grass strip. A land is a palette;
   write the film's own for its places (a market town, a wheat field, a harbour) with the same pieces plus its props.
-- **Cast:** either jointed dolls (`PC.story.looks`: hair, outfit, trim, ears, tail; give each role a colour and one
-  shape of its own) or a reference sheet per role from the image generator the user chose (picture-book proportions,
+- **Cast:** preferably the folk rig (`PC.story.folk`: a custom look per role, generic townsfolk for extras; poses,
+  expressions and hand anchors for props; STYLE.md §2), or jointed dolls (`PC.story.looks`: hair, outfit, trim, ears,
+  tail; give each role a colour and one shape of its own) or a reference sheet per role from the image generator the user chose (picture-book proportions,
   about four heads tall; side view facing left and front view; flat contrasting background), the background removed,
   looked at, then cut with `tools/cut_puppet.py`. Set the cast's relative heights. Keep extras (tails, capes) as their
   own pieces.
@@ -49,7 +55,9 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
 
 | move | feel | when | size |
 |---|---|---|---|
-| walk across the spread | the journey | most spreads | a steady pace, left to right going out (right to left coming home) |
+| the line's event | what the line says, shown | every line | a prop handed over, something popping up from the page, a newcomer stepping in; on the word that names it |
+| walk across the spread | the journey | between events, never a whole run of lines | a steady pace, left to right going out (right to left coming home) |
+| shot size | closeness | per line | wide (s 1.35) for a place, medium (2.2) for an exchange, close (4.2) for a face or a hand |
 | page turn | the next part of the story | between spreads | 1–2 beats; never a dissolve |
 | ink-in text | being read aloud | every line | per character, as sung |
 | small life | the page breathes | always | clouds drift, grass sways, a tail or a cape swings |
@@ -68,9 +76,10 @@ which line gets the spread with no text.
 - RPG or game language (HUD, coins, LV UP, battles, menus) unless the user asks for it (the kit is still in the
   engine: STYLE.md §5).
 - Ink outlines; mottled or dirty paper; glows without a paper source; dissolves; camera moves.
+- Runs of spreads that are only the cast walking; every spread at the same shot size.
 - Existing characters or illustrations; the reference film's song, cast or story.
 
 ## 6. Where it lives
 
-`scene:pcStory` and `PC.story.*` (puppet, looks, land, cut, tissue), `PC.doll`, `tools/cut_puppet.py`, `scene:pcBook` (the bookends),
+`scene:pcStory` and `PC.story.*` (puppet, folk, looks, land, cut, tissue), `folk.js` (`window.PCF`), `PC.doll`, `tools/cut_puppet.py`, `scene:pcBook` (the bookends),
 the `pageTurn` transition. Starter: `--style papercraft`, an example to rewrite.

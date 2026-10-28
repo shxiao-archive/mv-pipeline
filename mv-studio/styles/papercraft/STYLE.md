@@ -34,9 +34,24 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: fa
   texture per shape. The book (desk, cloth cover, page stack, gutter) is drawn by the scene. Landscape only.
 - Bookends: `pcBook` `{ mode: 'open' | 'close' }`. Between spreads: `pageTurn` (1–2 beats).
 
-## 2. The cast: jointed dolls, or reference sheets cut into puppets
+## 2. The cast: the folk rig (preferred), jointed dolls, or reference sheets cut into puppets
 
-Two kinds (BRIEF §1.5; the user picks after a walking clip of each):
+**Folk rig (preferred).** `PC.story.folk.<who> = { look: {...} | variant: 'beret' | 'bonnet' | ..., seed }` draws the
+role with the vendored folk rig (`folk.js`, `window.PCF.drawCitizen`; `vendor/` is the source, `vendor/build.mjs`
+rebuilds it). A cast entry passes its own keys through: `pose` (walk, idle, point, offer, wave, cheer, clap, lookUp,
+hugSelf, turnHead, stepBack, raiseHand, flee, push…), `expr` (smile, happy, surprise, worried, curious, hope, sleepy…),
+`joints` / `jointsSet` (head, lean, earPerk, tailWag…), `hat: false`. `hold(g, A)` draws a prop at the returned anchors
+(`A.handF`, `A.handB`, `A.head`, `A.mouth`, `A.hat`, world px, `A.scale`, `A.face`): an apple handed over, a lantern, a
+horn at the mouth. `{ folk: { variant, seed } }` in a cast entry draws an extra with no role (a baker, a musician, a child).
+`s: 1` is about 186 px: a wide spread s ≈ 1.35, a medium one ≈ 2.2 (feet on the path), a close-up ≈ 4.2 (feet below
+the page, the face large). Faces and expressions read only from medium size up: put the acting there.
+
+The rig's `sit` does not read as seated at story scale: seat figures behind a log, a wall or a table drawn in front
+(`front(g, S)`) that hides the legs. An animal look (ears, a tail) takes `earPerk` / `tailWag` joints on the beat of
+what it hears. The reference film's own story characters (its herald, guard, scribe, named child) are not ours; its
+generic townsfolk variants are.
+
+Two older kinds (BRIEF §1.5; the user picks after a walking clip):
 
 **Jointed doll (code).** `PC.story.looks.<who> = { detail: 1, hairStyle, hair, outfit, trim, legs, shoes, hat, ears,
 earIn, tail, tailTip, seed }` (every `PC.doll` look option; `ears` and `tail` take a colour) and that role is drawn as
@@ -63,9 +78,16 @@ Keep scale consistent: the starter's `s: 0.7` puts a 640-px `tall` role at ~450 
 
 ## 3. Motion
 
-The frame holds: motion is the cast walking (a steady pace, `walk: 1`, `phase = x / STRIDE` so the feet plant), the
-clouds, the grass, the extras swinging, the text inking in, the page turns. Accents on lyric cues: a stop, a nod
-(`nod`), a turn (`face`), a character stepping in. Run `motion_check.py` on renders: static stretches ≤ 10 %.
+The frame holds: motion is what happens on the page. Walking is the connective tissue, not the content: each lyric
+line gets its own spread with its own event, staged literally from what the line says (a prop handed over, a butterfly
+landing on a hat, a town appearing, a hat blown off and caught, a blanket pulled up, a lantern lit), timed to the
+words that name it. Ease appearances over a few beats (a smoothstep of time between two cues) (pop-up from the page, a slide in from the
+edge) and the rig's poses and expressions for the acting. Small life fills the rest: the clouds, the grass, a tail,
+the text inking in, the page turns. Run `motion_check.py` on renders: static stretches ≤ 10 %.
+
+Before rendering, look at a contact sheet of one still per line (`tools/stills.mjs --times ... --sheet`): if two
+neighbouring lines show the same picture (two figures walking on a path), the second needs its own event, a change of
+shot size or a new place.
 
 ## 4. New scenes
 
