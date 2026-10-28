@@ -25,7 +25,7 @@ import { browserChannel, gpuArgs, launchBrowser, FFMPEG, underRoot } from './kit
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT = path.resolve(__dirname, '..');
-const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json)$/;   // as tools/engine_page.mjs
+const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json|assets\/cast\/rig\.json)$/;   // as tools/engine_page.mjs
 
 // ------------------------------------------------------------------ args
 const HELP = `

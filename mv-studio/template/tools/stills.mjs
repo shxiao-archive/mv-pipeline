@@ -43,7 +43,7 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await launchBrowser({ headless: true, args: [...gpuArgs(), '--enable-gpu-rasterization'] });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 const errors = [];
-const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json)$/;    // probed by the engine; may not exist
+const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json|assets\/cast\/rig\.json)$/;    // probed by the engine; may not exist
 page.on('response', r => { if (r.status() >= 400 && !OPTIONAL.test(new URL(r.url()).pathname)) { const s = `[page] HTTP ${r.status()} ${new URL(r.url()).pathname}`; errors.push(s); console.log(s); } });
 page.on('console', m => { if ((m.type() === 'error' || m.type() === 'warning') && !/^Failed to load resource/.test(m.text())) { const s = `[page ${m.type()}] ${m.text().slice(0, 300)}`; errors.push(s); console.log(s); } });
 page.on('pageerror', e => { errors.push(String(e)); console.log('[pageerror]', String(e).slice(0, 500)); });
