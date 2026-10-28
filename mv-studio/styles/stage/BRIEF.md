@@ -18,7 +18,8 @@ is that it was all a play.
 3. **The story spine is escalation of size and stakes.** The lead grows (a doodle → stage-sized → planet-sized → back
    to cute), or a running prop climbs every chorus (a meter, a pile, a crack). *Why:* the choruses become one
    story, and the finale has something to pay off.
-4. **Big worlds the camera travels through.** A set isn't a card. The camera tilts up through the fly loft into the
+4. **Big worlds the camera travels through; the stage only frames them.** Each chapter goes to its own painted place,
+   and the stage returns only for the curtain, the choruses and the bow (about one shot in five). A set isn't a card. The camera tilts up through the fly loft into the
    sky, pushes into an eye, chases a rocket, with ink speed streaks that scale with the camera's real speed. *Why:*
    scale and travel are what make a painted show feel like a film.
 5. **Stagecraft you can see.** Flats, strings, trapdoors, costumes, spotlights, a painted backdrop that wobbles. *Why:*
@@ -67,7 +68,7 @@ pan, tilt or on-beat bump on every shot); boil on the lines; the camera is bold.
 All of this is the identity; the song decides:
 - how far the show goes off the rails;
 - what grows (the lead, a prop, a number);
-- which chapters happen on the stage and which in painted worlds;
+- which painted worlds the chapters travel through (the stage frames them; it is not where the film lives);
 - where the twist lands.
 
 ## 5. How the reference film was made
@@ -90,6 +91,7 @@ All of this is the identity; the song decides:
 ## 7. Avoid
 
 - Shots where nothing happens; gags that need a caption; signs that repeat the lyric.
+- A film that never leaves the stage: backdrops flown in behind the proscenium are not worlds.
 - Faces that snap; dances off the beat.
 - Choruses that repeat instead of growing; an ending that just stops.
 - Any existing character or mascot (the reference film's mascot belongs to a company). The troupe is designed for each

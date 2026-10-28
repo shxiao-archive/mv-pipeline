@@ -13,9 +13,15 @@ character. Design your own troupe for every film.
 ## 1. The idea
 
 The film is a **stage show that the song puts on**. It opens on a painted curtain and ends on the same curtain. In
-between, an original puppet troupe acts the song out, line by line, as cartoon gags. Each chapter happens in one place:
-a painted set (`stSet`) or the stage itself (`stShow`). The choruses return to the **same stage**, and each one is
-bigger than the last. Often there is a twist at the end ("it was all a play": the camera pulls back, everyone bows).
+between, an original puppet troupe acts the song out, line by line, as cartoon gags. Often there is a twist at the end
+("it was all a play": the camera pulls back, everyone bows).
+
+- **The stage is the frame, not the location.** Each chapter happens in its own painted world (`stSet` or a scene of
+  your own: a road, a market, a cliff, a sky, an inn), and most shots get a place of their own inside it. The stage
+  (`stShow`) appears only at the opening curtain, the chorus returns (each bigger than the last) and the reveal and bow:
+  about one shot in five. The reference film has 62 shots in about 35 places, and only about 10 shots on the stage.
+  Cloths flown in behind the proscenium do not count as a world: a film that never leaves the boards reads as one
+  static set, however many backdrops it changes.
 
 - **Something happens in every shot.** A character does something, something breaks, transforms, chases or falls. A
   shot is 1.4–4 s, so the gag has to read instantly: one clear action, one big silhouette.
@@ -107,5 +113,6 @@ Build these, each with a model sheet you have looked at (`engine/sheets/`; start
   chorus (a meter and a pump, a pile, a crack); one painted set per chapter with its palette.
 - **Sound effects:** a handful in the whole film (`ST.sfx`), each a punch line.
 
-Targets: chapters of 6–10 shots; every shot a named gag in phases (hop → slide → teeter → fall → land); the lead about
-40 % of the frame height in chorus and dance shots; the four choruses on the same stage, escalating.
+Targets: chapters of 6–10 shots, each chapter in its own world; every shot a named gag in phases (hop → slide → teeter →
+fall → land) with its own drawn place (the reference spends about 150 lines of drawing per shot); the lead about 40 % of
+the frame height in chorus and dance shots; the stage only for the curtain, the chorus returns and the bow, escalating.
