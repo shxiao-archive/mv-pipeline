@@ -39,7 +39,8 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: fa
    character, full body, a side view facing left and a front view, picture-book proportions (about four heads), cut
    paper collage style, on a flat background that contrasts with the figure (a pale figure on cream defeats background
    removal: use slate or green). Long tails, capes or scarves: generate them as a separate piece on a flat background.
-2. **Remove the background** (the generator's tool or `tools/alpha_matte.py`) and look at the cut-out on grey.
+2. **Remove the background** (the generator's tool, `tools/alpha_matte.py`, or `"key": true` in puppets.json for a flat
+   background) and look at the cut-out on grey.
 3. **Cut**: write `assets/cast/puppets.json` (the side and front x spans, the neck line under a collar or hair, the hem
    line under a coat or skirt, `tall` for relative heights, `extras` with their join point) and run
    `python tools/cut_puppet.py` → `assets/cast/<role>_{head,body,leg,front,<extra>}.png` + `rig.json`. The docstring

@@ -26,7 +26,7 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
    cape end) that move like a paper puppet: legs swing at the hip, the head nods. *Why:* a crude code doll reads as
    a placeholder; an illustration with a few hinges reads as the book's own character.
 6. **Literal and warm.** The pages show what the song is about, readable cold: who is travelling, where, with whom.
-   One colour script across the book (a land or a light per section), a few gentle continuity devices (a scarf, a
+   One colour script across the book (a land or a light per section), a few gentle continuity devices (a satchel, a
    path that keeps going).
 
 ## 2. Art construction
@@ -48,7 +48,7 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
 | walk across the spread | the journey | most spreads | a steady pace, left to right going out (right to left coming home) |
 | page turn | the next part of the story | between spreads | 1–2 beats; never a dissolve |
 | ink-in text | being read aloud | every line | per character, as sung |
-| small life | the page breathes | always | clouds drift, grass sways, a tail or scarf swings |
+| small life | the page breathes | always | clouds drift, grass sways, a tail or a cape swings |
 | a look, a stop | acting | on a lyric cue | a nod, a turn to the other, a stop to point; hold ≥ 0.2 s |
 | book open / close | bookends | the first and last frames | the cover is a hinge |
 

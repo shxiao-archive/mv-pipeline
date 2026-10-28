@@ -7,8 +7,9 @@
 
 A sheet is one generated image of a character on a removed (transparent) background: a side view facing LEFT and a
 front view, both full body (generate it, remove the background with the generator's tool or tools/alpha_matte.py,
-look at it). puppets.json, per role:
-    "hero": { "src": "assets/cast/hero_cut.png",
+look at it). A sheet on a flat background that contrasts with the figure can be keyed here instead: "key": true.
+puppets.json, per role:
+    "hero": { "src": "assets/cast/hero_cut.png",   (or "src": "assets/ref/hero_sheet.png", "key": true)
               "side": [0.56, 0.70],      the side view's x span, as fractions of the sheet width
               "neck": 110, "hem": 513,   sheet rows: the head is cut above the neck line, the legs below the hem line
               "front": [0.05, 0.25],     the front view's x span (drawn as one piece)
@@ -55,7 +56,10 @@ def cut(spec: dict, root: Path, out: Path) -> dict:
     rig, files = {}, {}
     for who, s in spec.items():
         im = np.array(Image.open(root / s["src"]).convert("RGBA"))
-        im[:, :, 3] = np.array(Image.fromarray(im[:, :, 3]).filter(ImageFilter.MinFilter(3)))   # drop the matte's 1 px fringe
+        if s.get("key"):
+            im = key_flat(im)
+        else:
+            im[:, :, 3] = np.array(Image.fromarray(im[:, :, 3]).filter(ImageFilter.MinFilter(3)))   # drop the matte's 1 px fringe
         W = im.shape[1]
         side = im[:, int(s["side"][0] * W):int(s["side"][1] * W)].copy()
         if s.get("mirror"):
@@ -125,6 +129,11 @@ def selftest():
         x = R["extras"][0]
         assert x["w"] == 158 and x["h"] == 18 and abs(x["base"][1] - 8.5) < 1 and x["at"] == [25.0, -129.0], x
         assert (d / "out/hero_tail.png").exists() and (d / "out/rig.json").exists()
+        flat = np.where(sheet[:, :, 3:] > 0, sheet, np.array([100, 120, 130, 255], np.uint8))   # the same sheet on flat slate
+        Image.fromarray(flat[:, :, :3]).save(d / "f.png")
+        K = cut({"hero": dict(spec["hero"], src="f.png", key=True, extras=[])}, d, d / "outk")["hero"]
+        assert all(K[k] == R[k] for k in ("head", "body", "front", "neck", "hip")), (K, R)
+        assert abs(K["leg"]["w"] - R["leg"]["w"]) <= 2, (K, R)   # the median fills the coat/leg corner a little
     print("cut_puppet selftest ok")
 
 
