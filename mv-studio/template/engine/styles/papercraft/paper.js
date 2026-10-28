@@ -288,10 +288,7 @@
     if (tex) return tex;
     const size = 512, c = Z.canvas(size, size), g = c.getContext('2d'), rnd = Z.rng(7);
     g.fillStyle = '#ffffff'; g.fillRect(0, 0, size, size);
-    for (let i = 0; i < 70; i++) {
-      const x = rnd() * size, y = rnd() * size, r = 30 + rnd() * 110, a = 0.018 + rnd() * 0.03;
-      for (let ox = -1; ox <= 1; ox++) for (let oy = -1; oy <= 1; oy++) { const grd = g.createRadialGradient(x + ox * size, y + oy * size, 0, x + ox * size, y + oy * size, r); grd.addColorStop(0, `rgba(120,95,70,${a})`); grd.addColorStop(1, 'rgba(120,95,70,0)'); g.fillStyle = grd; g.fillRect(x + ox * size - r, y + oy * size - r, r * 2, r * 2); }
-    }
+    // fibre only: soft radial mottles read as dirt once multiplied over every sheet (a user's note on a paper film)
     g.lineCap = 'round';
     for (let i = 0; i < 900; i++) {
       const x = rnd() * size, y = rnd() * size, len = 4 + rnd() * 18, ang = rnd() * TAU, dark = rnd() < 0.7;

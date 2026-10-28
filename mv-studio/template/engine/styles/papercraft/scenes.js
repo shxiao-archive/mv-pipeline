@@ -121,7 +121,7 @@
         if (paper) {
           f.save(); PC.applyCam(f, C, depth); f.fillStyle = f.createPattern(PC.texture(), 'repeat'); f.fillRect(-1600, -600, 5200, 2400); f.restore();
           f.globalCompositeOperation = 'destination-in'; f.drawImage(A, 0, 0);
-          x.globalCompositeOperation = 'multiply'; x.globalAlpha = 0.9; x.drawImage(F, 0, 0);
+          x.globalCompositeOperation = 'multiply'; x.globalAlpha = 0.5; x.drawImage(F, 0, 0);   // faint: the sheet stays clean
         }
         if (o.sat != null && o.sat < 1) {
           f.globalCompositeOperation = 'copy'; f.globalAlpha = 1; f.drawImage(A, 0, 0);
