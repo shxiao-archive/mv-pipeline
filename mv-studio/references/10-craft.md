@@ -258,7 +258,7 @@ its own; `evals/grade.py` counts own lines per shot (bar: 30).
 
 | budget | do |
 |---|---|
-| solo, ~300–600 k tokens | the order of §1 at small scale: write the shot specs; build a small library (the cast on `Z.rig.biped` (`PC.doll` / `ST.person`: 34 poses, 19 expressions built in) plus the film's own 5–10 poses and gag states, 2–3 sets with preset cameras and 2 lighting states, the gag prop); one model sheet per asset; then shots; one revision round on the worst third of the shots |
+| solo, ~300–600 k tokens | the order of §1 at small scale: write the shot specs; build a small library (the cast built natively the way the style's reference repo builds characters (its own primitives, a body table per build, poses as parameters; never the shared `Z.rig.biped` template) with the film's 5–10 poses and gag states, 2–3 sets with preset cameras and 2 lighting states, the gag prop); one model sheet per asset; then shots; one revision round on the worst third of the shots |
 | solo, several sessions | as above, plus a revision brief between sessions (§8) and a second library pass |
 | team, millions of tokens | `references/11-team.md`: storyboard proposals and judges, parallel asset builders with model sheets and API notes, seam contracts, parallel block builders, independent reviewers |
 

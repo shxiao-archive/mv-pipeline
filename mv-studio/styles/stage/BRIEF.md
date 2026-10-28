@@ -33,7 +33,7 @@ is that it was all a play.
 
 ## 2. Art construction (what makes a frame look hand-made and finished)
 
-- **Every kind of character has its own silhouette:** a human on the person rig, an animal on four legs, a creature
+- **Every kind of character has its own silhouette:** a human painted natively the way the style's reference builds characters (from primitives, a body table per build, poses as parameters), an animal on four legs, a creature
   built from what it is. One puppet body recoloured for every role reads as one creature repeated.
 - **Characters stay flat and readable:** a flat wash, a lighter pool at the top left, a darker settle along the
   bottom, then one continuous tapered ink line. Watercolour granulation, bleeds and hatching are kept for
@@ -104,8 +104,8 @@ All of this is the identity; the song decides:
 
 Search `grep '"stage"' index/index.jsonl`:
 - the scenes `scene:stShow`, `scene:stSet`, `scene:stTitle`;
-- `helper:ST.person` for humans, `helper:ST.puppet` (an original gumdrop puppet) for a mascot lead and its troupe; every
-  other kind of character is a draw function of your own;
+- `helper:ST.puppet` (an original gumdrop puppet) for a mascot lead and its troupe; every other character, humans
+  included, is a draw function of your own painted natively the way the style's reference builds characters (from primitives, a body table per build, poses as parameters) (`helper:ST.person` is the shared template rig: study it, never cast it);
 - `helper:ST.mood`, `helper:ST.move`;
 - painting with `ST.paint` and `ST.ink`;
 - the set (`ST.curtains`, `ST.spot`, `ST.floor`, `ST.sunburst`), `ST.sfx`, `ST.confetti`;

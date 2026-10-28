@@ -55,7 +55,8 @@ grin, o, O, flat, wobble, cat; `blush`), hats (`party crown top halo bow flower`
 music ! ? zzz`), arms with hand hooks for props (`armL / armR`), and a `draw` hook for accessories.
 
 - **Every role gets its own build, never a recolour.** `ST.puppet` is one body for one role (a mascot lead, or a
-  troupe of the same kind). Humans go on `ST.person`; an animal, a creature or a guest gets a draw function of its own
+  troupe of the same kind). Every other role, humans included, gets a draw function of its own painted natively the way the style's reference builds characters (from primitives, a body table per build, poses as parameters), never the shared template rig
+  (`ST.person` / `Z.rig.biped`, which makes every film's people look alike)
   on the same API (`(x, y, u, o)` from the ground point, the `ST.mood` faces, hand hooks). Build the silhouette from
   what it is: a tube along a curling spine for tentacles, a tail or a serpent; a bumpy outline for fur or cloud;
   four legs and a head on a neck for a beast. The feature that defines it is also its gag (cheeks that swell past the
@@ -111,12 +112,12 @@ pile, a giant version of the lead), so the choruses read as one story. End on th
 
 ## 6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)
 
-Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `engine/styles/stage/stage_person.js`):
+Build these, each with a model sheet you have looked at (`engine/sheets/`; study `engine/styles/stage/stage_person.js` for the API, then build your own):
 - **The cast, one build per kind:** the lead (on `ST.puppet` when it is a mascot), the troupe of its kind, and a draw
   function for every other kind of character; the face vocabulary is the point: 13 eye shapes, 7 mouths, 6 hats,
   8 emotes, 12 beat-synced moves, `ST.mood` changes — use them all over the film.
-- **A human on `ST.person`** (the biped skeleton: 34 poses, 19 expressions; coat, hair, glasses, bowtie): the "I" of the
-  song or a stagehand; props in the hand (`hold`).
+- **Humans, one build each** (painted natively the way the style's reference builds characters (from primitives, a body table per build, poses as parameters); the poses and faces you need, not a
+  generic skeleton): the "I" of the song or a stagehand; props in the hand.
 - **Guests:** each verse may bring a guest character, drawn by the chapter that introduces it and kept as a function so
   the finale can bring every guest back for the curtain call.
 - **The stage set:** backdrop, floor, curtains, spotlights, and the **running prop on stage** that gets worse every

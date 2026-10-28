@@ -522,7 +522,7 @@
 {"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:156-201","lines":46}
 {"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:202-207","lines":6}
 {"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:208-219","lines":12}
-{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:220-322","lines":103}
+{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:220-323","lines":104}
 {"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
 {"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-54","lines":28}
@@ -624,10 +624,10 @@
 {"id":"manual:styles/stage/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/stage/BRIEF.md:103-115","lines":13}
 {"id":"manual:styles/stage/STYLE#1","kind":"manual","does":"1. The idea","where":"<skill>/styles/stage/STYLE.md:13-37","lines":25}
 {"id":"manual:styles/stage/STYLE#2","kind":"manual","does":"2. The look","where":"<skill>/styles/stage/STYLE.md:38-49","lines":12}
-{"id":"manual:styles/stage/STYLE#3","kind":"manual","does":"3. The troupe (design yours)","where":"<skill>/styles/stage/STYLE.md:50-73","lines":24}
-{"id":"manual:styles/stage/STYLE#4","kind":"manual","does":"4. Building it","where":"<skill>/styles/stage/STYLE.md:74-104","lines":31}
-{"id":"manual:styles/stage/STYLE#5","kind":"manual","does":"5. Escalation and the finale","where":"<skill>/styles/stage/STYLE.md:105-111","lines":7}
-{"id":"manual:styles/stage/STYLE#6","kind":"manual","does":"6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)","where":"<skill>/styles/stage/STYLE.md:112-129","lines":18}
+{"id":"manual:styles/stage/STYLE#3","kind":"manual","does":"3. The troupe (design yours)","where":"<skill>/styles/stage/STYLE.md:50-74","lines":25}
+{"id":"manual:styles/stage/STYLE#4","kind":"manual","does":"4. Building it","where":"<skill>/styles/stage/STYLE.md:75-105","lines":31}
+{"id":"manual:styles/stage/STYLE#5","kind":"manual","does":"5. Escalation and the finale","where":"<skill>/styles/stage/STYLE.md:106-112","lines":7}
+{"id":"manual:styles/stage/STYLE#6","kind":"manual","does":"6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)","where":"<skill>/styles/stage/STYLE.md:113-130","lines":18}
 {"id":"manual:styles/vocaloid/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/vocaloid/BRIEF.md:11-77","lines":67}
 {"id":"manual:styles/vocaloid/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/vocaloid/BRIEF.md:78-112","lines":35}
 {"id":"manual:styles/vocaloid/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/vocaloid/BRIEF.md:113-143","lines":31}

@@ -247,7 +247,8 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
   changes), `Z.rig.biped` (a generic skeleton: 34 poses incl. walk / run / jump / fall / dance moves, 19 expressions,
   `solve(o)` → skeleton, `anchors`, measured `STRIDE`), `Z.rig.face` (one face construction for a cast); stateless
   `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/biped.js`; the
-  styles' own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage).
+  styles' own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage); they are examples of the API, not a cast: a film paints its
+  characters natively in its style's own way (references/10).
   Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
 - **Preloading:** a scene preloads only the images its args name (`illust`: bg / chars / layers). An image a custom
   `fx` or `text` hook draws needs `await Z.preload([...])` in `Z.setup`, or it is missing on the first frames.
