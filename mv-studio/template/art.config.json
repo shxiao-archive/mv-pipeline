@@ -7,7 +7,7 @@
   "grok": {},
   "novelai": {
     "_doc": "Defaults for tools/novelaigen.py. Free on Opus: <= 1048576 px and <= 28 steps, no references.",
-    "model": "nai-diffusion-4-5-full",
+    "model": "nai-diffusion-5-full",
     "steps": 28,
     "scale": 5.0,
     "max_pixels": 1048576

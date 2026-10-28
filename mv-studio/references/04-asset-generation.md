@@ -283,7 +283,7 @@ shadow-free; the engine adds contact shadows and reflections).
 
 ## 12. NovelAI (mv-studio: `tools/novelaigen.py`)
 
-NovelAI's image API with its anime-trained models (default `nai-diffusion-4-5-full`): strong for illustrated characters
+NovelAI's image API with its anime-trained models (default `nai-diffusion-5-full`): strong for illustrated characters
 and painted backgrounds, weaker for photographic plates, legible objects and UI-like pictures. Same jobs files (`aspect`
 as Grok plus `4:3` `3:4`; sized to ≤ 1 MP in multiples of 64).
 ```bash
@@ -299,7 +299,7 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
   back-off.
 - **Cost.** On an Opus subscription a plain generation up to 1 MP and 28 steps is free; larger sizes, more steps, img2img
   and references cost Anlas (HTTP 402 = no subscription or not enough Anlas; the tool stops at the first 401/402/403).
-- **Prompts.** The V4.5 models read natural language *and* Danbooru-style tags; a tag lead-in helps
+- **Prompts.** The V4.5 and V5 models read natural language *and* Danbooru-style tags; a tag lead-in helps
   (a count tag such as `solo` or `no humans`, `original`, the framing, then the subject). **Never use character, series or artist tags**:
   they reproduce existing characters and styles, which breaks "original characters only". The tool adds a negative
   prompt (`nsfw`, text, logo, watermark, bad hands, ...) from `art.config.json` → `novelai.negative`; a job adds its own
@@ -321,14 +321,14 @@ python tools/novelaigen.py assets/char/jobs_core.jsonl --out-dir assets/char    
 - **Seeds.** Default seed = hash of id + prompt, so a re-run gives the same image (the manifest records it). For
   another take change `"seed"` (or the prompt) and pass `--force`.
 - **References** (`"images"`), by `ref_mode`: `"character"` (V4.5 character reference: the identity of the first image;
-  `ref_strength`, `fidelity`; the default on V4.5), `"img2img"` (the first image is the starting picture, `"strength"`
+  `ref_strength`, `fidelity`; the default on V4.5; on V5 the default is `"img2img"`), `"img2img"` (the first image is the starting picture, `"strength"`
   0–1, default 0.6: re-framing a plate, a variant of a pose), `"vibe"` (V3 models). Character reference is the way to
   keep a master consistent across poses, and it costs Anlas. The reference request format is the least stable part of
   NovelAI's API: run one job first; on HTTP 400 try `img2img`, or go without and lean on the verbatim character
   sentence plus several takes (§9). On `nai-diffusion-5-full` the character reference returned HTTP 500 on every
   retry (iteration 6, 2026-10-24): with V5, leave `refs.char` empty and hold the design with `"char"` tags.
 - **Model / settings:** `art.config.json` → `novelai` (`model`, `steps`, `scale`, `sampler`, `noise_schedule`,
-  `max_pixels`, `negative`, `upscale_model`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-curated`,
+  `max_pixels`, `negative`, `upscale_model`); raw request overrides per job in `"nai": {...}`. Other models: `nai-diffusion-4-5-full`, `nai-diffusion-4-5-curated`,
   `nai-diffusion-4-full`, `nai-diffusion-3`. `NOVELAI_API_URL` overrides the endpoint (a proxy or a local mock).
 - The returned PNG is re-encoded on save (NovelAI's metadata chunks with the prompt are not kept).
 - **Edit jobs** (`"op"`, the source in `"images"`, no prompt; same jobs file, same one-at-a-time queue, all cost Anlas):

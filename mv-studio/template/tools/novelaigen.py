@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Image generation through the NovelAI image API -- the same jobs file as tools/imagegen.py and tools/grokgen.py.
 
-NovelAI's models are anime-trained (V4.5 by default). The key comes ONLY from the
+NovelAI's models are anime-trained (V5 by default). The key comes ONLY from the
 environment variable NOVELAI_API_KEY (a persistent API token from NovelAI's account settings, set by the user in their
 own shell); it is never read from, or written to, a file, and never printed. Without it this tool stops before any
 request.
@@ -21,7 +21,7 @@ Job fields (tools/imagegen.py: id, prompt, out, transparent, key, images, trim; 
                                change the seed or the prompt for another take)
   "ref_mode": "character" | "img2img" | "inpaint" | "vibe"
                                how "images" are used: "character" = V4.5 character reference (identity of the FIRST
-                               image; default on V4.5 models), "img2img" = the first image is the starting picture
+                               image; default on V4.5, not V5: its character reference failed), "img2img" = the first image is the starting picture
                                ("strength" 0..1, default 0.6), "inpaint" = repaint only the box "region" [u0, v0, u1, v1] (on the 8 px grid)
                                of the first image (the <model>-inpainting model; variants for tools/gen_table.py),
                                "vibe" = vibe transfer (V3 models only). A cut-out is flattened on the key colour first
@@ -72,7 +72,7 @@ KEY_ENV = "NOVELAI_API_KEY"
 SIZES = {"16:9": (1344, 768), "9:16": (768, 1344), "1:1": (1024, 1024), "2:3": (832, 1216), "3:2": (1216, 832),
          "4:3": (1152, 896), "3:4": (896, 1152)}
 DEFAULTS = {
-    "model": "nai-diffusion-4-5-full",
+    "model": "nai-diffusion-5-full",
     "steps": 28, "scale": 5.0, "sampler": "k_euler_ancestral", "noise_schedule": "karras", "cfg_rescale": 0.0,
     "quality_tags": True, "uc_preset": 0, "skip_cfg_above_sigma": None,
     # NSFW, text and existing-character look-alikes are never wanted in an MV asset
@@ -189,7 +189,7 @@ def build_request(job: dict, cfg: dict, data: bool = True) -> dict:
         if not r.is_file():
             raise FileNotFoundError(f"job {job['id']}: reference image {r} does not exist")
     if refs:
-        mode = job.get("ref_mode") or ("character" if gen >= 4.5 else "vibe" if not v4 else "img2img")
+        mode = job.get("ref_mode") or ("character" if 4.5 <= gen < 5 else "vibe" if not v4 else "img2img")   # V5 character reference: HTTP 500 (04 §12)
         if mode == "character":
             if gen < 4.5:
                 raise ValueError(f"job {job['id']}: ref_mode 'character' needs a V4.5 model (model is {model})")

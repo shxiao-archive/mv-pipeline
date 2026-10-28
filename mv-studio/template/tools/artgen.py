@@ -82,7 +82,7 @@ def builtin() -> dict:
                  "collect": [PY, str(TOOLS / "grokgen.py"), "collect", "{jobs}", "--out-dir", "{out_dir}"],
                  "note": "two steps around `bash tools/grok_run.sh` (Grok will not start from Python)"},
         "novelai": {"check": novelai, "cmd": [PY, str(TOOLS / "novelaigen.py"), "{jobs}", "--out-dir", "{out_dir}"],
-                    "dry": ["--dry-run"], "note": "anime models (V4.5); one image at a time; free <= 1 MP / 28 steps on Opus"},
+                    "dry": ["--dry-run"], "note": "anime models (V5); one image at a time; free <= 1 MP / 28 steps on Opus"},
     }
 
 
