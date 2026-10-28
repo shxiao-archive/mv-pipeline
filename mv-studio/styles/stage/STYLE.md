@@ -54,8 +54,17 @@ library (`eyes`: normal, look, happy, closed, wink, star, heart, swirl, x, dot, 
 grin, o, O, flat, wobble, cat; `blush`), hats (`party crown top halo bow flower`), emotes (`sweat heart spark anger
 music ! ? zzz`), arms with hand hooks for props (`armL / armR`), and a `draw` hook for accessories.
 
-- **Make the cast yours:** colours (`col / dk / lt`), the top, hats, sizes. Write a one-paragraph bible per character in
-  `docs/CONCEPT.md` (look, role, how it moves). For a different body, write your own draw function on the same API.
+- **Every role gets its own build, never a recolour.** `ST.puppet` is one body for one role (a mascot lead, or a
+  troupe of the same kind). Humans go on `ST.person`; an animal, a creature or a guest gets a draw function of its own
+  on the same API (`(x, y, u, o)` from the ground point, the `ST.mood` faces, hand hooks). Build the silhouette from
+  what it is: a tube along a curling spine for tentacles, a tail or a serpent; a bumpy outline for fur or cloud;
+  four legs and a head on a neck for a beast. The feature that defines it is also its gag (cheeks that swell past the
+  head, a mask that slips, a cap that falls off). A cast of one gumdrop in six colours reads as one creature
+  repeated. A variant of the lead (a costume, ears, a tail) goes through the `draw` hook, so it stays on-model.
+- **Vary size and pose, not only colour:** characters hold props, ride and drive, hang from one hand, get flung along
+  an arc and change scale through the film (tiny → person-sized → huge → back).
+- Write a one-paragraph bible per character in `docs/CONCEPT.md` (look, build, role, how it moves), and check each one
+  on a model sheet before any shot.
 - **The lead carries the story;** the troupe are backup dancers, stagehands, a jury, a crowd. Guests appear in a verse
   and come back for the curtain call.
 - **Scale:** tiny u ≈ 8–12, normal u ≈ 20–30, the lead in chorus and dance shots ≈ 40–50 (about 40 % of the frame height).
@@ -103,8 +112,9 @@ pile, a giant version of the lead), so the choruses read as one story. End on th
 ## 6. Asset library and density (what PDoomVideo built before its chapters; method: references/10, team: 11)
 
 Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `engine/styles/stage/stage_person.js`):
-- **The troupe on `ST.puppet`:** the lead's design plus 3–5 members (colour, top, hat); the vocabulary is the point:
-  13 eye shapes, 7 mouths, 6 hats, 8 emotes, 12 beat-synced moves, `ST.mood` changes — use them all over the film.
+- **The cast, one build per kind:** the lead (on `ST.puppet` when it is a mascot), the troupe of its kind, and a draw
+  function for every other kind of character; the face vocabulary is the point: 13 eye shapes, 7 mouths, 6 hats,
+  8 emotes, 12 beat-synced moves, `ST.mood` changes — use them all over the film.
 - **A human on `ST.person`** (the biped skeleton: 34 poses, 19 expressions; coat, hair, glasses, bowtie): the "I" of the
   song or a stagehand; props in the hand (`hold`).
 - **Guests:** each verse may bring a guest character, drawn by the chapter that introduces it and kept as a function so
