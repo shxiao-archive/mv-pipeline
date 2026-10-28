@@ -34,6 +34,8 @@ that is the film's story.
 6. **Characters are material.** A kanji is stamped across a photograph on every accent; a character is taken apart
    (a radical leaves as bubbles and what remains is a new word); a proofreader rings a word in red or strikes it out
    with トル. *Why:* Japanese type carries meaning in its parts; taking it apart is the film's way of thinking.
+   Show the character whole first, set as itself by the font, and swap to its parts only on the event that moves
+   them: a character assembled from separate glyphs never matches the real one and reads as misspelt.
 7. **When the paper is gone, type becomes light.** Over a dark world the ink layer prints as light (screen), not ink.
    *Why:* it says the page has been left behind while the words go on.
 8. **Memory as a single frame.** A one-tatum flash of a picture from earlier or later in the film, key-only negative,
