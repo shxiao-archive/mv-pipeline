@@ -241,14 +241,16 @@
     for (const x of ACC[key]) { if (x > t) break; h = x; }
     return h;
   };
+  // how much a drum accent at ht still rings at t (public so tools/pops.mjs can tell a reacting frame from a glitch)
+  MZ.ring = (t, ht, tau) => (ht < 0 ? 0 : Math.exp(-(t - ht) / tau));
   MZ.react = (F, t, amt = 1, o = {}) => {
     F.grainAmt += 0.03 * (Z.hit ? Z.hit('hat', t, 0.06) : 0);   // hats: paper texture, always
     if (!amt) return;
     const thr = o.thr ?? 0.8, gap = o.gap ?? 0.6;
     const kt = accent('kick', t, thr, gap), st = accent('snare', t, thr, gap);
-    if (kt >= 0) F.xf[0] *= 1 + 0.015 * amt * Math.exp(-(t - kt) / 0.1);
+    if (kt >= 0) F.xf[0] *= 1 + 0.015 * amt * MZ.ring(t, kt, 0.1);
     if (st >= 0) {
-      const s = amt * Math.exp(-(t - st) / 0.15), a = Z.rnds(Math.round(st * 1000), 7) * Math.PI * 2;   // one direction per hit
+      const s = amt * MZ.ring(t, st, 0.15), a = Z.rnds(Math.round(st * 1000), 7) * Math.PI * 2;   // one direction per hit
       F.offA = [F.offA[0] + Math.cos(a) * 6 * s, F.offA[1] + Math.sin(a) * 6 * s];
       F.offB = [F.offB[0] - Math.cos(a) * 3 * s, F.offB[1] - Math.sin(a) * 3 * s];
     }

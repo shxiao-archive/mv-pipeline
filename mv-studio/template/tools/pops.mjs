@@ -9,7 +9,7 @@
  *   POP    for 1-3 frames the picture changes and then comes back to what it was: a short flash, a missing
  *          frame, a glitch that escaped (signal-style glitches are deliberate: check they are the planned ones)
  *   HIT    a jump or pop within one frame of a beat, a lyric cut, a line's start or end, or a cue, or on a frame where
- *          the scene's code reads a drum hit still ringing (Z.hit above 0.05), a signal cut's burst (Z.SIG.kick above
+ *          the scene's code reads a drum hit still ringing (Z.hit or the magazine press's MZ.ring above 0.05), a signal cut's burst (Z.SIG.kick above
  *          0.05) or a signal vertical-hold jump (Z.SIG.vhold), or a change that goes away with the lyric layer off (the
  *          JIZURA part's own motion: its entrance, exit, layout move, fx event): an accent the edit asked for (a beat pulse, a shake on the snare, a slam, a JIZURA
  *          entrance or exit). Listed, never a failure: a check that failed hits sanded
@@ -44,6 +44,8 @@ await E.page.evaluate(() => {
   Z.hit = (k, t, tau) => { const v = h(k, t, tau); if (v > 0.05) window.__drum = 1; return v; };
   const kick = Z.SIG && Z.SIG.kick;
   if (kick) Z.SIG.kick = t => { const v = kick(t); if (v > 0.05) window.__drum = 1; return v; };
+  const ring = Z.MZ && Z.MZ.ring;   // the magazine press's plate slip / page punch on kick and snare accents (MZ.react)
+  if (ring) Z.MZ.ring = (t, ht, tau) => { const v = ring(t, ht, tau); if (v > 0.05) window.__drum = 1; return v; };
   // the signal layer's own vertical-hold jump is planned: the frame it fires on and the frame it snaps back on
   const vhold = Z.SIG && Z.SIG.vhold;
   if (vhold) Z.SIG.vhold = (f, d) => { const v = vhold(f, d); if (v || vhold(f - 1, d)) window.__drum = 1; return v; };
