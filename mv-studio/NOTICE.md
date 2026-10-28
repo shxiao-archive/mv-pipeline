@@ -95,6 +95,10 @@ paper doll is a generic original rig. `template/engine/core/rig.js` (joint table
 distance, two-bone IK, ground contact, time-lagged trails) and `core/blocks.js` follow its rig and block methods; the
 team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
 documents of all six study films (methods only; none of their characters, songs, copy or art).
+`styles/papercraft/vendor/` vendors its folk rig (`rigs/folk.js`, `core/`, ISC) with mv-studio additions (animal ears,
+a tail, a satchel; the walk, point, sit, offer, hugSelf and lookUp poses); `vendor/build.mjs` bundles it to
+`template/engine/styles/papercraft/folk.js` (`window.PCF`). Films use its construction, its custom looks and its
+generic townsfolk; its story's own characters (the herald, the guard, the scribe, the named child) are not used.
 
 ## The magazine style: adapted from he-drowns-mv-v2 — © 2026 ATRAXI (longruizhi2-beep), code MIT
 

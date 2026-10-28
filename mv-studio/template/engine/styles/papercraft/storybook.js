@@ -12,6 +12,11 @@
  *                                         neck, extras (a tail, a cape end) swing behind the body. A role with no rig
  *                                         entry falls back to a flat PC.doll (o.look: its options) so a new project
  *                                         renders before the cast is cut. s = 1: the role's `tall` px.
+ *   PC.story.folk[who] = o                draw that role with the folk rig (folk.js, window.PCF.drawCitizen: o.look a
+ *                                         custom look, or o.variant a townsfolk); a cast entry's own keys (pose, expr,
+ *                                         joints, hatFly, p, cycle) pass through, { folk: o } draws an extra with no role,
+ *                                         and hold(g, A) draws a prop at the returned anchors (A.handF, A.head, A.hat).
+ *                                         s 1 ~ 186 px; walk: 1 takes the gait from x. Preferred: faces, expressions, poses.
  *   PC.story.looks[who] = look            draw that role as the jointed PC.doll instead (its rigged walk: knees, arms,
  *                                         planted feet; look: the doll's options, ears / tail too). s 0.42 ~ 260 px.
  *   PC.story.cut(g, path, col, o)         a collage piece: painted tissue fill, a torn white edge (o.edge px), a shadow
@@ -75,8 +80,15 @@
     darkLegs.set(who, c); return c;
   };
   const place = (g, im, r) => g.drawImage(im, r.x, r.y, r.w, r.h);
+  SB.folk = {};                                                  // who -> PCF.drawCitizen options ({ look } or { variant }): the folk rig
   SB.puppet = (g, who, x, y, s, o = {}) => {
-    const R = RIG && RIG[who], { face = 1, phase = 0, walk = 0, nod = 0, t = 0 } = o, look = SB.looks[who];
+    const R = RIG && RIG[who], { face = 1, phase = 0, walk = 0, nod = 0, t = 0 } = o, look = SB.looks[who], fl = o.folk ?? SB.folk[who];
+    if (fl) {                                                    // the folk rig: s = 1 ~ 186 px; the gait is taken from x so the feet plant
+      const cycle = walk ? face * x / (PCF.citizenStride(fl) * s) : undefined;
+      const A = PCF.drawCitizen(g, Object.assign({ pose: walk ? 'walk' : 'idle', cycle }, fl, o, { x, y, s, face, phase: fl.seed ?? 0 }));
+      if (o.hold) o.hold(g, A);                                  // a prop in the hands: A.handF / handB / head / hat / top, world px
+      return A;
+    }
     if (!R || look) {                                            // the jointed doll, ~ the same height; its feet plant by x
       const sd = s * 2.4, step = walk ? face * x / (Z.rig.biped.STRIDE.walk * sd) : undefined;
       return PC.doll(g, x, y, sd, Object.assign({ face, t, walk: step, detail: 0, jointsAdd: { nod: nod * 180 / Math.PI }, joints: o.front ? { yaw: 0 } : undefined }, look, o.look));
