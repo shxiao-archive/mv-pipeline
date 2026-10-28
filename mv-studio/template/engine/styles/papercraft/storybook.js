@@ -182,19 +182,33 @@
   };
 
   // ---------------------------------------------------------------- the story's text, set on the page
+  // the row of each character: rows of even width (no row left holding a stray character), a spaced line broken at its
+  // spaces (its phrase breaks), never a row starting with small kana or punctuation
+  const NO_START = new Set('、。，．,.!?！？ーぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮ」』）)');
+  SB.rows = (chars, widths, maxW) => {
+    const tot = widths.reduce((a, b) => a + b, 0), lim = Math.min(maxW, tot / Math.ceil(tot / maxW) * 1.12), spaced = chars.includes(' ');
+    const wordW = k => { let w = 0; while (k < chars.length && chars[k] !== ' ') w += widths[k++]; return w; };
+    let r = 0, x = 0;
+    return chars.map((ch, k) => {
+      if (x > 0 && (ch === ' ' ? x + wordW(k + 1) > lim : !NO_START.has(ch) && x + widths[k] > (spaced ? maxW : lim))) { r++; x = 0; }
+      if (x > 0 || ch !== ' ') x += widths[k];                  // a space that starts a row takes no room
+      return r;
+    });
+  };
   const text = (g, S, i, at, ink = '#3B302B') => {
     if (i == null || i < 0) return;
     const L = Z.line(i); if (!L.text) return;
     const n = Z.charsAt(i, S.t), size = 62, x0 = at === 'R' ? GUT + 130 : PAGE.x + 130, maxW = 680;
     g.save();
     g.font = `600 ${size}px "Klee One", "Noto Serif JP", serif`; g.textBaseline = 'alphabetic'; g.fillStyle = ink;
-    let x = x0, y = PAGE.y + 170;
-    [...L.text].forEach((ch, k) => {
-      const w = g.measureText(ch).width;
-      if (x + w > x0 + maxW) { x = x0; y += size * 1.6; }
+    const chars = [...L.text], W = chars.map(ch => g.measureText(ch).width + 2), row = SB.rows(chars, W, maxW);
+    let x = x0;
+    chars.forEach((ch, k) => {
+      if (k && row[k] !== row[k - 1]) x = x0;
+      if (x === x0 && ch === ' ') return;
       const a = clamp(n - k);                                   // each character inks in as it is sung
-      if (a > 0) { g.globalAlpha = a; g.fillText(ch, x, y); }
-      x += w + 2;
+      if (a > 0) { g.globalAlpha = a; g.fillText(ch, x, PAGE.y + 170 + row[k] * size * 1.6); }
+      x += W[k];
     });
     g.restore();
   };

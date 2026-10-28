@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Self-test of engine/core/rig.js (no browser): ground contact, IK reach, blending, determinism, and the walk / run
- * stride (the distance a planted foot travels per cycle, so  phase = distance / stride  keeps feet from sliding).
+ * stride (the distance a planted foot travels per cycle, so  phase = distance / stride  keeps feet from sliding); and the
+ * papercraft picture book's text rows (PC.story.rows).
  *   node tools/rig_selftest.mjs        exit 1 on a failed check; prints the measured strides
  * mv-studio (MIT).
  */
@@ -52,5 +53,12 @@ const stride = pose => {
 const sw = stride('walk'), sr = stride('run');
 console.log(`stride (s = 1): walk ${sw.toFixed(1)} px / cycle, run on the ground ${sr.toFixed(1)} px / cycle  (Z.rig.biped.STRIDE: ${JSON.stringify(B.STRIDE)})`);
 check(Math.abs(sw - B.STRIDE.walk) < 3, 'Z.rig.biped.STRIDE.walk matches the measured stride (a run is off the ground half the time: its stride is nominal)');
+// the picture book's text rows: even widths, breaks at a spaced line's spaces, no row starting with small kana
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'engine/styles/papercraft/storybook.js'), 'utf8'), ctx, { filename: 'storybook.js' });
+const rows = (s, maxW = 680, w = 64) => { const c = [...s]; return win.Z.PC.story.rows(c, c.map(() => w), maxW).join(''); };
+check(rows('あいうえおかきくけこさ') === '00000011111', 'rows: 11 chars over 680 px split 6 + 5, not 10 + 1: ' + rows('あいうえおかきくけこさ'));
+check(rows('あいうえお') === '00000', 'rows: a short line stays on one row');
+check(rows('あいうえ おかきくけこさし') === '0000111111111', 'rows: a spaced line breaks at its space: ' + rows('あいうえ おかきくけこさし'));
+check(rows('あいうえおかょくけこさ') === '00000001111', 'rows: no row starts with small kana: ' + rows('あいうえおかょくけこさ'));
 console.log(bad ? `${bad} check(s) failed` : 'rig self-test: ok');
 process.exit(bad ? 1 : 0);
