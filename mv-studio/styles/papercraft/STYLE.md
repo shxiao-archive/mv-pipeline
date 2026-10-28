@@ -22,7 +22,8 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: fa
     back: (g, S) => drawStalls(g, S) } });                     // the film's own pieces behind the cast
 ```
 - `land`: `'meadow' | 'dusk' | 'snow' | 'blank'` or the film's own palette object (copy `PC.story.LANDS.meadow`: sky,
-  sun, far ranges, hills, ground, path, tree colours, `pine`, flowers, `grass`, `clouds`).
+  sun, far ranges, hills, ground, path, tree colours, `pine`, flowers, `grass`, `clouds`, `ink` the text colour: a
+  night or other dark land needs a light one).
 - `line` (or a list: the latest started is shown) is set on the `textAt` page (`'L'` or `'R'`; the sun and clouds move
   to the other side), Klee One 600 at 62 px, inked in as sung. Never ahead of the voice; lyric text never in code.
 - `cast(S)`: `{ who, x, y (default the path), s, face ±1, walk 0..1, phase, nod, front (the front view, standing) }`;

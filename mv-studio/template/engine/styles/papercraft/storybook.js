@@ -14,7 +14,7 @@
  *                                         renders before the cast is cut. s = 1: the role's `tall` px.
  *   PC.story.cut(g, path, col, o)         a collage piece: painted tissue fill, a torn white edge (o.edge px), a shadow
  *   PC.story.land(g, B, o)                the land of one spread: a clean sky, a sun, puffy clouds, two soft ranges,
- *                                         rolling hills, round trees (pines on snow), a path, tissue flowers
+ *                                         rolling hills, round trees (pines on snow), a path, tissue flowers; B.ink: the text colour (a dark land wants a light one)
  *
  * Paper fibre and the vignette come from PC.install's frame pass (the scene name starts with pc); nothing here adds
  * mottling: the pages stay clean. Landscape (1920x1080) only.
@@ -182,12 +182,12 @@
   };
 
   // ---------------------------------------------------------------- the story's text, set on the page
-  const text = (g, S, i, at) => {
+  const text = (g, S, i, at, ink = '#3B302B') => {
     if (i == null || i < 0) return;
     const L = Z.line(i); if (!L.text) return;
     const n = Z.charsAt(i, S.t), size = 62, x0 = at === 'R' ? GUT + 130 : PAGE.x + 130, maxW = 680;
     g.save();
-    g.font = `600 ${size}px "Klee One", "Noto Serif JP", serif`; g.textBaseline = 'alphabetic'; g.fillStyle = '#3B302B';
+    g.font = `600 ${size}px "Klee One", "Noto Serif JP", serif`; g.textBaseline = 'alphabetic'; g.fillStyle = ink;
     let x = x0, y = PAGE.y + 170;
     [...L.text].forEach((ch, k) => {
       const w = g.measureText(ch).width;
@@ -219,7 +219,7 @@
       for (const m of cast) SB.puppet(g, m.who, m.x, m.y ?? GY + 14, m.s ?? 0.7, Object.assign({ t: S.t }, m));
       if (a.front) a.front(g, S);
       foreground(g, B, S.t);
-      text(g, S, Array.isArray(a.line) ? a.line.filter(i => Z.line(i).t - 0.35 <= S.t).pop() : a.line, a.textAt || 'L');
+      text(g, S, Array.isArray(a.line) ? a.line.filter(i => Z.line(i).t - 0.35 <= S.t).pop() : a.line, a.textAt || 'L', B.ink);
       gutter(g);
       g.restore();
     },
