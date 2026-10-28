@@ -155,6 +155,10 @@ in the concept where each sits and why:
 
 Many films travel along these ranges, and the travel is the story.
 
+A gentle song may stay at the quiet end of every range for the whole film: tegaki only, held pictures, lyrics in
+depth. The loud devices (signal runs and their overload, `kanjiSlam` / `titleRiff`, hero-size glyph effects) belong
+to songs that build to them; put them in only when the song asks for them.
+
 ## 5. How the reference films were made
 
 - **「残光」:**
