@@ -21,10 +21,12 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
 4. **The camera holds; the story moves.** Within a spread the frame is still: the characters walk across it, the
    clouds drift, the grass sways, a tail swings. Between spreads, the page turns. *Why:* a book does not pan; its
    motion is the page and what is drawn on it.
-5. **Characters are illustrations, cut into puppets.** Each role is designed as a picture-book illustration first
-   (a generated reference sheet: side view and front view), then cut into a few pieces (head, body, legs, a tail or a
-   cape end) that move like a paper puppet: legs swing at the hip, the head nods. *Why:* a crude code doll reads as
-   a placeholder; an illustration with a few hinges reads as the book's own character.
+5. **Characters are paper figures that move like paper figures.** Two ways, the user picks after seeing both
+   walk: the jointed paper doll drawn in code (small, chibi, about 2.5 heads; knees, elbows, a real walk cycle with
+   planted feet; ears, a tail, a hat as pieces), or an illustration cut into a few pieces (a generated sheet: head,
+   body, legs, a tail; legs swing at the hip, the head nods). *Why:* judged in motion, a rigid illustration swinging at
+   the hip can read uncanny, and a user may prefer the small doll's walk; in a still, a bare doll can read as a
+   placeholder. Show a walking clip, not a still, before casting.
 6. **Literal and warm.** The pages show what the song is about, readable cold: who is travelling, where, with whom.
    One colour script across the book (a land or a light per section), a few gentle continuity devices (a satchel, a
    path that keeps going).
@@ -34,12 +36,14 @@ closes on the last. It is a book, not a game: no HUD, menus, battles, stat bars 
 - **Sets** after the reference film's journey: sky gradient, a sun on the side away from the text, two far ranges,
   near hills with trees, the ground, the path the cast walks on, tissue flowers, the grass strip. A land is a palette;
   write the film's own for its places (a market town, a wheat field, a harbour) with the same pieces plus its props.
-- **Cast:** a reference sheet per role from the image generator the user chose (picture-book proportions, about four
-  heads tall; side view facing left and front view; flat contrasting background), the background removed, looked at,
-  then cut with `tools/cut_puppet.py`. Set the cast's relative heights. Keep extras (tails, capes) as their own pieces.
+- **Cast:** either jointed dolls (`PC.story.looks`: hair, outfit, trim, ears, tail; give each role a colour and one
+  shape of its own) or a reference sheet per role from the image generator the user chose (picture-book proportions,
+  about four heads tall; side view facing left and front view; flat contrasting background), the background removed,
+  looked at, then cut with `tools/cut_puppet.py`. Set the cast's relative heights. Keep extras (tails, capes) as their
+  own pieces.
 - **Finished versus amateur:** a finished spread has tissue streaks in every piece, torn edges, soft shadows, the
-  gutter's curve, clean sky, a character with a face you would remember. An amateur one has flat fills, outlines,
-  mottled paper and a stick figure.
+  gutter's curve, clean sky, a character with a face you would remember, walking with planted feet. An amateur one has flat fills,
+  outlines, mottled paper, a stick figure and sliding feet.
 
 ## 3. Motion vocabulary
 
@@ -68,5 +72,5 @@ which line gets the spread with no text.
 
 ## 6. Where it lives
 
-`scene:pcStory` and `PC.story.*` (puppet, land, cut, tissue), `tools/cut_puppet.py`, `scene:pcBook` (the bookends),
+`scene:pcStory` and `PC.story.*` (puppet, looks, land, cut, tissue), `PC.doll`, `tools/cut_puppet.py`, `scene:pcBook` (the bookends),
 the `pageTurn` transition. Starter: `--style papercraft`, an example to rewrite.

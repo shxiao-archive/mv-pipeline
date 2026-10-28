@@ -12,6 +12,8 @@
  *                                         neck, extras (a tail, a cape end) swing behind the body. A role with no rig
  *                                         entry falls back to a flat PC.doll (o.look: its options) so a new project
  *                                         renders before the cast is cut. s = 1: the role's `tall` px.
+ *   PC.story.looks[who] = look            draw that role as the jointed PC.doll instead (its rigged walk: knees, arms,
+ *                                         planted feet; look: the doll's options, ears / tail too). s 0.42 ~ 260 px.
  *   PC.story.cut(g, path, col, o)         a collage piece: painted tissue fill, a torn white edge (o.edge px), a shadow
  *   PC.story.land(g, B, o)                the land of one spread: a clean sky, a sun, puffy clouds, two soft ranges,
  *                                         rolling hills, round trees (pines on snow), a path, tissue flowers; B.ink: the text colour (a dark land wants a light one)
@@ -63,6 +65,7 @@
 
   // ---------------------------------------------------------------- the paper puppets
   let RIG = null;
+  SB.looks = {};                                                 // who -> PC.doll look: that role is drawn as the jointed doll
   const IMG = (who, part) => Z.imgSync(`assets/cast/${who}_${part}.png`);
   const darkLegs = new Map();
   const backLeg = who => {                                       // the far leg: the same piece, in shade
@@ -73,8 +76,11 @@
   };
   const place = (g, im, r) => g.drawImage(im, r.x, r.y, r.w, r.h);
   SB.puppet = (g, who, x, y, s, o = {}) => {
-    const R = RIG && RIG[who], { face = 1, phase = 0, walk = 0, nod = 0, t = 0 } = o;
-    if (!R) return PC.doll(g, x, y, s * 2.4, Object.assign({ face, t, walk: walk ? phase : undefined, detail: 0 }, o.look));   // ~ the same height
+    const R = RIG && RIG[who], { face = 1, phase = 0, walk = 0, nod = 0, t = 0 } = o, look = SB.looks[who];
+    if (!R || look) {                                            // the jointed doll, ~ the same height; its feet plant by x
+      const sd = s * 2.4, step = walk ? face * x / (Z.rig.biped.STRIDE.walk * sd) : undefined;
+      return PC.doll(g, x, y, sd, Object.assign({ face, t, walk: step, detail: 0, jointsAdd: { nod: nod * 180 / Math.PI }, joints: o.front ? { yaw: 0 } : undefined }, look, o.look));
+    }
     s *= R.scale ?? 1;
     g.save();
     g.translate(x, y);

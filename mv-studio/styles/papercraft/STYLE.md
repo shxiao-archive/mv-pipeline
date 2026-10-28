@@ -34,7 +34,17 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: fa
   texture per shape. The book (desk, cloth cover, page stack, gutter) is drawn by the scene. Landscape only.
 - Bookends: `pcBook` `{ mode: 'open' | 'close' }`. Between spreads: `pageTurn` (1–2 beats).
 
-## 2. The cast: reference sheets cut into puppets
+## 2. The cast: jointed dolls, or reference sheets cut into puppets
+
+Two kinds (BRIEF §1.5; the user picks after a walking clip of each):
+
+**Jointed doll (code).** `PC.story.looks.<who> = { detail: 1, hairStyle, hair, outfit, trim, legs, shoes, hat, ears,
+earIn, tail, tailTip, seed }` (every `PC.doll` look option; `ears` and `tail` take a colour) and that role is drawn as
+the rigged doll: knees and arms in the walk, its phase taken from x so the feet plant (the cast's `phase` is ignored),
+`nod` turns the head, `front` faces the reader. `s: 0.45` is about 280 px, small on the page. `detail: 1` keeps the
+ink line and pins of `PC.doll`; without it the doll is the flat stand-in.
+
+**Reference sheets cut into puppets:**
 
 1. **Generate** a sheet per role with the image generator the user chose (`tools/artgen.py`, references/04): one
    character, full body, a side view facing left and a front view, picture-book proportions (about four heads), cut
@@ -47,6 +57,7 @@ S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: fa
    `python tools/cut_puppet.py` → `assets/cast/<role>_{head,body,leg,front,<extra>}.png` + `rig.json`. The docstring
    lists every field. Check a still: the neck and hip seams must hide under the collar and the hem while walking.
 4. Until a role is cut, `pcStory` draws a flat `PC.doll` stand-in (`look`: its options), so the film renders from day one.
+   A role in `PC.story.looks` is always drawn as the doll, cut or not.
 
 Keep scale consistent: the starter's `s: 0.7` puts a 640-px `tall` role at ~450 px on the page.
 
@@ -65,7 +76,7 @@ Name them `pcXxx` (the paper fibre and vignette apply only to scenes matching `/
 ## 5. On request only: the pop-up RPG kit
 
 The earlier pop-up RPG language is still in the engine for a user who asks for it: `pcWorld` (multiplane lands with a
-tracking camera, HUD, mini-map), `pcMap` (a route drawn), `pcBattle` (paper theatre), the jointed `PC.doll` with its
-poses and expressions (`engine/styles/papercraft/papercraft_doll.js` model sheet), and the paper UI kit (`PC.dialog /
+tracking camera, HUD, mini-map), `pcMap` (a route drawn), `pcBattle` (paper theatre), `PC.doll`'s RPG poses and
+expressions (`engine/styles/papercraft/papercraft_doll.js` model sheet), and the paper UI kit (`PC.dialog /
 panel / nameTab / bar / lvUp / coins / menu / map`). Search `grep '"papercraft"' index/index.jsonl`. Do not mix it
 into a picture-book film.

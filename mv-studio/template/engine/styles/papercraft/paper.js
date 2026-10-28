@@ -20,7 +20,8 @@
  *                                    (Z.rig.biped.EXPRS), eyes / mouth / brows overrides, ik { F, B }, joints, jointsAdd,
  *                                    face +-1, emote ('!' '?' heart spark sweat music) + emoteK, blink, sq / take,
  *                                    look: skin hair hairStyle (mop bob spiky braid) outfit outfitDark trim legs shoes
- *                                    hat (crown cap hood) hatCol scarf vel seed; hold(g, s) at the near hand; detail 0;
+ *                                    hat (crown cap hood) hatCol scarf vel ears (animal ears, a colour; earIn) tail (a
+ *                                    fluffy tail, a colour; tailTip) seed; hold(g, s) at the near hand; detail 0;
  *                                    silhouette (colour); pins false; rigOnly (anchors only). Old: walk, jump, armF, armB, lean
  *   PC.burst(g, t, t0, x, y, o)      paper confetti / coins / petals burst from (x, y) at t0, pure function of t
  *   PC.texture()                     the paper fibre tile; multiplied over every papercraft shot (scenes.js install)
@@ -226,6 +227,15 @@
         return [N[0] - 12 - q * len * (0.25 + 0.75 * v), N[1] + 4 + q * len * (0.85 - 0.7 * v) + wv]; });
       piece(PC.ribbon(pts, q => 13 * (1 - q * 0.4)), o.scarf);
     }
+    if (o.tail && !sil) {
+      // behind the torso: a fluffy tail from the hip, hanging back in an S; it swings with the step and sways when still
+      const sw = (pose === 'walk' || pose === 'run' ? 0.18 * Math.sin(TAU * (phase || 0)) : 0) + 0.06 * Math.sin(t * 2.2 + seed), T0 = sk.T;
+      const pts = [0, 1, 2, 3, 4, 5].map(i => { const q = i / 5, a = 1.0 - 0.9 * q * q + sw * q;
+        return T0(-34 - 120 * q * Math.cos(a * 0.6), -10 + 70 * q * Math.sin(a)); });
+      const wid = q => 9 + 24 * Math.sin(Math.PI * Math.min(1, q * 0.9 + 0.1));
+      piece(PC.ribbon(pts, wid), o.tail);
+      if (o.tailTip) piece(PC.ribbon(pts.slice(3), q => wid(0.6 + 0.4 * q) * (1 - 0.5 * q)), o.tailTip);
+    }
     // torso (lean and squash through the skeleton's torso transform)
     const T = sk.T, poly = pts => PC.poly(pts.map(p => T(p[0], p[1])), { seed: seed + 4, amp: 1.2, round: 0.5 });
     const body = poly([[-36, -92], [36, -92], [47, 8], [-47, 8]]);
@@ -238,6 +248,11 @@
     g.save(); g.translate(hx, hy); g.rotate(sk.hA);
     const head = PC.blob(0, 0, 52, 48, { seed: seed + 5, amp: 0.02 });
     piece(head, skin, { shadow: sh * 0.5, rim: PC.mix(skin, P.white, 0.5) });
+    const at = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+    if (o.ears) for (const [b0, tip, b1] of [[[-40, -26], [-50, -92], [-12, -46]], [[2, -48], [24, -98], [36, -34]]]) {   // under the hair
+      piece(PC.poly([b0, tip, b1], { seed: seed + 9, round: 0.25 }), o.ears);
+      if (!sil) piece(PC.poly([at(b0, tip, 0.3), at(b0, tip, 0.85), at(b1, tip, 0.3)], { seed: seed + 10, round: 0.3 }), o.earIn || PC.mix(o.ears, P.pink, 0.5), { stroke: null, shadow: 0 });
+    }
     const hs = o.hairStyle || 'mop';
     const hairPath = hs === 'bob' ? PC.blob(-4, -22, 58, 38, { seed: seed + 6 }) : hs === 'spiky'
       ? PC.poly([[-56, -6], [-46, -50], [-24, -36], [-8, -62], [12, -38], [36, -56], [48, -22], [56, -6], [0, -28]], { seed: seed + 6, round: 0.2 })
