@@ -195,6 +195,8 @@ to songs that build to them; put them in only when the song asks for them.
 - Every shot at the same intensity; effects stacked on everything; no holds.
 - Impacts too small to read (a 1–3 px wiggle); glitch as a filter with no cause.
 - Type that only fades; one layout for every line; lyrics over the face.
+- A walk made by flipping between two still poses: it reads stiff. With still art, glide one pose a short distance
+  or hold it; a walk cycle needs its 8 phases (references/10).
 - Copying a reference film's motifs, character, palette or lyrics.
 
 ## 8. Where it lives
