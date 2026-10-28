@@ -601,19 +601,17 @@
 {"id":"manual:styles/magazine/STYLE#4","kind":"manual","does":"4. Scenes (`scenes.js`)","where":"<skill>/styles/magazine/STYLE.md:86-110","lines":25}
 {"id":"manual:styles/magazine/STYLE#5","kind":"manual","does":"5. Drums and metre","where":"<skill>/styles/magazine/STYLE.md:111-131","lines":21}
 {"id":"manual:styles/magazine/STYLE#6","kind":"manual","does":"6. Checks","where":"<skill>/styles/magazine/STYLE.md:132-141","lines":10}
-{"id":"manual:styles/papercraft/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/papercraft/BRIEF.md:10-30","lines":21}
-{"id":"manual:styles/papercraft/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look hand-made and finished)","where":"<skill>/styles/papercraft/BRIEF.md:31-49","lines":19}
-{"id":"manual:styles/papercraft/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/papercraft/BRIEF.md:50-69","lines":20}
-{"id":"manual:styles/papercraft/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/papercraft/BRIEF.md:70-77","lines":8}
-{"id":"manual:styles/papercraft/BRIEF#5","kind":"manual","does":"5. How the reference film was made","where":"<skill>/styles/papercraft/BRIEF.md:78-86","lines":9}
-{"id":"manual:styles/papercraft/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/papercraft/BRIEF.md:87-93","lines":7}
-{"id":"manual:styles/papercraft/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/papercraft/BRIEF.md:94-100","lines":7}
-{"id":"manual:styles/papercraft/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/papercraft/BRIEF.md:101-114","lines":14}
-{"id":"manual:styles/papercraft/STYLE#1","kind":"manual","does":"1. The idea","where":"<skill>/styles/papercraft/STYLE.md:12-30","lines":19}
-{"id":"manual:styles/papercraft/STYLE#2","kind":"manual","does":"2. Look","where":"<skill>/styles/papercraft/STYLE.md:31-46","lines":16}
-{"id":"manual:styles/papercraft/STYLE#3","kind":"manual","does":"3. Building it","where":"<skill>/styles/papercraft/STYLE.md:47-72","lines":26}
-{"id":"manual:styles/papercraft/STYLE#4","kind":"manual","does":"4. Motion (it is a quiet, flat medium: make it move)","where":"<skill>/styles/papercraft/STYLE.md:73-79","lines":7}
-{"id":"manual:styles/papercraft/STYLE#5","kind":"manual","does":"5. Asset library and density (what dalabengba-mv built before its scenes; method: references/10, team: 11)","where":"<skill>/styles/papercraft/STYLE.md:80-108","lines":29}
+{"id":"manual:styles/papercraft/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/papercraft/BRIEF.md:11-31","lines":21}
+{"id":"manual:styles/papercraft/BRIEF#2","kind":"manual","does":"2. Art construction","where":"<skill>/styles/papercraft/BRIEF.md:32-43","lines":12}
+{"id":"manual:styles/papercraft/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/papercraft/BRIEF.md:44-56","lines":13}
+{"id":"manual:styles/papercraft/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/papercraft/BRIEF.md:57-61","lines":5}
+{"id":"manual:styles/papercraft/BRIEF#5","kind":"manual","does":"5. Avoid","where":"<skill>/styles/papercraft/BRIEF.md:62-68","lines":7}
+{"id":"manual:styles/papercraft/BRIEF#6","kind":"manual","does":"6. Where it lives","where":"<skill>/styles/papercraft/BRIEF.md:69-73","lines":5}
+{"id":"manual:styles/papercraft/STYLE#1","kind":"manual","does":"1. The spread: `pcStory`","where":"<skill>/styles/papercraft/STYLE.md:12-35","lines":24}
+{"id":"manual:styles/papercraft/STYLE#2","kind":"manual","does":"2. The cast: reference sheets cut into puppets","where":"<skill>/styles/papercraft/STYLE.md:36-50","lines":15}
+{"id":"manual:styles/papercraft/STYLE#3","kind":"manual","does":"3. Motion","where":"<skill>/styles/papercraft/STYLE.md:51-56","lines":6}
+{"id":"manual:styles/papercraft/STYLE#4","kind":"manual","does":"4. New scenes","where":"<skill>/styles/papercraft/STYLE.md:57-62","lines":6}
+{"id":"manual:styles/papercraft/STYLE#5","kind":"manual","does":"5. On request only: the pop-up RPG kit","where":"<skill>/styles/papercraft/STYLE.md:63-70","lines":8}
 {"id":"manual:styles/stage/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/stage/BRIEF.md:11-32","lines":22}
 {"id":"manual:styles/stage/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look hand-made and finished)","where":"<skill>/styles/stage/BRIEF.md:33-46","lines":14}
 {"id":"manual:styles/stage/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/stage/BRIEF.md:47-64","lines":18}

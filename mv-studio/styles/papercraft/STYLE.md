@@ -1,107 +1,69 @@
-# Style: PAPERCRAFT — a pop-up paper storybook told as a retro RPG
+# Style: PAPERCRAFT — a cut-paper collage picture book, read aloud
 
-**Technical manual of this style pack** (API, building, assets, safety). The creative brief — what the film is, its
-elements, motion and ways of thinking — is BRIEF.md next to this file: read that first, and open only the section here
-that the build needs.
+**Technical manual of this style pack** (API, building, assets). The creative brief is BRIEF.md next to this file:
+read that first, and open only the section here that the build needs.
 
-Engine code: `template/engine/styles/papercraft/` (`paper.js`, `rpg.js`, `scenes.js`). Starter:
-`engine/starters/papercraft.js` (`new_project.py --style papercraft`). After *dalabengba-mv* (ISC, see
-`licenses/LICENSE-dalabengba-mv.txt`): its paper primitives are adapted, its pop-up book, multiplane camera, paper RPG
-interface and transitions are followed. Its song, lyrics, characters and story are not ours: make your own film.
+Engine code: `template/engine/styles/papercraft/` (`paper.js` primitives, `storybook.js` the picture book, `scenes.js`
+the book bookends, transitions and the RPG kit's scenes, `rpg.js` the RPG kit). Starter: `engine/starters/papercraft.js`
+(`new_project.py --style papercraft`). After *dalabengba-mv* (ISC, see `licenses/LICENSE-dalabengba-mv.txt`): its paper
+primitives are adapted, its pop-up book, journey lands and transitions are followed. Its song, lyrics, characters and
+story are not ours: make your own film.
 
-## 1. The idea
-
-The world is a **moving pop-up book**, and the **RPG is its interface language**. The song is a quest: the book
-opens, the hero sets out (left to right), crosses lands, fights, levels up, comes home (right to left), and the book
-closes on the last frame.
-
-- **Everything is cut paper.** Flat colour, a slightly wavy hand-cut edge, a soft drop shadow that grows with the
-  piece's height above the page (`PC.cut(..., { shadow })`), a lit cut edge on top (`rim`), paper fibre printed on each
-  sheet. Light from the top left, shadows to the bottom right.
-- **Depth is multiplane.** Far layers move slowly, the subject plane at 1, the foreground faster and softer
-  (`PC.applyCam(g, cam, depth)`). The camera is never dead: long tracking shots that follow the hero, pushes on emotion,
-  a bump on each step and hit.
-- **The RPG interface is paper:** cream card with an ink line, a dashed stitch and gold corners; red name tabs; the
-  **dialogue box** (the lyric lines are the dialogue, typed as sung); HP / EXP bars, LV UP, a coin counter, a battle
-  menu, damage numbers; the **map with a red dashed route** is the film's navigation prop (the oath → the full route →
-  a corner mini-map on the road → the road home).
-- **Running gags pay off.** Pick one or two (a counter that keeps rising, a name too long for its box, a prop that
-  grows) and escalate them each chorus.
-
-## 2. Look
-
-- **One palette (`PC.PAL`):** paper / kraft / ink, royal red and gold, skies for day / dusk / night / doom, nature,
-  skin, fire, coins. Colour script per chapter in `docs/CONCEPT.md` (dawn → noon green → golden village → cold snow →
-  moonlit night → crystal cave → festive return).
-- **Type:** ZCOOL QingKe HuangYou (round display: titles, big names), ZCOOL KuaiLe (playful: dialogue, UI), ZCOOL XiaoWei
-  (storybook serif: narration, credits), Fredoka (round Latin: numbers, LV, HP). `npm run fonts` fetches them; Japanese
-  lyrics: `PC.useJapanese()` (the starter calls it).
-- **Characters:** `PC.doll` is a generic jointed paper doll (chibi, ~2.6 heads) pinned on the biped skeleton
-  (`core/rig.js`): design your own cast with its options (hair style and colour, outfit, hat, scarf) and act with
-  `pose`, `act`, `expr`, `emote`, `ik`, `hold`; or write your own rig in the same paper language. Never an existing
-  character. Keep scale consistent (full shot ~260 px, medium ~420, close-up head ~360).
-- **Text in the picture:** the lyric in the dialogue box (the default) or built into the world as a physical object
-  (the reference film's way; then no dialogue box); otherwise only your own short UI words (menu items, name
-  tabs, LV UP, coin counts), ≤ 5 characters of sound effects, and the credits.
-
-## 3. Building it
+## 1. The spread: `pcStory`
 
 ```js
-const PC = Z.PC, P = PC.PAL;
-PC.install(); Z.LOOK_DEFAULT = Object.assign({}, PC.post);
-const HERO = { hairStyle: 'spiky', hair: '#4A3428', outfit: P.blue, hat: 'cap', hatCol: P.red };
-const FRIEND = { hairStyle: 'braid', hair: P.gold, outfit: P.pink, seed: 5 };
-S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcWorld', lyric: 'none', hud: false, line: 3,
+const SC = 0.7, STRIDE = 127 * SC / 0.5;                         // puppet scale; px per walk cycle (feet do not slide)
+const walker = (who, x0, v, t0) => S => { const x = x0 + (S.t - t0) * v; return { who, x, face: 1, walk: 1, phase: x / STRIDE, s: SC }; };
+S.push({ id: 'v03', t0: B(6), t1: B(8), scene: 'pcStory', lyric: 'none', hud: false, line: 3, post: PC.post,
   trans: { type: 'pageTurn', dur: 2 * beat },
-  moment: 'the hero reaches the village; every chest pops open',
-  args: { biome: 'village', line: 3, speaker: '♪',
-    cast: [Object.assign({ x: 200, walkTo: [[B(6), 200], [B(6) + 0.01, 1800]], walkDur: B(8) - B(6), walkEase: 'linear' }, HERO),
-           Object.assign({ x: 1500, pose: 'shock', expr: 'shock', emote: '!' }, FRIEND)],   // walkers walk / run by speed
-    cam: { from: PC.cam(960, 560, 1.05), to: PC.cam(960, 520, 1.2), follow: 0, lead: 200 },
-    hud: { coins: [[B(6), 9], [B(7), 21]], lv: [B(7)] }, mini: { route: ROUTE, from: 0.3, to: 0.4 },
-    burst: [{ at: B(7), x: 1200, y: 600, kind: 'coin', n: 16 }] } });
+  moment: 'line 3: the two of them reach the market town',
+  args: { land: TOWN, line: 3, textAt: 'L',
+    cast: S => [walker('hero', 600, 110, B(6))(S), walker('companion', 920, 110, B(6))(S)],
+    back: (g, S) => drawStalls(g, S) } });                     // the film's own pieces behind the cast
 ```
-- **Scenes:** `pcBook` (`mode open | close`: the bookends), `pcWorld` (biomes `meadow village snow night cave dusk`,
-  cast, HUD, mini-map, bursts, tracking camera), `pcMap` (the route drawn over the shot), `pcBattle` (paper theatre:
-  plates, HP, menu, damage on beats). New scenes: name them `pcXxx`, draw with `PC.cut / poly / blob / ribbon / shade /
-  glow / rays`, the multiplane camera, and the RPG kit (`PC.panel / nameTab / dialog / bar / lvUp / coins / menu / map`).
-- **Transitions with a motive:** `pageTurn` between chapters, `shapeReveal` (circle / star / heart / keyhole) into a
-  chorus or a reveal; shape-match cuts (moon ↔ coin, sword flash ↔ star, eye ↔ cave mouth); a whip with speed lines.
-- **Lyrics:** every line shot passes `line` and the scene types it into the dialogue box as sung (never ahead of the
-  voice). The speaker tab is your own word (`'♪'`, a role name), never lyric text.
+- `land`: `'meadow' | 'dusk' | 'snow' | 'blank'` or the film's own palette object (copy `PC.story.LANDS.meadow`: sky,
+  sun, far ranges, hills, ground, path, tree colours, `pine`, flowers, `grass`, `clouds`).
+- `line` (or a list: the latest started is shown) is set on the `textAt` page (`'L'` or `'R'`; the sun and clouds move
+  to the other side), Klee One 600 at 62 px, inked in as sung. Never ahead of the voice; lyric text never in code.
+- `cast(S)`: `{ who, x, y (default the path), s, face ±1, walk 0..1, phase, nod, front (the front view, standing) }`;
+  drawn in order of y.
+- `back(g, S)` / `front(g, S)`: the film's own props behind / in front of the cast, drawn with `PC.story.cut(g, path,
+  col, { edge, shadow })` on `PC.poly` / `PC.blob` paths so they share the tissue material.
+- Paper fibre and the vignette come from `PC.install()` (the starter calls it) for every scene named `pc*`; do not add
+  texture per shape. The book (desk, cloth cover, page stack, gutter) is drawn by the scene. Landscape only.
+- Bookends: `pcBook` `{ mode: 'open' | 'close' }`. Between spreads: `pageTurn` (1–2 beats).
 
-## 4. Motion (it is a quiet, flat medium: make it move)
+## 2. The cast: reference sheets cut into puppets
 
-Flat paper colour changes few pixels when the camera drifts. Track the action (`cam.follow`), walk at a steady pace on
-long tracks (`walkEase: 'linear'`), keep a gentle drift, bump the camera on steps and hits (not on every beat: cue-lock
-the accents), let the paper fibre travel with each layer (the scenes do), and add pop-up clutter that rises piece by
-piece. No ink outlines: edges come from the cut, the rim and the shadow. Run `motion_check.py` on renders: static stretches ≤ 10 %.
+1. **Generate** a sheet per role with the image generator the user chose (`tools/artgen.py`, references/04): one
+   character, full body, a side view facing left and a front view, picture-book proportions (about four heads), cut
+   paper collage style, on a flat background that contrasts with the figure (a pale figure on cream defeats background
+   removal: use slate or green). Long tails, capes or scarves: generate them as a separate piece on a flat background.
+2. **Remove the background** (the generator's tool or `tools/alpha_matte.py`) and look at the cut-out on grey.
+3. **Cut**: write `assets/cast/puppets.json` (the side and front x spans, the neck line under a collar or hair, the hem
+   line under a coat or skirt, `tall` for relative heights, `extras` with their join point) and run
+   `python tools/cut_puppet.py` → `assets/cast/<role>_{head,body,leg,front,<extra>}.png` + `rig.json`. The docstring
+   lists every field. Check a still: the neck and hip seams must hide under the collar and the hem while walking.
+4. Until a role is cut, `pcStory` draws a flat `PC.doll` stand-in (`look`: its options), so the film renders from day one.
 
-## 5. Asset library and density (what dalabengba-mv built before its scenes; method: references/10, team: 11)
+Keep scale consistent: the starter's `s: 0.7` puts a 640-px `tall` role at ~450 px on the page.
 
-New scenes: name them `pcXxx` (the paper grain and vignette are applied only to scenes whose name matches `/^pc[A-Z]/`,
-`PC.isPaper`), and add the file to `engine/index.html` **and** `engine/vertical.html` (references/05 §9). The doll's
-arms do not reach above its head: hold or hang things at shoulder height, or draw a raised prop on its own.
+## 3. Motion
 
-Build these, each with a model sheet you have looked at (`engine/sheets/`; start from `engine/styles/papercraft/papercraft_doll.js`),
-before writing shots:
-- **The cast on `PC.doll`** (34 poses and 19 expressions built in, `pose: { from, to, k }` blending, `act` actions,
-  emotes, `hold` props, `detail: 0`, `silhouette`): per character one silhouette idea (a scarf too long, a crown too
-  big) and its gag prop with 3–5 states; the film's own 5–12 actions as poses (`jointsAdd` on the nearest one, or a new
-  entry in a film pose table passed through `joints`). Extras: 4–6 variants with `detail: 0`.
-- **Creatures** (a horse, a dragon, monsters) on their own skeleton with the same tools: `Z.rig.keyed` actions, gait
-  phase from distance (`Z.rig.cycle`), a long body as a spine of segments at equal arc length, tails and manes from
-  `Z.rig.trail`.
-- **Sets:** every recurring place with written coordinates; layers sky / far / mid / main / near / foreground
-  (`PC.applyCam` depths 0.2–0.6 / 1 / 1.2–1.6); 2–4 lighting states (day, dusk, night, fire); named preset cameras
-  (wide, two-shot, each character's reaction framing, close-up); 20–40 drawn things; pop-up mechanics (a flap that
-  rises with `fold` 0..1, a hinged tower, a tab that slides).
-- **The paper UI kit** (`PC.dialog / panel / nameTab / bar / lvUp / coins / menu / map`) plus the film's gag UI (a name
-  box too small, an item bar, a damage counter); the map in all its forms sharing one (u, v) route.
-- **Effects:** the impact levels (references/10 §5), speed lines, paper transitions (page turn, shape reveal, burning
-  edge, paper tear, smoke wipe, split screen), `Z.burst` confetti / coins / ash.
-- **One long take through the journey:** a camera on a spline, the hero's state from one function of time, zone changes
-  hidden behind a foreground occluder (a tree, an arch) sweeping past.
+The frame holds: motion is the cast walking (a steady pace, `walk: 1`, `phase = x / STRIDE` so the feet plant), the
+clouds, the grass, the extras swinging, the text inking in, the page turns. Accents on lyric cues: a stop, a nod
+(`nod`), a turn (`face`), a character stepping in. Run `motion_check.py` on renders: static stretches ≤ 10 %.
 
-Targets: 3–6 events per shot; the lead acts every cue (a pose change, an expression, a reaction); the running gag
-escalates every repeat; bookends (the book opens / closes) match.
+## 4. New scenes
+
+Name them `pcXxx` (the paper fibre and vignette apply only to scenes matching `/^pc[A-Z]/`, `PC.isPaper`), draw with
+`PC.story.cut` and `PC.poly / blob`, and add the file to `engine/index.html` **and** `engine/vertical.html`
+(references/05 §9). A close-up page (a hand, an apple, a letter) is a spread too: the same book, a bigger subject.
+
+## 5. On request only: the pop-up RPG kit
+
+The earlier pop-up RPG language is still in the engine for a user who asks for it: `pcWorld` (multiplane lands with a
+tracking camera, HUD, mini-map), `pcMap` (a route drawn), `pcBattle` (paper theatre), the jointed `PC.doll` with its
+poses and expressions (`engine/styles/papercraft/papercraft_doll.js` model sheet), and the paper UI kit (`PC.dialog /
+panel / nameTab / bar / lvUp / coins / menu / map`). Search `grep '"papercraft"' index/index.jsonl`. Do not mix it
+into a picture-book film.

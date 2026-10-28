@@ -53,7 +53,7 @@ a thing you can point at in a frame.
 | vocaloid | an illustrated (anime) character as the subject of most frames · the lyric line over the picture on a band, box or plate, in columns beside the subject, or as one monument kanji · HUD readouts, brackets or frame lines · kanji title slams · glowing line effects (crack webs, rays, sparks, embers, a rim light on the figure) · a dark ground lit by a few glowing accents |
 | interface | a chat or app screen (bubbles, a cursor, typing) · technical plates (charts, oscilloscopes, forms, prompts, maps) · a mono "system" voice · colour states for who speaks |
 | stage | puppets or a troupe acting · painted sets, a proscenium or a curtain · gags that escalate |
-| papercraft | cut paper in multiplane depth · RPG menus, dialogue boxes, stat bars · a book that opens and closes |
+| papercraft | painted tissue with torn edges, no outlines · the lyric set as the text on the page · page turns · a book that opens and closes |
 | magazine | vertical mincho lyric columns · pictures separated into a few inks on paper · folios, proof or register marks · a page with a fate |
 
 Markers are a review prompt, not a score. A single shared element that serves the song needs no justification. Judge

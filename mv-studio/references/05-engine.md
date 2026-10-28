@@ -237,7 +237,7 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
   zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
   karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
   and the GPU plates `trEngrave trField`, `TR.write` (a line written by the pen),
-  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcWorld pcMap pcBattle`, transitions
+  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcStory pcWorld pcMap pcBattle`, transitions
   `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`) and `styles/magazine/*`
   (`Z.MZ`: the press `MZ.begin / print / react` with spot separation, screens and misregistration, type and furniture
   `MZ.lyricV / folio / ruler / proofCircle ...`, scenes `mzSpread mzContents mzStrips mzGrid mzSlam mzBurn mzTear

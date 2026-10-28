@@ -4,7 +4,7 @@ description: >-
   Make an original music video (MV / PV / lyric video) for a song from its audio and lyrics, rendered by a
   deterministic Canvas2D/WebGL2 engine. By default each film designs its own look from the song; style presets on
   request: ボカロPV (手書き / JIZURA kinetic lyrics / signal-glitch cutting), screen / chat lyric video and technical
-  treatise typography, watercolour picture-book stage show (绘本风), pop-up papercraft RPG storybook, experimental
+  treatise typography, watercolour picture-book stage show (绘本风), cut-paper collage picture book (papercraft), experimental
   print magazine (riso / 雑誌). Beat-locked editing, art from Codex / Grok / NovelAI or the user's own, optional toon
   3D, 9:16 version. Use whenever the user wants an MV, PV, lyric video or beat-synced animation for a song ("make an
   MV for my song", "给这首歌做个MV", "この曲のMVを作って", "a lyric video like a chat log"), even with only a
@@ -36,7 +36,7 @@ merely sounds like a preset is not a request for it.
      | vocaloid | the ボカロPV: lyrics as the subject, motion-graphics layers, rhythm-driven editing, limited animation, symbols over plot | `vocaloid` |
      | interface | a digital-tech look: the song on an AI chat screen and on high-precision technical plates | `interface` |
      | stage | a watercolour picture-book show by an original puppet troupe | `stage` |
-     | papercraft | a pop-up paper storybook told as a retro RPG quest | `papercraft` |
+     | papercraft | a cut-paper collage picture book read aloud: the lyric on the page, pages turning, puppets cut from generated sheets | `papercraft` |
      | magazine | a Japanese experimental print magazine: three-ink press, vertical type, editorial marks that keep time, the page's fate | `magazine` |
 
    **Shared elements yes, a preset's overall look no.** Any film may use modules from the library (a transition, the
