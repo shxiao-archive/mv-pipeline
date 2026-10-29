@@ -2,7 +2,7 @@
   "name": "mv-studio-project",
   "version": "0.1.0",
   "private": true,
-  "description": "A lyric MV project made with the mv-studio skill (based on vocaloid-style-mv-pipeline by NikusonP): deterministic Canvas2D/WebGL2 engine with styles (vocaloid / interface / stage / papercraft / magazine), rendered headless with Playwright and ffmpeg.",
+  "description": "A lyric MV project made with the mv-studio skill (based on vocaloid-style-mv-pipeline by NikusonP): deterministic Canvas2D/WebGL2 engine with styles (vocaloid / interface / magazine), rendered headless with Playwright and ffmpeg.",
   "author": "NikusonP",
   "license": "MIT",
   "type": "module",

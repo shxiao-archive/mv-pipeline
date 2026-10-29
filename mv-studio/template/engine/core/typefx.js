@@ -22,7 +22,7 @@
   const spring = (k, over = 0.18) => (k >= 1 ? 1 : 1 + over * Math.sin(k * Math.PI) - (1 - Z.ease.outCubic(k)));   // rises past 1 and settles
 
   TFX.pop = (ctx, text, x, y, o = {}) => {
-    const g = [...(text || '')], size = o.size ?? 72, dur = o.dur ?? 0.16, from = o.from ?? 0.3, t = o.t ?? Z.ST?.t ?? 0;
+    const g = [...(text || '')], size = o.size ?? 72, dur = o.dur ?? 0.16, from = o.from ?? 0.3, t = o.t ?? 0;
     if (!g.length) return;
     ctx.save(); ctx.font = TFX.font(size, o); ctx.fillStyle = o.color || '#fff'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
     const adv = g.map(ch => (o.vertical ? size * 1.05 : ctx.measureText(ch).width)), total = adv.reduce((a, b) => a + b, 0);
@@ -38,7 +38,7 @@
   };
 
   TFX.slam = (ctx, text, x, y, o = {}) => {
-    const t = o.t ?? Z.ST?.t ?? 0, at = o.at ?? 0, fps = FPS(), age = (t - at) * fps;
+    const t = o.t ?? 0, at = o.at ?? 0, fps = FPS(), age = (t - at) * fps;
     if (age < 0 || !text) return 0;
     const fr = o.frames ?? 2, s = age < fr ? Z.lerp(o.from ?? 3, 1, Z.ease.inQuad(age / fr)) : 1, sh = age >= fr && age < fr + 6 ? (o.shake ?? 6) * (1 - (age - fr) / 6) : 0;
     ctx.save(); ctx.translate(x + Z.rnds(Math.floor(age), 5) * sh, y + Z.rnds(Math.floor(age), 7) * sh); ctx.scale(s, s);
@@ -49,7 +49,7 @@
 
   const POOL = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789アイウエオカキクケコサシスセソタチツテトナニヌネノ#%&*+=/<>';
   TFX.scramble = (ctx, text, x, y, o = {}) => {
-    const g = [...(text || '')], t = o.t ?? Z.ST?.t ?? 0, at = o.at ?? 0, dur = o.dur ?? 0.4, pool = [...(o.pool || POOL)];
+    const g = [...(text || '')], t = o.t ?? 0, at = o.at ?? 0, dur = o.dur ?? 0.4, pool = [...(o.pool || POOL)];
     if (!g.length || t < at) return;
     const k = Z.clamp((t - at) / dur), f = Math.floor(t * (o.fps ?? 24));
     const shown = g.map((ch, i) => (i / g.length < k || ch === ' ' ? ch : pool[Math.floor(Z.rnd(f, i, o.seed ?? 3) * pool.length)])).join('');

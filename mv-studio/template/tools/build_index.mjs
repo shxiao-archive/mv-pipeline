@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSy
 import { join, relative, dirname, basename } from 'node:path';
 
 const args = process.argv.slice(2), opt = k => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
-const PACK = { signal: 'vocaloid', interface: 'interface', treatise: 'interface', stage: 'stage', papercraft: 'papercraft', magazine: 'magazine' };
+const PACK = { signal: 'vocaloid', interface: 'interface', treatise: 'interface', magazine: 'magazine' };
 
 function fitsOf(path) {
   const m = path.match(/engine\/(?:styles\/(\w+)\/|starters\/(?!blank\.)(\w+)\.js$)/);   // a preset's pack or starter
@@ -107,10 +107,10 @@ function manuals(skill) {
 
 if (args.includes("--selftest")) {
   const src = `/* x.js: two scenes.\n *   alpha  a red square that slams\n *          on the beat\n *   beta   a blue line\n */\n  Z.scene('alpha', {\n  });\n  // the second\n  // @index tags: impact\n  Z.scene('beta', {});\n  // moves on an arc\n  D.travel = (t, t0, t1, p0) => {};\n  T('iris', () => {});\n`;
-  const e = indexSource(src, 'engine/styles/stage/x.js');
-  const ok = [e.length === 4, e[0].does === 'a red square that slams on the beat', e[0].fits[0] === 'stage', e[1].tags?.[0] === 'impact',
+  const e = indexSource(src, 'engine/styles/magazine/x.js');
+  const ok = [e.length === 4, e[0].does === 'a red square that slams on the beat', e[0].fits[0] === 'magazine', e[1].tags?.[0] === 'impact',
     e[1].does === 'a blue line', e[2].id === 'helper:D.travel' && e[2].does === 'moves on an arc' && e[2].use === 'D.travel(t, t0, t1, p0)',
-    e[3].kind === 'transition', e[0].where === 'engine/styles/stage/x.js:6-9'];
+    e[3].kind === 'transition', e[0].where === 'engine/styles/magazine/x.js:6-9'];
   console.log(`[build_index] selftest ${ok.every(Boolean) ? 'ok' : 'FAIL ' + JSON.stringify(ok) + ' ' + JSON.stringify(e.map(x => [x.does, x.where]))}`); process.exit(ok.every(Boolean) ? 0 : 1);
 }
 

@@ -94,16 +94,6 @@ takes.
 Look at it as the plates (`kit.js` separation in a test sheet): a fourth tone or a soft gradient turns into a ragged
 plate edge.
 
-**Stage** (its STYLE.md, cut-outs that join the painted troupe): flat-colour picture-book characters with ink outlines,
-plain background, matching the watercolour `ST.paint` sets.
-```json
-{ "locks": { "BOOK": "picture-book illustration, flat watercolour-like colour areas, thin dark ink outline, simple rounded shapes, paper white",
-             "ISO": "the subject alone on a flat #00FF00 background, nothing else" },
-  "rows": [
-    { "id": "CAST01", "kind": "world", "locks": ["BOOK", "ISO"], "subject": "an old lighthouse keeper with a lantern, full body, front view", "transparent": true } ] }
-```
-Line it up with the troupe in a test still (`lineup.py` against a frame) before ordering the rest: the outline weight
-and the size of the colour areas must match the drawn puppets.
 
 ---
 

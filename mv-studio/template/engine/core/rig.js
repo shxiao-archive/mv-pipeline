@@ -11,7 +11,7 @@
  *   Z.rig.blink(t, seed, period)       0..1 eyelid closure (~every 3.7 s, seeded so a cast does not blink together)
  *   Z.rig.take(t, [[t0, expr, emote?], ...])   expression changes that never snap: { expr, blink, sq, emote, emoteK }
  *
- * The biped (an original generic skeleton; style packs paint parts on it, e.g. PC.doll, ST.person):
+ * The biped (an original generic skeleton; a film may paint parts on it):
  *   Z.rig.biped.SPEC                   bone lengths at s = 1 (chibi, ~260 px tall); Z.rig.biped.spec({...}) overrides
  *   Z.rig.biped.STRIDE / stride(pose, spec)   px per walk / run cycle: phase = Z.rig.cycle(distance, stride / s)
  *   Z.rig.biped.POSES / EXPRS          ~30 poses (cycles, actions with act, dance moves with beat) / 18 expressions
@@ -34,7 +34,7 @@
  * Model sheets (references/10 §8): a timeline in engine/sheets/<name>.js whose shot uses the 'sheet' scene:
  *   { scene: 'sheet', args: { cols, title, bg, ink, cells: [{ label, draw(g, t, box) }] }, post: Z.rig.SHEET_POST }
  *                                      box = { x, y, w, h, cx, cy, ground }; labels are light on a dark `bg`
- *   A cell that draws a style's scene (stShow, pcWorld ...) needs that style's post on the shot (ST.post ...), or it blows out.
+ *   A cell that draws a style's scene needs that style's post on the shot, or it blows out.
  *   node tools/stills.mjs --url "engine/index.html?tl=sheets/<name>.js" --times 0.5,1.7 --out render/sheets/<name>
  *
  * mv-studio (MIT). Written for this engine; the rig method (joint tables, keyed actions, phase from distance, two-bone

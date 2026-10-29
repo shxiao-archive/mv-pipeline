@@ -52,8 +52,6 @@ a thing you can point at in a frame.
 |---|---|
 | vocaloid | an illustrated (anime) character as the subject of most frames · the lyric line over the picture on a band, box or plate, in columns beside the subject, or as one monument kanji · HUD readouts, brackets or frame lines · kanji title slams · glowing line effects (crack webs, rays, sparks, embers, a rim light on the figure) · a dark ground lit by a few glowing accents |
 | interface | a chat or app screen (bubbles, a cursor, typing) · technical plates (charts, oscilloscopes, forms, prompts, maps) · a mono "system" voice · colour states for who speaks |
-| stage | puppets or a troupe acting · painted sets, a proscenium or a curtain · gags that escalate |
-| papercraft | painted tissue with torn edges, no outlines · the lyric set as the text on the page · page turns · a book that opens and closes |
 | magazine | vertical mincho lyric columns · pictures separated into a few inks on paper · folios, proof or register marks · a page with a fate |
 
 Markers are a review prompt, not a score. A single shared element that serves the song needs no justification. Judge
@@ -75,8 +73,6 @@ as a preset's overall look with no reason from the song, or conflict with the co
     (crack webs, rays, embers, fireflies, feathers, a rim light: the preset's pack, `engine/styles/vocaloid/`);
   - the AI-chat voices and colour states;
   - the treatise's spark-and-number plates;
-  - the puppet troupe on its painted stage;
-  - the paper RPG interface;
   - the three-ink magazine press with its folios, proof marks and vertical lyric columns;
   - the heat-grade recording device.
 

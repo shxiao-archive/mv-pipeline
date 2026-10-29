@@ -91,7 +91,7 @@ eyes (`Z.rig.take`). The face changes 2–4 frames **before** the body acts (thi
 
 ### 2.4 Model sheet (the acceptance test)
 
-Render one sheet per rig (`engine/sheets/<name>.js`, §8; start from `sheets/biped.js`, or a style's own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`): every pose in both facings, every expression, every state, the
+Render one sheet per rig (`engine/sheets/<name>.js`, §8; start from `sheets/biped.js`): every pose in both facings, every expression, every state, the
 walk and run at 8 phases, the close-up at the largest zoom the film uses, the `detail: 0` and silhouette versions. Look
 at it; fix; render again; at least two full rounds. Then a **lineup**: every character at s = 1 on one ground line with
 the height line, and trial placements in two of the film's sets (this is where a scarf turns out to hang off a balcony).
@@ -223,7 +223,7 @@ falls. The picture tells the joke; text in the frame only when the joke needs a 
 Each style's STYLE.md gives its own asset list and targets. Hitting them takes budget: plan it with the user (§9).
 
 **Where that code goes: a scene file of the film's own.** In the iteration-4 acceptance test the two films that reached
-the bar each wrote `engine/scenes/<film>.js` (papercraft 63 own lines per shot, stage 44); the three that stayed at
+the bar each wrote `engine/scenes/<film>.js` (44–63 own lines per shot); the three that stayed at
 9–22 only filled stock scenes with arguments in `timeline.js` (a background, a camera move, a cut-out, the same few
 effects in every shot). So every film:
 1. creates `engine/scenes/<film>.js` (one IIFE, like the template's scene files; a `<script>` line in

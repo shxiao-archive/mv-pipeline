@@ -228,17 +228,13 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
 | — (the film's own, default) | `own` | `blank.js` | `scenes/<film>.js` | `design-a-style.md` |
 | vocaloid | `vocaloid` | `vocaloid.js` | `styles/vocaloid/` (tegaki), `styles/signal/` (signal) | `styles/vocaloid/` |
 | interface | `interface` | `interface.js` | `styles/interface/` (screen), `styles/treatise/` (treatise) | `styles/interface/` |
-| stage | `stage` | `stage.js` | `styles/stage/` | `styles/stage/` |
-| papercraft | `papercraft` | `papercraft.js` | `styles/papercraft/` | `styles/papercraft/` |
 | magazine | `magazine` | `magazine.js` | `styles/magazine/` | `styles/magazine/` |
 
 - **What each pack registers** (all load after `core/scenes.js`): `styles/vocaloid/*` (its fx, transitions and scenes, §5; its scenes: `styles/vocaloid/STYLE.md`), `styles/interface/*` (`Z.IF`, scenes
   `ifChat ifPlate ifCode`; `kit.js`: ink plates `IF.inks / inkClip / part`, sagging type `IF.limp`, `IF.masked`) and `styles/signal/*` (`Z.SIG`, scenes `sigShot sigTerm sigFrag sigAbs`, transitions `whipL/R/U/D
-  zoomThru spin sigTear`) and `styles/stage/*` (`Z.ST`, scenes `stShow stSet stTitle`, transitions `brushWipe irisInk`,
-  karaoke `ST.karaoke`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
+  zoomThru spin sigTear`) and `styles/treatise/*` (`Z.TR`, plates `trSheet trPlot trScope trForm trPrompt trHook trContour`
   and the GPU plates `trEngrave trField`, `TR.write` (a line written by the pen),
-  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/papercraft/*` (`Z.PC`, scenes `pcBook pcStory pcWorld pcMap pcBattle`, transitions
-  `pageTurn shapeReveal`, the paper doll `PC.doll`, the RPG kit `PC.dialog / panel / map`) and `styles/magazine/*`
+  per-word lyrics `TR.words / lineWords`, the running number `TR.NUM`) and `styles/magazine/*`
   (`Z.MZ`: the press `MZ.begin / print / react` with spot separation, screens and misregistration, type and furniture
   `MZ.lyricV / folio / ruler / proofCircle ...`, scenes `mzSpread mzContents mzStrips mzGrid mzSlam mzBurn mzTear
   mzContact mzDecon mzFlash`; self-test `node engine/styles/magazine/press_selftest.mjs`). Their guides: `<skill>/styles/<style>/STYLE.md` (vocaloid = `styles/vocaloid` + `signal`; interface = `interface` + `treatise`). Starters: `engine/starters/`. `Z.SIG.spans` limits the signal layer to sections.
@@ -246,9 +242,8 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
   `mix`, keyed actions `keyed`, `cycle` from distance, `ik2`, `squash`, `trail`, `blink`, `take` for expression
   changes), `Z.rig.biped` (a generic skeleton: 34 poses incl. walk / run / jump / fall / dance moves, 19 expressions,
   `solve(o)` → skeleton, `anchors`, measured `STRIDE`), `Z.rig.face` (one face construction for a cast); stateless
-  `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/biped.js`; the
-  styles' own: `styles/papercraft/papercraft_doll.js`, `styles/stage/stage_person.js`). Style rigs on it: `PC.doll` (papercraft), `ST.person` (stage); they are examples of the API, not a cast: a film paints its
-  characters natively in its style's own way (references/10).
+  `Z.burst / Z.stream / Z.field`; the `sheet` scene + `Z.sheetGrid` for model sheets (`engine/sheets/biped.js`). The biped is
+  an example of the API, not a cast: a film paints its characters natively in its own way (references/10).
   Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
 - **Preloading:** a scene preloads only the images its args name (`illust`: bg / chars / layers). An image a custom
   `fx` or `text` hook draws needs `await Z.preload([...])` in `Z.setup`, or it is missing on the first frames.

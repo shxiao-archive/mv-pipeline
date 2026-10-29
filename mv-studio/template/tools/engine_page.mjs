@@ -34,7 +34,7 @@ export async function openEngine({ url = 'engine/index.html', width = 1920, heig
   const errors = [];
   let at = null;                                         // song time being rendered, for the error log
   // optional data files the engine probes for: a 404 there is not an error
-  const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json|assets\/cast\/rig\.json)$/;   // rig.json: pcStory before the cast is cut
+  const OPTIONAL = /\/(project\.json|analysis\/(cues|lyric_timing|envelope_30fps)\.json)$/;
   page.on('response', r => { if (r.status() >= 400 && !OPTIONAL.test(new URL(r.url()).pathname)) { errors.push({ t: at, msg: `HTTP ${r.status()} ${new URL(r.url()).pathname}` }); if (!quiet) console.log(`[page] HTTP ${r.status()} ${r.url()}`); } });
   page.on('console', m => { if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) { errors.push({ t: at, msg: m.text().slice(0, 300) }); if (!quiet) console.log(`[page error] ${m.text().slice(0, 200)}`); } });
   page.on('pageerror', e => { errors.push({ t: at, msg: String(e).slice(0, 300) }); if (!quiet) console.log('[pageerror]', String(e).slice(0, 200)); });

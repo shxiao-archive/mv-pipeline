@@ -64,12 +64,6 @@ their films. All tools listed above were written for this skill.
   cut-outs masked from a green redraw and a keyer for light-on-light subjects (`alpha_matte.py redraw`, `--seal`),
   reference images labelled as style or design.
 
-## The stage style
-
-`styles/stage/` and `template/engine/styles/stage/` were written for this skill after the look of **PDoomVideo** (a
-watercolour stage-show MV painted with p5.brush; no licence published, so ideas only: no code, art or characters). Its
-mascot belongs to another company and is not drawn; the default puppet is an original design.
-
 ## The treatise kit (interface style)
 
 `styles/interface/` (§B) and `template/engine/styles/treatise/` follow **pdoom-video** by Giacomo Magnanini (MIT; licence in
@@ -86,19 +80,13 @@ U. S. National Bureau of Standards; the format of the font data in this distribu
 Hurt, Cognition, Inc. (full use restriction in each file's metadata). EMS Readability and EMS Allure (Sheldon B.
 Michaels; derivatives of Source Sans Pro and Allura): SIL Open Font License 1.1, `fonts/stroke/OFL_ems.txt`.
 
-## The papercraft style
+## Rig, blocks and team process (after dalabengba-mv)
 
-`styles/papercraft/` and `template/engine/styles/papercraft/` adapt the paper-drawing primitives of **dalabengba-mv**
-(licence ISC as declared in its package.json; text in `licenses/LICENSE-dalabengba-mv.txt`) and follow its pop-up book,
-multiplane camera, paper RPG interface and transitions. Its song, lyrics, characters and story are not used; the
-paper doll is a generic original rig. `template/engine/core/rig.js` (joint tables, keyed actions, gait phase from
-distance, two-bone IK, ground contact, time-lagged trails) and `core/blocks.js` follow its rig and block methods; the
-team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
+`template/engine/core/rig.js` (joint tables, keyed actions, gait phase from distance, two-bone IK, ground contact,
+time-lagged trails) and `core/blocks.js` follow the rig and block methods of **dalabengba-mv** (licence ISC as declared
+in its package.json; text in `licenses/LICENSE-dalabengba-mv.txt`); its song, lyrics, characters and story are not used.
+The team process in `references/11-team.md` follows its reproduction manual. `references/10-craft.md` distils the process
 documents of all six study films (methods only; none of their characters, songs, copy or art).
-`styles/papercraft/vendor/` vendors its folk rig (`rigs/folk.js`, `core/`, ISC) with mv-studio additions (animal ears,
-a tail, a satchel; the walk, point, sit, offer, hugSelf and lookUp poses); `vendor/build.mjs` bundles it to
-`template/engine/styles/papercraft/folk.js` (`window.PCF`). Films use its construction, its custom looks and its
-generic townsfolk; its story's own characters (the herald, the guard, the scribe, the named child) are not used.
 
 ## The magazine style: adapted from he-drowns-mv-v2 — © 2026 ATRAXI (longruizhi2-beep), code MIT
 

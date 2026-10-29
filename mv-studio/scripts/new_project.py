@@ -2,7 +2,7 @@
 """new_project.py -- scaffold an mv-studio (lyric-MV) project from the skill's template (base: vocaloid-style-mv).
 
   python scripts/new_project.py <target_dir> [--song song.wav] [--lyrics lyrics.lrc] [--title NAME] [--title-sub LATIN]
-                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid|interface|stage|papercraft|magazine]
+                                [--artist NAME] [--credit "Music / Lyrics / Movie：Artist"] [--style vocaloid|interface|magazine]
                                 [--art codex|grok|novelai] [--mode solo|team] [--no-git]
                                 [--setup] [--setup-args "..."]
                                 [--force]
@@ -20,7 +20,7 @@ What it does
                 (HUD, end card, 9:16 header and footer). --title alone empties Z.TITLE_SUB;
                 --credit alone also sets Z.ARTIST to the name after its first role (： or :), up to the next ' / '
   * --style  own (default: the film designs its own style; engine/timeline.js is the blank starter) | a preset the user
-                asked for: vocaloid | interface | stage | papercraft | magazine (engine/timeline.js is a copy of engine/starters/<starter>.js)
+                asked for: vocaloid | interface | magazine (engine/timeline.js is a copy of engine/starters/<starter>.js)
   * --mode   solo (default) | team -> project.json; --no-git skips `git init` (the default when git exists)
   * --art    the image generator the user chose -> art.config.json "provider" (tools/artgen.py; default: ask later)
   * --setup  runs setup.ps1 (Windows) or setup.sh (macOS / Linux) inside the new project
@@ -62,7 +62,7 @@ SKIP_FILE_GLOBS = ["audio/*", "analysis/*", "*.pyc", "*.raw.png", "*.mp4", "*.mo
 KEEP_FILES = {"audio/.gitkeep", "analysis/.gitkeep"}
 MAKE_DIRS = ["audio", "analysis", "assets/char", "assets/bg", "docs", "engine/tests"]
 # --style -> starter in engine/starters (where each style's code lives: references/05-engine.md §12)
-STYLES = {"own": "blank", "vocaloid": "vocaloid", "interface": "interface", "stage": "stage", "papercraft": "papercraft", "magazine": "magazine"}
+STYLES = {"own": "blank", "vocaloid": "vocaloid", "interface": "interface", "magazine": "magazine"}
 STYLE_ALIASES = {"tegaki": "vocaloid", "vocaloid:tegaki": "vocaloid", "signal": "vocaloid", "vocaloid:signal": "vocaloid",
                  "interface:screen": "interface", "screen": "interface", "treatise": "interface", "interface:treatise": "interface", "none": "own", "blank": "own",
                  "zine": "magazine", "print": "magazine", "riso": "magazine", "雑誌": "magazine"}  # incl. the names before the merge

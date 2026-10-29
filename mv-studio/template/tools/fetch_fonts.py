@@ -39,7 +39,7 @@ FAMILIES = [
     # treatise style pack: a grotesk with a width axis (the lyric voice) and an italic serif (the prophetic register)
     ("Archivo", "archivo"),
     ("Cormorant Garamond", "cormorantgaramond"),
-    # papercraft style pack: round display, playful hand, storybook serif (CJK) + a round Latin for numbers / UI
+    # round display, playful hand, storybook serif (CJK) + a round Latin for numbers / UI
     ("ZCOOL QingKe HuangYou", "zcoolqingkehuangyou"),
     ("ZCOOL KuaiLe", "zcoolkuaile"),
     ("ZCOOL XiaoWei", "zcoolxiaowei"),

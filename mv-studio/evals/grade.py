@@ -15,48 +15,17 @@ SPEC = {
     "interface-en-chat": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True),
     "signal-zh-glitch": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_zh.lrc", pops=False),   # 1-2 frame inserts are the style
     "tegaki-vertical-plain": dict(size=(1080, 1920), span=(0.5, 33.5), fps=30, lyr="lyrics_en_plain.txt", estimated=True, pops=True),
-    "stage-en-show": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, stage=True, style="stage"),
     "treatise-en-plates": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="interface", look="treatise"),
-    "papercraft-en-quest": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="papercraft"),
     "vocaloid-en-singer": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="vocaloid"),
     "own-en-film": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=True, style="own"),   # no preset asked for
     "magazine-en-press": dict(size=(1920, 1080), span=(0.5, 33.5), lyr="lyrics_en.lrc", pops=False, style="magazine"),   # one-tatum MZ.flash inserts are the style
 }
 SPEC["interface-en-chat"].update(style="interface", look="screen")   # look: which of the style's two kits the prompt asks for
-STARTER = Path(__file__).resolve().parents[1] / "template" / "engine" / "starters" / "stage.js"
-PAINT = re.compile(r"\bST\.(paint|ink|puppet|dancer)\(")
-
-
-def stage_checks(proj, add):
-    """Stage style: the style is used, the starter was replaced (not shipped), and the film paints its own gags."""
-    sj = proj / "plan" / "shots.json"
-    shots = json.loads(sj.read_text(encoding="utf-8"))["shots"] if sj.is_file() else []
-    st = [s for s in shots if re.match(r"^st[A-Z]", s.get("scene", ""))]
-    declared = {i for s in shots for i in (s.get("line") if isinstance(s.get("line"), list) else [s.get("line")]) if isinstance(i, int)}
-    add("uses the stage style: >= 80% of the shots are st* scenes and every lyric line 0-7 is declared by a shot",
-        shots and len(st) >= 0.8 * len(shots) and set(range(len(TRUTH))) <= declared,
-        f"{len(st)}/{len(shots)} st* shots; lines declared {sorted(declared)}" if shots else "no plan/shots.json (run tools/storyboard.mjs)")
-    moments = [s.get("moment") or "" for s in shots]
-    left = sum("REPLACE" in m for m in moments)
-    add("the starter was replaced: no placeholder moments left and >= 80% of the moments are distinct",
-        shots and not left and len(set(moments)) >= 0.8 * len(shots), f"{left} placeholder(s); {len(set(moments))} distinct of {len(shots)}")
-    base = len(PAINT.findall(STARTER.read_text(encoding="utf-8")))
-    mine = 0
-    for f in [proj / "engine" / "timeline.js", *(proj / "engine" / "scenes").glob("*.js"), *(proj / "engine" / "tests").glob("*.js")]:
-        if f.is_file():
-            mine += len(PAINT.findall(f.read_text(encoding="utf-8", errors="ignore")))
-    for f in (proj / "engine" / "styles").rglob("*.js") if (proj / "engine" / "styles").is_dir() else []:
-        if not (STARTER.parents[1] / "styles" / f.relative_to(proj / "engine" / "styles")).is_file():
-            mine += len(PAINT.findall(f.read_text(encoding="utf-8", errors="ignore")))
-    add("the film paints its own gags: >= 15 ST.paint / ST.ink / ST.puppet calls beyond the starter's",
-        mine - base >= 15, f"{mine} calls in the project's own engine files, starter has {base}")
 ENGINE = Path(__file__).resolve().parents[1] / "template" / "engine"
 # per style: its scenes (None = the scene library), its starter timeline, and what its depth work looks like in code
 STYLE = {
     # use: a film's own scene file that builds on the style (its scenes or its kit) counts as the style's scenes
     "interface": dict(scene=r"^(if|tr)[A-Z]", starter="starters/interface.js", use=r"\b(IF|TR)\.|['\"](if|tr)[A-Z]"),
-    "papercraft": dict(scene=r"^pc[A-Z]", starter="starters/papercraft.js", use=r"\bPC\."),
-    "stage": dict(scene=r"^st[A-Z]", starter="starters/stage.js", use=r"\bST\."),
     "magazine": dict(scene=r"^mz[A-Z]", starter="starters/magazine.js", use=r"\bMZ\.|['\"]mz[A-Z]"),
     "vocaloid": dict(scene=None, starter="starters/vocaloid.js"),
     "own": dict(scene=None, starter="starters/blank.js"),               # the film designs its own style (design-a-style.md)
@@ -138,16 +107,6 @@ def style_checks(proj, add, style, look=None):
         add("at least one GPU plate in its own code (trEngrave / trField, or Z.shade / Z.lineBatch)", gpu, "yes" if gpu else "none")
         pen = bool(re.search(r"TR\.write\(|Z\.stroke\.|trEngrave|trField", text))
         add("a line written by the pen (TR.write / Z.stroke)", pen, "yes" if pen else "none")
-    if style == "papercraft":
-        # any quoted rig pose name (poses also come as keyed lists [[t, 'jump'], ...]); names from core/rig.js
-        r = subprocess.run(["node", "-e", "const vm=require('vm'),fs=require('fs'),w={},c=vm.createContext({window:w,Math,console});"
-                            "for(const f of ['core/util.js','core/rig.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c);"
-                            "console.log(w.Z.rig.biped.NAMES.join(' '))"], capture_output=True, text=True, cwd=ENGINE)
-        names = set(r.stdout.split())
-        poses = sorted({q for q in re.findall(r"['\"]([A-Za-z]+)['\"]", text) if q in names})
-        add(">= 8 distinct rig poses named in the project's own code", len(poses) >= 8, f"{len(poses)}: {poses[:20]}")
-        sheets = list((proj / "render" / "sheets").rglob("*.png")) + list((proj / "render" / "sheets").rglob("*.jpg")) if (proj / "render" / "sheets").is_dir() else []
-        add("model sheets were rendered (render/sheets)", bool(sheets), f"{len(sheets)} images")
 
 
 TRUTH = [4.25, 8.25, 12.25, 16.25, 20.25, 22.25, 26.25, 28.25]   # sung line onsets of the fixture song (all three lyric files)
@@ -332,8 +291,6 @@ def main():
             f"{good}/{len(TRUTH)} within 120 ms ({lrc.relative_to(out / 'project').as_posix()}); errors {[round(e, 2) for e in errs]}")
     else:
         add("lyric timing: >= 90% of the line starts within 120 ms of where the lines are sung", False, "no .lrc in the project")
-    if sp.get("stage"):
-        stage_checks(out / "project", add)
     if sp.get("style"):
         style_checks(out / "project", add, sp["style"], sp.get("look"))
     if sp.get("estimated"):

@@ -23,7 +23,7 @@ builders and later rounds find it.
 |---|---|
 | `id` | `<kind>:<name>`, e.g. `scene:train`, `helper:D.travel`, `manual:references/04-asset-generation#12` |
 | `kind` | `scene` · `type-scene` · `transition` · `helper` · `lyric-plan` · `tool` · `check` · `manual` |
-| `fits` | the preset it was made for (`vocaloid`, `interface`, `stage`, `papercraft`, `magazine`), `shared`, or `film` (the film's own): a technique any film may use; a preset's overall look stays the preset's |
+| `fits` | the preset it was made for (`vocaloid`, `interface`, `magazine`), `shared`, or `film` (the film's own): a technique any film may use; a preset's overall look stays the preset's |
 | `does` | what it shows or does, from the header or the comment above it |
 | `where` | `path:first-last` (project-relative; `<skill>/…` for manuals) |
 | `use` | the smallest call |
