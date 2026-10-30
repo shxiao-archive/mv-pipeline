@@ -185,7 +185,7 @@ fx specs (`fxBack`/`fx`, or `Z.fx`): `rain`, `dust` (options as in §5), `glow {
   });
 })();
 ```
-Then: add `<script src="scenes/rain_glass.js"></script>` to `index.html` **and** `vertical.html`; write a test timeline; render stills; **look at them**; iterate.
+Then: add `<script src="scenes/rain_glass.js"></script>` to `index.html` **and** `vertical.html` (`lint.mjs` PAGES fails until both load it); write a test timeline; render stills; **look at them**; iterate.
 ```js
 // engine/tests/rain.js
 (() => { const Z = window.Z; Z.setup = async () => {

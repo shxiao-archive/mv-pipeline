@@ -6,6 +6,8 @@
  *   MOJIBAKE   no U+FFFD replacement character in code, docs or analysis data (a write that lost CJK text)
  *   NONDET     no Math.random( / Date.now( / performance.now( / new Date( in engine code (frames are rendered in
  *              parallel and out of order: use Z.rnd / S.rng / the song time). A line may opt out with  // lint-ok
+ *   PAGES      engine/index.html and vertical.html load the same scripts, engine/scenes/*.js included (vertical.html
+ *              is the same stack plus vertical.js: a scene file in one page only breaks the 9:16 build)
  *   LYRICS     node tools/check_no_lyrics.mjs (lyric text only in analysis/lyrics_mv.lrc)
  * With paths, only those files / folders are checked (a builder checking its own files). Exit 1 on any problem.
  *
@@ -58,6 +60,15 @@ for (const f of files.filter(f => /\.js$/.test(f) && rel(f).startsWith('engine/'
     code = code.replace(/\/\/.*$/, m => (/lint-ok/.test(m) ? ' LINTOK' : ''));
     if (NONDET.test(code) && !/LINTOK/.test(code)) problems.push(`NONDET   ${rel(f)}:${i + 1}: ${line.trim().slice(0, 120)}`);
   });
+}
+const scripts = n => { const f = path.join(ROOT, 'engine', n); return fs.existsSync(f) && new Set([...fs.readFileSync(f, 'utf8').matchAll(/<script src="([\w./-]+)"/g)].map(m => m[1])); };
+const [hp, vp] = [scripts('index.html'), scripts('vertical.html')];
+if (!args.length && hp && vp) {
+  const sd = path.join(ROOT, 'engine', 'scenes'), scenes = fs.existsSync(sd) ? fs.readdirSync(sd).filter(n => /\.js$/.test(n)).map(n => `scenes/${n}`) : [];
+  for (const s of new Set([...hp, ...scenes])) {
+    const miss = [!hp.has(s) && 'index.html', !vp.has(s) && 'vertical.html'].filter(Boolean);
+    if (miss.length) problems.push(`PAGES    engine/${s} is not loaded by engine/${miss.join(' or ')}: add its <script> to both pages`);
+  }
 }
 let lyricsOk = true;
 if (!flag('no-lyrics-check') && fs.existsSync(path.join(ROOT, 'tools', 'check_no_lyrics.mjs'))) {
