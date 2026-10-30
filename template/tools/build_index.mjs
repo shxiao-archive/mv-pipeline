@@ -84,8 +84,10 @@ function walk(dir, ext, out = []) {
   return out;
 }
 const rel = p => relative(process.cwd(), p).replace(/\\/g, '/');
+const read = f => readFileSync(f, 'utf8').replace(/\r\n/g, '\n');   // the same index from a CRLF (Windows) or LF checkout
 
 function toolDoc(text) {
+  text = text.replace(/^#![^\n]*\n/, '').replace(/^#.*coding[:=][^\n]*\n/, '');   // shebang, then a Python coding line
   const m = text.match(/^(?:#![^\n]*\n)?\s*(?:\/\*|"""|''')\s*([\s\S]*?)(?:\*\/|"""|''')/) || text.match(/^(?:#![^\n]*\n)?((?:\s*(?:\/\/|#)[^\n]*\n)+)/);
   if (!m) return '';
   return short(clean(m[1].replace(/^\s*(\/\/|#)/gm, '').split(/\n\s*\n/)[0]));
@@ -110,19 +112,20 @@ if (args.includes("--selftest")) {
   const e = indexSource(src, 'engine/styles/magazine/x.js');
   const ok = [e.length === 4, e[0].does === 'a red square that slams on the beat', e[0].fits[0] === 'magazine', e[1].tags?.[0] === 'impact',
     e[1].does === 'a blue line', e[2].id === 'helper:D.travel' && e[2].does === 'moves on an arc' && e[2].use === 'D.travel(t, t0, t1, p0)',
-    e[3].kind === 'transition', e[0].where === 'engine/styles/magazine/x.js:6-9'];
+    e[3].kind === 'transition', e[0].where === 'engine/styles/magazine/x.js:6-9',
+    toolDoc('#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n"""\nx.py -- does a thing\n"""\n') === 'x.py -- does a thing'];
   console.log(`[build_index] selftest ${ok.every(Boolean) ? 'ok' : 'FAIL ' + JSON.stringify(ok) + ' ' + JSON.stringify(e.map(x => [x.does, x.where]))}`); process.exit(ok.every(Boolean) ? 0 : 1);
 }
 
 const rows = [];
-for (const f of walk('engine', /\.js$/)) rows.push(...indexSource(readFileSync(f, 'utf8'), rel(f)));
+for (const f of walk('engine', /\.js$/)) rows.push(...indexSource(read(f), rel(f)));
 for (const f of walk('tools', /\.(mjs|py)$/).filter(f => dirname(f) === 'tools')) {
   const n = basename(f), kind = /^(check_|motion_check|pops|lint|storyboard|verify)/.test(n) ? 'check' : 'tool';
-  rows.push({ id: `${kind}:${n.replace(/\.\w+$/, '')}`, kind, fits: ['shared'], does: toolDoc(readFileSync(f, 'utf8')) || n, where: rel(f), use: `${n.endsWith('.py') ? 'python' : 'node'} tools/${n}` });
+  rows.push({ id: `${kind}:${n.replace(/\.\w+$/, '')}`, kind, fits: ['shared'], does: toolDoc(read(f)) || n, where: rel(f), use: `${n.endsWith('.py') ? 'python' : 'node'} tools/${n}` });
 }
 for (const f of walk('engine/styles', /\.mjs$/)) {                     // a preset's own tools live in its pack
   const n = basename(f, '.mjs');
-  rows.push({ id: `tool:${n}`, kind: 'tool', fits: fitsOf(rel(f)), does: toolDoc(readFileSync(f, 'utf8')) || n, where: rel(f), use: `node ${rel(f)}` });
+  rows.push({ id: `tool:${n}`, kind: 'tool', fits: fitsOf(rel(f)), does: toolDoc(read(f)) || n, where: rel(f), use: `node ${rel(f)}` });
 }
 const skill = opt('--skill') || (existsSync('../references') ? '..' : null);
 const out = opt('--out') || 'index/index.jsonl';
