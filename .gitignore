@@ -1,4 +1,4 @@
-mv-studio/evals/fixtures/test_song.wav
+evals/fixtures/test_song.wav
 __pycache__/
 *.pyc
 node_modules/
