@@ -67,7 +67,9 @@ user a 3–6 line summary plus an image at the checkpoints (◆).
 | 8 deliver | master, share encode, 9:16, credits | — | references/08 |
 
 Scaffold: `python <skill>/scripts/new_project.py <dir> --song <song> --lyrics <lyrics> [--style <preset>] [--art <gen>]
---title … --credit "Music / Lyrics / Movie：<artist>" --setup`. A large film with parallel builders: references/11.
+--title … --credit "Music / Lyrics / Movie：<artist>" --setup`. On Windows setup runs `powershell -ExecutionPolicy Bypass`;
+if your permissions deny that, ask the user to run it (`! powershell -ExecutionPolicy Bypass -File setup.ps1`), never
+work around it. A large film with parallel builders: references/11.
 
 ## Checks guard the craft, not the taste
 

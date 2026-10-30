@@ -161,7 +161,8 @@ one of your own backgrounds instead of the built-in dusk scene).
   `.npm-cache`, re-run setup.
 - **NovelAI: `NOVELAI_API_KEY is not set`** → set it in your own shell (`setx NOVELAI_API_KEY "<token>"`, new terminal); never in a project file. HTTP 402 → subscription / Anlas (sizes > 1 MP, > 28 steps and references cost Anlas).
 - **Grok images never start** when called from Python: run `bash tools/grok_run.sh` from a shell (`references/04` §11).
-- **`setup.ps1` cannot be loaded** (execution policy): run it as `powershell -ExecutionPolicy Bypass -File setup.ps1`.
+- **`setup.ps1` cannot be loaded** (execution policy): run it as `powershell -ExecutionPolicy Bypass -File setup.ps1`. An agent whose
+  permissions deny that call asks you to run it yourself.
 - **Font download hits the GitHub rate limit**: set `GITHUB_TOKEN`, or `-FontsFrom` / `--fonts-from` another project.
 - **No network for JIZURA**: clone it elsewhere and set `JIZURA_DIR`, then `node tools/build_jizura_bundle.mjs`.
 - **Frames differ between render workers / flicker at 1/3 and 2/3 of the film**: something in a scene depends on
