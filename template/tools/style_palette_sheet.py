@@ -11,7 +11,7 @@ Outputs (under the project root):
   assets/style/palettes.json          (roles, gradient stops, duotone pairs, contrast)
   assets/style/luts/<id>.png          (256x1 RGB gradient-map LUT, OKLab-interpolated)
   assets/style/luts/<id>_duo.png      (256x1 duotone LUT)
-  assets/style/dusk_scene_gray.png    (the grey test scene; engine/styles/vocaloid/preview_style_fx.mjs renders onto it)
+  assets/style/dusk_scene_gray.png    (a grey test scene to try a grade on)
   docs/style_palettes.png             (contact sheet)
 Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 """
@@ -192,7 +192,7 @@ def main():
     os.makedirs(OUT_LUT, exist_ok=True)
     os.makedirs(os.path.dirname(sheet_path), exist_ok=True)
 
-    scene = dusk_scene()   # always refreshed: engine/styles/vocaloid/preview_style_fx.mjs renders onto it
+    scene = dusk_scene()   # always refreshed: a grey test scene to try a grade on
     Image.fromarray((scene * 255).round().astype(np.uint8), 'L').save(os.path.join(OUT_STYLE, "dusk_scene_gray.png"))
     if plate:   # Rec.601 luma of the plate, same 640x360 frame as the dusk scene
         grey = ImageOps.fit(Image.open(plate).convert("L"), (640, 360), Image.LANCZOS)
