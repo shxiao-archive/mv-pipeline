@@ -73,7 +73,7 @@ Scaffold: `python <skill>/scripts/new_project.py <dir> --song <song> --lyrics <l
 
 `node tools/verify.mjs` runs the automated checks in order and prints what fails, warns or did not run, each with its
 fix: determinism and lint, no lyrics in code, storyboard and grid, lyric safe area and overlaps, sprite swaps, unplanned
-pops (drawn from the engine, before a render: they cannot see defects of the encoded file), and on a render: flash
+pops (drawn from the engine, before a render: they cannot see defects of the encoded file), and on a render: the credit, flash
 safety, static stretches, sync. A failure is a technical defect to fix; no check decides what the film
 should look like. Taste is judged by a jury that did not make the film, against your `docs/CONCEPT.md`, whether the
 film reads as its style, and general craft (references/09 §8).
