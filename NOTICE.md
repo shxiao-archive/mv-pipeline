@@ -52,7 +52,8 @@ their films. All tools listed above were written for this skill.
   constant-tempo grid, sections with a pickup rule, an edit derived from the lyrics and the grid, per-section lyric
   treatments, a "not slop" list, revisions recorded with their reasons, a preview player with keys and deep links
   (`engine/core/player.js`), shutter motion blur.
-- **dalabengba-mv** and **PDoomVideo** (no licence published, so ideas only): a director's brief read by everyone,
+- **dalabengba-mv** (ISC, see "Rig, blocks and team process" below) and **PDoomVideo** (no licence published, so
+  ideas only): a director's brief read by everyone,
   cue tables with picture hints, labelled per-cue contact sheets, unplanned-jump detection, a lint for
   non-determinism and lost characters, P0 / P1 / P2 independent review, progress written before polish, git
   checkpoints; one short guide for every builder, a frame that returns, a motif that escalates each chorus, a
