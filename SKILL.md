@@ -58,7 +58,7 @@ user a 3–6 line summary plus an image at the checkpoints (◆).
 |---|---|---|---|
 | 0 setup | env report; the user's choice of art generator; credit line; solo or team; a preset or the film's own style (`--style`) | `python <skill>/scripts/check_env.py` | references/01 §0 |
 | 1 listen | `analysis/audio.json`, `overview.png`, timed lyrics, `analysis/cues.json` | `python tools/check_sync.py --lyrics-only`, `tools/lyric_timing.py status` | references/03 |
-| 2 direct ◆ | `docs/CONCEPT.md` (with the film's style), `docs/BRIEF.md` | the user's go | `direction.md`, `design-a-style.md` or the preset's BRIEF.md |
+| 2 direct ◆ | `docs/CONCEPT.md` (with the film's style), `docs/BRIEF.md` | the user's go | `direction.md`, `design-a-style.md` or the preset's BRIEF.md (vocaloid: also `styles/vocaloid/DIRECTION.md`) |
 | 3 plan | the shot list in `engine/timeline.js` (`moment`, `line`, `cue` per shot) | `node tools/storyboard.mjs` | references/05 §3 |
 | 4 art ◆ | generated / drawn assets on review sheets, `docs/WANTED_ART.md` | look at every sheet (`art_grid.py`, `lineup.py`) | references/04, references/10 |
 | 5 build | the film's own `engine/scenes/<film>.js` + timeline | `node tools/verify.mjs --quick` | references/05, 06, 07 |

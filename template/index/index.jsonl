@@ -541,8 +541,8 @@
 {"id":"manual:styles/vocaloid/DIRECTION#10","kind":"manual","does":"10. Variation matrix — make it different","where":"<skill>/styles/vocaloid/DIRECTION.md:90-110","lines":21}
 {"id":"manual:styles/vocaloid/DIRECTION#11","kind":"manual","does":"11. Worked example: 残光 in brief","where":"<skill>/styles/vocaloid/DIRECTION.md:111-114","lines":4}
 {"id":"manual:styles/vocaloid/DIRECTION#12","kind":"manual","does":"12. Anti-patterns","where":"<skill>/styles/vocaloid/DIRECTION.md:115-124","lines":10}
-{"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:125-142","lines":18}
-{"id":"manual:styles/vocaloid/DIRECTION#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/styles/vocaloid/DIRECTION.md:143-157","lines":15}
+{"id":"manual:styles/vocaloid/DIRECTION#13","kind":"manual","does":"13. Bright / daytime films (high-key)","where":"<skill>/styles/vocaloid/DIRECTION.md:125-139","lines":15}
+{"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:140-157","lines":18}
 {"id":"manual:styles/vocaloid/STYLE#A","kind":"manual","does":"A. Tegaki — illustrated MV with an original character (the base kit's style)","where":"<skill>/styles/vocaloid/STYLE.md:30-76","lines":47}
 {"id":"manual:styles/vocaloid/STYLE#B","kind":"manual","does":"B. Signal — a recording device failing","where":"<skill>/styles/vocaloid/STYLE.md:77-162","lines":86}
 {"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both kits)","where":"<skill>/styles/vocaloid/STYLE.md:163-207","lines":45}
