@@ -381,7 +381,7 @@ def main() -> int:
               ("node tools/stills.mjs --times 1,3.5,8.4,10,12.5,13.6,18.4,19.5,21.2,23.3 --sheet smoke   "
                "# -> render/stills/smoke.jpg" if demo else
                "node tools/stills.mjs --times 1,4,8,14,17,23 --sheet first   # stills + contact sheet in render/stills/"),
-              f"node tools/render_final.mjs --name {name}          # full render + audio -> render/{name}.mp4"]
+              f"node tools/render_final.mjs --name {name}          # full render + audio -> render/{name}.mp4 (add --codec x264 without an NVIDIA GPU)"]
     if demo:
         steps.append("# 9:16 version + review sheets: README.md section 2")
     if lyrics and not LRC_TAG.search(lyrics.read_bytes().decode("utf-8-sig", errors="replace")):
