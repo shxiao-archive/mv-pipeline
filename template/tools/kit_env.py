@@ -65,6 +65,14 @@ def resolve(p, base: Path | str = ROOT) -> Path:
     return (Path(base) / p).resolve()
 
 
+def film_title() -> str | None:
+    """Z.TITLE from engine/timeline.js (new_project.py --title); None while it is empty or the starter's 'untitled'."""
+    tl = ROOT / "engine" / "timeline.js"
+    m = re.search(r"""^\s*Z\.TITLE\s*=\s*(['"`])((?:\\.|(?!\1)[^\\\n])*)\1""", tl.read_text(encoding="utf-8"), re.M) if tl.is_file() else None
+    title = re.sub(r"\\(.)", r"\1", m.group(2)) if m else ""
+    return title if title and title != "untitled" else None
+
+
 def rel(p) -> str:
     """Path for logs / JSON: relative to ROOT with forward slashes when inside the project, else as is."""
     try:

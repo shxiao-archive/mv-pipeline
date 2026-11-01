@@ -10,6 +10,11 @@ r = run(str(P), "--no-git"); assert r.returncode == 0, r.stderr
 rec = json.loads((P / ".mv-studio.json").read_text(encoding="utf-8"))
 assert "engine/core/main.js" in rec["files"] and "engine/timeline.js" not in rec["files"] and "README.md" in rec["files"]
 assert "tools/check_env.py" in rec["files"] and not any(k.startswith(("node_modules", "analysis/a")) for k in rec["files"])
+# the title the film was scaffolded with is what the analysis prints; the starter's 'untitled' is no title
+title = lambda d: subprocess.run([sys.executable, "-c", "import kit_env; print(kit_env.film_title())"], cwd=d / "tools", capture_output=True, text=True).stdout.strip()
+assert title(P) == "None", title(P)
+r = run(str(P.parent / "q"), "--no-git", "--title", "it's here"); assert r.returncode == 0, r.stderr
+assert title(P.parent / "q") == "it's here", title(P.parent / "q")
 r = run(str(P), "--upgrade"); assert "up to date" in r.stdout, r.stdout
 (P / "index/index.jsonl").write_text('{"id":"scene:mine"}\n', encoding="utf-8")   # a rebuilt index is not a project change
 r = run(str(P), "--upgrade"); assert "up to date" in r.stdout and "index" not in r.stdout.split("project  :")[1], r.stdout

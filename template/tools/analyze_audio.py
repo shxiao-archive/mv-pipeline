@@ -1538,7 +1538,7 @@ def main():
                     help="beats: tracked (onset-snapped, attack-refined), fitted (one constant tempo through them), or "
                          "auto = fitted when the song is metronomic (default)")
     ap.add_argument("--title", default=None, help="song title for overview.png / AUDIO_MAP.md "
-                                                  "(default: the audio file name, or the project folder name)")
+                                                  "(default: Z.TITLE in engine/timeline.js, else the audio file name or the project folder name)")
     ap.add_argument("--no-plot", action="store_true", help="skip overview.png / ssm.png")
     ap.add_argument("--no-click", action="store_true", help="skip analysis/click_preview.m4a")
     ap.add_argument("--vocal-stem", default=VOCAL_STEM,
@@ -1555,7 +1555,7 @@ def main():
     if not os.path.exists(audio_path):
         sys.exit(f"audio not found: {audio_path}  (put the song at audio/song.wav or pass --audio)")
     stem_name = os.path.splitext(os.path.basename(audio_path))[0]
-    title = args.title or (kit_env.ROOT.name if stem_name.lower() == "song" else stem_name)
+    title = args.title or kit_env.film_title() or (kit_env.ROOT.name if stem_name.lower() == "song" else stem_name)
     sec_arg = args.sections or (SECTIONS_FILE if os.path.exists(SECTIONS_FILE) else "auto")
     vocal_stem = str(kit_env.resolve(args.vocal_stem)) if args.vocal_stem else None
 
