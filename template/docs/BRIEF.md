@@ -44,8 +44,8 @@ What carries the eye across cuts: a recurring object, a shape match, a colour br
 
 ## 7. Not in this film
 
-The clichés to avoid for this song (pdoom-video's "not slop" list is a good model): e.g. generic glowing particles,
-lens-flare soup, stock "AI" imagery, a lyric repeated as a caption over a picture of the same thing.
+The clichés to avoid for this song: e.g. generic glowing particles, lens-flare soup, purple/cyan neon, code rain,
+stock "AI" imagery, a lyric repeated as a caption over a picture of the same thing.
 
 ## 8. Reserved zones
 
