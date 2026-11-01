@@ -93,7 +93,7 @@ Random parts are curated for the film's own tone. The template timeline builds `
 Optional mood filter, `MOODS` in `timeline.js`: `null` (default) = no filter — the demo is curated by the deny-lists alone. An array of JIZURA tags (`glitch calm pop graphic editorial emotional`) keeps only the parts whose registry entry's `tags` include one of them; untagged parts (the plain `cut` / `none` entries) stay on. Setting it re-rolls every cut. The plan's `mood` field is not a filter (§3).
 
 The demo's deny-lists. The rows about opaque cards, full-frame effects and plates that cover the picture are defects
-(measure them with `jizura_cover.mjs` below); the rest are the demo's tone, and a film's own lists follow its concept:
+(measure them with `jizura_cover.mjs` below); the rest are the demo's tone, and a film's own lists follow its concept. Plans draw any part left on, so before the first stills turn every device the brief rules out (shake, labels, particles) into DENY lines, with `node tools/jizura_parts.mjs` for the names:
 
 | group | denied | why |
 |---|---|---|
