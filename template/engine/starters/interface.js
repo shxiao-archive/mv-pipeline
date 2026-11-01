@@ -86,9 +86,11 @@
       }
       shot(id, a, b, scene, Object.assign({ line: l.i }, args), { line: l.i, post: TR.post, moment: `line ${l.i} as a ${scene.slice(2).toLowerCase()} plate (REPLACE: the visual pun for this line)` });
     };
+    // the GPU plates write the line with a pen font, Latin only: any other line goes to a plate that sets it as type
+    const pen = (scene, args) => { const p = plate(scene, args), q = plate('trForm', {}); return (l, a, b) => (/^[\x20-\x7e’“”]*$/.test(l.text) ? p : q)(l, a, b); };
     // REPLACE: the film's own order (or choose a builder per line). Any line may come from either library.
     const POOL = [screen, plate('trPlot', { mode: 'drop' }), screen, plate('trScope', {}), screen, plate('trForm', {}),
-      screen, plate('trContour', { seed: 5 }), screen, plate('trEngrave', { form: 'bulb' }), screen, plate('trField', {})];
+      screen, plate('trContour', { seed: 5 }), screen, pen('trEngrave', { form: 'bulb' }), screen, pen('trField', {})];
 
     const lines = L.filter(l => l.t >= first - 0.3 && l.t < END - 0.3);
     let cur = first;

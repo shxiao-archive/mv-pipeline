@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Self-test of the time and word helpers (no browser): Z.withInserts, Z.replay / replayMap / passOf, Z.dropFrames,
  * Z.tear, Z.wordsAt / wordIndex, the metre clock (Z.makeClock with a bar map) and Z.makeHits (engine/core/util.js,
- * engine/core/lyrics.js).
+ * engine/core/lyrics.js), and Z.stroke reporting a character its font has no glyph for (engine/core/stroke.js).
  *   node tools/time_selftest.mjs        exit 1 on a failed check
  * mv-studio (MIT).
  */
@@ -67,6 +67,18 @@ check(Math.abs(H.hit('kick', 1) - 1) < 1e-9 && Math.abs(H.hit('kick', 1.12) - Ma
 check(H.hit('kick', 0.5) === 0 && H.hit('snare', 3) === 0 && H.hit('hat', 3) === 0, 'no onset, no hit');
 check(Math.abs(H.hit('kick', 2.06) - 0.9 * Math.exp(-0.01 / 0.12)) < 1e-9, 'the strongest recent onset wins');
 check(H.lastHit('kick', 2.03, 0.5) === 1 && H.hitCount('kick', 0, 3, 0.5) === 2, 'lastHit / hitCount');
+
+// the pen fonts are Latin only: a character with no glyph is a page error, once per font and text; a space is not
+const logged = [], glyph = u => ({ getAttribute: k => (k === 'unicode' ? u : k === 'd' ? 'M0 0L0 700' : null) });
+const stubs = { window: win, Math, console: { error: m => logged.push(m) }, fetch: async () => ({ ok: true, text: async () => '' }),
+  DOMParser: class { parseFromString() { return { querySelector: () => ({ getAttribute: () => null }), querySelectorAll: () => [glyph('H'), glyph(' ')] }; } } };
+vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'engine/core/stroke.js'), 'utf8'), stubs, { filename: 'engine/core/stroke.js' });
+await Z.stroke.load(['sans']);
+check(Z.stroke.layout('H H', 'sans').len > 0 && logged.length === 0, 'a line the font has: no report');
+Z.stroke.layout('H\u661f\u661f', 'sans');
+check(logged.length === 1 && logged[0].includes('2 character') && logged[0].includes('\u661f'), 'missing glyphs are reported: ' + logged[0]);
+Z.stroke.layout('H\u661f\u661f', 'sans');
+check(logged.length === 1, 'the same line is reported once');
 
 console.log(bad ? `[time_selftest] ${bad} FAILED` : '[time_selftest] ok');
 process.exit(bad ? 1 : 0);

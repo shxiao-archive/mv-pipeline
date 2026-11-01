@@ -64,7 +64,7 @@ as a preset's overall look with no reason from the song, or conflict with the co
 
 - **Any film may use the library's techniques** (search `index/index.jsonl`): the JIZURA lyric layer, the
   transitions, camera and drawing helpers (`D.*`), `Z.withInserts`, the decay layer, shaders and hairlines
-  (`Z.shade`, `Z.lineBatch`), written type (`Z.stroke`), the shape and type kits, paper and paint primitives. Each
+  (`Z.shade`, `Z.lineBatch`), written type (`Z.stroke`, Latin text only), the shape and type kits, paper and paint primitives. Each
   one is restyled to your slots; its defaults are not a look.
 - **What makes up each preset's overall look** (its palette, type system, cast and signature devices working
   together; one item of it, restyled to your slots, is a shared element):

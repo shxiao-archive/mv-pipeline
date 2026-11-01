@@ -1,13 +1,13 @@
 /* styles/treatise — gpu.js: the plates that need the GPU tools of core/shade.js and core/stroke.js.
  *
- *   TR.write(c, i, t, x, y, size, o)   lyric line i WRITTEN by the pen in a single-stroke font as it is sung; the spark
- *                       rides the pen head. o: { font 'script' | 'sans' | 'serif' | 'readable' | 'allure', align, color,
+ *   TR.write(c, i, t, x, y, size, o)   lyric line i WRITTEN by the pen in a single-stroke font as it is sung. Latin text
+ *                       only (Z.stroke: no CJK glyphs; check_shots fails the shot). The spark rides the pen head. o: { font 'script' | 'sans' | 'serif' | 'readable' | 'allure', align, color,
  *                       width, maxW 1600 (a longer line is set smaller), spark true, lead }. Returns the pen head [x, y] (null before the line starts)
  *   TR.ENGRAVE          the GLSL of the engraved form (copy it to start a shader plate of your own)
  *
  * 'trEngrave' an engraved 3D form under a raking light, shaded with burin lines that wrap round it (core/shade.js slice):
  *             line WIDTH is the light, so the lit side is nearly bone, the dark side a few hairlines. The form turns, the
- *             light sweeps, the rim catches the signal on downbeats; the line is written under it.
+ *             light sweeps, the rim catches the signal on downbeats; the line is written under it (Latin only, see TR.write).
  *             { line, form 'bulb' | 'sphere' | 'torus', turn (rad over the shot), light [a0, a1] (rad), freq 26, cam }
  * 'trField'   tens of thousands of hairlines combed by a field (iron filings round a pole): the pole is the pen that
  *             writes the line, so the field turns towards the words as they are written; it swells with the music.

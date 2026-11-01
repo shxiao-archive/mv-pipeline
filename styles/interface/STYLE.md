@@ -244,7 +244,8 @@ S.push({ id: 'p03', t0: B(6), t1: B(8), scene: 'trPlot', lyric: 'none', hud: fal
 - **GPU plates:** `trEngrave` (an engraved 3D form under a raking light: burin lines that wrap it, line WIDTH is the
   light; `form bulb | sphere | torus`, `turn`, `light [a0, a1]`, `freq`; the line is written under it) and `trField`
   (57 000 hairlines combed round a pole that is the pen writing the line; it swells with the music). Both write the
-  lyric with `TR.write` (single-stroke `script` by default: `font: 'sans' | 'serif' | 'readable' | 'allure'`).
+  lyric with `TR.write` (single-stroke `script` by default: `font: 'sans' | 'serif' | 'readable' | 'allure'`), so they
+  take Latin text only; give a Japanese or Chinese line a plate that sets it as type.
 - **New plates:** write a scene named `trXxx` that paints in this palette with the kit: `TR.text / measure` (width axis),
   `TR.lineWords` (per-word karaoke with your own `place(word)`), `TR.spark / trail`, `TR.grid / axes / cropMarks /
   callout / stamp / hatch / contours / readout`, `TR.cam`. Engraving = `TR.hatch` (parallel hairlines, tone by spacing).
@@ -277,7 +278,7 @@ Z.scene('trLung', { init: async () => Z.stroke.load(['script']), draw(c, S) {
 - **Hairline fields** (`Z.lineBatch`): fibres, field lines, fur, flow, rain, wireframes. Thousands of short segments
   at width < 1 px and alpha 0.2–0.5 with `blend: 'add'`: density becomes tone. Seed them on a jittered grid with
   `Z.rnd(i, j)` (never `Math.random`), advance them through a field that is a function of t.
-- **Written type** (`TR.write`, `Z.stroke`): the pen writes the line as it is sung; the spark sits on the pen head; use
+- **Written type** (`TR.write`, `Z.stroke`, Latin text only): the pen writes the line as it is sung; the spark sits on the pen head; use
   the head as a pole, a light, a camera target (`cam.follow`).
 - **Motion on paper:** the plate itself moves: the pen writes, the curve runs, the field combs, the number rolls, the
   stamp lands. A chart under a camera move with nothing drawn is static (`motion_check.py`). Something drawn moving

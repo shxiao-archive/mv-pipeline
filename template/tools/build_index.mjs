@@ -54,6 +54,7 @@ const DEFS = [
   [/(?:^|[^.\w])(?:T|Z\.transition)\(\s*'(\w+)'/, n => ['transition', n, `{ trans: { type: '${n}', dur } }`]],
   [/addPlan\(\s*'(\w+)'/, n => ['lyric-plan', n, `shot(…, { plan: '${n}' })`]],
   [/^ {0,4}((?:Z\.)?[A-Z][A-Za-z]*(?:\.[A-Za-z]\w*)*)\.(\w+)\s*=\s*(\([^)]*\)|\w+)\s*=>/, (n, f, m) => ['helper', `${m[1]}.${n}`, `${m[1]}.${n}${m[3].startsWith('(') ? m[3] : `(${m[3]})`}`], 2],
+  [/^ {0,4}(Z\.[a-z]\w*)\s*=\s*\{/, n => ['helper', n, `${n}.…`]],   // an object API; upper-case Z.X = {} are data tables
 ];
 
 export function indexSource(text, path) {
@@ -108,9 +109,9 @@ function manuals(skill) {
 }
 
 if (args.includes("--selftest")) {
-  const src = `/* x.js: two scenes.\n *   alpha  a red square that slams\n *          on the beat\n *   beta   a blue line\n */\n  Z.scene('alpha', {\n  });\n  // the second\n  // @index tags: impact\n  Z.scene('beta', {});\n  // moves on an arc\n  D.travel = (t, t0, t1, p0) => {};\n  T('iris', () => {});\n`;
+  const src = `/* x.js: two scenes.\n *   alpha  a red square that slams\n *          on the beat\n *   beta   a blue line\n */\n  Z.scene('alpha', {\n  });\n  // the second\n  // @index tags: impact\n  Z.scene('beta', {});\n  // moves on an arc\n  D.travel = (t, t0, t1, p0) => {};\n  T('iris', () => {});\n  // a pen\n  Z.pen = {\n  };\n  Z.TABLE = {};\n`;
   const e = indexSource(src, 'engine/styles/magazine/x.js');
-  const ok = [e.length === 4, e[0].does === 'a red square that slams on the beat', e[0].fits[0] === 'magazine', e[1].tags?.[0] === 'impact',
+  const ok = [e.length === 5, e[4].id === 'helper:Z.pen' && e[4].does === 'a pen', e[0].does === 'a red square that slams on the beat', e[0].fits[0] === 'magazine', e[1].tags?.[0] === 'impact',
     e[1].does === 'a blue line', e[2].id === 'helper:D.travel' && e[2].does === 'moves on an arc' && e[2].use === 'D.travel(t, t0, t1, p0)',
     e[3].kind === 'transition', e[0].where === 'engine/styles/magazine/x.js:6-9',
     toolDoc('#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n"""\nx.py -- does a thing\n"""\n') === 'x.py -- does a thing'];

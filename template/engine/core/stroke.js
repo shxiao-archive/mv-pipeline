@@ -1,9 +1,11 @@
 /* mv-studio engine — stroke.js: single-stroke (pen-plotter / engraving) fonts, so a line can be WRITTEN by a moving point.
  *
+ *   Z.stroke            Latin text only: the fonts have no CJK glyphs. A character with no glyph draws nothing and logs a
+ *                       page error (check_shots fails the shot; a render only logs it). Set a Japanese or Chinese line as type.
  *   await Z.stroke.load(['script', 'sans'])   fonts from engine/fonts/stroke (README there: sans script serif readable allure)
  *   Z.stroke.layout(text, font, size, o)       -> st { strokes: [[[x, y], ...], ...], len (total pen path, px), width, at[k] }
  *                       size = CAP HEIGHT in px; baseline at y = 0, starting at x = 0 (o.align 'center' | 'right' moves it);
- *                       o.tracking (em). at[k] = the pen length where character k starts. Latin text only (no CJK glyphs).
+ *                       o.tracking (em). at[k] = the pen length where character k starts.
  *   Z.stroke.draw(ctx, st, x, y, o)            draws the first o.len px of pen path (all if absent); returns the pen head
  *                       [x, y] (where the spark sits). o: { color, width 2, alpha, glow (px of shadow blur) }
  *   Z.stroke.at(st, len)                       the pen head after len px of path, relative to the layout origin
@@ -18,7 +20,7 @@
   'use strict';
   const Z = window.Z;
   const FILES = { sans: 'HersheySans1.svg', script: 'HersheyScript1.svg', serif: 'HersheySerifMed.svg', readable: 'EMSReadability.svg', allure: 'EMSAllure.svg' };
-  const fonts = new Map();
+  const fonts = new Map(), reported = new Set();
 
   // SVG path d -> polylines (y up in font units): M L H V C Q Z, absolute and relative; curves flattened
   function parsePath(d) {
@@ -67,12 +69,18 @@
     layout(text, font = 'sans', size = 60, { tracking = 0, align = 'left' } = {}) {
       const F = fonts.get(font); if (!F) throw new Error('Z.stroke: font ' + font + ' not loaded (await Z.stroke.load([...]) in the scene init)');
       const k = size / F.cap, strokes = [], at = [];
-      let x = 0, len = 0;
+      let x = 0, len = 0, lost = 0, first = '';
       for (const ch of String(text)) {
         at.push(len);
         const g = F.glyphs.get(ch) || (ch === '’' ? F.glyphs.get("'") : ch === '“' || ch === '”' ? F.glyphs.get('"') : null);
+        if (!g && ch.trim() && !lost++) first = ch;
         if (g) for (const s of g.strokes) { const p = s.map(([u, v]) => [x + u * k, -(v - F.base) * k]); strokes.push(p); len += plen(p); }
         x += (g ? g.adv : F.defAdv) * k + tracking * size;
+      }
+      // an error, not a throw: check_shots fails the shot, while one stray symbol cannot stop a long render
+      if (lost && !reported.has(font + '|' + text)) {
+        reported.add(font + '|' + text);
+        console.error(`Z.stroke: font ${font} has no glyph for ${lost} character(s) of a line (first: ${first}); they draw nothing. The pen fonts are Latin only: set this line as type`);
       }
       const width = Math.max(0, x - tracking * size), dx = align === 'center' ? -width / 2 : align === 'right' ? -width : 0;
       if (dx) for (const s of strokes) for (const p of s) p[0] += dx;
