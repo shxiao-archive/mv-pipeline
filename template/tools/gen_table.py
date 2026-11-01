@@ -319,6 +319,11 @@ def save(a: np.ndarray, p: Path) -> None:
     Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8), "RGBA").save(p)
 
 
+def leaves_border(base: np.ndarray, v: np.ndarray) -> bool:
+    """an opaque base, and the aligned variant leaves more than 0.5 % of its canvas empty"""
+    return bool((base[..., 3] > 0.5).mean() > 0.995 and (v[..., 3] > 0.5).mean() < 0.995)
+
+
 def do_align(base_p: Path, var_p: Path, out_p: Path, mode: str, region=None, max_err=0.12, min_iou=0.85, inpaint=False) -> dict:
     base, var = _rgba(base_p), _rgba(var_p)
     if inpaint and region:                                            # same canvas by construction: resize, no keying or search
@@ -330,7 +335,10 @@ def do_align(base_p: Path, var_p: Path, out_p: Path, mode: str, region=None, max
         ok = info["colour_err"] <= max_err and info["shape_iou"] >= (min_iou if mode == "patch" else min_iou - 0.15)
     info["mode"] = mode
     if not ok:
-        info["refused"] = f"the variant does not line up with its base (colour_err {info['colour_err']} > {max_err} or shape_iou {info['shape_iou']} too low): regenerate it"
+        info["refused"] = f"the variant does not line up with its base (colour_err {info['colour_err']} > {max_err} or shape_iou {info['shape_iou']} too low): regenerate it; a relight or other big change is not a variant, give it its own row"
+        return info
+    if mode == "full" and not region and leaves_border(base, v):      # an opaque picture swapped for one that doesn't fill it shows a border in the film
+        info["refused"] = f"the aligned variant (scale {info['scale']}) leaves part of the opaque base's canvas empty: regenerate it, or give it its own row"
         return info
     if mode == "patch":
         p, frac = patch_of(base, v, region)
@@ -773,6 +781,9 @@ def selftest() -> int:
     bad = 0
     if info["colour_err"] > 0.08 or info["shape_iou"] < 0.9:
         print("FAIL align:", info); bad += 1
+    opaque = np.ones((H, W, 4), np.float32)
+    if not leaves_border(opaque, place(opaque, H, W, 0.95, 0, 0)) or leaves_border(opaque, place(opaque, H, W, 1.04, 0, 0)) or leaves_border(base, place(base, H, W, 0.95, 0, 0)):
+        print("FAIL leaves_border"); bad += 1
     p, frac = patch_of(base, v, (0.3, 0.15, 0.7, 0.35))
     ys, xs = np.nonzero(p[..., 3] > 0.5)
     if not len(ys) or ys.min() < 50 or ys.max() > 95 or frac > 0.05:
