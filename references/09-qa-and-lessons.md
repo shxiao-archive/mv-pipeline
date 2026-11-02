@@ -107,6 +107,9 @@ What reviewers flagged in films that passed every automatic check — look for t
 | monotonous typography | one layout and one entrance for every line | vary per section (scale, layout, entrance, emphasis); keywords peak; custom type scenes |
 | a story action you cannot see | the lyric's action happens in < 1 s or off-screen | ≥ 1.5–2 s, a clear before / after, set up in the previous shot |
 | a cut-out in the wrong light | a white prop at dusk | `tint: { color: <the light>, a: 0.4-0.6 }` |
+| "strange textures" on an object | part of another picture pasted on for a changed state | generate the new state whole and cut to it (`references/04` §1, "Whole pictures, not patches") |
+| "looks fake": a door closing, a lid opening | the event drawn in flat shapes over a still | whole pictures of the before and the after, or another shot idea (same section) |
+| "the screen doesn't fit" | a separately drawn picture pasted into a painted monitor | generate the monitor with the picture on it, or cut to the picture full frame (same section) |
 | unreadable lines in a chat / UI | the full window at 1:1 | camera on the thread; `sizes`; lines >= 40 px on screen |
 | a fast-cut section fails check_flash | bright inserts, luminance jumps | dark inserts only, fewer per second, darker motifs, move the white flash |
 
@@ -197,7 +200,9 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      lip-sync: a face changes only now and then, and a still face is fine
    - composition_type: composition and type as the concept intends, carried out with control; lyrics legible and
      inside the safe area; CJK and Latin type set well
-   - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts
+   - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts;
+     no visible patches (a pasted part of a picture, a flat shape standing in for an event, a picture sitting on a
+     screen rather than in it). A fix for one is a new whole picture or another shot idea, never a better patch
    - sync: cuts and hits on the music, sections change with the song, the lyric never ahead of the voice
    - technical: the automatic checks, fonts (no tofu or fallback), no pops, black frames or seams
 3. Give 5-10 fixes ordered by impact on the final impression. Each: shot id or timecode, what is wrong (observable),

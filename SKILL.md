@@ -99,6 +99,8 @@ film reads as its style, and general craft (references/09 §8).
 - Choose the art generator for the user: `python tools/artgen.py providers`, ask once, record it.
 - Ship without `check_flash.py` PASS; add a photosensitivity card when the film is intense.
 - Forget the credit: the artist on screen and in the README.
+- Paste part of a picture over another, or draw an event in flat shapes over a still, when a new whole picture or another
+  shot would do. Generate first (`references/04` §1, "Whole pictures, not patches").
 
 Requirements: Node 20+, Python 3.10+ (numpy, librosa, scipy, soundfile, pillow, matplotlib), ffmpeg, Edge or Chrome;
 optional NVIDIA GPU (else `--codec x264`), an image generator, Blender 5.x. `check_env.py` says what is missing and

@@ -109,8 +109,29 @@ Do not generate a generic library. Go through `plan/storyboard.md` (and in team 
 - `storyboard.mjs` fails on both, counting the image paths in the shots' args. Don't accept them out loud, and don't
   argue the concept excuses them ("one room, one monitor"): a single room has many angles.
 
-**A screen with a picture on it:** when a film watches a screen, generate plates with the screen front-on as well as at an
-angle, for the close shots. Composite through the corners (`references/05-engine.md`, `Z.draw.warpQuad`).
+**A screen with a picture on it:** the picture is part of the generation. Prompt the monitor with what it shows ("an old
+CRT monitor showing a singer holding a microphone"), so glass, lines and light are one painting; each new thing on the
+screen is a new generation. To show the screen's content up close, cut to that picture full frame, with no monitor around it.
+
+**Whole pictures, not patches.** A viewer sees a patch as a mistake before reading what it means. A director rejected all
+of these in one film: a rectangle of another picture pasted onto a guitar case for an opened clasp (its texture and line
+weight showed), a door "closing" as a flat wedge of light drawn over a still of the closed door, and a singer pasted into
+a painted monitor, even with all four corners exact. When a shot needs something to change, in this order:
+1. **Generate the new state as a whole new picture** and cut to it: the clasp shut, then open; the door ajar, then shut.
+   Generate several seeds and try them, as below; a cut between two whole pictures looks intended.
+2. **Change the shot** if generation doesn't give it: another angle, the action just out of frame, the before and the after
+   with a sound or a hit between them, or a simpler idea.
+3. **A patch only as the last resort,** and only if it can't be seen at full size, in motion.
+
+The limits:
+- At most 3 opaque pictures in a film may be made by hand instead of generated. `python tools/gen_table.py local
+  assets/gen/table.json` (part of `verify.mjs`) fails above that; regenerate rather than move the edit elsewhere.
+- Patch-mode variant rows are for eyes and mouths (`styles/vocaloid/STYLE.md`), not for objects.
+- Don't draw an event in flat shapes over a still, and don't shift or redraw boxes of a painted picture to fake one. Light,
+  particles and type on top of a picture are fine; they don't pretend to be part of the painted object.
+- When a patch is rejected, don't patch the patch: go back to step 1.
+- Name every hand-made picture in the report to the user, with the shot it is in.
+- Collage that looks cut on purpose (a style's torn paper, ink plates, windows) is design, not a patch.
 
 **Generate more, and try them.**
 - A picture the film leans on (its main room, the person, the screen): at least 3 seeds, compared on a sheet (`tools/art_grid.py`), best one kept.
