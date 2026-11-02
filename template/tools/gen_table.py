@@ -190,12 +190,16 @@ def cmd_jobs(table: Path, pass_: str, out: Path | None) -> int:
         ch = char_of(t, r) or char_of(t, next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {}))
         if ch:
             job["char"] = ch                                              # NovelAI: a V4 character caption
+        base_row = next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {})
         for k in ("size", "aspect", "seed", "negative", "noise", "ref_mode", "ref_strength", "fidelity", "nai"):   # passed through to the generator wrapper
             if k in r:
                 job[k] = r[k]
+        if r.get("variant_of"):                                       # else a 4:3 base is stretched to the default aspect, repainted and refused by `post`
+            for k in ("size", "aspect"):
+                if k not in r and k in base_row:
+                    job[k] = base_row[k]
         if r.get("view") == "back":
             job["negative"] = ", ".join(x for x in (job.get("negative"), BACK_NEGATIVE) if x)
-        base_row = next((x for x in t["rows"] if x["id"] == r.get("variant_of")), {})
         if r.get("key") or base_row.get("key"):
             job["key"] = r.get("key") or base_row["key"]                 # a variant keeps its base's screen colour
         if r.get("provider"):
