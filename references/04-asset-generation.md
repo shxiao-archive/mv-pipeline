@@ -109,6 +109,9 @@ Do not generate a generic library. Go through `plan/storyboard.md` (and in team 
 - `storyboard.mjs` fails on both, counting the image paths in the shots' args. Don't accept them out loud, and don't
   argue the concept excuses them ("one room, one monitor"): a single room has many angles.
 
+**A screen with a picture on it:** when a film watches a screen, generate plates with the screen front-on as well as at an
+angle, for the close shots. Composite through the corners (`references/05-engine.md`, `Z.draw.warpQuad`).
+
 **Generate more, and try them.**
 - A picture the film leans on (its main room, the person, the screen): at least 3 seeds, compared on a sheet (`tools/art_grid.py`), best one kept.
 - Plan the returns while listing: a location in 4 shots or more gets at least 2 plates from the start.

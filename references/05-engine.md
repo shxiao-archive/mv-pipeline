@@ -250,6 +250,10 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
 - **Living faces on cut-outs** (`core/scenes.js` `chars[].anim`): a still character with face patches from one
   expression sheet (`tools/gen_table.py`): `blink` on a seeded clock, `mouth` on the sung characters, `expr` +
   `exprAt` on cues; optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states`.
+- **A picture on a screen inside a plate** goes through the glass's four corners, `Z.draw.warpQuad(ctx, img, from, to)`, after
+  clipping to the glass, with a thin dark veil and an inner edge shadow on top so it sits behind the glass. Read the corners
+  off the plate, on a still. Clipping an upright picture to angled glass looks pasted, and a viewer sees it at once. If the
+  screen matters to the shot, generate the plate front-on instead: the glass is then a plain rectangle and nothing has to bend.
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.

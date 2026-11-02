@@ -41,6 +41,28 @@
   //       tint:{ color, a } (multiply by the scene's light colour: light match; not with wave) }
   const ids = new WeakMap(); let nextId = 0;
   const imgId = img => { let i = ids.get(img); if (i == null) ids.set(img, (i = ++nextId)); return i; };   // cache keys for derived copies
+  // a picture through four corners: `from` in the source, `to` on the canvas, both [tl, tr, br, bl]. A grid of affine
+  // triangles (bilinear, not true perspective, which a screen's size can't show). Clip to the glass first; see references/05-engine.md.
+  const bilinear = (q, u, v) => [0, 1].map(k => (q[0][k] + (q[1][k] - q[0][k]) * u) * (1 - v) + (q[3][k] + (q[2][k] - q[3][k]) * u) * v);
+  const warpTri = (ctx, src, s0, s1, s2, d0, d1, d2) => {
+    const den = s0[0] * (s1[1] - s2[1]) + s1[0] * (s2[1] - s0[1]) + s2[0] * (s0[1] - s1[1]); if (!den) return;
+    const sol = k => [
+      (d0[k] * (s1[1] - s2[1]) + d1[k] * (s2[1] - s0[1]) + d2[k] * (s0[1] - s1[1])) / den,
+      (d0[k] * (s2[0] - s1[0]) + d1[k] * (s0[0] - s2[0]) + d2[k] * (s1[0] - s0[0])) / den,
+      (d0[k] * (s1[0] * s2[1] - s2[0] * s1[1]) + d1[k] * (s2[0] * s0[1] - s0[0] * s2[1]) + d2[k] * (s0[0] * s1[1] - s1[0] * s0[1])) / den];
+    const [a, c, e] = sol(0), [b, d, f] = sol(1), cx = (d0[0] + d1[0] + d2[0]) / 3, cy = (d0[1] + d1[1] + d2[1]) / 3;
+    const out = p => { const dx = p[0] - cx, dy = p[1] - cy, l = Math.hypot(dx, dy) || 1; return [p[0] + dx / l * 1.2, p[1] + dy / l * 1.2]; };   // overlap, so no seams
+    const [p0, p1, p2] = [out(d0), out(d1), out(d2)];
+    ctx.save(); ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.closePath(); ctx.clip();
+    ctx.transform(a, b, c, d, e, f); ctx.drawImage(src, 0, 0); ctx.restore();
+  };
+  D.warpQuad = (ctx, src, from, to, N = 8) => {
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const u0 = i / N, u1 = (i + 1) / N, v0 = j / N, v1 = (j + 1) / N, A = q => bilinear(q, u0, v0), B = q => bilinear(q, u1, v0), C = q => bilinear(q, u1, v1), E = q => bilinear(q, u0, v1);
+      warpTri(ctx, src, A(from), B(from), C(from), A(to), B(to), C(to));
+      warpTri(ctx, src, A(from), C(from), E(from), A(to), C(to), E(to));
+    }
+  };
   // draw img into the rect (x0, y0, w, h) through a grid warped by field(u, v) -> [dx, dy] (px). Cells that do not move
   // are plain blits; moving cells are two affine-mapped triangles, each grown a little so no seams show.
   D.meshDraw = (ctx, img, x0, y0, w, h, field, mesh = {}) => {

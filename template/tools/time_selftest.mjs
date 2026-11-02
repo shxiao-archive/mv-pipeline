@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /* Self-test of the time and word helpers (no browser): Z.withInserts, Z.replay / replayMap / passOf, Z.dropFrames,
  * Z.tear, Z.wordsAt / wordIndex, the metre clock (Z.makeClock with a bar map) and Z.makeHits (engine/core/util.js,
- * engine/core/lyrics.js), and Z.stroke reporting a character its font has no glyph for (engine/core/stroke.js).
+ * engine/core/lyrics.js), Z.stroke reporting a character its font has no glyph for (engine/core/stroke.js), and
+ * Z.draw.warpQuad landing a picture's corners on the glass (engine/core/draw.js).
  *   node tools/time_selftest.mjs        exit 1 on a failed check
  * mv-studio (MIT).
  */
@@ -79,6 +80,18 @@ Z.stroke.layout('H\u661f\u661f', 'sans');
 check(logged.length === 1 && logged[0].includes('2 character') && logged[0].includes('\u661f'), 'missing glyphs are reported: ' + logged[0]);
 Z.stroke.layout('H\u661f\u661f', 'sans');
 check(logged.length === 1, 'the same line is reported once');
+
+// warpQuad: every source corner lands on its corner of the glass, and the middle of the picture on the middle
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'engine/core/draw.js'), 'utf8'), ctx, { filename: 'engine/core/draw.js' });
+const glass = [[100, 50], [500, 80], [520, 400], [90, 380]], srcQ = [[0, 0], [200, 0], [200, 100], [0, 100]], maps = [];
+let cur = null;
+Z.draw.warpQuad({ save() { cur = null; }, restore() {}, beginPath() {}, moveTo() {}, lineTo() {}, closePath() {}, clip() {},
+  transform(a, b, c, d, e, f) { cur = [a, b, c, d, e, f]; }, drawImage() { maps.push(cur); } }, {}, srcQ, glass, 2);
+const hits = p => maps.map(([a, b, c, d, e, f]) => [a * p[0] + c * p[1] + e, b * p[0] + d * p[1] + f]);
+const lands = (p, want) => hits(p).some(h => Math.hypot(h[0] - want[0], h[1] - want[1]) < 1e-6);
+check(maps.length === 8, 'warpQuad: two triangles a cell');
+srcQ.forEach((p, i) => check(lands(p, glass[i]), 'warpQuad: corner ' + i + ' lands on the glass'));
+check(lands([100, 50], [(100 + 500 + 520 + 90) / 4, (50 + 80 + 400 + 380) / 4]), 'warpQuad: the middle lands in the middle');
 
 console.log(bad ? `[time_selftest] ${bad} FAILED` : '[time_selftest] ok');
 process.exit(bad ? 1 : 0);
