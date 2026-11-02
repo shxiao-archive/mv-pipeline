@@ -137,18 +137,25 @@ export const moving = (c, t) => !!c && (t - c.start < c.inDur + 0.1 || c.end - t
 
 // one sighting of a glyph { x0, y0, x1, y1 (frame px), cut, layer, seq } is whole: inside the W x H frame, not cut by a
 // canvas it passed through, and not over 25 % under a figure box drawn after it (or in the foreground layer)
-export function glyphWhole(g, W, H, figs = []) {
-  if (g.cut || g.x0 < -1 || g.y0 < -1 || g.x1 > W + 1 || g.y1 > H + 1) return false;
+export const glyphWhole = (g, W, H, figs = []) => !glyphCut(g, W, H, figs);
+// why a sighting is not whole (null when it is): for the report, so a cut glyph can be found
+export function glyphCut(g, W, H, figs = []) {
+  if (g.cut) return 'cut by a canvas it was drawn through';
+  if (g.x0 < -1 || g.y0 < -1 || g.x1 > W + 1 || g.y1 > H + 1) return g.x1 < 0 || g.y1 < 0 || g.x0 > W || g.y0 > H ? 'drawn wholly outside the frame' : 'past the frame edge';
   const area = Math.max(1, (g.x1 - g.x0) * (g.y1 - g.y0));
-  return !figs.some(f => (f.layer === 'fg' ? g.layer !== 'fg' || f.seq > g.seq : f.layer === g.layer && f.seq > g.seq)
-    && Math.max(0, Math.min(g.x1, f.x1) - Math.max(g.x0, f.x0)) * Math.max(0, Math.min(g.y1, f.y1) - Math.max(g.y0, f.y0)) > 0.25 * area);
+  return figs.some(f => (f.layer === 'fg' ? g.layer !== 'fg' || f.seq > g.seq : f.layer === g.layer && f.seq > g.seq)
+    && Math.max(0, Math.min(g.x1, f.x1) - Math.max(g.x0, f.x0)) * Math.max(0, Math.min(g.y1, f.y1) - Math.max(g.y0, f.y0)) > 0.25 * area) ? 'under a figure' : null;
 }
 // per character of a shot, the sizes (round(4 log2 px)) it showed at whole / not whole -> how many characters showed at
 // a size never seen whole: a whole sighting within 4x counts (the glyph pushed in or pulled back), a small copy does not
 // a glyph cut on every frame of a shot, at a size never seen whole there (within 4x); `near` are the neighbouring
 // shots' sightings, since a slam's lead-in or a transition puts the next shot's type on this shot's frames
-export const neverWhole = (seen, ...near) => [...seen].filter(([ch, o]) => [...o.not].some(q => ![o, ...near.map(m => m && m.get(ch))]
-  .some(x => x && [...x.whole].some(w => Math.abs(w - q) <= 8)))).length;
+// -> [{ at }]: per such character, a sighting at a size never seen whole ({ t, why, box } when seeGlyphs recorded one)
+export const neverWholeOf = (seen, ...near) => [...seen].flatMap(([ch, o]) => {
+  const q = [...o.not].find(q => ![o, ...near.map(m => m && m.get(ch))].some(x => x && [...x.whole].some(w => Math.abs(w - q) <= 8)));
+  return q === undefined ? [] : [{ at: o.at && o.at.get(q) }];
+});
+export const neverWhole = (seen, ...near) => neverWholeOf(seen, ...near).length;
 // shots with oversized type [{ k: shot index, id, t }] sorted by k -> places (runs of adjacent shots)
 export function oversizeMoments(hits) {
   const out = [];
@@ -177,6 +184,10 @@ if (flag('selftest')) {
     glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'text', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'scene', seq: 9 }]),   // lyrics over the picture
     !glyphWhole({ x0: 100, y0: 100, x1: 900, y1: 980, layer: 'text', seq: 5 }, 1920, 1080, [{ x0: 500, y0: 0, x1: 1500, y1: 1080, layer: 'fg', seq: 1 }]),     // under the foreground
     oversizeMoments([{ k: 2 }, { k: 3 }, { k: 7 }]).length === 2,                                                     // shots 2-3 are one place
+    glyphCut({ x0: -300, y0: 900, x1: -240, y1: 960, layer: 'scene', seq: 5 }, 1920, 1080) === 'drawn wholly outside the frame',   // page text left out of a crop
+    glyphCut({ x0: 100, y0: -80, x1: 1300, y1: 1100, layer: 'scene', seq: 5 }, 1920, 1080) === 'past the frame edge',
+    // the reported sighting is one at the size never seen whole, not the first cut one
+    neverWholeOf(new Map([['a', { whole: new Set([39]), not: new Set([40, 52]), at: new Map([[40, { t: 1 }], [52, { t: 2 }]]) }]]))[0].at.t === 2,
     neverWhole(new Map([['a', { whole: new Set([39]), not: new Set([42]) }]])) === 0,                                  // landed whole, then pushed in
     neverWhole(new Map([['a', { whole: new Set([19]), not: new Set([42]) }]])) === 1,                                  // only a small copy was whole
     neverWhole(new Map([['a', { whole: new Set(), not: new Set([42]) }]]), null, new Map([['a', { whole: new Set([41]), not: new Set() }]])) === 0, // whole across the cut
@@ -246,7 +257,9 @@ if (spriteFps > 0) {                                           // which sprite i
     const seen = glyphs.get(s.id) || new Map(); glyphs.set(s.id, seen);
     for (const g of gl.gs) {
       const h = Math.max(g.x1 - g.x0, g.y1 - g.y0), o = seen.get(g.ch) || { whole: new Set(), not: new Set() };
-      seen.set(g.ch, o); o[glyphWhole(g, gl.W, gl.H, gl.figs) ? 'whole' : 'not'].add(Math.round(4 * Math.log2(Math.max(1, h))));
+      const why = glyphCut(g, gl.W, gl.H, gl.figs), q = Math.round(4 * Math.log2(Math.max(1, h)));
+      seen.set(g.ch, o); o[why ? 'not' : 'whole'].add(q);
+      if (why) { o.at = o.at || new Map(); if (!o.at.has(q)) o.at.set(q, { t, why, box: [g.x0, g.y0, g.x1, g.y1].map(Math.round) }); }   // for the report
       if (h > 0.5 * gl.H && !big.has(k)) big.set(k, { k, id: s.id, t });
     }
   };
@@ -341,8 +354,10 @@ if (spriteFps > 0) {                                           // which sprite i
   for (let k = 0; k < shots.length; k++) {
     const s = shots[k], seen = glyphs.get(s.id), last = lastGlyph.get(s.id);
     if (!seen) continue;
-    const never = neverWhole(seen, glyphs.get(shots[k - 1]?.id), glyphs.get(shots[k + 1]?.id));
-    if (never) (flag('strict') ? errors : warns).push(`${s.id} @${(last ?? s.t0).toFixed(2)}: GLYPH NEVER WHOLE (${never} character${never > 1 ? 's' : ''} of the lyrics / title past the frame, cut or covered on every frame they show; let each land whole once, then crop or push)`);
+    const nw = neverWholeOf(seen, glyphs.get(shots[k - 1]?.id), glyphs.get(shots[k + 1]?.id)), never = nw.length;
+    // where one of them was cut, and why (the box in frame px; the character itself is not printed: no lyrics in logs)
+    const at = nw.map(x => x.at).find(Boolean), where = at ? `; one at @${at.t.toFixed(2)}, box ${at.box[0]},${at.box[1]} to ${at.box[2]},${at.box[3]}: ${at.why}` : '';
+    if (never) (flag('strict') ? errors : warns).push(`${s.id} @${(last ?? s.t0).toFixed(2)}: GLYPH NEVER WHOLE (${never} character${never > 1 ? 's' : ''} of the lyrics / title past the frame, cut or covered on every frame they show${where}; let each land whole once, then crop or push)`);
   }
   const places = oversizeMoments([...big.values()].sort((a, b) => a.k - b.k));
   if (places.length > 2) (flag('strict') ? errors : warns).push(`OVERSIZED TYPE in ${places.length} places (${places.map(m => `${m[0].id} @${m[0].t.toFixed(2)}`).join(', ')}; glyphs over half the frame high): a peak move, keep it for the song's emotional peaks, one or two in a film, never the same move twice`);
