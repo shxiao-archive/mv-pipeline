@@ -53,7 +53,8 @@ def main() -> int:
             dst = (ROOT / (a.out or "render")) / f"grid_{p.stem}.png"
         dst.parent.mkdir(parents=True, exist_ok=True)
         im.save(dst)
-        print(f"[grid] {src} -> {dst.relative_to(ROOT)}  (u = x / width, v = y / height of the ORIGINAL image)")
+        shown = dst.relative_to(ROOT) if dst.is_relative_to(ROOT) else dst  # --out may be outside the project
+        print(f"[grid] {src} -> {shown}  (u = x / width, v = y / height of the ORIGINAL image)")
     return 0
 
 
