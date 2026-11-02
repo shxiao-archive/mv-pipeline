@@ -302,6 +302,8 @@ async function inPageRun(o) {
       const blob = await new Promise((r) => cv.toBlob(r, o.mime, o.quality));
       const c = performance.now(); st.read += c - b;
       await throttle(); send('frame', f, blob); st.post += performance.now() - c;
+      // a Blob's bytes count against the browser's blob limit until its small JS wrapper is collected, and nothing else asks for a GC
+      if (f % 30 === 0 && window.gc) window.gc();
     } else if (o.mode === 'webcodecs') {
       const vf = new VideoFrame(cv, { timestamp: Math.round((f - o.f0) * 1e6 / o.fps), duration: Math.round(1e6 / o.fps) });
       const opts = { keyFrame: (f - o.f0) % o.gop === 0 };
@@ -339,7 +341,7 @@ async function main() {
   await fsp.mkdir(partsDir, { recursive: true });
 
   const launchArgs = [
-    ...gpuArgs(), '--enable-gpu-rasterization', '--enable-zero-copy',
+    ...gpuArgs(), '--enable-gpu-rasterization', '--enable-zero-copy', '--js-flags=--expose-gc',
     '--disable-gpu-vsync', '--disable-frame-rate-limit', '--force-color-profile=srgb', '--disable-lcd-text',
     '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
     '--autoplay-policy=no-user-gesture-required', '--disable-features=CalculateNativeWinOcclusion',
