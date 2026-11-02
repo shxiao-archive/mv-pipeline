@@ -126,7 +126,11 @@ def split(a, cfg: dict, provs: dict) -> tuple[dict, list[dict]]:
     jobs = load_jobs(kit_env.resolve(a.jobs))
     if a.only:
         keep = set(a.only.split(","))
-        jobs = [j for j in jobs if j["id"] in keep]
+        # a variant job is <id>__t1, <id>__t2: its base id selects all its takes
+        jobs = [j for j in jobs if j["id"] in keep or j["id"].split("__")[0] in keep]
+        missing = keep - {x for j in jobs for x in (j["id"], j["id"].split("__")[0])}
+        if missing:
+            sys.exit(f"[artgen] --only: no job {', '.join(sorted(missing))} in {a.jobs}")
     avail = available(provs)
     groups: dict[str, list[dict]] = {}
     for j in jobs:
@@ -168,7 +172,7 @@ def main() -> int:
     ap.add_argument("jobs", nargs="?", help="jobs file (run / collect) or provider name (use)")
     ap.add_argument("--out-dir", default="assets")
     ap.add_argument("--provider", help="provider for jobs that do not name one")
-    ap.add_argument("--only", help="comma-separated job ids")
+    ap.add_argument("--only", help="comma-separated job ids; a base id selects its variant takes (<id>__t1, ...)")
     ap.add_argument("--force", action="store_true", help="regenerate even if the output exists")
     ap.add_argument("--dry-run", action="store_true", help="show which provider makes which job; send nothing")
     a, extra = ap.parse_known_args()
