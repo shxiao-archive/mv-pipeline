@@ -549,7 +549,7 @@
 {"id":"manual:styles/vocaloid/DIRECTION#14","kind":"manual","does":"14. Frame, arc and escalation (mv-studio, from the reference films)","where":"<skill>/styles/vocaloid/DIRECTION.md:140-157","lines":18}
 {"id":"manual:styles/vocaloid/STYLE#A","kind":"manual","does":"A. Tegaki — illustrated MV with an original character (the base kit's style)","where":"<skill>/styles/vocaloid/STYLE.md:30-76","lines":47}
 {"id":"manual:styles/vocaloid/STYLE#B","kind":"manual","does":"B. Signal — a recording device failing","where":"<skill>/styles/vocaloid/STYLE.md:77-162","lines":86}
-{"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both kits)","where":"<skill>/styles/vocaloid/STYLE.md:163-208","lines":46}
-{"id":"manual:styles/vocaloid/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10 §3, team: 11)","where":"<skill>/styles/vocaloid/STYLE.md:209-222","lines":14}
-{"id":"manual:styles/vocaloid/STYLE#Scene","kind":"manual","does":"Scene catalogue (the tegaki scenes, `engine/styles/vocaloid/*.js`)","where":"<skill>/styles/vocaloid/STYLE.md:274-336","lines":63}
-{"id":"manual:styles/vocaloid/STYLE#Porting","kind":"manual","does":"Porting checklist (song-specific constants of the tegaki scenes)","where":"<skill>/styles/vocaloid/STYLE.md:337-343","lines":7}
+{"id":"manual:styles/vocaloid/STYLE#Characters","kind":"manual","does":"Characters with a living face (optional, both kits)","where":"<skill>/styles/vocaloid/STYLE.md:163-210","lines":48}
+{"id":"manual:styles/vocaloid/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10 §3, team: 11)","where":"<skill>/styles/vocaloid/STYLE.md:211-224","lines":14}
+{"id":"manual:styles/vocaloid/STYLE#Scene","kind":"manual","does":"Scene catalogue (the tegaki scenes, `engine/styles/vocaloid/*.js`)","where":"<skill>/styles/vocaloid/STYLE.md:276-338","lines":63}
+{"id":"manual:styles/vocaloid/STYLE#Porting","kind":"manual","does":"Porting checklist (song-specific constants of the tegaki scenes)","where":"<skill>/styles/vocaloid/STYLE.md:339-345","lines":7}

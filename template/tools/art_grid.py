@@ -22,10 +22,14 @@ def main() -> int:
     ap.add_argument("--step", type=float, default=0.05)
     ap.add_argument("--out", help="output file (one image) or folder")
     ap.add_argument("--width", type=int, default=1600, help="output width (px)")
+    ap.add_argument("--crop", help="u0,v0,u1,v1: grid only this part, enlarged (a face region: --crop ... --step 0.01)")
     a = ap.parse_args()
+    u0, v0, u1, v1 = [float(x) for x in a.crop.split(",")] if a.crop else (0, 0, 1, 1)
+    assert 0 <= u0 < u1 <= 1 and 0 <= v0 < v1 <= 1, "--crop wants u0,v0,u1,v1 inside 0..1"
     for src in a.images:
         p = Path(src) if Path(src).is_absolute() else ROOT / src
         im = Image.open(p).convert("RGB")
+        im = im.crop((round(u0 * im.width), round(v0 * im.height), round(u1 * im.width), round(v1 * im.height)))
         s = a.width / im.width
         im = im.resize((a.width, round(im.height * s)))
         d = ImageDraw.Draw(im, "RGBA")
@@ -34,11 +38,13 @@ def main() -> int:
             f = k * a.step
             major = k % 2 == 0
             col = (255, 255, 0, 150) if major else (255, 255, 255, 70)
-            x, y = round(f * im.width), round(f * im.height)
-            d.line([(x, 0), (x, im.height)], fill=col, width=2 if major else 1)
-            d.line([(0, y), (im.width, y)], fill=col, width=2 if major else 1)
+            # labels stay in the ORIGINAL image's u, v when cropped
+            x, y = round((f - u0) / (u1 - u0) * im.width), round((f - v0) / (v1 - v0) * im.height)
+            if u0 < f < u1: d.line([(x, 0), (x, im.height)], fill=col, width=2 if major else 1)
+            if v0 < f < v1: d.line([(0, y), (im.width, y)], fill=col, width=2 if major else 1)
             if major:
-                for (tx, ty, txt) in [(x + 3, 3, f"u{f:.2f}"), (3, y + 2, f"v{f:.2f}")]:
+                for (tx, ty, txt, on) in [(x + 3, 3, f"u{f:.2f}", u0 < f < u1), (3, y + 2, f"v{f:.2f}", v0 < f < v1)]:
+                    if not on: continue
                     d.rectangle([tx - 1, ty - 1, tx + 46, ty + 12], fill=(0, 0, 0, 160))
                     d.text((tx, ty), txt, fill=(255, 255, 0, 255))
         if a.out and len(a.images) == 1 and Path(a.out).suffix:

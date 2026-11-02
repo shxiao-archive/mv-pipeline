@@ -169,7 +169,9 @@ wrong, and the pasted eye / mouth areas showed their edges). The engine does the
 **The faces: pictures that differ only in the eyes or the mouth.** Best: repaint just that area of the approved picture
 with the generator, so everything else stays identical and the whole picture can be swapped without a seam:
 1. The base: the approved bust or half-body picture of the character (a char row, e.g. `CH03`, or the neutral figure
-   of a sheet). Measure the eye box and the mouth box on it with `python tools/art_grid.py assets/gen/CH03.png`.
+   of a sheet). Measure the eye box and the mouth box on it with `python tools/art_grid.py assets/gen/CH03.png`, then
+   read the exact box off the face enlarged: `--crop u0,v0,u1,v1 --step 0.01` (labels in the whole picture's u, v).
+   Never off a review sheet: boxes read off downscaled sheets were off by up to 0.15, and 13 of 36 inpaints were wasted.
 2. One variant row per face, repainting only its box (NovelAI infill: the pixels outside the box come back
    unchanged; inpainting costs Anlas):
    `{ "id": "CH03_blink", "variant_of": "CH03", "edit": "her eyes closed", "region": [0.30, 0.24, 0.62, 0.36],
