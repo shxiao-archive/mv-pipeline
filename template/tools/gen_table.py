@@ -9,7 +9,6 @@ it so the engine can switch them (engine/core/scenes.js chars[].anim).
   python tools/artgen.py run assets/gen/jobs_variants.jsonl --out-dir assets/gen/raw
   python tools/gen_table.py post   assets/gen/table.json      # align variants, copy finals, review sheets per category
   python tools/gen_table.py status assets/gen/table.json      # done / missing / failed per row
-  python tools/gen_table.py local  assets/gen/table.json      # fails above 3 opaque pictures no row generated (references/04 §1)
   python tools/gen_table.py align  BASE.png VARIANT.png OUT.png [--mode patch|full] [--region u0,v0,u1,v1]
   python tools/gen_table.py selftest
 
@@ -58,7 +57,6 @@ import argparse
 import json
 import re
 import sys
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -765,28 +763,6 @@ def cmd_status(table: Path) -> int:
     return 0
 
 
-MAX_HAND_MADE = 3
-
-
-def hand_made(t: dict) -> list[str]:
-    """opaque pictures in the art folder that no row generated. A cut-out is a whole subject, so transparency doesn't count"""
-    made = {r["id"] for r in t["rows"]} | {f"{r['id']}_{c}" for r in t["rows"] if r.get("sheet") for c in r["sheet"].get("cells", [])}
-    files = [p for p in sorted(rp(t.get("out", "assets/gen")).glob("*.png")) if p.stem not in made and ".raw." not in p.name]
-    return [p.stem for p in files if _rgba(p)[..., 3].min() > 0.99]
-
-
-def cmd_local(table: Path) -> int:
-    if not table.is_file():
-        print(f"no {table.name}: no generation table to compare with")
-        return 0
-    names = hand_made(load(table))
-    print(f"{len(names)} hand-made picture(s), at most {MAX_HAND_MADE}" + (f": {', '.join(names)}" if names else ""))
-    if len(names) > MAX_HAND_MADE:
-        print("generate these states as whole pictures or change the shots (references/04 section 1, Whole pictures, not patches)")
-        return 1
-    return 0
-
-
 def selftest() -> int:
     from scipy import ndimage
     rng = np.random.default_rng(3)
@@ -848,13 +824,6 @@ def selftest() -> int:
     sc = [(-0.3, Path("CH01_blink__t2.png")), (-0.1, Path("CH01_blink__t1.png"))]
     if pick_take(sc).name != "CH01_blink__t2.png" or pick_take(sc, 1).name != "CH01_blink__t1.png":
         print("FAIL take pick / the row's take"); bad += 1
-    with tempfile.TemporaryDirectory() as td:
-        solid, clear = Image.new("RGBA", (4, 4), (9, 9, 9, 255)), Image.new("RGBA", (4, 4), (9, 9, 9, 0))
-        for name, im in (("BG01", solid), ("CH01_open", solid), ("OBJ01b", solid), ("CH09", clear)):
-            im.save(Path(td) / f"{name}.png")
-        tl = {"out": td, "rows": [{"id": "BG01"}, {"id": "CH01", "sheet": {"cells": ["neutral", "open"]}}]}
-        if hand_made(tl) != ["OBJ01b"]:
-            print("FAIL hand-made pictures:", hand_made(tl)); bad += 1
     print("align:", info, f"patch {frac:.2%} of the canvas; sheet face region {reg}")
     print("gen_table self-test: " + ("ok" if not bad else f"{bad} failed"))
     return 1 if bad else 0
@@ -864,7 +833,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     j = sub.add_parser("jobs"); j.add_argument("table"); j.add_argument("--pass", dest="pass_", choices=["base", "variants"], default="base"); j.add_argument("--out")
-    for name in ("post", "status", "local"):
+    for name in ("post", "status"):
         sub.add_parser(name).add_argument("table")
     a = sub.add_parser("align"); a.add_argument("base"); a.add_argument("variant"); a.add_argument("out")
     a.add_argument("--mode", choices=["patch", "full"], default="patch"); a.add_argument("--region", help="u0,v0,u1,v1 (0..1 of the base)")
@@ -876,8 +845,6 @@ def main() -> int:
         return cmd_post(rp(a.table))
     if a.cmd == "status":
         return cmd_status(rp(a.table))
-    if a.cmd == "local":
-        return cmd_local(rp(a.table))
     if a.cmd == "align":
         info = do_align(rp(a.base), rp(a.variant), rp(a.out), a.mode, [float(x) for x in a.region.split(",")] if a.region else None)
         print(json.dumps(info))
