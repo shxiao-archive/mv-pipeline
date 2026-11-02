@@ -109,29 +109,18 @@ Do not generate a generic library. Go through `plan/storyboard.md` (and in team 
 - `storyboard.mjs` fails on both, counting the image paths in the shots' args. Don't accept them out loud, and don't
   argue the concept excuses them ("one room, one monitor"): a single room has many angles.
 
-**A screen with a picture on it:** the picture is part of the generation. Prompt the monitor with what it shows ("an old
-CRT monitor showing a singer holding a microphone"), so glass, lines and light are one painting; each new thing on the
-screen is a new generation. To show the screen's content up close, cut to that picture full frame, with no monitor around it.
+**Three composites that look fake.** A director rejected these three kinds in one film. Don't use them; do what the
+right-hand column says.
 
-**Whole pictures, not patches.** A viewer sees a patch as a mistake before reading what it means. A director rejected all
-of these in one film: a rectangle of another picture pasted onto a guitar case for an opened clasp (its texture and line
-weight showed), a door "closing" as a flat wedge of light drawn over a still of the closed door, and a singer pasted into
-a painted monitor, even with all four corners exact. When a shot needs something to change, in this order:
-1. **Generate the new state as a whole new picture** and cut to it: the clasp shut, then open; the door ajar, then shut.
-   Generate several seeds and try them, as below; a cut between two whole pictures looks intended.
-2. **Change the shot** if generation doesn't give it: another angle, the action just out of frame, the before and the after
-   with a sound or a hit between them, or a simpler idea.
-3. **A patch only as the last resort,** and only if it can't be seen at full size, in motion.
+| Composite | What it looked like | Instead |
+|---|---|---|
+| A changed state of an object, pasted in from part of another picture | a rectangle of an inpaint on a guitar case for an opened clasp: its texture and line weight showed, "strange-looking textures" | generate the new state as a whole picture (the clasp shut, then open) and cut between the two |
+| An event drawn in flat shapes over a still | a door "closing" as a wedge of flat light at the edge of a still of the shut door, "very fake" | whole pictures of the before and the after (the door ajar, then shut), with a sound or a hit on the cut; or show the hand on the handle and cut |
+| A separately drawn picture pasted into a painted screen (monitor, phone, TV) | a singer in a CRT monitor, still "doesn't fit" with all four corners exact | generate the screen with its picture on it ("an old CRT monitor showing a singer holding a microphone"), one generation per thing it shows; or cut to the picture full frame, with no screen around it |
 
-The limits:
-- At most 3 opaque pictures in a film may be made by hand instead of generated. `python tools/gen_table.py local
-  assets/gen/table.json` (part of `verify.mjs`) fails above that; regenerate rather than move the edit elsewhere.
-- Patch-mode variant rows are for eyes and mouths (`styles/vocaloid/STYLE.md`), not for objects.
-- Don't draw an event in flat shapes over a still, and don't shift or redraw boxes of a painted picture to fake one. Light,
-  particles and type on top of a picture are fine; they don't pretend to be part of the painted object.
-- When a patch is rejected, don't patch the patch: go back to step 1.
-- Name every hand-made picture in the report to the user, with the shot it is in.
-- Collage that looks cut on purpose (a style's torn paper, ink plates, windows) is design, not a patch.
+When one of these is rejected, don't try a better version of it: generate, or change the shot. Other compositing is fine
+and stays: cut-outs on plates, light, particles and type on top of a picture, a prop drawn on a picture (a sticker), face
+frames, colour fixes, a sky revealed through a cut polygon, a plate replaced by a whole new picture on a cut.
 
 **Generate more, and try them.**
 - A picture the film leans on (its main room, the person, the screen): at least 3 seeds, compared on a sheet (`tools/art_grid.py`), best one kept.
