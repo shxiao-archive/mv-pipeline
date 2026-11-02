@@ -53,6 +53,7 @@ const steps = [
   ['lint', 'node', ['tools/lint.mjs'], 'references/09 §7'],
   ['no lyrics in code', 'node', ['tools/check_no_lyrics.mjs', '--strict'], 'SKILL.md "Laws"'],
   ['storyboard', 'node', ['tools/storyboard.mjs', '--quiet'], 'references/05 §3'],
+  ['hand-made pictures', py, ['tools/gen_table.py', 'local', 'assets/gen/table.json'], 'references/04 §1'],
   ['shots' + (vertical ? ' (9:16)' : ''), 'node', ['tools/check_shots.mjs', '--strict', ...(page ? ['--url', page] : [])], 'references/09 §6'],
 ];
 if (!args.includes('--quick')) steps.push(['pops (engine, pre-render)', 'node', ['tools/pops.mjs', '--strict', ...(page ? ['--url', page] : [])], 'references/09 §7']);
