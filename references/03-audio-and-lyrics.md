@@ -102,7 +102,7 @@ Timeline helpers (inside `Z.setup(audio)`):
 ```js
 const lastBar = audio.bars.length ? audio.bars[audio.bars.length - 1].index : 0;
 const B  = n => { const b = audio.bars.find(x => x.index === n); return b ? b.start : n > lastBar ? audio.music_cut : 0; };   // bar start, by bars[].index
-const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);              // nearest beat
+const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);              // nearest beat (none after music_cut: time the tail in seconds)
 const stopsIn = (a, b) => audio.stops.filter(s => s.kind === 'stop' && s.end > a && s.start < b);  // e.g. freeze windows
 ```
 Patterns earlier films used (choices, not rules): cut on `nb(lyricOnset)` inside a section and on `B(n)` at section changes; big hits (flash, slam, palette change) on chorus downbeats and `drop` impacts; freezes on `stops`; per-beat motion from `pulse`, per-bar loops from `barPhase`; a global camera shake driven by `env.low(t)^3` during choruses only (残光 `Z.globalFX`). Several library scenes read `Z.audio.stops` and `onsets_strong` directly (`fall`, `ember`, `road`).

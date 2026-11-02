@@ -43,6 +43,7 @@ JIZURA plan (shot.lyric) ─► TEXT layer (transparent) ◄─ shot.text(ctx,S)
     const lastBar = audio.bars.length ? audio.bars[audio.bars.length - 1].index : 0;
     const B = n => { const b = audio.bars.find(x => x.index === n); return b ? b.start : n > lastBar ? audio.music_cut : 0; };   // by bars[].index, never array position
     const nb = t => audio.beats.reduce((b, x) => (Math.abs(x - t) < Math.abs(b - t) ? x : b), audio.beats[0] ?? t);
+    // no beats after music_cut: nb() snaps every tail time back to the last beat and collapses the tail shots; time them in seconds
     Z.LOOK_DEFAULT = { boil: 0, bloom: 0, grain: 0, vignette: 0, lutMix: 0 };   // the film's own values (every param: §7)
     // JIZURA: JZ.setAudio(...); await JZ.addPlan('main', {...}); ...           (06-jizura.md)
     const S = []; const shot = (id, t0, t1, scene, args, extra = {}) => S.push(Object.assign({ id, t0, t1, scene, args }, extra));

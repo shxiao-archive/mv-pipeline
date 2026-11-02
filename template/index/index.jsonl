@@ -428,16 +428,16 @@
 {"id":"manual:references/04-asset-generation#13","kind":"manual","does":"13. Choosing the generator (`tools/artgen.py`)","where":"<skill>/references/04-asset-generation.md:375-398","lines":24}
 {"id":"manual:references/05-engine#1","kind":"manual","does":"1. Architecture","where":"<skill>/references/05-engine.md:7-26","lines":20}
 {"id":"manual:references/05-engine#2","kind":"manual","does":"2. Hard rules","where":"<skill>/references/05-engine.md:27-35","lines":9}
-{"id":"manual:references/05-engine#3","kind":"manual","does":"3. The timeline (`engine/timeline.js`)","where":"<skill>/references/05-engine.md:36-69","lines":34}
-{"id":"manual:references/05-engine#4","kind":"manual","does":"4. Scene API","where":"<skill>/references/05-engine.md:70-84","lines":15}
-{"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:85-98","lines":14}
-{"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:99-118","lines":20}
-{"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:119-136","lines":18}
-{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Shared scenes (`core/scenes.js`)","where":"<skill>/references/05-engine.md:137-155","lines":19}
-{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:156-201","lines":46}
-{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:202-207","lines":6}
-{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:208-219","lines":12}
-{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:220-322","lines":103}
+{"id":"manual:references/05-engine#3","kind":"manual","does":"3. The timeline (`engine/timeline.js`)","where":"<skill>/references/05-engine.md:36-70","lines":35}
+{"id":"manual:references/05-engine#4","kind":"manual","does":"4. Scene API","where":"<skill>/references/05-engine.md:71-85","lines":15}
+{"id":"manual:references/05-engine#5","kind":"manual","does":"5. Drawing toolkit (`Z.draw`, alias `D`)","where":"<skill>/references/05-engine.md:86-99","lines":14}
+{"id":"manual:references/05-engine#6","kind":"manual","does":"6. Transitions (`core/trans.js`; on the incoming shot: `trans: {type, dur, …}`)","where":"<skill>/references/05-engine.md:100-119","lines":20}
+{"id":"manual:references/05-engine#7","kind":"manual","does":"7. Post pass and LUTs (`core/gl.js`; per shot `post: {…}` or `post: S => ({…})`)","where":"<skill>/references/05-engine.md:120-137","lines":18}
+{"id":"manual:references/05-engine#8","kind":"manual","does":"8. Shared scenes (`core/scenes.js`)","where":"<skill>/references/05-engine.md:138-156","lines":19}
+{"id":"manual:references/05-engine#9","kind":"manual","does":"9. Writing a new scene","where":"<skill>/references/05-engine.md:157-202","lines":46}
+{"id":"manual:references/05-engine#10","kind":"manual","does":"10. Porting a preset's scenes","where":"<skill>/references/05-engine.md:203-208","lines":6}
+{"id":"manual:references/05-engine#11","kind":"manual","does":"11. Pitfalls","where":"<skill>/references/05-engine.md:209-220","lines":12}
+{"id":"manual:references/05-engine#12","kind":"manual","does":"12. mv-studio additions (core)","where":"<skill>/references/05-engine.md:221-323","lines":103}
 {"id":"manual:references/06-jizura#1","kind":"manual","does":"1. What it is","where":"<skill>/references/06-jizura.md:5-12","lines":8}
 {"id":"manual:references/06-jizura#2","kind":"manual","does":"2. How it's wired in","where":"<skill>/references/06-jizura.md:13-26","lines":14}
 {"id":"manual:references/06-jizura#3","kind":"manual","does":"3. Plans","where":"<skill>/references/06-jizura.md:27-54","lines":28}
