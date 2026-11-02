@@ -91,7 +91,7 @@
   //     blink: 'patch.png' (eyes closed) | { base: 'p.png', <state>: 'p2.png' }   closes on a seeded clock (Z.rig.blink)
   //     seed, period                    the blink clock (cast members get different seeds)
   //     mouth: 'open.png' | ['half.png', 'open.png'] (or per state as blink)   opens now and then while a line is sung
-  //                                     (about 0.5 s every 1.1-1.7 s, seeded per line; a viewer reads singing, not
+  //                                     (about 0.5 s every 2.4-3.6 s, seeded per line; a viewer reads singing, not
   //                                     speech), only inside talk: [[t0, t1], ...] when given; sings: false = never;
   //                                     lipsync: true = open on each sung character (12 fps), rarely wanted
   //     whole: true                     blink / mouth / expr are WHOLE pictures (gen_table `faces: 'whole'`): the
@@ -127,10 +127,10 @@
     const next = ct[k + 1] ?? L.end, f = (t - ct[k]) / Math.max(0.05, next - ct[k]);
     return f < 0.1 ? 0.5 : f < 0.7 ? 1 : 0;
   }
-  // the calm mouth: open for ~0.5 s every 1.1-1.7 s while a line is sung (seeded per line), closed between lines
+  // the calm mouth: open for ~0.5 s every 2.4-3.6 s while a line is sung (seeded per line), closed between lines
   function mouthCalm(t, seed) {
     const i = Z.lineAt(t, 0); if (i < 0) return 0;
-    const L = Z.line(i), u = t - L.t, p = 1.1 + 0.6 * Z.rnd(i, seed);
+    const L = Z.line(i), u = t - L.t, p = 2.4 + 1.2 * Z.rnd(i, seed);
     return u >= 0 && t < L.end - 0.15 && (u % p) < 0.5 ? 1 : 0;
   }
   Z.mouthCalm = mouthCalm;   // for a film's own face swaps, so they keep this timing

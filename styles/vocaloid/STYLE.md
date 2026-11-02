@@ -197,9 +197,9 @@ the variant rows above instead. `"faces": "whole"` writes the aligned copies who
 match outside the face (swapping redrawn copies reads as a jump cut).
 
 Timing (engine): blinks on a seeded clock (`seed` per character, `period` 3.7 s); the mouth opens for about half a second
-every 1.1–1.7 s while a line is sung and stays closed between lines (`sings: false` for a listener; `lipsync: true`
+every 2.4–3.6 s while a line is sung and stays closed between lines (`sings: false` for a listener; `lipsync: true`
 opens it on every sung character, rarely wanted); expressions change on cues (`exprAt`). A film's own scene code that
-swaps a face (a singer on a screen, say) calls `Z.mouthCalm(t, seed)`, never a clock of its own: no check sees those swaps. A film has shipped with the mouth changing eight times a second this way, after a director had asked for the opposite. `motion_check.py` counts a
+swaps a face (a singer on a screen, say) calls `Z.mouthCalm(t, seed)`, never a clock of its own: no check sees those swaps. A film has shipped with the mouth changing eight times a second this way, after a director had asked for the opposite. A singer's picture drawn with an open mouth can simply hold, closing only when `Z.mouthCalm` says so and between lines. Look at any locally painted frame at full size: a blink painted over hair shows its patch, so leave it out, and a closed mouth must not change the expression (a downward arc reads as a frown). `motion_check.py` counts a
 living face (≥ 40 % of its threshold, the camera taken out) as motion, read from plan/shots.json `animFaces`.
 
 Do not ask the generator for a changed version of a whole finished picture (a turned head, another pose): tested, it
