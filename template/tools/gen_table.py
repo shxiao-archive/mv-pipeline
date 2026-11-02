@@ -41,6 +41,8 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
   review-sheet category (BG, CH, OBJ ...). A variant is generated FROM its base (the base is the reference image and
   the prompt says to change only the edit); `post` aligns it to the base (scale + offset, refuses a misfit) and writes
     patch  only the pixels that changed (the blobs centred in `region`, if given), on the base's canvas: drawn over the base
+           (a transparent overlay: a scene that only swaps the picture's path draws the feature floating on nothing;
+           draw the patch over the base, or use `full`)
   "takes": 3 generates three seeds of a variant and keeps the one that changed least outside its region (an inpaint
   face variant: the one that changed most inside it, which is not always the one with the eyes closed); `post` writes
   _review_<id>_takes.jpg (the box from the base and from every take) and "take": 2 keeps take 2 instead.
