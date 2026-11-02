@@ -99,13 +99,20 @@ plate edge.
 
 ## 1. What to generate (derive it from the storyboard)
 
-Do not generate a generic library. Go through `plan/storyboard.md` (and in team mode `docs/STORYBOARD.md`) shot by shot and list what each shot needs; merge duplicates. The engine can re-frame, re-grade and re-light the same image, but a return is a new treatment, not the same shot again.
+Do not generate a generic library. Go through `plan/storyboard.md` (and in team mode `docs/STORYBOARD.md`) shot by shot and list what each shot needs. The engine can re-frame, re-grade and re-light an image, but viewers still see the same picture: when a place or a person returns, generate another angle or another moment of it.
 
 **The picture budget:** count it from the shot list, never from a habit.
-- A film cut from pictures needs at least one per 2–3 pictured shots, and no picture in more than 4 shots.
+- A film cut from pictures needs at least one per 2 pictured shots, and no picture in more than 4 shots.
 - A fast song cuts more, so it needs more.
-- Iteration 7 made 15–16 for 64–81 shots, so one background appeared in 21 shots and the films felt repetitive.
-- `storyboard.mjs` warns about both, counting the image paths in the shots' args.
+- Iteration 7 made 15–16 for 64–81 shots, so one background appeared in 21 shots and the films felt repetitive. A later
+  film had 26 for 72, one picture in 9 shots, and its director still said the main pictures repeat too often.
+- `storyboard.mjs` fails on both, counting the image paths in the shots' args. Don't accept them out loud, and don't
+  argue the concept excuses them ("one room, one monitor"): a single room has many angles.
+
+**Generate more, and try them.**
+- A picture the film leans on (its main room, the person, the screen): at least 3 seeds, compared on a sheet (`tools/art_grid.py`), best one kept.
+- Plan the returns while listing: a location in 4 shots or more gets at least 2 plates from the start.
+- Try the new picture in its shot on a still before settling; a good picture that doesn't fit the shot goes back to the batch.
 - NovelAI at 1 MP or less costs no Anlas on Opus, so generate in batches by section until the budget is met. When the
   user has said Anlas may be spent, spend it where it shows: character references for the cast, a larger `max_pixels`
   for the key plates, `upscale` for close-ups; drafts and takes stay at the free size.

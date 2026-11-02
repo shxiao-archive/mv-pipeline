@@ -61,7 +61,7 @@ limited animation; one visual idea about the song runs through it all.
 6. **Limited animation and reuse, as a strength.**
    - A few illustrations brought to life by camera push and pull, parallax, light, particles and type.
    - Partial animation (a blink, hair, a hand) on twos or threes, with line boil.
-   - Loops of 2–3 frames; a new pose per beat; the same illustration returning re-framed.
+   - Loops of 2–3 frames; a new pose per beat. A re-framed return stays within the picture budget (`references/04` §1).
    *Why:* this *is* the tegaki look; full animation would read as anime, not ボカロPV.
 7. **Mixed media, held by the grade.** Hand-drawn, collage, pixel art, glitch and signal decay, retro UI, terminal
    junk, neon, cinematic painted backgrounds. A strong version sets **order against chaos**: a narrator layer (grid,

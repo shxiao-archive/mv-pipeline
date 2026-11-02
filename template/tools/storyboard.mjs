@@ -19,13 +19,13 @@
  *   ERROR  unknown scene · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)
  *          · a cut far from its declared cue · a shot shorter than review.minShotFrames · a sung line no shot shows
  *          (no JIZURA layer, no text hook, no line index in its args)
+ *          · too few pictures (fewer than one per 2 pictured shots) or one picture in more than 4 shots, in a film
+ *            mostly cut from pictures (image paths in the shots' args; inserts not counted)
  *   WARN   a shot without `moment` (ERROR with --strict) · a line no shot declares it answers · a line too short to read
  *          (< max(0.7 s, 0.09 s per character)) · line cues without a picture hint (analysis/cues.json)
  *          · vocaloid preset only (project.json style): characters placed the same way (ERROR with --strict): over
  *            half of the character shots centred (|u - 0.5| < 0.08), or a third of the frame never used (u < 0.4 /
  *            u > 0.6), with 4+ character shots (args.chars x or pin)
- *          · too few pictures (fewer than one per 3 pictured shots) or one picture in more than 4 shots, in a film
- *            mostly cut from pictures (image paths in the shots' args; inserts not counted)
  *          · 12+ shots and no scene file of the film's own in engine/scenes/ (its scenes belong there, the edit in
  *            timeline.js)
  * Tolerances from project.json -> review: { cutTolerance: 0.04, cueTolerance: 0.15, grid: 'half' | 'beat', minShotFrames: 3 }.
@@ -96,15 +96,16 @@ if (placed.length >= 4 && /^vocaloid/.test((P.project && P.project.style) || '')
   if (centred > placed.length / 2 || !left || !right)
     (strict ? err : warn)('placement', `characters: ${centred} of ${placed.length} shots centred, ${left} on the left third, ${right} on the right: put most on a third (x ~ 640 / 1280, pin u ~ 0.33 / 0.67), facing into the open side (flip), and keep the centre for frontal singing and kime shots (styles/vocaloid/STYLE.md, Placement varies)`);
 }
-// pictures: a film cut from pictures needs enough of them (references/04 §1); inserts reuse pictures on purpose
+// pictures: a film cut from pictures needs enough of them (references/04 §1); inserts reuse pictures on purpose. These
+// fail and are not accepted out loud: a director read 26 pictures for 72 shots, one in 9 of them, as repetition
 const pictured = shots.filter(s => !s.insert && s.pics && s.pics.length), uses = {};
 pictured.forEach(s => s.pics.forEach(p => { uses[p] = (uses[p] || 0) + 1; }));
 const nPics = Object.keys(uses).length, over = Object.entries(uses).filter(([, n]) => n > 4).sort((a, b) => b[1] - a[1]);
 if (shots.length >= 12 && pictured.length >= shots.length / 2) {
-  if (nPics < pictured.length / 3)
-    warn('pictures', `${nPics} pictures for ${pictured.length} pictured shots: about one per 2-3 shots keeps the film from repeating itself (references/04 §1); generate more, or draw more of the shots`);
+  if (nPics < pictured.length / 2)
+    err('pictures', `${nPics} pictures for ${pictured.length} pictured shots: at least one per 2 shots keeps the film from repeating itself (references/04 §1); generate more and try them`);
   if (over.length)
-    warn('pictures', `used in more than 4 shots: ${over.slice(0, 6).map(([p, n]) => `${path.basename(p)} x${n}`).join(', ')}: give the returns a new picture, or a new treatment (a detail, a different crop and grade)`);
+    err('pictures', `used in more than 4 shots: ${over.slice(0, 6).map(([p, n]) => `${path.basename(p)} x${n}`).join(', ')}: generate a new picture for the returns (another angle or moment of the same place, references/04 §1); a new crop or grade is still the same picture`);
 }
 // the template's scene files; a film's set pieces and per-shot events go in a file of its own. A short test timeline
 // (the demo has 11 shots) is spared
