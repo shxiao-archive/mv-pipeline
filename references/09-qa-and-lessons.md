@@ -193,7 +193,8 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      as peaks land; an ending, not a stop
    - motion_craft: easing, spacing, overlap, anticipation and follow-through, arcs, holds that are chosen; the motion
      comes from what happens in the picture, on the music; the camera moves with a reason and holds otherwise; no dead
-     or jittery motion, no camera drifting or shaking to keep stills alive, no sprites flipping back and forth
+     or jittery motion, no camera drifting or shaking to keep stills alive, no sprites flipping back and forth, no
+     lip-sync: a face changes only now and then, and a still face is fine
    - composition_type: composition and type as the concept intends, carried out with control; lyrics legible and
      inside the safe area; CJK and Latin type set well
    - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts
@@ -220,7 +221,9 @@ Return the score table, the critical issues, the fixes and the strengths, then o
 An independent jury reviewed your film. Here is the full review: <docs/review/jury-N.md>
 Raise the film to award level (target >= 8 in every dimension, 9 where the style allows):
 - The current version is tagged review-N and kept as render/mv_rN.mp4; work on top of it.
-- Implement every critical issue and every high-impact fix. You may replace a listed fix with a better solution if you
+- The user's notes and the style's rules outrank the jury: a fix that breaks one (a mouth moving with the voice, say) is
+  skipped and logged, or solved another way. Check every fix against them before applying it.
+- Implement every other critical issue and high-impact fix. You may replace a listed fix with a better solution if you
   are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
   weakest section. Do not regress anything the jury listed as a strength.
 - Run the checks of references/09 §7 again, re-render (`render_final.mjs --patch <shot ids>`; one `--full` render

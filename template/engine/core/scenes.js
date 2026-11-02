@@ -133,6 +133,7 @@
     const L = Z.line(i), u = t - L.t, p = 1.1 + 0.6 * Z.rnd(i, seed);
     return u >= 0 && t < L.end - 0.15 && (u % p) < 0.5 ? 1 : 0;
   }
+  Z.mouthCalm = mouthCalm;   // for a film's own face swaps, so they keep this timing
   function animOf(S, c, t, img) {
     const A = c.anim;
     let state = 'base';
