@@ -29,12 +29,16 @@
  *            the renderer draws, and the lines the film's own code reads with Z.line(i).text before the HUD), on every
  *            frame from 3 before to 3 after each shot cut and each JIZURA cut, and every 0.5 s: a transition, a
  *            cut's exit running into the next shot, the same line set by JIZURA and by the film's own type; an ERROR
- *            with --strict
+ *            with --strict. A scene registered with { history: true } (a chat thread, a log) counts only its newest
+ *            line. The flag is per scene: when only one kind of a many-kind scene is a log, register that kind under a
+ *            second name with the flag, so the other kinds keep the check
  *          · GLYPH NEVER WHOLE: a character of the lyrics or the title shows in a shot but is never once wholly on screen
  *            there: always past the frame edge, cut by a canvas it was drawn through, or over 25 % under a figure drawn
  *            after it. Every glyph lands whole at least once, then may crop or push (見切れ). Seen wherever the
  *            film draws text (fillText / strokeText, followed through drawImage into the frame), scene type included;
- *            crop: true does not exempt it. Suspect shots are sampled again at full fps. An ERROR with --strict
+ *            crop: true does not exempt it. Suspect shots are sampled again at full fps. An ERROR with --strict.
+ *            ctx.clip() is not followed: text clipped away past the frame edge counts as cut (don't draw it, or fade
+ *            it out before the edge), and text cut by a clip inside the frame counts as whole
  *          · OVERSIZED TYPE: glyphs over half the frame high in more than 2 places (adjacent shots are one place): a
  *            peak move, kept for the song's emotional peaks, once each. An ERROR with --strict
  * Exit 1 on any ERROR.

@@ -4,8 +4,8 @@
 // In the page, before the engine loads: every fillText / strokeText records a box per character on its canvas, and
 // drawImage carries a canvas's boxes into the canvas it is drawn on (mapped, cut where the source rect cuts them), so
 // the frame's layers know where each glyph landed, however many offscreen caches it went through.
-// shortcut: maxWidth squeeze, rtl, putImageData, OffscreenCanvas and WebGL passes are not followed, and a partial erase
-// keeps its boxes; upgrade if a film's type is drawn that way.
+// shortcut: maxWidth squeeze, rtl, putImageData, OffscreenCanvas, WebGL passes and ctx.clip() are not followed, and a
+// partial erase keeps its boxes; upgrade if a film's type is drawn that way.
 export function glyphTracker() {
   const R = new WeakMap(), G = window.__glyph = { R, seq: 0, final: new Set(), fg: null, want: new Set() };
   const P = CanvasRenderingContext2D.prototype;
