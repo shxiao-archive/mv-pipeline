@@ -292,7 +292,8 @@ def patch_of(base: np.ndarray, v: np.ndarray, region=None, thr=0.14, feather=3) 
         u0, v0, u1, v1 = region
         yy, xx = np.mgrid[0:H, 0:W]                                      # the ellipse inside the region (as the inpaint mask)
         cx, cy, rx, ry = (u0 + u1) / 2 * W, (v0 + v1) / 2 * H, max(1, (u1 - u0) / 2 * W), max(1, (v1 - v0) / 2 * H)
-        m &= ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1
+        # 0.85: the inscribed ellipse touches the box mid-sides, where an inpaint's re-shaded box edge (a seam) comes back
+        m &= ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 0.85 ** 2
     m = ndimage.binary_opening(m, iterations=2)                       # drops thin resampling differences along outlines
     m = ndimage.binary_closing(m, iterations=3)
     if region:                                                        # keep the feature: blobs centred in the region's core
