@@ -116,11 +116,24 @@ right-hand column says.
 |---|---|---|
 | A changed state of an object, pasted in from part of another picture | a rectangle of an inpaint on a guitar case for an opened clasp: its texture and line weight showed, "strange-looking textures" | generate the new state as a whole picture (the clasp shut, then open) and cut between the two |
 | An event drawn in flat shapes over a still | a door "closing" as a wedge of flat light at the edge of a still of the shut door, "very fake" | whole pictures of the before and the after (the door ajar, then shut), with a sound or a hit on the cut; or show the hand on the handle and cut |
-| A separately drawn picture pasted into a painted screen (monitor, phone, TV) | a singer in a CRT monitor, still "doesn't fit" with all four corners exact | generate the screen with its picture on it ("an old CRT monitor showing a singer holding a microphone"), one generation per thing it shows; or cut to the picture full frame, with no screen around it |
+| A picture put on a screen (monitor, phone, TV) without a perspective transform, or with corners that miss the glass | a singer in a CRT monitor that "doesn't fit precisely": a bilinear warp, the corners set a few pixels inside the glass so a dark rim showed, a bulging CRT glass no four straight edges follow | the perspective transform below, always |
 
-When one of these is rejected, don't try a better version of it: generate, or change the shot. Other compositing is fine
-and stays: cut-outs on plates, light, particles and type on top of a picture, a prop drawn on a picture (a sticker), face
-frames, colour fixes, a sky revealed through a cut polygon, a plate replaced by a whole new picture on a cut.
+When one of the first two is rejected, don't try a better version of it: generate, or change the shot. Other compositing
+is fine and stays: cut-outs on plates, light, particles and type on top of a picture, a prop drawn on a picture (a
+sticker), face frames, colour fixes, a sky revealed through a cut polygon, a plate replaced by a whole new picture on a cut.
+
+**A picture on a screen: always a perspective transform.** A picture shown on a screen inside a plate (a phone, a
+monitor, a TV) goes through `Z.draw.warpQuad(ctx, img, from, to)`, which maps its four corners onto the glass with a true
+perspective transform (references/05). Never paste it upright, scale it into a rectangle, or clip an upright picture to
+angled glass.
+- Read the four corners off the full-size plate, on the glass's edge where it meets the bezel, not inside it. Overlay the
+  quad on the plate at 4x and fix any corner that shows glass or bezel between the line and the edge.
+- Clip to the glass's own outline (its rounded corners) and let the picture overfill the quad slightly rather than leave
+  a rim of the plate's dark glass.
+- Prefer flat glass: a phone, a flat panel, a tablet. A bulging CRT has curved edges no four corners follow; if the film
+  needs one, generate it facing the camera and with a flat screen.
+- Look at the result at full size in the render, not on a sheet. A phone screen pasted this way passed with the director;
+  a monitor with the corners off by a few pixels did not.
 
 **Generate more, and try them.**
 - A picture the film leans on (its main room, the person, the screen): at least 3 seeds, compared on a sheet (`tools/art_grid.py`), best one kept.

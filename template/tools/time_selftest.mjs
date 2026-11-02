@@ -81,7 +81,7 @@ check(logged.length === 1 && logged[0].includes('2 character') && logged[0].incl
 Z.stroke.layout('H\u661f\u661f', 'sans');
 check(logged.length === 1, 'the same line is reported once');
 
-// warpQuad: every source corner lands on its corner of the glass, and the middle of the picture on the middle
+// warpQuad: every source corner lands on its corner of the glass, and the middle of the picture where its diagonals cross
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'engine/core/draw.js'), 'utf8'), ctx, { filename: 'engine/core/draw.js' });
 const glass = [[100, 50], [500, 80], [520, 400], [90, 380]], srcQ = [[0, 0], [200, 0], [200, 100], [0, 100]], maps = [];
 let cur = null;
@@ -91,7 +91,10 @@ const hits = p => maps.map(([a, b, c, d, e, f]) => [a * p[0] + c * p[1] + e, b *
 const lands = (p, want) => hits(p).some(h => Math.hypot(h[0] - want[0], h[1] - want[1]) < 1e-6);
 check(maps.length === 8, 'warpQuad: two triangles a cell');
 srcQ.forEach((p, i) => check(lands(p, glass[i]), 'warpQuad: corner ' + i + ' lands on the glass'));
-check(lands([100, 50], [(100 + 500 + 520 + 90) / 4, (50 + 80 + 400 + 380) / 4]), 'warpQuad: the middle lands in the middle');
+// perspective: the picture's middle lands where the glass's diagonals cross (bilinear would put it at the corners' mean)
+const [[ax, ay], [bx, by], [cx, cy], [dx, dy]] = glass, tD = ((bx - ax) * (dy - by) - (by - ay) * (dx - bx)) / ((cx - ax) * (dy - by) - (cy - ay) * (dx - bx));
+check(lands([100, 50], [ax + (cx - ax) * tD, ay + (cy - ay) * tD]), 'warpQuad: the middle lands where the diagonals cross');
+check(!lands([100, 50], [(ax + bx + cx + dx) / 4, (ay + by + cy + dy) / 4]), 'warpQuad: perspective, not bilinear');
 
 console.log(bad ? `[time_selftest] ${bad} FAILED` : '[time_selftest] ok');
 process.exit(bad ? 1 : 0);

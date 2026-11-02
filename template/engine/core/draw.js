@@ -41,9 +41,14 @@
   //       tint:{ color, a } (multiply by the scene's light colour: light match; not with wave) }
   const ids = new WeakMap(); let nextId = 0;
   const imgId = img => { let i = ids.get(img); if (i == null) ids.set(img, (i = ++nextId)); return i; };   // cache keys for derived copies
-  // a picture through four corners: `from` in the source, `to` on the canvas, both [tl, tr, br, bl]. A grid of affine
-  // triangles (bilinear, not true perspective, which a screen's size can't show). Clip to the glass first; see references/05-engine.md.
-  const bilinear = (q, u, v) => [0, 1].map(k => (q[0][k] + (q[1][k] - q[0][k]) * u) * (1 - v) + (q[3][k] + (q[2][k] - q[3][k]) * u) * v);
+  // a picture through four corners: `from` in the source, `to` on the canvas, both [tl, tr, br, bl]. True perspective: the
+  // grid points go through the homography of the four corners (a screen's middle lands where its diagonals cross), each
+  // cell drawn as two affine triangles. Clip to the glass first; see references/05-engine.md.
+  const square2quad = q => {   // unit square -> quad (Heckbert): [u, v] -> point
+    const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q, dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+    const den = dx1 * dy2 - dx2 * dy1, g = den ? (dx3 * dy2 - dx2 * dy3) / den : 0, h = den ? (dx1 * dy3 - dx3 * dy1) / den : 0;
+    return (u, v) => { const w = g * u + h * v + 1; return [((x1 - x0 + g * x1) * u + (x3 - x0 + h * x3) * v + x0) / w, ((y1 - y0 + g * y1) * u + (y3 - y0 + h * y3) * v + y0) / w]; };
+  };
   const warpTri = (ctx, src, s0, s1, s2, d0, d1, d2) => {
     const den = s0[0] * (s1[1] - s2[1]) + s1[0] * (s2[1] - s0[1]) + s2[0] * (s0[1] - s1[1]); if (!den) return;
     const sol = k => [
@@ -57,10 +62,11 @@
     ctx.transform(a, b, c, d, e, f); ctx.drawImage(src, 0, 0); ctx.restore();
   };
   D.warpQuad = (ctx, src, from, to, N = 8) => {
+    const S = square2quad(from), T = square2quad(to);
     for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
-      const u0 = i / N, u1 = (i + 1) / N, v0 = j / N, v1 = (j + 1) / N, A = q => bilinear(q, u0, v0), B = q => bilinear(q, u1, v0), C = q => bilinear(q, u1, v1), E = q => bilinear(q, u0, v1);
-      warpTri(ctx, src, A(from), B(from), C(from), A(to), B(to), C(to));
-      warpTri(ctx, src, A(from), C(from), E(from), A(to), C(to), E(to));
+      const u0 = i / N, u1 = (i + 1) / N, v0 = j / N, v1 = (j + 1) / N;
+      warpTri(ctx, src, S(u0, v0), S(u1, v0), S(u1, v1), T(u0, v0), T(u1, v0), T(u1, v1));
+      warpTri(ctx, src, S(u0, v0), S(u1, v1), S(u0, v1), T(u0, v0), T(u1, v1), T(u0, v1));
     }
   };
   // draw img into the rect (x0, y0, w, h) through a grid warped by field(u, v) -> [dx, dy] (px). Cells that do not move

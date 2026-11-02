@@ -109,7 +109,7 @@ What reviewers flagged in films that passed every automatic check — look for t
 | a cut-out in the wrong light | a white prop at dusk | `tint: { color: <the light>, a: 0.4-0.6 }` |
 | "strange textures" on an object | part of another picture pasted on for a changed state | generate the new state whole and cut to it (`references/04` §1, "Three composites that look fake") |
 | "looks fake": a door closing, a lid opening | the event drawn in flat shapes over a still | whole pictures of the before and the after, or another shot idea (same section) |
-| "the screen doesn't fit" | a separately drawn picture pasted into a painted monitor | generate the monitor with the picture on it, or cut to the picture full frame (same section) |
+| "the screen doesn't fit" | no perspective transform (an upright paste, a bilinear warp), corners set inside the glass, a bulging CRT | `Z.draw.warpQuad` onto corners read on the glass's edge at full size, clipped to the glass; prefer flat glass (references/04 §1, "A picture on a screen") |
 | unreadable lines in a chat / UI | the full window at 1:1 | camera on the thread; `sizes`; lines >= 40 px on screen |
 | a fast-cut section fails check_flash | bright inserts, luminance jumps | dark inserts only, fewer per second, darker motifs, move the white flash |
 
@@ -202,8 +202,9 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      inside the safe area; CJK and Latin type set well
    - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts;
      none of the three composites that look fake (references/04 §1: an object's new state pasted in from part of
-     another picture, an event drawn in flat shapes over a still, a separately drawn picture pasted into a painted
-     screen). A fix for one is a new whole picture or another shot idea, never a better version of the composite
+     another picture, an event drawn in flat shapes over a still, a picture put on a screen without a perspective
+     transform or with corners off the glass). A fix for either of the first two is a new whole picture or another shot
+     idea, never a better version of the composite; a screen is fixed with `Z.draw.warpQuad` and corners on the glass
    - sync: cuts and hits on the music, sections change with the song, the lyric never ahead of the voice
    - technical: the automatic checks, fonts (no tofu or fallback), no pops, black frames or seams
 3. Give 5-10 fixes ordered by impact on the final impression. Each: shot id or timecode, what is wrong (observable),

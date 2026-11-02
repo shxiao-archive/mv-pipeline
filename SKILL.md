@@ -100,7 +100,8 @@ film reads as its style, and general craft (references/09 §8).
 - Ship without `check_flash.py` PASS; add a photosensitivity card when the film is intense.
 - Forget the credit: the artist on screen and in the README.
 - Use the three composites that look fake: an object's new state pasted in from part of another picture, an event drawn
-  in flat shapes over a still, a separately drawn picture pasted into a painted screen (`references/04` §1).
+  in flat shapes over a still, a picture put on a screen without a perspective transform onto corners read on the
+  glass's edge (`references/04` §1).
 
 Requirements: Node 20+, Python 3.10+ (numpy, librosa, scipy, soundfile, pillow, matplotlib), ffmpeg, Edge or Chrome;
 optional NVIDIA GPU (else `--codec x264`), an image generator, Blender 5.x. `check_env.py` says what is missing and

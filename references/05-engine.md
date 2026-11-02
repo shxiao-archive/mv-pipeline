@@ -250,10 +250,10 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
 - **Living faces on cut-outs** (`core/scenes.js` `chars[].anim`): a still character with face patches from one
   expression sheet (`tools/gen_table.py`): `blink` on a seeded clock, `mouth` on the sung characters, `expr` +
   `exprAt` on cues; optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states`.
-- **A picture on a screen inside a plate:** generate it as part of the plate (`references/04` §1, "A screen with a picture
-  on it"). A separately drawn picture keeps its own lines and light and reads as pasted, even with the corners exact. Use
-  `Z.draw.warpQuad(ctx, img, from, to)` only for flat graphics on a screen that no viewer looks at closely (a graph, a
-  glow), clipped to the glass, with the corners read off the plate. Clipping an upright picture to angled glass is worse still.
+- **A picture on a screen inside a plate:** always `Z.draw.warpQuad(ctx, img, from, to)` (`core/draw.js`), a true
+  perspective transform from the picture's four corners `[tl, tr, br, bl]` to the glass's; never an upright paste, a
+  scaled rectangle, a bilinear grid or a scene's own warp. Clip to the glass's outline first, with the corners read on the
+  glass's edge off the full-size plate (`references/04` §1, "A picture on a screen").
 - **Lyric lines in code** (`core/lyrics.js`): `Z.LYR` = `[{ i, t, end, text, parts, emph, kime }]` parsed from
   `analysis/lyrics_mv.lrc` before `Z.setup`; `Z.line(i)`, `Z.lineAt(t, lead)`, `Z.charsAt(i, t, { lead, over | rate })`
   (characters typed out with the voice), `Z.isEmph(i, k)`. Scenes take line indices; the text is read at draw time.
