@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """gen_table.py -- the film's assets as ONE generation table (references/10 §3; the netsu-ijou-pv method), plus
-VARIANTS: small edits of an approved image (eyes closed, mouth open, a head turn, wind in the hair) that are aligned to
+VARIANTS: small edits of an approved image (eyes closed, a smile, a head turn, wind in the hair) that are aligned to
 it so the engine can switch them (engine/core/scenes.js chars[].anim).
 
   python tools/gen_table.py jobs   assets/gen/table.json [--pass base|variants]   # -> assets/gen/jobs_<pass>.jsonl
@@ -26,13 +26,14 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
         "view": "back" },   # the CHAR_BACK lock if the table has one, else CHAR without its face words; + a face negative
       { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full" },
       { "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view", "size": "1024x1024", "transparent": true,
-        "sheet": { "cells": ["neutral", "blink", "open", "smile"] } } ] }
+        "sheet": { "cells": ["neutral", "blink", "smile", "sad"] } } ] }
   A SHEET row is THE way to make a character's expressions: one generation draws all of them in the same style; `post`
   numbers the figures it finds (_<id>_figures.jpg: generators often add or reorder figures; then set
   "pick": {"neutral": 2, "blink": 4, ...}) and draws a grid on the neutral one (_<id>_grid.jpg: set "eyes" and
   "mouth" [u0, v0, u1, v1] there, a little larger than the features), takes them, aligns them to the first (neutral) one, cuts each other expression to the face (`face`
   area pasted from each copy) and writes <id>.png, <id>_<name>.png and <id>.anim.json
-  (blink / open -> anim.blink / anim.mouth, the others -> anim.expr) for engine/core/scenes.js. Variant rows (below)
+  (blink -> anim.blink, the others -> anim.expr) for engine/core/scenes.js; the mouth is never swapped, so a sheet
+  has no "open" / "mouth" / "sing" cell (an error). Variant rows (below)
   are for a full-body picture that needs one more face; big changes by variant drift in style (tested): avoid them.
   Prompt = the row's locks (default: char -> STYLE + CHAR, world -> STYLE + WORLD, + ISO when transparent, + EMPTY for
   world rows that are not transparent) + "New image: " + subject. References: the style reference first, then the
@@ -143,8 +144,12 @@ def prompt_of(t: dict, r: dict) -> str:
         subject = "seen from behind, back view, facing away from the viewer, " + subject
     if r.get("sheet"):                                                  # an expression sheet: one image, one style
         cells = r["sheet"]["cells"]; cols = r["sheet"].get("cols", 2 if len(cells) == 4 else len(cells))
+        try:
+            no_mouth_cells(r["id"], cells)
+        except ValueError as e:
+            sys.exit(str(e))
         desc = {"neutral": "neutral, mouth closed, eyes open", "blink": "eyes closed, mouth closed", "closed": "eyes closed",
-                "open": "mouth open as if singing, eyes open", "smile": "a warm smile, mouth closed", "sad": "sad", "surprised": "surprised, mouth open"}
+                "smile": "a warm smile, mouth closed", "sad": "sad", "surprised": "surprised, mouth open"}
         order = "; ".join(f"{i + 1}: {desc.get(c, c)}" for i, c in enumerate(cells))
         subject = (f"expression sheet of ONE character: {len(cells)} identical copies of the same picture of her in a grid of {cols} "
                    f"columns, evenly spaced, not touching, exactly the same pose, framing, size, hair and clothes in every copy; only the "
@@ -554,7 +559,16 @@ def grid_image(a: np.ndarray, dst: Path, step: float = 0.05) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True); bg.convert("RGB").save(dst, quality=90)
 
 
-ROLE = {"blink": "blink", "closed": "blink", "open": "mouth", "mouth": "mouth", "sing": "mouth"}
+ROLE = {"blink": "blink", "closed": "blink"}
+# the mouth swap was removed (it looked wrong in two films): a mouth stays as the picture was generated
+MOUTH_CELLS = {"open", "mouth", "sing"}
+
+
+def no_mouth_cells(rid: str, cells) -> None:
+    bad = sorted(MOUTH_CELLS & set(cells))
+    if bad:
+        raise ValueError(f"{rid}: sheet cells {bad}: the mouth is no longer swapped; leave them out "
+                         "(a singing picture is generated singing and holds)")
 
 
 def grid_figures(sheet: np.ndarray, cols: int, rows: int) -> list[tuple[int, int, int, int]]:
@@ -572,6 +586,7 @@ def grid_figures(sheet: np.ndarray, cols: int, rows: int) -> list[tuple[int, int
 
 def split_sheet(t: dict, r: dict, raw: Path) -> dict:
     sh = r["sheet"]; names = sh["cells"]; rid = r["id"]; out = rp(t.get("out", "assets/gen"))
+    no_mouth_cells(rid, names)
     img = _rgba(raw)
     allb = figures(img)
     if len(allb) < len(names) and not sh.get("pick"):                # figures drawn touching merge: cut the sheet's own grid
@@ -608,19 +623,15 @@ def split_sheet(t: dict, r: dict, raw: Path) -> dict:
         err = float(np.abs(base[..., :3] - v[..., :3]).mean(axis=2)[both].mean()) if both.any() else 1.0
         role = ROLE.get(name)
         # whole: the aligned copy itself, swapped for the picture (no seams, but a copy is redrawn: only for copies that
-        # match outside the face). patch (default): a blink takes the eye area, a mouth the mouth area
-        p = v if whole else paste_of(base, v, [sh["eyes"]] if role == "blink" else [sh["mouth"]] if role == "mouth" else [sh["eyes"], sh["mouth"]])
+        # match outside the face). patch (default): a blink takes the eye area, an expression the eyes and the mouth
+        p = v if whole else paste_of(base, v, [sh["eyes"]] if role == "blink" else [sh["eyes"], sh["mouth"]])
         frac = float((p[..., 3] > 0.5).mean())
         dst = out / f"{rid}_{name}.png"; save(p, dst)
         info["cells"][name] = {"colour_err": round(err, 4), "changed": round(frac, 4), "outside_face": round(drift(base, v, region), 4) if region else None}
         if role == "blink":
             anim["blink"] = rel(dst)
-        elif role == "mouth":
-            anim.setdefault("mouth", []).append(rel(dst))
         else:
             anim.setdefault("expr", {})[name] = rel(dst)
-    if len(anim.get("mouth", [])) == 1:
-        anim["mouth"] = anim["mouth"][0]
     snippet = {"img": rel(out / f"{rid}.png"), "anim": anim}
     (out / f"{rid}.anim.json").write_text(json.dumps(snippet, indent=2), encoding="utf-8")
     info["snippet"] = rel(out / f"{rid}.anim.json")
@@ -818,6 +829,10 @@ def selftest() -> int:
         {"id": "CH01", "kind": "char"}, {"id": "CH02", "kind": "char", "locks": ["STYLE", "CHAR_BACK"]}, {"id": "BG01", "kind": "world"}]}
     if [char_of(tb, r) for r in tb["rows"]] != ["front", "back", None] or "front" in prompt_of(tb, dict(tb["rows"][1], subject="x")):
         print("FAIL character caption / CHAR_BACK lock"); bad += 1
+    try:                                                              # the mouth swap is gone: a mouth cell is an error
+        no_mouth_cells("CH09", ["neutral", "blink", "open"]); print("FAIL mouth cell accepted"); bad += 1
+    except ValueError:
+        pass
     tv = {"locks": {"STYLE": "s", "CHAR": "1girl, white bob hair, blunt bangs, red eyes, black jacket"},
           "rows": [{"id": "CH05", "kind": "char", "view": "back", "subject": "full body"}]}
     pb = prompt_of(tv, tv["rows"][0])

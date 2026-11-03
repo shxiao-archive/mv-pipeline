@@ -37,21 +37,22 @@ behind the locks (§5–7) and the generators' own fields.
    `"refs": { "char": ["assets/gen/CH00b.png"] }` carries the character's face into every later char row (Codex, Grok). On
    NovelAI a character reference costs Anlas: ask the user once whether Anlas may be spent. If yes, use `refs.char` as
    above; if not, leave it empty and lean on `CHAR` plus takes (§12).
-3. **Faces that live (optional, a cast only):** if the film wants a character to blink or sing, per framing (bust, half body), the approved picture plus variant rows
-   that repaint only its eye or mouth box (`"ref_mode": "inpaint", "mode": "full"`), swapped whole by the engine
-   (`anim.whole`); an expression sheet is the fallback (styles/vocaloid/STYLE.md, Characters with a living face). A
-   character who sings or reacts in a shot is drawn from such a framing. A still character is fine too.
+3. **Faces that live (optional, a cast only):** if the film wants a character to blink or change expression, per framing (bust, half body), the approved picture plus
+   variant rows that repaint only its eye or face box (`"ref_mode": "inpaint", "mode": "full"`), swapped whole by the
+   engine (`anim.whole`); an expression sheet is the fallback (styles/vocaloid/STYLE.md, Characters with a living face).
+   A character who reacts in a shot is drawn from such a framing. The mouth is never swapped: a character who sings is
+   generated singing and holds. A still character is fine too.
 4. **The rest** from the storyboard (§1): poses, the eye close-up (opaque 16:9), backgrounds with their time-of-day
    variants, props. Look at every `_review_<category>.jpg`; line them up with
    `python tools/lineup.py assets/gen/CH*.png --bg assets/gen/BG01.png` (§5.9).
 
 A character's expressions come from a **sheet row**: one generation of all of them (same style), split, aligned and
-cut to eye / mouth patches for the engine (`styles/vocaloid/STYLE.md`). Lessons from the first real runs (NovelAI): its
+cut to eye / face patches for the engine (`styles/vocaloid/STYLE.md`). Lessons from the first real runs (NovelAI): its
 "magenta" screen comes out hot pink (the keyer treats it as a two-channel screen; before, it ate every red / brown /
 skin colour); it lays a sheet out its own way (a full body plus heads: pick the figures by number); copies on a sheet
 are each redrawn a little, so a whole feature area is pasted, not only the changed pixels; asking for a changed version
 of a finished picture (img2img / inpaint of a head) drifts in style or does not change — variant rows remain for small
-fixes to one face (inpaint of an eye or mouth region, `"takes": 3`).
+fixes to one face (inpaint of an eye or face region, `"takes": 3`).
 
 Sheet layout (iteration-4 run): a row of 4 busts (`"cells": [...], "cols": 4, "size": "1472x704"`) gave about
 400x650 px per figure; a 2x2 sheet at 1024x1024 gives small faces. Name every expression in the subject (the first

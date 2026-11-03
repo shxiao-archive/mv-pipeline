@@ -71,7 +71,7 @@ def main():
     for s in shots:
         if s.get("animFaces"):
             faces |= (t >= s["t0"]) & (t < s["t1"])
-    # a living face (chars[].anim: blinks, a singing mouth) is motion too, over a frame that also drifts (>= 40 % of the
+    # a living face (chars[].anim: blinks, expressions) is motion too, over a frame that also drifts (>= 40 % of the
     # threshold). Read from the plan, not the pixels: a top-cells measure scored held stills with animated lyrics and
     # petals (0.008-0.03) above a singing mouth (0.006), so it cannot tell them apart
     rescued = faces & (lvl < thr) & (lvl >= 0.4 * thr)

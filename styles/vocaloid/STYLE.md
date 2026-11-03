@@ -59,7 +59,7 @@ Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline,
   jump), move her across the frame with `x2` / `pin2`, and give two-character shots both thirds. `tools/storyboard.mjs`
   warns when over half the character shots are centred or a third is never used (a Gemini film had 10 of 16 at u = 0.5).
 - **Poses: an acting shot or a drawn beat sequence.** In an acting shot a character keeps one picture and her face
-  lives through `chars[].anim` (blink, mouth, expressions); a new pose comes with a cut to a new framing. The tegaki
+  lives through `chars[].anim` (blink, expressions; never the mouth); a new pose comes with a cut to a new framing. The tegaki
   idiom of a new pose per beat is also right: a drawn sequence of ONE action, in order, stepped on twos or threes, or
   a 2–3 frame loop (hair, a breath, a sway) — the drawn layer steps while the camera, light and grain run on ones.
   What reads as a glitch is going back and forth: A → B → A (a Gemini film stepped three poses on each band stop of its
@@ -163,21 +163,23 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ## Characters with a living face (optional, both kits)
 
-A character may stay completely still; that is fine. If the film wants more, now and then she blinks, opens the mouth
-or changes expression: a swap of the face, not an animation and not lip-sync (a viewer who watched the eval film: the mouth flapping on every syllable looked
-wrong, and the pasted eye / mouth areas showed their edges). The engine does the timing; you supply the faces.
+A character may stay completely still; that is fine. If the film wants more, now and then she blinks or changes
+expression: a swap of the face, not an animation. **The mouth is never swapped**: a picture keeps the mouth it was
+generated with (a singing picture is generated singing and holds). Mouth swaps were removed from the kit after they
+looked wrong in every film that used them: a mouth flapping on every syllable, then a calm mouth that opened now and
+then, then closed-mouth patches between lines (a director, of the last: "very poor; remove it entirely"). The engine
+does the timing; you supply the faces.
 
-**The faces: pictures that differ only in the eyes or the mouth.** Best: repaint just that area of the approved picture
+**The faces: pictures that differ only around the eyes.** Best: repaint just that area of the approved picture
 with the generator, so everything else stays identical and the whole picture can be swapped without a seam:
 1. The base: the approved bust or half-body picture of the character (a char row, e.g. `CH03`, or the neutral figure
-   of a sheet). Measure the eye box and the mouth box on it with `python tools/art_grid.py assets/gen/CH03.png`, then
+   of a sheet). Measure the eye box (and, for an expression, the face box) on it with `python tools/art_grid.py assets/gen/CH03.png`, then
    read the exact box off the face enlarged: `--crop u0,v0,u1,v1 --step 0.01` (labels in the whole picture's u, v).
    Never off a review sheet: boxes read off downscaled sheets were off by up to 0.15, and 13 of 36 inpaints were wasted.
 2. One variant row per face, repainting only its box (NovelAI infill: the pixels outside the box come back
    unchanged; inpainting costs Anlas):
    `{ "id": "CH03_blink", "variant_of": "CH03", "edit": "her eyes closed", "region": [0.30, 0.24, 0.62, 0.36],
-   "ref_mode": "inpaint", "mode": "full", "takes": 3 }` — likewise `CH03_open` (the mouth box, "her mouth open, singing")
-   and `CH03_smile`. `gen_table.py jobs --pass variants` → generate → `post`; `post` keeps the take that changed most
+   "ref_mode": "inpaint", "mode": "full", "takes": 3 }` — likewise `CH03_smile` (the face box). `gen_table.py jobs --pass variants` → generate → `post`; `post` keeps the take that changed most
    inside the box and blends it into the base with a soft edge inside the figure (outside the face the picture is the
    base, pixel for pixel). Look at every final over the base. From the first test (16 inpaints of one bust):
    - keep each box **inside the face**: a box that crosses the chin or the face outline got key-coloured smudges;
@@ -187,23 +189,24 @@ with the generator, so everything else stays identical and the whole picture can
      base and from every take). `post` keeps the take that changed most, which is not always the closed eyes: set
      `"take": 2` on the row to keep another, and run `post` again;
    - if no take closed the eyes: a taller eye box (from mid-fringe to below the lower lashes) and `"noise": 0.15`;
-   - the open mouth and the smile came out clean on the first good box; the blink was the hard one.
+   - the smile came out clean on the first good box; the blink was the hard one.
 3. In the shot: `chars: [{ img: 'assets/gen/CH03.png', …, anim: { whole: true, blink: 'assets/gen/CH03_blink.png',
-   mouth: 'assets/gen/CH03_open.png', expr: { smile: 'assets/gen/CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]],
-   seed } }]`. `whole: true` swaps the whole picture (mouth over blink over expression), with no pasting.
+   expr: { smile: 'assets/gen/CH03_smile.png' }, exprAt: [[t, 'smile'], [t2, null]], seed } }]`. `whole: true` swaps
+   the whole picture (blink over expression), with no pasting.
 
-Fallback, **an expression sheet** (one generation of all faces, `"sheet": { "cells": ["neutral", "blink", "open",
-"smile"], "cols": 4 }`, references/04 §0): the copies on a sheet are each redrawn (head angle, crop and collar move), so
-`post` pastes only their eye / mouth boxes onto the neutral figure (`"eyes"`, `"mouth"` boxes measured on
+Fallback, **an expression sheet** (one generation of all faces, `"sheet": { "cells": ["neutral", "blink", "smile"],
+"cols": 3 }`, references/04 §0; an `open` / `mouth` / `sing` cell is an error): the copies on a sheet are each redrawn
+(head angle, crop and collar move), so `post` pastes only their eye (blink) or eye and mouth (expression) boxes onto the
+neutral figure (`"eyes"`, `"mouth"` boxes measured on
 `_CH03_grid.jpg`; set `"pick"` from `_CH03_figures.jpg`). Look at every patch at full size: where its edge shows, use
 the variant rows above instead. `"faces": "whole"` writes the aligned copies whole, only for a sheet whose copies really
 match outside the face (swapping redrawn copies reads as a jump cut).
 
-Timing (engine): blinks on a seeded clock (`seed` per character, `period` 3.7 s); the mouth opens for about half a second
-every 2.4–3.6 s while a line is sung and stays closed between lines (`sings: false` for a listener; `lipsync: true`
-opens it on every sung character, rarely wanted); expressions change on cues (`exprAt`). A film's own scene code that
-swaps a face (a singer on a screen, say) calls `Z.mouthCalm(t, seed)`, never a clock of its own: no check sees those swaps. A film has shipped with the mouth changing eight times a second this way, after a director had asked for the opposite. A singer's picture drawn with an open mouth can simply hold, closing only when `Z.mouthCalm` says so and between lines. Look at any locally painted frame at full size: a blink painted over hair shows its patch, so leave it out, and a closed mouth must not change the expression (a downward arc reads as a frown). `motion_check.py` counts a
-living face (≥ 40 % of its threshold, the camera taken out) as motion, read from plan/shots.json `animFaces`.
+Timing (engine): blinks on a seeded clock (`seed` per character, `period` 3.7 s); expressions change on cues
+(`exprAt`). A film's own scene code must not swap a mouth either (no closed-mouth patches over a singing picture, no
+clock of its own): no check sees those swaps. Look at any locally painted frame at full size: a blink painted over hair
+shows its patch, so leave it out. `motion_check.py` counts a living face (≥ 40 % of its threshold, the camera taken
+out) as motion, read from plan/shots.json `animFaces`.
 
 Do not ask the generator for a changed version of a whole finished picture (a turned head, another pose): tested, it
 either drifts in style or does not change. Other poses are other pictures, cut to, not morphed. (`anim.tilt` /

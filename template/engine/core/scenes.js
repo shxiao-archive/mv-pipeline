@@ -33,7 +33,7 @@
   //   `water: { sink, reflect, bob }` sinks it into the waterline at its pin and hangs a rippled reflection below.
   //   vignette: 0..1, letter: ...
   // }
-  const animAssets = A => !A ? [] : [A.blink, A.mouth, A.states && Object.values(A.states), A.expr && Object.values(A.expr)].flat(2).flatMap(x => (x && typeof x === 'object' && !Array.isArray(x) ? Object.values(x) : [x])).filter(x => typeof x === 'string');
+  const animAssets = A => !A ? [] : [A.blink, A.states && Object.values(A.states), A.expr && Object.values(A.expr)].flat(2).flatMap(x => (x && typeof x === 'object' && !Array.isArray(x) ? Object.values(x) : [x])).filter(x => typeof x === 'string');
   const assetsOf = a => [a.bg, ...(a.chars || []).flatMap(c => [c.img, ...animAssets(c.anim)]), ...(a.layers || []).map(l => l.img)].filter(Boolean);
   Z.scene('illust', {
     preload: a => assetsOf(a),
@@ -85,17 +85,14 @@
   Z.pinPt = pinPt;
 
   //   ANIMATED CUT-OUTS (mv-studio): chars[].anim gives a generated character a living face — it stays still and only
-  //   blinks, sings and changes expression, from face patches cut from ONE expression sheet (tools/gen_table.py writes
-  //   <id>.anim.json: paste its `img` and `anim`):
+  //   blinks and changes expression, from face patches cut from ONE expression sheet (tools/gen_table.py writes
+  //   <id>.anim.json: paste its `img` and `anim`). The mouth is never swapped: it stays as the picture was generated
+  //   (the mouth swap was removed after two films where it looked wrong):
   //     expr: { smile: 'p.png', ... }, exprAt: [[t, 'smile'], [t2, null]]   expression changes on cues (null = neutral)
   //     blink: 'patch.png' (eyes closed) | { base: 'p.png', <state>: 'p2.png' }   closes on a seeded clock (Z.rig.blink)
   //     seed, period                    the blink clock (cast members get different seeds)
-  //     mouth: 'open.png' | ['half.png', 'open.png'] (or per state as blink)   opens now and then while a line is sung
-  //                                     (about 0.5 s every 2.4-3.6 s, seeded per line; a viewer reads singing, not
-  //                                     speech), only inside talk: [[t0, t1], ...] when given; sings: false = never;
-  //                                     lipsync: true = open on each sung character (12 fps), rarely wanted
-  //     whole: true                     blink / mouth / expr are WHOLE pictures (gen_table `faces: 'whole'`): the
-  //                                     current one replaces the picture (mouth over blink over expression), no patches
+  //     whole: true                     blink / expr are WHOLE pictures (gen_table `faces: 'whole'`): the
+  //                                     current one replaces the picture (blink over expression), no patches
   //   Optional, rarely needed (keep characters mostly still):
   //     states: { turn: 'full.png', ... }, state: [[t, 'turn'], [t2, 'base']]   swap the whole picture on a cut
   //     tilt:{ pivot: [u, v] (the neck), deg 2.5 (sway amplitude), rate 0.3 Hz, keys: [[t, deg], ...] (acted tilts) }
@@ -114,26 +111,6 @@
     return cv;
   };
   const keysAt = (keys, t) => { let v = keys[0][1]; for (let i = 0; i < keys.length; i++) { const [t0, v0] = keys[i], nx = keys[i + 1]; if (t >= t0) v = nx ? Z.lerp(v0, nx[1], Z.ease.inOutSine(Z.clamp((t - t0) / Math.max(0.05, Math.min(0.5, nx[0] - t0))))) : v0; } return v; };
-  // lip flap: open on each sung character (the lyric's per-character times, else spread over the line), closed between
-  // them and on spaces / punctuation; with no lyric line, flap at 6 Hz while the vocal flag is on
-  const SILENT = /[\s、。，．,.!?！？「」『』（）()…・~〜-]/;
-  function mouthOpen(S, t) {
-    const i = Z.lineAt(t, 0);
-    if (i < 0) return S.env && S.env.vocal(t) > 0.5 ? Math.floor(t * 6) % 2 : 0;
-    const L = Z.line(i), chars = [...L.text], n = chars.length; if (!n) return 0;
-    const ct = L.chars || chars.map((_, k) => L.t + k * (L.end - L.t) / n);
-    let k = -1; for (let j = 0; j < n; j++) if (ct[j] <= t) k = j;
-    if (k < 0 || SILENT.test(chars[k])) return 0;
-    const next = ct[k + 1] ?? L.end, f = (t - ct[k]) / Math.max(0.05, next - ct[k]);
-    return f < 0.1 ? 0.5 : f < 0.7 ? 1 : 0;
-  }
-  // the calm mouth: open for ~0.5 s every 2.4-3.6 s while a line is sung (seeded per line), closed between lines
-  function mouthCalm(t, seed) {
-    const i = Z.lineAt(t, 0); if (i < 0) return 0;
-    const L = Z.line(i), u = t - L.t, p = 2.4 + 1.2 * Z.rnd(i, seed);
-    return u >= 0 && t < L.end - 0.15 && (u % p) < 0.5 ? 1 : 0;
-  }
-  Z.mouthCalm = mouthCalm;   // for a film's own face swaps, so they keep this timing
   function animOf(S, c, t, img) {
     const A = c.anim;
     let state = 'base';
@@ -142,17 +119,11 @@
     const baseImg = stImg || img, baseKey = stImg ? A.states[state] : c.img;
     const pick = v => (v && typeof v === 'object' && !Array.isArray(v) ? v[state] : state === 'base' ? v : null);
     const parts = [];
-    let ex = null;                                                // the current expression (smile, sad ...) under the blink and mouth
+    let ex = null;                                                // the current expression (smile, sad ...) under the blink
     if (A.exprAt) for (const [tk, e] of A.exprAt) if (t >= tk) ex = e;
     if (ex && A.expr && A.expr[ex]) { const p = Z.imgSync(A.expr[ex]); if (p) parts.push([A.expr[ex], p]); }
     const bl = pick(A.blink);
     if (bl && Z.rig.blink(t, A.seed || 0, A.period || 3.7) > 0.4) { const p = Z.imgSync(bl); if (p) parts.push([bl, p]); }
-    const mo = pick(A.mouth);
-    if (mo && (!A.talk || A.talk.some(([a, b]) => t >= a && t < b)) && (A.sings ?? true)) {
-      const v = A.lipsync ? mouthOpen(S, Z.quant(t, 12)) : mouthCalm(t, A.seed || 0), list = Array.isArray(mo) ? mo : [mo];
-      const k = list.length > 1 ? (v > 0.75 ? list.length - 1 : v > 0.25 ? 0 : -1) : (v > 0.5 ? 0 : -1);   // half open, then open
-      if (k >= 0) { const p = Z.imgSync(list[k]); if (p) parts.push([list[k], p]); }
-    }
     let field = null;
     if (A.tilt || A.hair) {
       const T = A.tilt, hairs = A.hair || [];

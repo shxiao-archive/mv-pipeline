@@ -58,7 +58,7 @@ Method in one paragraph: onset envelope at 100 fps (log-mel flux at 24 kHz); tem
 | `stops[]` | `{start, end, depth_db, kind: 'stop'\|'gap'}` — a dip ≥ 9 dB below the local 80th percentile; `stop` = ≥ 13 dB and ≥ 0.14 s, or ≥ 0.3 s; else `gap` | freeze frames, black frames, held breaths, hard cuts on silence |
 | `impacts[]` | `{t, strength, kind, …}` with kinds `first_sound, stop, gap, drop` (bass re-enters), `breakdown` (bass drops out), `hit` (isolated transient, `on_downbeat`), `section_start, final_cut, end_of_tail` | the big sync candidates; 残光 had 60 |
 | `onsets_strong[]` | ~520 × `{t, strength, band: kick\|snare\|hat\|tonal, grid: beat\|8th\|16th, beat}` | stutters, glitches on snares, particle bursts on kicks |
-| `vocal_activity[]` | `{start, end}` segments (breaths < 0.18 s bridged) | lyric-free windows = showcase shots; mouth/glow driven by voice |
+| `vocal_activity[]` | `{start, end}` segments (breaths < 0.18 s bridged) | lyric-free windows = showcase shots; glow driven by voice |
 | `vocal_activity_method` | which method + thresholds | audit |
 
 ## 4. `envelope_30fps.json` reference
