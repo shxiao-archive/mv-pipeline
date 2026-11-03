@@ -37,9 +37,10 @@ behind the locks (§5–7) and the generators' own fields.
    `"refs": { "char": ["assets/gen/CH00b.png"] }` carries the character's face into every later char row (Codex, Grok). On
    NovelAI a character reference costs Anlas: ask the user once whether Anlas may be spent. If yes, use `refs.char` as
    above; if not, leave it empty and lean on `CHAR` plus takes (§12).
-3. **Faces (a cast only):** never swapped inside a shot: no blink, expression or mouth patches (removed 2026-11-03:
-   the swapped face read as another picture; styles/vocaloid/STYLE.md, Characters' faces). Another face is another
-   picture, its own char row, cut to. A character who sings is generated singing and holds. A still character is fine.
+3. **Faces (a cast only):** no partial face replacement: no blink, expression or mouth patches pasted or inpainted
+   over a picture (removed 2026-11-03: the patched face read as another picture; styles/vocaloid/STYLE.md,
+   Characters' faces). Another expression is a whole picture of its own (a char row), swapped in whole
+   (`anim.states`) or cut to. A character who sings is generated singing and holds. A still character is fine.
 4. **The rest** from the storyboard (§1): poses, the eye close-up (opaque 16:9), backgrounds with their time-of-day
    variants, props. Look at every `_review_<category>.jpg`; line them up with
    `python tools/lineup.py assets/gen/CH*.png --bg assets/gen/BG01.png` (§5.9).

@@ -58,7 +58,8 @@ Grok §11, NovelAI §12, choosing §13) → `references/05-engine.md` (timeline,
   jump), move her across the frame with `x2` / `pin2`, and give two-character shots both thirds. `tools/storyboard.mjs`
   warns when over half the character shots are centred or a third is never used (a Gemini film had 10 of 16 at u = 0.5).
 - **Poses: an acting shot or a drawn beat sequence.** In an acting shot a character keeps one picture and its face
-  as generated (never swapped: no blink, expression or mouth); a new face or pose comes with a cut to a new framing. The tegaki
+  as generated (no blink, expression or mouth patches); another expression is a whole picture of its own, and a new
+  pose comes with a cut to a new framing. The tegaki
   idiom of a new pose per beat is also right: a drawn sequence of ONE action, in order, stepped on twos or threes, or
   a 2–3 frame loop (hair, a breath, a sway) — the drawn layer steps while the camera, light and grain run on ones.
   What reads as a glitch is going back and forth: A → B → A (a Gemini film stepped three poses on each band stop of its
@@ -160,22 +161,23 @@ Pixel type sits on a 16 px grid (DotGothic16 at 16 / 32 / 48 / 64 px, integer po
 
 ---
 
-## Characters' faces: never swapped (both kits)
+## Characters' faces: no partial face replacement (both kits)
 
-A character's face is the face the picture was generated with. Nothing swaps it inside a shot: no blinks, no
-expression changes, no mouth. The kit had all three (`chars[].anim` blink / expr / mouth, expression sheets, face
-inpaints) and removed them on 2026-11-03: in every test film the swapped face read as a different picture, frame
-against frame (a director: "the differences between the character's appearance across frames are still too
-noticeable"). A film's own scene code must not bring them back either (no eye or mouth patches over a picture, no
-clock of its own): no check sees those swaps.
+Nothing pastes or inpaints part of a face over a picture: no blink, expression or mouth patches. The kit had them
+(`chars[].anim` blink / expr / mouth, expression sheets, inpainted face boxes) and removed them on 2026-11-03: in every
+test film the patched face read as a different picture, frame against frame (a director: "the differences between
+the character's appearance across frames are still too noticeable"). A film's own scene code must not bring them back
+either (no eye or mouth patches over a picture, no clock of its own): no check sees those patches.
 
-Another face is another picture: generate it as its own image (a char row) and cut to it, on a cut to a new framing
-where the jump is expected. A character may stay completely still for a whole shot; life comes from events in the
-shot (references/10 §1), not from her face.
+Another expression is a whole picture: generate it as its own image (a char row, same framing and the character
+references) and swap it in whole with `anim.states` (`states: { smile: 'assets/gen/CH03b.png' }, state: [[t,
+'smile']]`), or cut to it. Look at the two side by side first (`tools/lineup.py`): if they differ outside the face,
+cut rather than swap in place. A character may also stay completely still; life then comes from events in the shot
+(references/10 §1).
 
 Do not ask the generator for a changed version of a whole finished picture (a turned head, another pose): tested, it
 either drifts in style or does not change. Other poses are other pictures, cut to, not morphed. (`anim.tilt` /
-`anim.hair` mesh warps and whole-picture `states` swapped on a cut exist but are rarely needed.)
+`anim.hair` mesh warps exist but are rarely needed.)
 
 ## Asset library and density (method: references/10 §3, team: 11)
 

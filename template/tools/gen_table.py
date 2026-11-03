@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gen_table.py -- the film's assets as ONE generation table (references/10 §3; the netsu-ijou-pv method), plus
-VARIANTS: edits of an approved image (a head turn, another pose) aligned to it, for a whole-picture swap on a cut
-(engine/core/scenes.js chars[].anim.states). A face is never swapped inside a shot: no blink or expression variants.
+VARIANTS: edits of an approved image (a head turn, another pose) aligned to it, for a whole-picture swap
+(engine/core/scenes.js chars[].anim.states). No partial face replacement: no blink or expression patches.
 
   python tools/gen_table.py jobs   assets/gen/table.json [--pass base|variants]   # -> assets/gen/jobs_<pass>.jsonl
   python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  # (the user's chosen generator)
@@ -24,7 +24,7 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
       { "id": "CH02", "kind": "char", "subject": "Full body seen from behind ...", "transparent": true,
         "view": "back" },   # the CHAR_BACK lock if the table has one, else CHAR without its face words; + a face negative
       { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full", "takes": 3 } ] }
-  A "sheet" row (expression sheets) is refused: they were removed with the face swaps. Big changes by variant drift
+  A "sheet" row (expression sheets) is refused: they were removed with the face patches. Big changes by variant drift
   in style (tested): avoid them.
   Prompt = the row's locks (default: char -> STYLE + CHAR, world -> STYLE + WORLD, + ISO when transparent, + EMPTY for
   world rows that are not transparent) + "New image: " + subject. References: the style reference first, then the
@@ -41,7 +41,7 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
   "noise": 0.1 (NovelAI inpaint / img2img) adds noise to the start image: try 0.1-0.2 when an edit comes back unchanged.
     full   the whole aligned variant on the base's canvas: swapped for the base (pose / turn / big changes); with
            "ref_mode": "inpaint" and a region: the repainted box blended into the base with a soft edge inside the
-           figure, the base everywhere else (cut to it with chars[].anim.states)
+           figure, the base everywhere else (not for a face: partial face replacement was removed)
 
 mv-studio (MIT). Standard library + numpy, scipy, Pillow.
 """
@@ -83,8 +83,8 @@ def load(table: Path) -> dict:
         if not r.get("variant_of") and not r.get("subject"):
             sys.exit(f"{r['id']}: no subject")
         if r.get("sheet"):
-            sys.exit(f"{r['id']}: expression sheets were removed (a swapped face reads as another picture); "
-                     "generate each face as its own picture and cut to it")
+            sys.exit(f"{r['id']}: expression sheets were removed (a patched face reads as another picture); "
+                     "generate each expression as a whole picture of its own")
     return t
 
 

@@ -60,8 +60,8 @@ limited animation; one visual idea about the song runs through it all.
    *Why:* mixed sources (AI art, code, 3D) must read as one hand.
 6. **Limited animation and reuse, as a strength.**
    - A few illustrations brought to life by camera push and pull, parallax, light, particles and type.
-   - Partial animation (hair, a hand) on twos or threes, with line boil. A face is never swapped inside a shot (no blink,
-     expression or mouth); another face is another picture, cut to (`STYLE.md`, "Characters' faces").
+   - Partial animation (hair, a hand) on twos or threes, with line boil. No partial face replacement (no blink, expression
+     or mouth patches); another expression is a whole picture of its own (`STYLE.md`, "Characters' faces").
    - Loops of 2–3 frames; a new pose per beat. A re-framed return stays within the picture budget (`references/04` §1).
    *Why:* this *is* the tegaki look; full animation would read as anime, not ボカロPV.
 7. **Mixed media, held by the grade.** Hand-drawn, collage, pixel art, glitch and signal decay, retro UI, terminal

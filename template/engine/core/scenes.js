@@ -84,10 +84,10 @@
   }
   Z.pinPt = pinPt;
 
-  //   chars[].anim (mv-studio): a generated character's face is never swapped (no blink, mouth or expression
-  //   patches: removed after the swapped faces read as a different picture in every test film). A face is the face
-  //   the picture was generated with; another face is another picture, cut to. Optional, rarely needed:
-  //     states: { turn: 'full.png', ... }, state: [[t, 'turn'], [t2, 'base']]   swap the whole picture on a cut
+  //   chars[].anim (mv-studio): no partial face replacement (blink, mouth and expression patches were removed:
+  //   the patched faces read as a different picture in every test film). Another expression is a whole picture of
+  //   its own, swapped in whole. Optional:
+  //     states: { smile: 'smile.png', ... }, state: [[t, 'smile'], [t2, 'base']]   swap the whole picture at t
   //     seed                            phase of the tilt sway (cast members get different seeds)
   //     tilt:{ pivot: [u, v] (the neck), deg 2.5 (sway amplitude), rate 0.3 Hz, keys: [[t, deg], ...] (acted tilts) }
   //     hair: [{ region: [u0, v0, u1, v1], root: 'top' | 'left' | 'right', amp 6 (px per 1000 px of height), freq 0.6 }]

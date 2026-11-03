@@ -248,8 +248,8 @@ preset's code and docs live (vocaloid and interface each draw on two kits, mixed
   Self-test: `node tools/rig_selftest.mjs` (ground contact, IK reach, determinism, stride).
 - **Preloading:** a scene preloads only the images its args name (`illust`: bg / chars / layers). An image a custom
   `fx` or `text` hook draws needs `await Z.preload([...])` in `Z.setup`, or it is missing on the first frames.
-- **Cut-outs** (`core/scenes.js` `chars[].anim`): a generated character's face is never swapped (no blink, expression
-  or mouth: removed); optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states` on a cut.
+- **Cut-outs** (`core/scenes.js` `chars[].anim`): no partial face replacement (blink, expression and mouth patches were
+  removed); optional `tilt` / `hair` mesh warps (`core/draw.js` `D.meshDraw`) and whole-picture `states` (another expression, a turn).
 - **A picture on a screen inside a plate:** always `Z.draw.warpQuad(ctx, img, from, to)` (`core/draw.js`), a true
   perspective transform from the picture's four corners `[tl, tr, br, bl]` to the glass's; never an upright paste, a
   scaled rectangle, a bilinear grid or a scene's own warp. Clip to the glass's outline first, with the corners read on the

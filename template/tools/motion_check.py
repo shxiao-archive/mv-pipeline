@@ -6,7 +6,7 @@ out: the previous frame is first aligned to this one with the best global move (
 content level stays under --threshold for at least --min seconds, whatever the camera does: a pan, push, float or
 reframing snap over a picture where nothing happens is a still picture moved, not animation. Those stretches print as
 "camera only", and the per-second chart shows content and camera apart. (A living-face allowance, 40 % of the
-threshold in shots whose character blinked or sang, was removed with the face swaps.) Cuts are excluded (they
+threshold in shots whose character blinked or sang, was removed with the face patches.) Cuts are excluded (they
 are change, not motion). Very low-contrast frames (frame std < 0.07: a dark UI, a night sky) get a proportionally lower
 threshold (down to 40 %): on them a clear camera move (~130 px/s) changes few grey levels. Above that floor nothing
 changes, so the calibration on reviewed films holds (a fully contrast-relative measure was tried and let slow crossfades

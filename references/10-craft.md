@@ -113,9 +113,9 @@ the height line, and trial placements in two of the film's sets (this is where a
    ISO ("single isolated subject, transparent background"), EMPTY ("no people").
 4. **Neutral colour, grade later:** generate natural colours at mid contrast; the film's colour comes from the grade in
    the engine (one palette for everything, see the signal kit's heat ramps).
-5. **Expressions:** another expression is another picture, generated as its own row and cut to; a face is never
-   swapped inside a shot (no blink, expression or mouth patches). Never ask for an edited copy of a finished picture
-   for a bigger change (it drifts in style).
+5. **Expressions:** another expression is a whole picture, generated as its own row and swapped in whole
+   (`anim.states`) or cut to; never a partial face replacement (blink, expression or mouth patches). Never ask for an
+   edited copy of a finished picture for a bigger change (it drifts in style).
 6. **Motion as separate images:** a bird in three wing positions (`OBJ10a/b/c`), hands clean and dirty (`H2a/H2b`), an
    object whole and broken. Animate by switching on the beat, plus the engine's drift and squash.
 7. **Fix the proportions after generation** (scale the body below the chin to the target head count) and matte
