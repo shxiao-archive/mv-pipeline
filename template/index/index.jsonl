@@ -503,15 +503,15 @@
 {"id":"manual:styles/interface/STYLE#A","kind":"manual","does":"A. Screen — the song as a conversation on a screen","where":"<skill>/styles/interface/STYLE.md:33-173","lines":141}
 {"id":"manual:styles/interface/STYLE#B","kind":"manual","does":"B. Treatise — the song as plates from an illustrated technical treatise","where":"<skill>/styles/interface/STYLE.md:174-296","lines":123}
 {"id":"manual:styles/interface/STYLE#Asset","kind":"manual","does":"Asset library and density (method: references/10, team: 11)","where":"<skill>/styles/interface/STYLE.md:297-317","lines":21}
-{"id":"manual:styles/magazine/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/magazine/BRIEF.md:13-48","lines":36}
-{"id":"manual:styles/magazine/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/magazine/BRIEF.md:49-75","lines":27}
-{"id":"manual:styles/magazine/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/magazine/BRIEF.md:76-106","lines":31}
-{"id":"manual:styles/magazine/BRIEF#4","kind":"manual","does":"4. Layout invention","where":"<skill>/styles/magazine/BRIEF.md:107-124","lines":18}
-{"id":"manual:styles/magazine/BRIEF#5","kind":"manual","does":"5. Let the song choose","where":"<skill>/styles/magazine/BRIEF.md:125-137","lines":13}
-{"id":"manual:styles/magazine/BRIEF#6","kind":"manual","does":"6. How the reference film was made","where":"<skill>/styles/magazine/BRIEF.md:138-153","lines":16}
-{"id":"manual:styles/magazine/BRIEF#7","kind":"manual","does":"7. Craft notes","where":"<skill>/styles/magazine/BRIEF.md:154-163","lines":10}
-{"id":"manual:styles/magazine/BRIEF#8","kind":"manual","does":"8. Avoid","where":"<skill>/styles/magazine/BRIEF.md:164-174","lines":11}
-{"id":"manual:styles/magazine/BRIEF#9","kind":"manual","does":"9. Where it lives","where":"<skill>/styles/magazine/BRIEF.md:175-186","lines":12}
+{"id":"manual:styles/magazine/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/magazine/BRIEF.md:13-50","lines":38}
+{"id":"manual:styles/magazine/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/magazine/BRIEF.md:51-77","lines":27}
+{"id":"manual:styles/magazine/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/magazine/BRIEF.md:78-108","lines":31}
+{"id":"manual:styles/magazine/BRIEF#4","kind":"manual","does":"4. Layout invention","where":"<skill>/styles/magazine/BRIEF.md:109-126","lines":18}
+{"id":"manual:styles/magazine/BRIEF#5","kind":"manual","does":"5. Let the song choose","where":"<skill>/styles/magazine/BRIEF.md:127-139","lines":13}
+{"id":"manual:styles/magazine/BRIEF#6","kind":"manual","does":"6. How the reference film was made","where":"<skill>/styles/magazine/BRIEF.md:140-155","lines":16}
+{"id":"manual:styles/magazine/BRIEF#7","kind":"manual","does":"7. Craft notes","where":"<skill>/styles/magazine/BRIEF.md:156-165","lines":10}
+{"id":"manual:styles/magazine/BRIEF#8","kind":"manual","does":"8. Avoid","where":"<skill>/styles/magazine/BRIEF.md:166-176","lines":11}
+{"id":"manual:styles/magazine/BRIEF#9","kind":"manual","does":"9. Where it lives","where":"<skill>/styles/magazine/BRIEF.md:177-188","lines":12}
 {"id":"manual:styles/magazine/STYLE#1","kind":"manual","does":"1. The two layers and the press","where":"<skill>/styles/magazine/STYLE.md:7-30","lines":24}
 {"id":"manual:styles/magazine/STYLE#2","kind":"manual","does":"2. Press settings (`MZ.defaults()`)","where":"<skill>/styles/magazine/STYLE.md:31-59","lines":29}
 {"id":"manual:styles/magazine/STYLE#3","kind":"manual","does":"3. Type and furniture (`layout.js`)","where":"<skill>/styles/magazine/STYLE.md:60-85","lines":26}
