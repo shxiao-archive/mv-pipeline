@@ -96,6 +96,7 @@ that is the film's story.
 | stamp / slam | a word as a blow | chorus accents, one character per cut | every line | scale 2.4 → 1 in 0.22 s, outExpo |
 | mora reveal | the voice writing | every sung line | — | per character at its sung time; a 70 ms fade-in |
 | proof mark | a reader's hand | a word to stress or doubt | more than twice a chapter | a ring drawn in 0.35 s; a strike + トル |
+| a hand on the page | the reader is real | a peak: one verb (lays a palm, unfolds, sets down) | gliding along a path through a shot; the same stock hand again and again | a whole picture per verb, 2–3 in a film |
 | burn-through | the page is mortal | piano notes, intros, a cue | under a lyric | holes grow 0.35 s, scorched rim |
 | tear | the break | the stab before a chorus, the last chorus | twice in a row | 0.6 s, outCubic; the sung line moves to a paper scrap |
 | negative reprint | the far side | a reprise, the second verse | as a filter | the whole page, key negative |
@@ -171,6 +172,7 @@ of its own bar lengths. Say where each section sits in the concept.
 ## 8. Avoid
 
 - Anime or cel-shaded pictures as the film's main art (§2).
+- One hand travelling continuously through a shot, or a generic model-like hand reused (a hand is a peak, §3).
 - More than three inks as the norm; full-colour photographs pasted unprinted.
 - A halftone filter over everything with the type on top; type outlines, glows, drop shadows.
 - Digital glow, lens flares, bloom; dissolves and crossfades.
