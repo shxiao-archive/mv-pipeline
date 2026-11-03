@@ -95,7 +95,7 @@ that is the film's story.
 | hard cut on the group | the metre made visible | 4+3+3, 3+3+2 accents | 4/4 verses (use the bar) | one picture per group |
 | stamp / slam | a word as a blow | chorus accents, one character per cut | every line | scale 2.4 → 1 in 0.22 s, outExpo |
 | mora reveal | the voice writing | every sung line | — | per character at its sung time; a 70 ms fade-in |
-| proof mark | a reader's hand | a word to stress or doubt | more than twice a chapter | a ring drawn in 0.35 s; a strike + トル |
+| proof mark | a reader's hand | a word that earns it: 4–6 in the whole film | rings, ticks and scribbles as decoration on many pages | a ring drawn in 0.35 s; a strike + トル |
 | a hand on the page | the reader is real | a peak: one verb (lays a palm, unfolds, sets down) | gliding along a path through a shot; the same stock hand again and again | a whole picture per verb, 2–3 in a film |
 | burn-through | the page is mortal | piano notes, intros, a cue | under a lyric | holes grow 0.35 s, scorched rim |
 | tear | the break | the stab before a chorus, the last chorus | twice in a row | 0.6 s, outCubic; the sung line moves to a paper scrap |
@@ -173,6 +173,7 @@ of its own bar lengths. Say where each section sits in the concept.
 
 - Anime or cel-shaded pictures as the film's main art (§2).
 - One hand travelling continuously through a shot, or a generic model-like hand reused (a hand is a peak, §3).
+- Red-pen rings and scribbles on page after page: a proof mark is rare, or it stops meaning anything (§3).
 - More than three inks as the norm; full-colour photographs pasted unprinted.
 - A halftone filter over everything with the type on top; type outlines, glows, drop shadows.
 - Digital glow, lens flares, bloom; dissolves and crossfades.
