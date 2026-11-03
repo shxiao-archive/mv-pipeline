@@ -20,7 +20,7 @@ section, the mechanism). "None" is a valid answer wherever it fits.
 |---|---|
 | reads as + traits | What would a viewer call this film in one line? Which 6–10 visible traits make it feel that way? |
 | medium | What is the film made of, or pretending to be made of? What physics does that material have? |
-| palette roles | Which colours, and what is each one's job? How and when do they change over the film? |
+| palette roles | Which colours, and what is each one's job? Is the film's one ground dark or light (`direction.md` §4)? How and when do the colours change over the film, on that ground? |
 | type roles | Which faces, and what is each one's job? Where does type live in the frame: over, in, or as the picture? |
 | shape and motif grammar | Which shapes and motifs recur, what does each mean, and how do their states change? |
 | motion feel | What moves, how (cadence, easing, physics), and what stays still? What is locked to the beat and what is not? |

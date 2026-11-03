@@ -32,7 +32,7 @@ A sampled black/odd frame in a sheet may be a *designed* beat (e.g. a 溜め bla
 - [ ] Flashes ≤ 3 per second; no saturated red full-frame flicker; fast stripes/spirals < 25 % of the frame.
 - [ ] Cuts and hits where the concept's editing rhythm puts them (on the measured grid, never on a BPM count); stops handled on purpose; the ending lands on the final cut.
 - [ ] A cast, if any, identical across shots; no green fringes; no cropped subjects unless intended.
-- [ ] The concept's colour script reads in the contact sheets.
+- [ ] The concept's colour script reads in the contact sheets, on one ground: no cuts between dark and light backgrounds (`direction.md` §4).
 - [ ] Transitions motivated by the concept, not decorative noise.
 - [ ] Credits present (title lockup, outro, end card, 9:16 header artist and footer) and spelled exactly as given — no leftover demo title, subtitle or artist (`Z.TITLE`, `Z.TITLE_SUB`, `Z.ARTIST`, `Z.CREDIT`).
 - [ ] Vertical version: graphic shots keep full composition; lyrics in the bands; header/footer not colliding.

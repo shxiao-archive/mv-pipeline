@@ -70,8 +70,12 @@ Take an image from a line and turn it:
   raise one or two each time, so the last chorus still has room.
 - **Motifs return changed**: a motif appears at least three times, each in a new state; the last answers the first.
 - **Repetition with change**: a repeated line never gets the same shot twice.
+- **One ground for the whole film**: one palette, and every shot on the same ground value, all dark or all light. A
+  film that cut between a light page and dark plates read as patchy to its director. The colour script travels inside
+  that value (hue, warmth, how much accent), and contrast comes from what sits on the ground (a lit window, the accent,
+  the type), never from flipping the ground. A held white or black frame is a ground too; a flash of a few frames is not.
 - **One rule broken on purpose**: the only centred frame, the only colour outside the palette, the only silent second,
-  placed on the song's biggest moment.
+  placed on the song's biggest moment. Never the ground (the rule above).
 - **Something happens in every shot**: a picture that only illustrates a word is a caption.
 
 ### Make it different from the last film
@@ -90,7 +94,7 @@ is trying to do, not what the style usually does:
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;
 - how each section sets its lyrics (each its own way; the keyword is the peak of its phrase);
-- the colour script, one line per section;
+- the film's one ground (dark or light, §4) and the colour script on it, one line per section;
 - a "not in this film" list: the clichés this song invites and the look-alikes to avoid.
 
 Record every later departure and every change the user asked for, with the reason, in `docs/PROGRESS.md`, so the next

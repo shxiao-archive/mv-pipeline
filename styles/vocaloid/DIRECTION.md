@@ -23,7 +23,7 @@ Write the logline (2 sentences: who, what happens, how it ends) and the emotiona
 
 ## 3. Colour script
 
-Assign a palette to each section so the film *travels*. **Build new palettes for every film** with the palette system (`tools/style_palette_sheet.py` → `assets/style/palettes.json` + LUT rows in the engine; COOKBOOK.md §2): 3–5 palettes × 6–7 roles, monotonic-luminance gradient maps, one accent colour, one afterimage/complement. The shipped `P1–P5` are 残光's dusk/night ramps and only a worked example: a gradient map of them turns a blue daylight sky cream or orange at any `lutMix`.
+Assign a palette to each section so the film *travels*, every one on the film's one ground value: all night ramps or all daylight ramps, never cutting between the two (`direction.md` §4). **Build new palettes for every film** with the palette system (`tools/style_palette_sheet.py` → `assets/style/palettes.json` + LUT rows in the engine; COOKBOOK.md §2): 3–5 palettes × 6–7 roles, monotonic-luminance gradient maps, one accent colour, one afterimage/complement. The shipped `P1–P5` are 残光's dusk/night ramps and only a worked example: a gradient map of them turns a blue daylight sky cream or orange at any `lutMix`.
 - 残光: magic hour (P1) → night-blue with amber (P2) → alarm red/black (P3) → P1 "on fire" in choruses → blue hour + fireflies (P4) → faded-photo sepia for memories (P5) → **dawn** for the last chorus → black + cyan afterimage.
 - Rule of thumb: one palette per shot; palette changes happen on cuts or motivated scrubs (sunset progressing, a light switching on). A full-colour frame should feel like an event.
 

@@ -198,8 +198,9 @@ line. Around that variety, everything shares one palette, one type system, one g
 ### B.2 Look and tone
 
 - **Palette (`TR.PAL`):** ink `#0A0A0B`, ink2 `#151517`, graphite, ash, bone `#EEE9DF`, **signal** `#FF4D12` (the spark,
-  the number, the sung word), ember, blood. One rare accent (`acid`) for one moment of the film only. Some plates invert
-  to bone paper with ink lines (forms, charts), which gives the edit a light / dark rhythm; orange stays orange on both.
+  the number, the sung word), ember, blood. One rare accent (`acid`) for one moment of the film only. A film picks one
+  ground for every plate: ink with bone lines, or bone paper with ink lines (`inv`), never a mix of the two
+  (`direction.md` §4: a film that alternated them read as patchy). Orange stays orange on either ground.
   Only signal and ember glow (the post's bloom threshold is set so); bone type stays crisp.
 - **Type:** Archivo (the lyric voice; animate its **width** 62–125 and weight: condense under pressure, stretch on held
   notes), IBM Plex Mono (the machine: tokens, labels, forms, footnotes), Cormorant Garamond italic (the rare prophetic

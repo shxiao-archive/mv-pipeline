@@ -129,7 +129,8 @@ S.push(...SIG.cuts({ t0: B(17), t1: B(25), tier: 1, seed: 3, id: 'c1_', motifs: 
   { scene: 'sigShot', args: { mode: 'split', imgs: [A + 'ruin.png', A + 'tower.png', A + 'sea.png'] } } ] }));
 ```
 - `sigShot` modes: `full` (cover + drift), `crop` (3–6× on a `focus` point), `char` (cut-out on a plate or flat ground,
-  contact shadow), `sil` (black silhouette on a light ground), `split` (2–4 panels, widths swap with the beat), `word`
+  contact shadow), `sil` (black silhouette on a light ground by default; in a dark film set
+  `ground` dark and `ink` light, since the film keeps one ground: `direction.md` §4), `split` (2–4 panels, widths swap with the beat), `word`
   (the line's *emphasis* or a char range, full frame; the HUD does not set that line again). `enter: 'punch' | 'shake'`.
 - Fillers / inserts: `sigTerm` (`hex mem panic ps check coord nosignal bars progress`; `copy: [...]` = your system lines),
   `sigFrag` (crop of your images: `threshold mono posterize channel invert`), `sigAbs` (`noise scan stripes checker blocks
