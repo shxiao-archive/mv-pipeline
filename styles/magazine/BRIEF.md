@@ -38,8 +38,10 @@ that is the film's story.
    paths through the gaps between strokes) on the event that moves them: a character assembled from separate glyphs
    never matches the real one, and a radical set alone is a different glyph (a lone 辶 can have two dots where 途 has
    one). A part that travels glides at an even pace from its beat; stepping it beat by beat reads as jerky.
-7. **When the paper is gone, type becomes light.** Over a dark world the ink layer prints as light (screen), not ink.
-   *Why:* it says the page has been left behind while the words go on.
+7. **A hole opens on the film's own ground.** The world behind a cut, burned or torn page shows raw, at the same
+   ground value as the page (`direction.md` §4): a paper film's holes open on daylight, not a night sea. Type that
+   prints as light over a dark world (`inkLight`) belongs to a film whose every shot is dark. *Why:* cutting from
+   paper to a dark world flips the ground, and a director read that as patchy.
 8. **Memory as a single frame.** A one-tatum flash of a picture from earlier or later in the film, key-only negative,
    at the end of a phrase. Four to six in a film. *Why:* foreshadowing and memory at the speed of a thought.
 9. **Three climaxes, each bigger.** Draft the intensity table first (section by section, how loud and what is at
@@ -153,8 +155,8 @@ of its own bar lengths. Say where each section sits in the concept.
 
 ## 7. Craft notes
 
-- The sung line prints in key, or in a spot with at least 3:1 contrast against the paper, or as light over a dark
-  world, and is never set over a busy picture without a paper band. check_shots measures only the text layer, so a
+- The sung line prints in key, or in a spot with at least 3:1 contrast against the paper (as light only in a film
+  whose ground is dark), and is never set over a busy picture without a paper band. check_shots measures only the text layer, so a
   scene's own type is your job.
 - One sung line per frame; the columns before it are empty squares, not old lines.
 - The page's marks are small (13–16 px mono); the line is big (64–96 px vertical). Never the other way.

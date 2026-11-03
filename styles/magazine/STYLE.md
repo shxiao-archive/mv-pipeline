@@ -45,7 +45,7 @@ Z.scene('myPage', { init: () => MZ.loadFonts(), draw(ctx, S) {
 | `xf` | [1, 0, 0, 0] | zoom, rotation (rad), dx, dy (fractions of the frame): the page under the camera |
 | `bleed` | 0 | px: wet ink spreading (2–4 for soaked paper) |
 | `backMode` | 0 | 1 = `back` raw where the proof is transparent · 2 = `back` printed like a photo |
-| `inkLight` | 0 | 1 = the ink layer prints as light (screen) in `lightK / lightA / lightB`: type over a dark world |
+| `inkLight` | 0 | 1 = the ink layer prints as light (screen) in `lightK / lightA / lightB`: type over a dark world (only in a film whose ground is dark: `direction.md` §4) |
 | `neg` | 0 | 0..1 negative reprint |
 | `ca` | 0 | px of chromatic split (use sparingly) |
 | `xerox` | 0 | copier streaks 0.2–0.5 |
