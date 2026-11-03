@@ -119,7 +119,7 @@ if (shots.length >= 12 && !ownScenes.length)
 const rows = shots.map((s, k) => {
   const end = shots[k + 1] ? shots[k + 1].t0 : s.t1;
   return { n: k + 1, id: s.id, t0: s.t0, t1: end, dur: +(end - s.t0).toFixed(3), scene: s.scene,
-    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined, animFaces: s.animFaces || undefined };
+    line: s.line, shows: s.shows, cue: s.cue, moment: s.moment, lyric: s.lyric, trans: s.trans, offgrid: s.offgrid, hold: s.hold || undefined };
 });
 fs.mkdirSync(path.join(ROOT, 'plan'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'plan', 'shots.json'), JSON.stringify({ generator: 'tools/storyboard.mjs', duration: P.duration, fps, shots: rows, lyricCuts: P.lyricCuts || [] }, null, 1) + '\n');

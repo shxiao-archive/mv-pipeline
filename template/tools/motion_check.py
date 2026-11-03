@@ -5,9 +5,8 @@ out: the previous frame is first aligned to this one with the best global move (
 192x108 copy), so what is left is what moves in the picture. Smoothed over 0.5 s. A stretch is STATIC when that
 content level stays under --threshold for at least --min seconds, whatever the camera does: a pan, push, float or
 reframing snap over a picture where nothing happens is a still picture moved, not animation. Those stretches print as
-"camera only", and the per-second chart shows content and camera apart. Inside shots with a living
-face (plan/shots.json `animFaces`: chars[].anim blinks and sings) 40 % of the threshold is enough, so a singer under a
-slow push passes while a still picture does not (the push itself is taken out), up to 8 % of the export. Cuts are excluded (they
+"camera only", and the per-second chart shows content and camera apart. (A living-face allowance, 40 % of the
+threshold in shots whose character blinked or sang, was removed with the face swaps.) Cuts are excluded (they
 are change, not motion). Very low-contrast frames (frame std < 0.07: a dark UI, a night sky) get a proportionally lower
 threshold (down to 40 %): on them a clear camera move (~130 px/s) changes few grey levels. Above that floor nothing
 changes, so the calibration on reviewed films holds (a fully contrast-relative measure was tried and let slow crossfades
@@ -67,19 +66,7 @@ def main():
     thr = a.threshold * np.clip(sd / 0.07, 0.4, 1.0)
     t = np.arange(len(d)) / fps + start                    # song time of each frame step
     shots = read_json(ROOT / "plan" / "shots.json").get("shots") or []
-    faces = np.zeros(len(d), bool)
-    for s in shots:
-        if s.get("animFaces"):
-            faces |= (t >= s["t0"]) & (t < s["t1"])
-    # a living face (chars[].anim: blinks, expressions) is motion too, over a frame that also drifts (>= 40 % of the
-    # threshold). Read from the plan, not the pixels: a top-cells measure scored held stills with animated lyrics and
-    # petals (0.008-0.03) above a singing mouth (0.006), so it cannot tell them apart
-    rescued = faces & (lvl < thr) & (lvl >= 0.4 * thr)
-    # capped at 8 % of the export, like holds: beyond it a held picture where only the face changes is static again
-    # (iteration 5: ~8 s of such shots passed here while two juries scored the motion 4-5)
-    idx = np.flatnonzero(rescued)
-    rescued[idx[int(0.08 * len(d)):]] = False
-    static = (lvl < thr) & ~rescued
+    static = lvl < thr
     runs, i = [], 0
     while i < len(static):
         if static[i]:
@@ -112,7 +99,6 @@ def main():
     print(f"[motion] {Path(a.mp4).name}: {total:.1f} s, mean motion {c.mean():.4f} in the picture + {cam.mean():.4f} from the camera, static stretches (< {a.threshold} for >= {a.min} s): "
           f"{len(runs)} totalling {inrun.sum() / fps:.1f} s; counted {still:.1f} s ({100 * still / total:.0f} %)"
           + (f", not counted: {n_silent / fps:.1f} s in the song's stops / after the cut, {n_hold / fps:.1f} s in hold shots" if n_silent or n_hold else "")
-          + (f"; {rescued.sum() / fps:.1f} s of slow drift in shots with a living face (chars[].anim): counted as motion" if rescued.sum() >= a.min * fps else "")
           + (f"; {cam_only:.1f} s of it moves only because the camera does" if cam_only else ""))
     for i, j in runs:
         only = raw_lvl[i:j].mean() >= thr[i:j].mean()

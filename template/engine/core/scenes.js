@@ -33,7 +33,7 @@
   //   `water: { sink, reflect, bob }` sinks it into the waterline at its pin and hangs a rippled reflection below.
   //   vignette: 0..1, letter: ...
   // }
-  const animAssets = A => !A ? [] : [A.blink, A.states && Object.values(A.states), A.expr && Object.values(A.expr)].flat(2).flatMap(x => (x && typeof x === 'object' && !Array.isArray(x) ? Object.values(x) : [x])).filter(x => typeof x === 'string');
+  const animAssets = A => (A && A.states ? Object.values(A.states) : []).filter(x => typeof x === 'string');
   const assetsOf = a => [a.bg, ...(a.chars || []).flatMap(c => [c.img, ...animAssets(c.anim)]), ...(a.layers || []).map(l => l.img)].filter(Boolean);
   Z.scene('illust', {
     preload: a => assetsOf(a),
@@ -84,46 +84,21 @@
   }
   Z.pinPt = pinPt;
 
-  //   ANIMATED CUT-OUTS (mv-studio): chars[].anim gives a generated character a living face — it stays still and only
-  //   blinks and changes expression, from face patches cut from ONE expression sheet (tools/gen_table.py writes
-  //   <id>.anim.json: paste its `img` and `anim`). The mouth is never swapped: it stays as the picture was generated
-  //   (the mouth swap was removed after two films where it looked wrong):
-  //     expr: { smile: 'p.png', ... }, exprAt: [[t, 'smile'], [t2, null]]   expression changes on cues (null = neutral)
-  //     blink: 'patch.png' (eyes closed) | { base: 'p.png', <state>: 'p2.png' }   closes on a seeded clock (Z.rig.blink)
-  //     seed, period                    the blink clock (cast members get different seeds)
-  //     whole: true                     blink / expr are WHOLE pictures (gen_table `faces: 'whole'`): the
-  //                                     current one replaces the picture (blink over expression), no patches
-  //   Optional, rarely needed (keep characters mostly still):
+  //   chars[].anim (mv-studio): a generated character's face is never swapped (no blink, mouth or expression
+  //   patches: removed after the swapped faces read as a different picture in every test film). A face is the face
+  //   the picture was generated with; another face is another picture, cut to. Optional, rarely needed:
   //     states: { turn: 'full.png', ... }, state: [[t, 'turn'], [t2, 'base']]   swap the whole picture on a cut
+  //     seed                            phase of the tilt sway (cast members get different seeds)
   //     tilt:{ pivot: [u, v] (the neck), deg 2.5 (sway amplitude), rate 0.3 Hz, keys: [[t, deg], ...] (acted tilts) }
   //     hair: [{ region: [u0, v0, u1, v1], root: 'top' | 'left' | 'right', amp 6 (px per 1000 px of height), freq 0.6 }]
   //   (tilt / hair replace the strip `wave`; measure pivot and regions on the picture with tools/art_grid.py)
-  const COMPOSED = new Map();
-  const composed = (base, baseKey, parts) => {                 // parts: [[path, image]]; keyed by path (bitmaps have no src)
-    if (!parts.length) return base;
-    const key = [baseKey, ...parts.map(p => p[0])].join('|');
-    let cv = COMPOSED.get(key);
-    if (!cv) {
-      cv = document.createElement('canvas'); cv.width = base.width; cv.height = base.height;
-      const g = cv.getContext('2d'); g.drawImage(base, 0, 0); for (const p of parts) g.drawImage(p[1], 0, 0, base.width, base.height);
-      if (COMPOSED.size > 64) COMPOSED.clear(); COMPOSED.set(key, cv);
-    }
-    return cv;
-  };
   const keysAt = (keys, t) => { let v = keys[0][1]; for (let i = 0; i < keys.length; i++) { const [t0, v0] = keys[i], nx = keys[i + 1]; if (t >= t0) v = nx ? Z.lerp(v0, nx[1], Z.ease.inOutSine(Z.clamp((t - t0) / Math.max(0.05, Math.min(0.5, nx[0] - t0))))) : v0; } return v; };
   function animOf(S, c, t, img) {
     const A = c.anim;
     let state = 'base';
     if (A.state) for (const [tk, st] of A.state) if (t >= tk) state = st || 'base';
     const stImg = state !== 'base' && A.states && A.states[state] ? Z.imgSync(A.states[state]) : null;
-    const baseImg = stImg || img, baseKey = stImg ? A.states[state] : c.img;
-    const pick = v => (v && typeof v === 'object' && !Array.isArray(v) ? v[state] : state === 'base' ? v : null);
-    const parts = [];
-    let ex = null;                                                // the current expression (smile, sad ...) under the blink
-    if (A.exprAt) for (const [tk, e] of A.exprAt) if (t >= tk) ex = e;
-    if (ex && A.expr && A.expr[ex]) { const p = Z.imgSync(A.expr[ex]); if (p) parts.push([A.expr[ex], p]); }
-    const bl = pick(A.blink);
-    if (bl && Z.rig.blink(t, A.seed || 0, A.period || 3.7) > 0.4) { const p = Z.imgSync(bl); if (p) parts.push([bl, p]); }
+    const baseImg = stImg || img;
     let field = null;
     if (A.tilt || A.hair) {
       const T = A.tilt, hairs = A.hair || [];
@@ -146,8 +121,7 @@
         return [dx, dy];
       };
     }
-    if (A.whole) return { img: parts.length ? parts[parts.length - 1][1] : baseImg, field };   // one whole picture, no seams
-    return { img: composed(baseImg, baseKey, parts), field };
+    return { img: baseImg, field };
   }
   function drawChar(ctx, S, c) {
     let img = Z.imgSync(c.img); if (!img) return;
@@ -172,7 +146,7 @@
     }
     if (c.ground) { const g = c.ground === true ? {} : c.ground; D.contactShadow(ctx, x, y, h * (g.w ?? 0.55), { a: (g.a ?? 0.45) * alpha, squash: g.squash }); }
     if (c.beatBump) h *= 1 + c.beatBump * S.clock.pulse(S.t, 10);
-    if (Z.onSprite) Z.onSprite(c.img, h);                    // the base picture (a face swap is not a new sprite): check_shots
+    if (Z.onSprite) Z.onSprite(c.img, h);                    // the base picture (a states swap is not a new sprite): check_shots
     const anim = c.anim ? animOf(S, c, t, img) : null;
     if (anim) img = anim.img;
     const opt = { tint: c.tint, anchor: c.anchor || [0.5, 1], rot, flip: c.flip, sway: c.sway ?? 0.012, breathe: c.breathe ?? 1, t, alpha, phase: c.phase || 0,

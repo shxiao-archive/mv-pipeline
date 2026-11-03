@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """gen_table.py -- the film's assets as ONE generation table (references/10 §3; the netsu-ijou-pv method), plus
-VARIANTS: small edits of an approved image (eyes closed, a smile, a head turn, wind in the hair) that are aligned to
-it so the engine can switch them (engine/core/scenes.js chars[].anim).
+VARIANTS: edits of an approved image (a head turn, another pose) aligned to it, for a whole-picture swap on a cut
+(engine/core/scenes.js chars[].anim.states). A face is never swapped inside a shot: no blink or expression variants.
 
   python tools/gen_table.py jobs   assets/gen/table.json [--pass base|variants]   # -> assets/gen/jobs_<pass>.jsonl
   python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  # (the user's chosen generator)
@@ -21,20 +21,11 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
       { "id": "CH01", "kind": "char", "subject": "Full body, side view ...", "size": "1024x1536", "transparent": true },
       { "id": "BG01", "kind": "world", "subject": "A vast ruined city plain ...", "size": "1536x1024" },
       { "id": "OBJ10a", "kind": "world", "subject": "A swallow, wings spread", "transparent": true },
-      { "id": "CH01_blink", "variant_of": "CH01", "edit": "her eyes closed", "mode": "patch", "region": [0.3, 0.05, 0.75, 0.3], "takes": 3 },
       { "id": "CH02", "kind": "char", "subject": "Full body seen from behind ...", "transparent": true,
         "view": "back" },   # the CHAR_BACK lock if the table has one, else CHAR without its face words; + a face negative
-      { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full" },
-      { "id": "CH03", "kind": "char", "subject": "head and shoulders, three-quarter view", "size": "1024x1024", "transparent": true,
-        "sheet": { "cells": ["neutral", "blink", "smile", "sad"] } } ] }
-  A SHEET row is THE way to make a character's expressions: one generation draws all of them in the same style; `post`
-  numbers the figures it finds (_<id>_figures.jpg: generators often add or reorder figures; then set
-  "pick": {"neutral": 2, "blink": 4, ...}) and draws a grid on the neutral one (_<id>_grid.jpg: set "eyes" and
-  "mouth" [u0, v0, u1, v1] there, a little larger than the features), takes them, aligns them to the first (neutral) one, cuts each other expression to the face (`face`
-  area pasted from each copy) and writes <id>.png, <id>_<name>.png and <id>.anim.json
-  (blink -> anim.blink, the others -> anim.expr) for engine/core/scenes.js; the mouth is never swapped, so a sheet
-  has no "open" / "mouth" / "sing" cell (an error). Variant rows (below)
-  are for a full-body picture that needs one more face; big changes by variant drift in style (tested): avoid them.
+      { "id": "CH01_turn", "variant_of": "CH01", "edit": "her head turned a little toward the viewer", "mode": "full", "takes": 3 } ] }
+  A "sheet" row (expression sheets) is refused: they were removed with the face swaps. Big changes by variant drift
+  in style (tested): avoid them.
   Prompt = the row's locks (default: char -> STYLE + CHAR, world -> STYLE + WORLD, + ISO when transparent, + EMPTY for
   world rows that are not transparent) + "New image: " + subject. References: the style reference first, then the
   character references (char rows) and the row's own "refs"; a row's "ref_strength" / "fidelity" / "ref_mode" /
@@ -45,12 +36,12 @@ Table (JSON). Every lock and row kind is optional: a film without a cast has no 
            (a transparent overlay: a scene that only swaps the picture's path draws the feature floating on nothing;
            draw the patch over the base, or use `full`)
   "takes": 3 generates three seeds of a variant and keeps the one that changed least outside its region (an inpaint
-  face variant: the one that changed most inside it, which is not always the one with the eyes closed); `post` writes
+  variant: the one that changed most inside it, which is not always the wanted edit); `post` writes
   _review_<id>_takes.jpg (the box from the base and from every take) and "take": 2 keeps take 2 instead.
-  "noise": 0.1 (NovelAI inpaint / img2img) adds noise to the start image: try 0.1-0.2 when a blink comes back unchanged.
+  "noise": 0.1 (NovelAI inpaint / img2img) adds noise to the start image: try 0.1-0.2 when an edit comes back unchanged.
     full   the whole aligned variant on the base's canvas: swapped for the base (pose / turn / big changes); with
-           "ref_mode": "inpaint" and a region (a face variant): the repainted box blended into the base with a soft
-           edge inside the figure, the base everywhere else (engine chars[].anim whole: true swaps it in)
+           "ref_mode": "inpaint" and a region: the repainted box blended into the base with a soft edge inside the
+           figure, the base everywhere else (cut to it with chars[].anim.states)
 
 mv-studio (MIT). Standard library + numpy, scipy, Pillow.
 """
@@ -91,6 +82,9 @@ def load(table: Path) -> dict:
             sys.exit(f"{r['id']}: variant_of {r['variant_of']} is not a row")
         if not r.get("variant_of") and not r.get("subject"):
             sys.exit(f"{r['id']}: no subject")
+        if r.get("sheet"):
+            sys.exit(f"{r['id']}: expression sheets were removed (a swapped face reads as another picture); "
+                     "generate each face as its own picture and cut to it")
     return t
 
 
@@ -142,18 +136,6 @@ def prompt_of(t: dict, r: dict) -> str:
     subject = r["subject"]
     if r.get("view") == "back" and "behind" not in subject.lower():
         subject = "seen from behind, back view, facing away from the viewer, " + subject
-    if r.get("sheet"):                                                  # an expression sheet: one image, one style
-        cells = r["sheet"]["cells"]; cols = r["sheet"].get("cols", 2 if len(cells) == 4 else len(cells))
-        try:
-            no_mouth_cells(r["id"], cells)
-        except ValueError as e:
-            sys.exit(str(e))
-        desc = {"neutral": "neutral, mouth closed, eyes open", "blink": "eyes closed, mouth closed", "closed": "eyes closed",
-                "smile": "a warm smile, mouth closed", "sad": "sad", "surprised": "surprised, mouth open"}
-        order = "; ".join(f"{i + 1}: {desc.get(c, c)}" for i, c in enumerate(cells))
-        subject = (f"expression sheet of ONE character: {len(cells)} identical copies of the same picture of her in a grid of {cols} "
-                   f"columns, evenly spaced, not touching, exactly the same pose, framing, size, hair and clothes in every copy; only the "
-                   f"facial expression changes, in reading order: {order}. The picture: {subject}")
     return "\n".join(lock_text(t, r, n) for n in names) + "\n\nNew image: " + subject
 
 
@@ -389,254 +371,6 @@ def feather_in(base: np.ndarray, v: np.ndarray, region) -> tuple[np.ndarray, flo
     return out, inside
 
 
-
-# ------------------------------------------------------------------ expression sheets (one generation, one style)
-def figures(sheet: np.ndarray, n: int | None = None) -> list[tuple[int, int, int, int]]:
-    """the figures of a keyed sheet (the n largest, or every one at least 15 % of the largest), in reading order
-    (top to bottom by their tops, then left to right)"""
-    from scipy import ndimage
-    m = ndimage.binary_dilation(sheet[..., 3] > 0.5, iterations=6)
-    lab, k = ndimage.label(m)
-    sizes = ndimage.sum(m, lab, range(1, k + 1))
-    if n is None:
-        n = int((sizes >= 0.15 * sizes.max()).sum()) if k else 0
-    if k < n or not n:
-        raise ValueError(f"found {k} figure(s) on the sheet, expected {n}")
-    keep = np.argsort(sizes)[::-1][:n] + 1
-    boxes = []
-    for i in keep:
-        ys, xs = np.nonzero(lab == i)
-        boxes.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
-    boxes = _split_touching(sheet[..., 3] > 0.5, boxes)
-    hmin = float(min(b[3] - b[1] for b in boxes))
-    boxes.sort(key=lambda b: (round(b[1] / (hmin * 0.5)), b[0]))
-    return boxes
-
-
-def _split_touching(alpha: np.ndarray, boxes: list) -> list:
-    """figures drawn touching come out as one box about twice as tall (wide) as its look-alikes: cut it at its
-    thinnest row (column) in the middle third"""
-    out = []
-    for b in boxes:
-        x0, y0, x1, y1 = b
-        w, h = x1 - x0, y1 - y0
-        peers = [o for o in boxes if o is not b and 0.6 < (o[2] - o[0]) / w < 1.6]
-        cut = None
-        if peers and h > 1.7 * float(np.median([o[3] - o[1] for o in peers])):
-            prof = alpha[y0:y1, x0:x1].sum(axis=1); a, z = h // 3, 2 * h // 3
-            cut = ("y", y0 + a + int(np.argmin(prof[a:z])))
-        peers = [o for o in boxes if o is not b and 0.6 < (o[3] - o[1]) / h < 1.6]
-        if cut is None and peers and w > 1.7 * float(np.median([o[2] - o[0] for o in peers])):
-            prof = alpha[y0:y1, x0:x1].sum(axis=0); a, z = w // 3, 2 * w // 3
-            cut = ("x", x0 + a + int(np.argmin(prof[a:z])))
-        if cut is None:
-            out.append(b); continue
-        halves = [(x0, y0, x1, cut[1]), (x0, cut[1], x1, y1)] if cut[0] == "y" else [(x0, y0, cut[1], y1), (cut[1], y0, x1, y1)]
-        areas = [float(alpha[hy0:hy1, hx0:hx1].sum()) for hx0, hy0, hx1, hy1 in halves]
-        if min(areas) < 0.6 * max(areas):                              # two look-alikes split evenly; a tall figure does not
-            out.append(b); continue
-        for hx0, hy0, hx1, hy1 in halves:                                # shrink each half to its own content
-            ys, xs = np.nonzero(alpha[hy0:hy1, hx0:hx1])
-            if len(ys):
-                out.append((hx0 + int(xs.min()), hy0 + int(ys.min()), hx0 + int(xs.max()) + 1, hy0 + int(ys.max()) + 1))
-    return out
-
-
-def cells_of(sheet: np.ndarray, n: int | None = None, margin: int = 24, boxes=None) -> list[np.ndarray]:
-    boxes = boxes or figures(sheet, n)
-    w = max(b[2] - b[0] for b in boxes) + 2 * margin
-    h = max(b[3] - b[1] for b in boxes) + 2 * margin
-    out = []
-    for x0, y0, x1, y1 in boxes:                                     # one canvas size, each figure centred on it
-        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
-        cell = np.zeros((h, w, 4), np.float32)
-        sx0, sy0 = max(0, cx - w // 2), max(0, cy - h // 2)
-        sx1, sy1 = min(sheet.shape[1], cx - w // 2 + w), min(sheet.shape[0], cy - h // 2 + h)
-        dx, dy = sx0 - (cx - w // 2), sy0 - (cy - h // 2)
-        own = np.zeros(sheet.shape[:2], bool); own[y0:y1, x0:x1] = True   # only this figure, not a neighbour's edge
-        part = sheet[sy0:sy1, sx0:sx1].copy(); part[~own[sy0:sy1, sx0:sx1]] = 0
-        cell[dy:dy + (sy1 - sy0), dx:dx + (sx1 - sx0)] = part
-        out.append(cell)
-    return out
-
-
-def face_region(base: np.ndarray, others: list[np.ndarray], pad: float = 0.25) -> list[float]:
-    """where the expressions differ from the neutral one (the face), as u0, v0, u1, v1 of the cell, padded"""
-    from scipy import ndimage
-    H, W = base.shape[:2]
-    acc = np.zeros((H, W), bool)
-    for v in others:
-        d = np.abs(base[..., :3] - v[..., :3]).max(axis=2) * np.minimum(base[..., 3], v[..., 3]) > 0.14
-        d = ndimage.binary_opening(d, iterations=2)
-        lab, k = ndimage.label(ndimage.binary_dilation(d, iterations=8))
-        if k:                                                         # the biggest cluster of changes is the face
-            sizes = ndimage.sum(d, lab, range(1, k + 1)); acc |= lab == (int(np.argmax(sizes)) + 1)
-    if not acc.any():
-        raise ValueError("the expressions do not differ from the neutral one")
-    ys, xs = np.nonzero(acc)
-    u0, u1, v0, v1 = xs.min() / W, xs.max() / W, ys.min() / H, ys.max() / H
-    pu, pv = (u1 - u0) * pad, (v1 - v0) * pad
-    return [round(max(0, u0 - pu), 3), round(max(0, v0 - pv), 3), round(min(1, u1 + pu), 3), round(min(1, v1 + pv), 3)]
-
-
-def numbered(img: np.ndarray, boxes, dst: Path) -> None:
-    im = Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8), "RGBA")
-    bg = Image.new("RGBA", im.size, (200, 200, 200, 255)); bg.alpha_composite(im)
-    dr = ImageDraw.Draw(bg)
-    try:
-        font = ImageFont.truetype("arial.ttf", 40)
-    except OSError:
-        font = ImageFont.load_default()
-    for i, (x0, y0, x1, y1) in enumerate(boxes):
-        dr.rectangle([x0, y0, x1, y1], outline=(220, 30, 30), width=3)
-        dr.rectangle([x0, y0, x0 + 46, y0 + 46], fill=(220, 30, 30)); dr.text((x0 + 10, y0 + 2), str(i + 1), fill="white", font=font)
-    dst.parent.mkdir(parents=True, exist_ok=True); bg.convert("RGB").save(dst, quality=90)
-
-
-def _shift(a: np.ndarray, dy: int, dx: int) -> np.ndarray:
-    out = np.zeros_like(a)
-    H, W = a.shape[:2]
-    ys, yd = (slice(0, H - dy), slice(dy, H)) if dy >= 0 else (slice(-dy, H), slice(0, H + dy))
-    xs, xd = (slice(0, W - dx), slice(dx, W)) if dx >= 0 else (slice(-dx, W), slice(0, W + dx))
-    out[yd, xd] = a[ys, xs]
-    return out
-
-
-def paste_of(base: np.ndarray, v: np.ndarray, regions, search: int = 6) -> np.ndarray:
-    """the copy's feature (eyes, mouth) on the base, clean: per region the copy is shifted to fit the base locally and
-    its skin tone matched; it is taken fully wherever the two drawings differ inside the feature (that also erases
-    the base's own feature), the base is kept elsewhere, and the edge is softened only over flat skin. Differences
-    near the region's edge (an outline a few px off) keep the base."""
-    from scipy import ndimage
-    H, W = base.shape[:2]
-    yy, xx = np.mgrid[0:H, 0:W]
-    out = np.zeros_like(base)
-    for u0, v0, u1, v1 in regions:
-        cx, cy, rx, ry = (u0 + u1) / 2 * W, (v0 + v1) / 2 * H, max(1, (u1 - u0) / 2 * W), max(1, (v1 - v0) / 2 * H)
-        r = np.sqrt(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2)
-        ring = (r > 0.7) & (r <= 1.15) & (base[..., 3] > 0.9)
-        best = None                                                   # local fit: the shift that matches the ring best
-        for dy in range(-search, search + 1, 2):
-            for dx in range(-search, search + 1, 2):
-                vs = _shift(v, dy, dx)
-                e = float(np.abs(base[..., :3] - vs[..., :3]).max(axis=2)[ring].mean()) if ring.any() else 0
-                if best is None or e < best[0]:
-                    best = (e, dy, dx)
-        vs = _shift(v, best[1], best[2])
-        d = np.abs(base[..., :3] - vs[..., :3]).max(axis=2)
-        flat = ring & (d < 0.08)                                      # matching skin: the tone offset of the copy
-        if flat.sum() > 50:
-            off = np.median((base[..., :3] - vs[..., :3])[flat], axis=0)
-            vs = vs.copy(); vs[..., :3] = np.clip(vs[..., :3] + off, 0, 1)
-            d = np.abs(base[..., :3] - vs[..., :3]).max(axis=2)
-        m = (d > 0.12) & (r <= 1.0)
-        m = ndimage.binary_opening(m, iterations=1)
-        lab, n = ndimage.label(ndimage.binary_dilation(m, iterations=3))
-        if n:                                                         # the feature: blobs centred inside the core
-            cyx = ndimage.center_of_mass(m, lab, range(1, n + 1))
-            keep = [i + 1 for i, (y, x) in enumerate(cyx) if not np.isnan(y) and ((x - cx) / (rx * 0.75)) ** 2 + ((y - cy) / (ry * 0.75)) ** 2 <= 1]
-            m = np.isin(lab, keep) & (r <= 1.05)
-        m = ndimage.binary_fill_holes(ndimage.binary_closing(m, iterations=4))
-        soft = np.clip(ndimage.gaussian_filter(ndimage.binary_dilation(m, iterations=2).astype(np.float32), 1.5) * 1.6, 0, 1)
-        a = soft * vs[..., 3]
-        take = a > out[..., 3]
-        out[take] = np.concatenate([vs[..., :3], a[..., None]], axis=2)[take]
-    return out
-
-
-def grid_image(a: np.ndarray, dst: Path, step: float = 0.05) -> None:
-    im = Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8), "RGBA")
-    k = max(1, round(900 / max(im.size)))
-    bg = Image.new("RGBA", im.size, (225, 225, 225, 255)); bg.alpha_composite(im); bg = bg.resize((im.width * k, im.height * k))
-    dr = ImageDraw.Draw(bg)
-    n = round(1 / step)
-    for i in range(n + 1):
-        x, y = i * step * bg.width, i * step * bg.height
-        col = (220, 30, 30) if i % 2 == 0 else (240, 160, 160)
-        dr.line([(x, 0), (x, bg.height)], fill=col, width=1); dr.line([(0, y), (bg.width, y)], fill=(30, 30, 220) if i % 2 == 0 else (160, 160, 240), width=1)
-        if i % 2 == 0:
-            dr.text((x + 2, 2), f"{i * step:.2f}", fill=(200, 0, 0)); dr.text((2, y + 2), f"{i * step:.2f}", fill=(0, 0, 200))
-    dst.parent.mkdir(parents=True, exist_ok=True); bg.convert("RGB").save(dst, quality=90)
-
-
-ROLE = {"blink": "blink", "closed": "blink"}
-# the mouth swap was removed (it looked wrong in two films): a mouth stays as the picture was generated
-MOUTH_CELLS = {"open", "mouth", "sing"}
-
-
-def no_mouth_cells(rid: str, cells) -> None:
-    bad = sorted(MOUTH_CELLS & set(cells))
-    if bad:
-        raise ValueError(f"{rid}: sheet cells {bad}: the mouth is no longer swapped; leave them out "
-                         "(a singing picture is generated singing and holds)")
-
-
-def grid_figures(sheet: np.ndarray, cols: int, rows: int) -> list[tuple[int, int, int, int]]:
-    """one box per cell of a cols x rows grid: the content bounds inside each cell (empty cells are left out)"""
-    H, W = sheet.shape[:2]
-    out = []
-    for j in range(rows):
-        for i in range(cols):
-            x0, x1, y0, y1 = W * i // cols, W * (i + 1) // cols, H * j // rows, H * (j + 1) // rows
-            ys, xs = np.nonzero(sheet[y0:y1, x0:x1, 3] > 0.5)
-            if len(ys) > 0.02 * (x1 - x0) * (y1 - y0):
-                out.append((x0 + int(xs.min()), y0 + int(ys.min()), x0 + int(xs.max()) + 1, y0 + int(ys.max()) + 1))
-    return out
-
-
-def split_sheet(t: dict, r: dict, raw: Path) -> dict:
-    sh = r["sheet"]; names = sh["cells"]; rid = r["id"]; out = rp(t.get("out", "assets/gen"))
-    no_mouth_cells(rid, names)
-    img = _rgba(raw)
-    allb = figures(img)
-    if len(allb) < len(names) and not sh.get("pick"):                # figures drawn touching merge: cut the sheet's own grid
-        cols = sh.get("cols", 2 if len(names) == 4 else len(names))
-        grid = grid_figures(img, cols, -(-len(names) // cols))
-        if len(grid) == len(names):
-            print(f"{rid}: {len(allb)} separate figure(s) found; using the {cols}-column grid of the sheet instead", flush=True)
-            allb = grid
-    numbered(img, allb, out / f"_{rid}_figures.jpg")                  # LOOK at it: which figure is which expression
-    pick = sh.get("pick")                                             # {"neutral": 2, "blink": 4, ...} (1-based numbers)
-    if pick:
-        missing = [nm for nm in names if nm not in pick]
-        if missing or any(not 1 <= pick[nm] <= len(allb) for nm in names):
-            raise ValueError(f"pick must give a figure 1..{len(allb)} for each of {names}")
-        boxes = [allb[pick[nm] - 1] for nm in names]
-    else:
-        if len(allb) != len(names):
-            raise ValueError(f"{len(allb)} figures on the sheet for {len(names)} expressions: look at _{rid}_figures.jpg and set sheet.pick")
-        boxes = allb
-    cells = cells_of(img, boxes=boxes)
-    base = cells[0]
-    grid_image(base, out / f"_{rid}_grid.jpg")                       # measure the eyes / mouth on the neutral figure
-    whole = sh.get("faces", "patch") == "whole"
-    if not whole and not (sh.get("eyes") and sh.get("mouth")):
-        raise ValueError(f"set sheet.eyes and sheet.mouth ([u0, v0, u1, v1] of the neutral figure; measure on _{rid}_grid.jpg)")
-    aligned = [base] + [align(base, c)[0] for c in cells[1:]]
-    region = [min(sh["eyes"][0], sh["mouth"][0]), sh["eyes"][1], max(sh["eyes"][2], sh["mouth"][2]), sh["mouth"][3]] if sh.get("eyes") and sh.get("mouth") else None
-    save(base, out / f"{rid}.png")
-    rel = lambda p: p.relative_to(ROOT).as_posix()
-    anim: dict = {"whole": True} if whole else {}
-    info = {"face": region, "cells": {}}
-    for name, v in zip(names[1:], aligned[1:]):
-        both = (base[..., 3] > 0.5) & (v[..., 3] > 0.5)
-        err = float(np.abs(base[..., :3] - v[..., :3]).mean(axis=2)[both].mean()) if both.any() else 1.0
-        role = ROLE.get(name)
-        # whole: the aligned copy itself, swapped for the picture (no seams, but a copy is redrawn: only for copies that
-        # match outside the face). patch (default): a blink takes the eye area, an expression the eyes and the mouth
-        p = v if whole else paste_of(base, v, [sh["eyes"]] if role == "blink" else [sh["eyes"], sh["mouth"]])
-        frac = float((p[..., 3] > 0.5).mean())
-        dst = out / f"{rid}_{name}.png"; save(p, dst)
-        info["cells"][name] = {"colour_err": round(err, 4), "changed": round(frac, 4), "outside_face": round(drift(base, v, region), 4) if region else None}
-        if role == "blink":
-            anim["blink"] = rel(dst)
-        else:
-            anim.setdefault("expr", {})[name] = rel(dst)
-    snippet = {"img": rel(out / f"{rid}.png"), "anim": anim}
-    (out / f"{rid}.anim.json").write_text(json.dumps(snippet, indent=2), encoding="utf-8")
-    info["snippet"] = rel(out / f"{rid}.anim.json")
-    return info
-
 # ------------------------------------------------------------------ post / status / sheets
 def cmd_post(table: Path) -> int:
     t = load(table)
@@ -660,17 +394,6 @@ def cmd_post(table: Path) -> int:
             if r.get("region"):
                 takes_sheet(t, r, b, takes, raw)
         if not raw.is_file():
-            continue
-        if r.get("sheet"):                                            # one image, several expressions: split and align
-            try:
-                info = split_sheet(t, r, raw)
-            except ValueError as e:
-                info = {"refused": str(e)}
-            report[r["id"]] = info
-            if info.get("refused"):
-                bad += 1; print(f"  REFUSED {r['id']}: {info['refused']}")
-            else:
-                print(f"  {r['id']}: sheet -> {', '.join(r['sheet']['cells'])}; face {info['face']}; " + ", ".join(f"{k} drift {v['outside_face']}" for k, v in info["cells"].items()) + f"; anim snippet {info['snippet']}")
             continue
         if not r.get("variant_of"):
             if not fin.is_file() or fin.stat().st_mtime < raw.stat().st_mtime:
@@ -806,43 +529,27 @@ def selftest() -> int:
     ys, xs = np.nonzero(p[..., 3] > 0.5)
     if not len(ys) or ys.min() < 50 or ys.max() > 95 or frac > 0.05:
         print("FAIL patch region:", (ys.min() if len(ys) else None, ys.max() if len(ys) else None, frac)); bad += 1
-    # an expression sheet: 2 x 2 copies, each a few px off the grid; split, align, find the face (the eyes)
-    sheet = np.zeros((2 * H + 40, 2 * W + 40, 4), np.float32)
-    for k, (img, ox, oy) in enumerate([(base, 0, 0), (var, 3, -2), (var, -2, 4), (base, 1, 1)]):
-        y0, x0 = (k // 2) * (H + 40) + 20 + oy, (k % 2) * (W + 40) + 20 + ox
-        sheet[max(0, y0):y0 + H, max(0, x0):x0 + W] = img[max(0, -y0):, max(0, -x0):][:sheet.shape[0] - max(0, y0), :sheet.shape[1] - max(0, x0)]
-    cells = cells_of(sheet, 4)
-    if len(figures(sheet)) != 4:
-        print("FAIL sheet: expected 4 figures"); bad += 1
-    touch = sheet.copy()                                              # a bar through each row joins its two figures
-    for yc in (20 + H // 2, H + 60 + H // 2):
-        touch[yc - 4:yc + 4, :, 3] = 1.0
-    if len(figures(touch)) >= 4 or len(grid_figures(touch, 2, 2)) != 4:
-        print("FAIL sheet: touching figures are not recovered from the grid"); bad += 1
-    al = [cells[0]] + [align(cells[0], c)[0] for c in cells[1:3]]
-    reg = face_region(cells[0], al[1:])
-    ch, cw = cells[0].shape[:2]
-    eye_v, eye_u = (70 + (ch - H) / 2) / ch, (100 + (cw - W) / 2) / cw
-    if not (reg[0] < eye_u < reg[2] and reg[1] < eye_v < reg[3]) or (reg[3] - reg[1]) > 0.4:
-        print("FAIL sheet face region:", reg, (eye_u, eye_v)); bad += 1
     tb = {"locks": {"STYLE": "s", "CHAR": "front", "CHAR_BACK": "back", "WORLD": "w"}, "rows": [
         {"id": "CH01", "kind": "char"}, {"id": "CH02", "kind": "char", "locks": ["STYLE", "CHAR_BACK"]}, {"id": "BG01", "kind": "world"}]}
     if [char_of(tb, r) for r in tb["rows"]] != ["front", "back", None] or "front" in prompt_of(tb, dict(tb["rows"][1], subject="x")):
         print("FAIL character caption / CHAR_BACK lock"); bad += 1
-    try:                                                              # the mouth swap is gone: a mouth cell is an error
-        no_mouth_cells("CH09", ["neutral", "blink", "open"]); print("FAIL mouth cell accepted"); bad += 1
-    except ValueError:
-        pass
+    import tempfile                                                   # expression sheets were removed: a sheet row is refused
+    with tempfile.TemporaryDirectory() as d:
+        tp = Path(d) / "t.json"; tp.write_text(json.dumps({"rows": [{"id": "CH09", "kind": "char", "subject": "x", "sheet": {"cells": ["neutral"]}}]}))
+        try:
+            load(tp); print("FAIL sheet row accepted"); bad += 1
+        except SystemExit:
+            pass
     tv = {"locks": {"STYLE": "s", "CHAR": "1girl, white bob hair, blunt bangs, red eyes, black jacket"},
           "rows": [{"id": "CH05", "kind": "char", "view": "back", "subject": "full body"}]}
     pb = prompt_of(tv, tv["rows"][0])
     if "eyes" in pb or "bangs" in pb or "black jacket" not in pb or "seen from behind" not in pb \
             or char_of(tv, tv["rows"][0]) != "1girl, white bob hair, black jacket":
         print("FAIL automatic back view:", pb); bad += 1
-    sc = [(-0.3, Path("CH01_blink__t2.png")), (-0.1, Path("CH01_blink__t1.png"))]
-    if pick_take(sc).name != "CH01_blink__t2.png" or pick_take(sc, 1).name != "CH01_blink__t1.png":
+    sc = [(-0.3, Path("CH01_turn__t2.png")), (-0.1, Path("CH01_turn__t1.png"))]
+    if pick_take(sc).name != "CH01_turn__t2.png" or pick_take(sc, 1).name != "CH01_turn__t1.png":
         print("FAIL take pick / the row's take"); bad += 1
-    print("align:", info, f"patch {frac:.2%} of the canvas; sheet face region {reg}")
+    print("align:", info, f"patch {frac:.2%} of the canvas")
     print("gen_table self-test: " + ("ok" if not bad else f"{bad} failed"))
     return 1 if bad else 0
 

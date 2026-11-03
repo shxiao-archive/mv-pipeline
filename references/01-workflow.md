@@ -111,7 +111,7 @@ python tools/artgen.py run assets/gen/jobs_base.jsonl --out-dir assets/gen/raw  
 python tools/gen_table.py post assets/gen/table.json                            # finals, sheets split, _review_*.jpg
 python tools/gen_table.py status assets/gen/table.json
 ```
-Acceptance: every image viewed (`_review_*.jpg`, `_<id>_figures.jpg`); a cast, if any, recognisably identical across
+Acceptance: every image viewed (`_review_*.jpg`); a cast, if any, recognisably identical across
 pictures; no green fringes; nothing imitates an existing character.
 
 ## 5. Build
