@@ -65,6 +65,11 @@ that is the film's story.
   it springs back. A broken reprise can print permanently out of register.
 - **Pictures you choose.** Generated art, the user's photos or your own renders, chosen for shape: a horizon, a hand,
   an eye, a figure against light. Generate neutral, colour in the press. Keep a manifest of sources.
+- **Photographs, not anime.** A magazine prints photographs, so its pictures read as editorial photography (or the
+  user's photos or renders), not as cel-shaded anime art. *Why:* a director found anime pictures broke the magazine
+  feel. On an anime-trained generator (NovelAI) lock the style as a photograph (`photo (medium), realistic, editorial
+  magazine photography`), add `anime, cel shading, lineart, illustration` to the negative, and test a small batch
+  through the press before generating the set.
 - **Enough pictures for the cut rate.** Count them from the shot list, not from a habit:
   - a picture appears in at most two or three shots, and each return is a new treatment (a detail crop, another
     screen, a negative, a cell of a grid), never the same page again;
@@ -165,6 +170,7 @@ of its own bar lengths. Say where each section sits in the concept.
 
 ## 8. Avoid
 
+- Anime or cel-shaded pictures as the film's main art (§2).
 - More than three inks as the norm; full-colour photographs pasted unprinted.
 - A halftone filter over everything with the type on top; type outlines, glows, drop shadows.
 - Digital glow, lens flares, bloom; dissolves and crossfades.
