@@ -64,7 +64,8 @@ does. A colour that neither spot can make falls back to the nearer one. This is 
     character fades and pops in over about 70 ms.
   - Fit a long line with the scenes' `fit`, or compute `size = min(size, room / MZ.vheight(text, 1))`.
 - **Paper band:** `band(P, I, lines, t, y, size)` in `scenes.js`. It is the sung line on a strip of bare paper over a
-  picture, so the key ink always reads. Copy it when you need it.
+  picture, so the key ink always reads. Copy it when you need it. Fill a slip with proof white (`#fff`), which prints
+  as the paper, and keep `paper` and `tone` the same in the shots that carry slips, so every slip is the same colour.
 - **Vertical rules:**
   - small kana and 、。 sit in the corner;
   - ー〜…, brackets and Latin are turned 90°;

@@ -115,7 +115,8 @@ that is the film's story.
 ## 4. Layout invention
 
 The spread (a picture block beside a lyric column) is the home layout, not the only one. Give every chapter its own
-layout idea, and never use the same layout in two shots in a row. Some to start from:
+layout idea, and never use the same layout in two shots in a row. The lyric's place is part of the layout and moves
+with it (§7). Some to start from:
 
 - **Type as the picture:** one sung character the size of the page, set in a spot ink; a page of only furniture and one
   line; a column that runs across the gutter.
@@ -165,6 +166,10 @@ of its own bar lengths. Say where each section sits in the concept.
   whose ground is dark), and is never set over a busy picture without a paper band. check_shots measures only the text layer, so a
   scene's own type is your job.
 - One sung line per frame; the columns before it are empty squares, not old lines.
+- The line's place belongs to the layout, so it moves when the layout does: right or left column, across the gutter,
+  under the picture, a horizontal band. One fixed column on the same edge shot after shot reads as a sidebar, not a
+  page. A paper slip goes only where the line crosses a picture, and it is always bare paper (proof white, which the
+  press prints as paper), never tinted by a shot's inks: slips of different colours read as mistakes.
 - The page's marks are small (13–16 px mono); the line is big (64–96 px vertical). Never the other way.
 - Inks are a decision per chapter: write them in the concept (`MZ.LOOK`, and `press` per shot).
 - A raw, unscreened picture appears only where the page is cut away.
