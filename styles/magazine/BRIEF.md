@@ -48,6 +48,13 @@ that is the film's story.
    stake) and give each chorus a larger fate: the first swallows a photograph, the second the camera, the last the
    whole page. *Why:* escalation is what keeps a quiet, typographic style from flattening out.
 
+10. **Inside the page first, the magazine as an object at the peaks.** There are two ways to make this film: the
+   frame *is* the page (the song's world printed on it, spread after spread), or the magazine is a thing in a room (a
+   desk, a cover landing, hands turning and cutting it). The page is the base; the object is held back for the peaks,
+   where stepping out of the page is an event. Say in the concept which sections are which. *Why:* a film made only
+   of a magazine on a desk turns the style into a prop story; a film that never leaves the page loses its fate's
+   physical moments.
+
 ## 2. Art construction (what makes a frame look finished)
 
 - **Two layers, one press.** Pictures go into the proof layer in normal colour on white. Type and rules go into the
