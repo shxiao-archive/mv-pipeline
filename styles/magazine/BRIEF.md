@@ -76,7 +76,8 @@ that is the film's story.
   user's photos or renders), not as cel-shaded anime art. *Why:* a director found anime pictures broke the magazine
   feel. On an anime-trained generator (NovelAI) lock the style as a photograph (`photo (medium), realistic, editorial
   magazine photography`), add `anime, cel shading, lineart, illustration` to the negative, and test a small batch
-  through the press before generating the set.
+  through the press before generating the set. A generated photograph of a person never shows a readable face
+  (references/04 §10): live-report blur, backlight, silhouettes, figures from behind or far off, and details.
 - **Enough pictures for the cut rate.** Count them from the shot list, not from a habit:
   - a picture appears in at most two or three shots, and each return is a new treatment (a detail crop, another
     screen, a negative, a cell of a grid), never the same page again;
