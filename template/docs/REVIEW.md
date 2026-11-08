@@ -10,8 +10,11 @@ listen. Write every problem here first, then fix in order, then re-run the check
   transition
 - **P2** nice to have
 
-| # | P | time / shot | problem | fix | done |
-|---|---|---|---|---|---|
-| 1 |  |  |  |  |  |
+| # | P | time / shot | problem | fix | removes | done |
+|---|---|---|---|---|---|---|
+| 1 |  |  |  |  |  |  |
+
+`removes`: what the fix takes away (nothing, or the device). Fix the fault and keep the device; a fix that removes a
+device the concept or style names, makes sections more alike or quietens a peak is skipped or solved another way.
 
 Done when P0 is empty and every P1 is fixed or explained in PROGRESS.md.

@@ -393,11 +393,11 @@
 {"id":"manual:references/01-workflow#4","kind":"manual","does":"4. Art","where":"<skill>/references/01-workflow.md:94-116","lines":23}
 {"id":"manual:references/01-workflow#5","kind":"manual","does":"5. Build","where":"<skill>/references/01-workflow.md:117-127","lines":11}
 {"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Render","where":"<skill>/references/01-workflow.md:128-138","lines":11}
-{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:139-148","lines":10}
-{"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:149-156","lines":8}
-{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:157-168","lines":12}
-{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:169-175","lines":7}
-{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:176-188","lines":13}
+{"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:139-150","lines":12}
+{"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:151-158","lines":8}
+{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:159-170","lines":12}
+{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:171-177","lines":7}
+{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:178-190","lines":13}
 {"id":"manual:references/03-audio-and-lyrics#1","kind":"manual","does":"1. Prepare the audio","where":"<skill>/references/03-audio-and-lyrics.md:9-17","lines":9}
 {"id":"manual:references/03-audio-and-lyrics#2","kind":"manual","does":"2. Run the analysis","where":"<skill>/references/03-audio-and-lyrics.md:18-39","lines":22}
 {"id":"manual:references/03-audio-and-lyrics#3","kind":"manual","does":"3. `audio.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:40-63","lines":24}
@@ -474,7 +474,7 @@
 {"id":"manual:references/09-qa-and-lessons#5","kind":"manual","does":"5. Working with agents","where":"<skill>/references/09-qa-and-lessons.md:77-83","lines":7}
 {"id":"manual:references/09-qa-and-lessons#6","kind":"manual","does":"6. mv-studio checks (from blind reviews of eval films)","where":"<skill>/references/09-qa-and-lessons.md:84-117","lines":34}
 {"id":"manual:references/09-qa-and-lessons#7","kind":"manual","does":"7. Review order (mv-studio)","where":"<skill>/references/09-qa-and-lessons.md:118-148","lines":31}
-{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:149-243","lines":95}
+{"id":"manual:references/09-qa-and-lessons#8","kind":"manual","does":"8. The jury: an independent review","where":"<skill>/references/09-qa-and-lessons.md:149-258","lines":110}
 {"id":"manual:references/10-craft#0","kind":"manual","does":"0. Why they look better than a first pass","where":"<skill>/references/10-craft.md:10-29","lines":20}
 {"id":"manual:references/10-craft#1","kind":"manual","does":"1. Order of work","where":"<skill>/references/10-craft.md:30-43","lines":14}
 {"id":"manual:references/10-craft#2","kind":"manual","does":"2. Characters drawn in code: rigs (if the film has a cast)","where":"<skill>/references/10-craft.md:44-98","lines":55}

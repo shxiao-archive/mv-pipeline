@@ -144,6 +144,8 @@ Write problems into `docs/REVIEW.md` (P0 / P1 / P2) and the round into `docs/PRO
 session that did not make the film (another model if the user has one, else a fresh session or a subagent with no
 history) reviews the pack, `docs/CONCEPT.md`, the style's Signature features and the check outputs with the jury prompt;
 the building session revises with the revise prompt and renders (a second round only when the user asks for it).
+A fix mends the fault and keeps the device; each REVIEW row says what it removes, and the new pack (`--out
+render/jury-2`) is laid beside the first so a round that made the film plainer shows.
 **Checkpoint:** show the user the scores and fix list.
 
 ## 8. Deliver

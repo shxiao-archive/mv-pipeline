@@ -154,8 +154,9 @@ session that **did not make the film**: another model if the user has one (Gemin
 or a subagent started with no history. Never the builder judging its own film: it no longer sees what the film lacks.
 
 1. Steps 1–8 of §7 green; `git commit` and `git tag review-1`; keep the render as `render/mv_r1.mp4`.
-2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, filmstrips of
-   every frame of 1 s at every chorus / hook and at `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
+2. The pack: `python tools/jury_pack.py render/mv.mp4` → `render/jury/` (one contact sheet per section, the line sheet
+   with one frame per sung line, filmstrips of every frame of 1 s at every chorus / hook / instrumental section and at
+   `--hero t1,t2` (your signature moments), every frame around each shot cut and lyric
    cut and each flagged pop or flash, full-resolution stills, motion per second in `index.md`). Run
    `node tools/storyboard.mjs` first: it writes the lyric cut times to `plan/shots.json`. Add
    `docs/CONCEPT.md`, the film's style (the style block of `docs/CONCEPT.md`; for a preset also its `styles/<preset>/BRIEF.md`) and the output of
@@ -174,10 +175,12 @@ what its own concept sets out to do, not against a style you prefer.
 Judge it harshly and precisely so it can reach award level. Kindness is useless here; specificity is everything.
 
 The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index.md> (contact sheet per section,
-filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept, which the film is judged against: <docs/CONCEPT.md>. What its style
+line sheet, filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept, which the film is judged against: <docs/CONCEPT.md>. What its style
 should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as line of styles/<preset>/BRIEF.md>. Automatic checks: <paste the check outputs>.
 
-1. Look properly: every contact sheet, every filmstrip (motion: easing, spacing, overlap, holds), every cut strip
+1. Look properly: every contact sheet, the line sheet (one frame per sung line: how many layouts and effects carry
+   the lyrics, section by section), every filmstrip (motion: easing, spacing, overlap, holds, how hard the hits
+   land), every cut strip
    (18 frames around a shot or lyric cut: two lines on top of each other, a pop, a flash, a transition that stutters,
    the same words drawn twice), every still at full
    resolution (edges, type setting, aliasing, banding, texture, clipping, AI-image errors such as hands, extra fingers,
@@ -199,7 +202,8 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
      or jittery motion, no camera drifting or shaking to keep stills alive, no sprites flipping back and forth, no
      lip-sync: a face changes only now and then, and a still face is fine
    - composition_type: composition and type as the concept intends, carried out with control; lyrics legible and
-     inside the safe area; CJK and Latin type set well
+     inside the safe area; CJK and Latin type set well; where the style makes the lyrics the subject, the type
+     changes with the lines (the line sheet), with fixed roles but not one layout
    - finish: light, texture, grain and detail right for the style; consistent art; no banding, aliasing or artifacts;
      none of the three composites that look fake (references/04 §1: an object's new state pasted in from part of
      another picture, an event drawn in flat shapes over a still, a picture put on a screen without a perspective
@@ -210,11 +214,14 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
 3. Give 5-10 fixes ordered by impact on the final impression. Each: shot id or timecode, what is wrong (observable),
    why it matters, and how to fix it concretely (scene, args, easing, frames, px, colours, a different shot idea). Prefer
    a few big upgrades to many nitpicks. At least one fix must raise the wow factor, not just polish; at least one must
-   lift the weakest section.
+   lift the weakest section. Fix the fault and keep the device: consistency means fixed type roles and one palette,
+   never one layout or one effect for every line, so do not ask for varied layouts to be made the same.
 4. Flag as critical: anything generic or AI-template, an existing character, brand or real UI imitated, wrong or
    garbled lyric text, tofu, a failed check, an off-model character, a preset's overall look adopted without being
    asked for or a reason from the song, sections that could be swapped without anyone noticing (the same layout and
-   effects whatever the lines say), a material conflict with the agreed concept. A minor inconsistency (one
+   effects whatever the lines say), most of a section's lines in one layout where the style makes the lyrics the
+   subject, a peak (sung or instrumental) that hits no harder than the verses, a material conflict with the agreed
+   concept. A minor inconsistency (one
    element off the palette, a borrowed device not restyled) is a fix, not critical.
 5. List the 3 strongest things, so the revision keeps them.
 Return the score table, the critical issues, the fixes and the strengths, then one JSON block:
@@ -233,9 +240,17 @@ Raise the film to award level (target >= 8 in every dimension, 9 where the style
 - Implement every other critical issue and high-impact fix. You may replace a listed fix with a better solution if you
   are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
   weakest section. Do not regress anything the jury listed as a strength.
+- Fix the fault, keep the device: ghost copies in a JIZURA plan → deny the part that draws them; type over a face →
+  move its box; a stuttering entrance → fix its timing. Never answer a fault by swapping a kinetic or varied device
+  for a static or uniform one. A fix that removes a device the concept or the style names, makes sections more
+  alike or quietens a peak is skipped or solved another way.
 - Run the checks of references/09 §7 again, re-render (`render_final.mjs --patch <shot ids>`; one `--full` render
-  for all the round's shared changes, each tried on a range first, 09 §1), build a new pack and look at the frames until the fixes have truly landed.
-- Write docs/REVIEW.md: each fix applied or skipped, and why. Name lyric lines by number (L05), never quote them:
+  for all the round's shared changes, each tried on a range first, 09 §1), build a new pack into its own folder
+  (`--out render/jury-<N+1>`) and look at the frames until the fixes have truly landed. Lay its line sheet and
+  filmstrips beside round N's: if the film came out plainer (fewer type layouts, softer hits, a quieter peak), the
+  round regressed; undo those rows.
+- Write docs/REVIEW.md: each fix applied or skipped, and why, and in `removes` what the fix took away (nothing, or
+  the device). Name lyric lines by number (L05), never quote them:
   tools/check_no_lyrics.mjs scans docs/ (only the jury's own files in docs/review/ are skipped).
 ```
 The jury's scores are a model's opinion, not a measurement: use them to find and rank problems and to compare rounds of
