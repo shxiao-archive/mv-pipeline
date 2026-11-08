@@ -72,6 +72,11 @@ limited animation; one visual idea about the song runs through it all.
    - Outside the climaxes, one screen effect and one decoration per shot.
    - Effects on a reserve list that unlocks by section.
    - Choruses call back the first chorus's layouts with one thing raised (boil, zoom, afterimage, cut density).
+   - Escalation reaches the hits as well as the pictures. The concept's section table names each section's entry
+     level (none, S, M or L from `references/10` §5, one MAX in the film), built with `Z.impact`. The last chorus
+     and an instrumental climax add punch or whip entries and kick shake (COOKBOOK K12, ≤ 5 px on strong kicks);
+     earlier choruses keep to their named hits. Shake on every kick of the film is a fault, and an instrumental
+     climax is not a run of held pictures, one per bar.
    - At least three real holds.
    - The ending is an idea taken from this film's own motif. 残光's hard cut to an afterimage was its own: never a
      default to copy.
@@ -156,6 +161,12 @@ in the concept where each sits and why:
 | type | lyrics living in depth | the machine's stamped type |
 
 Many films travel along these ranges, and the travel is the story.
+
+Type travels inside a section too. Where the lyrics are the subject, a section's lines take several layouts (JIZURA
+plans, a layout re-rolled on each cut, custom scenes for the キメ), with fixed font roles; one layout for most of a
+section's lines is monotony (the jury pack's line sheet shows it). A film's JIZURA DENY lists come from its own brief:
+残光's suit a melancholic film that wants no stamps, whips or shakes, and a theatrical or loud song turns those back
+on. Never copy another film's lists as a default.
 
 A gentle song may stay at the quiet end of every range for the whole film: tegaki only, held pictures, lyrics in
 depth. The loud devices (signal runs and their overload, `kanjiSlam` / `titleRiff`, hero-size glyph effects) belong

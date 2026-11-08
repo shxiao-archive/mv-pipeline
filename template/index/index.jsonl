@@ -518,14 +518,14 @@
 {"id":"manual:styles/magazine/STYLE#4","kind":"manual","does":"4. Scenes (`scenes.js`)","where":"<skill>/styles/magazine/STYLE.md:87-111","lines":25}
 {"id":"manual:styles/magazine/STYLE#5","kind":"manual","does":"5. Drums and metre","where":"<skill>/styles/magazine/STYLE.md:112-132","lines":21}
 {"id":"manual:styles/magazine/STYLE#6","kind":"manual","does":"6. Checks","where":"<skill>/styles/magazine/STYLE.md:133-142","lines":10}
-{"id":"manual:styles/vocaloid/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/vocaloid/BRIEF.md:11-78","lines":68}
-{"id":"manual:styles/vocaloid/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/vocaloid/BRIEF.md:79-113","lines":35}
-{"id":"manual:styles/vocaloid/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/vocaloid/BRIEF.md:114-144","lines":31}
-{"id":"manual:styles/vocaloid/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/vocaloid/BRIEF.md:145-163","lines":19}
-{"id":"manual:styles/vocaloid/BRIEF#5","kind":"manual","does":"5. How the reference films were made","where":"<skill>/styles/vocaloid/BRIEF.md:164-178","lines":15}
-{"id":"manual:styles/vocaloid/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/vocaloid/BRIEF.md:179-193","lines":15}
-{"id":"manual:styles/vocaloid/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/vocaloid/BRIEF.md:194-203","lines":10}
-{"id":"manual:styles/vocaloid/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/vocaloid/BRIEF.md:204-228","lines":25}
+{"id":"manual:styles/vocaloid/BRIEF#1","kind":"manual","does":"1. The feel","where":"<skill>/styles/vocaloid/BRIEF.md:11-83","lines":73}
+{"id":"manual:styles/vocaloid/BRIEF#2","kind":"manual","does":"2. Art construction (what makes a frame look finished)","where":"<skill>/styles/vocaloid/BRIEF.md:84-118","lines":35}
+{"id":"manual:styles/vocaloid/BRIEF#3","kind":"manual","does":"3. Motion vocabulary","where":"<skill>/styles/vocaloid/BRIEF.md:119-149","lines":31}
+{"id":"manual:styles/vocaloid/BRIEF#4","kind":"manual","does":"4. Let the song choose","where":"<skill>/styles/vocaloid/BRIEF.md:150-174","lines":25}
+{"id":"manual:styles/vocaloid/BRIEF#5","kind":"manual","does":"5. How the reference films were made","where":"<skill>/styles/vocaloid/BRIEF.md:175-189","lines":15}
+{"id":"manual:styles/vocaloid/BRIEF#6","kind":"manual","does":"6. Craft notes","where":"<skill>/styles/vocaloid/BRIEF.md:190-204","lines":15}
+{"id":"manual:styles/vocaloid/BRIEF#7","kind":"manual","does":"7. Avoid","where":"<skill>/styles/vocaloid/BRIEF.md:205-214","lines":10}
+{"id":"manual:styles/vocaloid/BRIEF#8","kind":"manual","does":"8. Where it lives","where":"<skill>/styles/vocaloid/BRIEF.md:215-239","lines":25}
 {"id":"manual:styles/vocaloid/COOKBOOK#0","kind":"manual","does":"0. How to use this menu","where":"<skill>/styles/vocaloid/COOKBOOK.md:9-17","lines":9}
 {"id":"manual:styles/vocaloid/COOKBOOK#1","kind":"manual","does":"1. Timing conventions","where":"<skill>/styles/vocaloid/COOKBOOK.md:18-24","lines":7}
 {"id":"manual:styles/vocaloid/COOKBOOK#2","kind":"manual","does":"2. Palette system","where":"<skill>/styles/vocaloid/COOKBOOK.md:25-51","lines":27}

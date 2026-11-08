@@ -93,7 +93,9 @@ is trying to do, not what the style usually does:
   the preset named by the user), and per section the methods the song asks for, and why;
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;
-- how each section sets its lyrics (each its own way; the keyword is the peak of its phrase);
+- a section table, one row per section: its **type** (the plans or layouts that carry its lines, each section its own
+  way, the keyword the peak of its phrase) and its **hits** (the entry level from `references/10` §5: none, S, M or L,
+  with one MAX in the film), so the escalation reaches the type and the hits, not only the pictures;
 - the film's one ground (dark or light, §4) and the colour script on it, one line per section;
 - a "not in this film" list: the clichés this song invites and the look-alikes to avoid.
 

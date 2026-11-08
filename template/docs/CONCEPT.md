@@ -66,10 +66,10 @@ The clichés this song invites and the look-alikes to avoid.
 ## Section by section
 
 Each section is designed from its own lines and its own music: what they say and how the song moves there decides
-the picture, the composition, the type, the motif's state, what moves and how the section hands over. If two rows read
-alike, one of them is not designed yet; a cell that would fit any song ("particles", "a camera push", "glow") is not a
-design. The shot list (`moment` per shot) is written from these rows.
+the picture, the composition, the type, the motif's state, what moves, how hard it hits and how the section hands
+over. If two rows read alike, one of them is not designed yet; a cell that would fit any song ("particles", "a camera
+push", "glow") is not a design. The shot list (`moment` per shot) is written from these rows.
 
-| section (time, lines) | the lines and the music here | the picture idea | composition and scale | type (how the lines are set) | motif state | what moves, on what | hand-over |
-|---|---|---|---|---|---|---|---|
-|  |  |  |  |  |  |  |  |
+| section (time, lines) | the lines and the music here | the picture idea | composition and scale | type (how the lines are set) | motif state | what moves, on what | hits (entry level, references/10 §5) | hand-over |
+|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  |  |
