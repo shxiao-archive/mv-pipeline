@@ -271,6 +271,15 @@ Anything that can (a) take a reference image and (b) produce either RGBA or a fl
 - Close-ups meant to fill the frame must be **opaque 16:9**, not cut-outs.
 - Model-drawn text, logos or signatures in the art; existing-character likeness. Say "original" and "no text" in every prompt.
 - **No photorealistic people with a readable face.** A generated photograph never shows a face that could be taken for a real person's. Blur, backlight, silhouette, distance, the back of the head, a turned-away figure, hands and details are fine; anime, illustration and code-drawn styles are not affected. Read each photographic take at full size and reject one whose face resolves. *Why:* a director rejected a film's sharp generated portraits as photos of real-looking people.
+- **Exact shapes: the model can't count.** An 8-point star, a clock face, a hand of five cards or a seven-string harp comes out
+  with the wrong number of points. Draw the exact shape in code, in one of two ways:
+  - as an engine motif over the picture;
+  - as the img2img starting picture, which is better when the shape belongs to the painted world. Paint the model's shape
+    out with the surrounding tone, draw the exact one in the picture's colours and perspective, and run the row with
+    `refs: [guide]`, `ref_mode: "img2img"` and the default `strength` 0.6. Keep the guide script in `assets/ref/`.
+  Never draw a code motif over a painted exact shape, because the two never line up.
+  *Why:* a film's ring floor came out with a star of the wrong count. A code-drawn {8/3} guide at strength 0.6 gave a NovelAI
+  painting with all 8 points in the film's style (film 8, 2026-11-08).
 - `--force` overwrites the chosen take; copy keepers to `alt/` or rename before re-running a batch.
 - Too many assets: every new image is ~1 min plus review time. Re-frame, re-grade and silhouette what you have first.
 
