@@ -395,9 +395,9 @@
 {"id":"manual:references/01-workflow#6","kind":"manual","does":"6. Render","where":"<skill>/references/01-workflow.md:128-138","lines":11}
 {"id":"manual:references/01-workflow#7","kind":"manual","does":"7. Review","where":"<skill>/references/01-workflow.md:139-150","lines":12}
 {"id":"manual:references/01-workflow#8","kind":"manual","does":"8. Deliver","where":"<skill>/references/01-workflow.md:151-158","lines":8}
-{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:159-170","lines":12}
-{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:171-177","lines":7}
-{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:178-190","lines":13}
+{"id":"manual:references/01-workflow#Time","kind":"manual","does":"Time budget (measured on 残光: 3:46 song, RTX 3080, Windows 11)","where":"<skill>/references/01-workflow.md:159-171","lines":13}
+{"id":"manual:references/01-workflow#Parallelising","kind":"manual","does":"Parallelising","where":"<skill>/references/01-workflow.md:172-178","lines":7}
+{"id":"manual:references/01-workflow#File","kind":"manual","does":"File conventions","where":"<skill>/references/01-workflow.md:179-191","lines":13}
 {"id":"manual:references/03-audio-and-lyrics#1","kind":"manual","does":"1. Prepare the audio","where":"<skill>/references/03-audio-and-lyrics.md:9-17","lines":9}
 {"id":"manual:references/03-audio-and-lyrics#2","kind":"manual","does":"2. Run the analysis","where":"<skill>/references/03-audio-and-lyrics.md:18-39","lines":22}
 {"id":"manual:references/03-audio-and-lyrics#3","kind":"manual","does":"3. `audio.json` reference","where":"<skill>/references/03-audio-and-lyrics.md:40-63","lines":24}

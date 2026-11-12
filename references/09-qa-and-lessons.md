@@ -8,7 +8,7 @@ Contents: 1 The loop · 2 Checklist · 3 Failure modes & fixes (visual) · 4 Pip
 2. **Dense stills where something moves** (transitions, stops, beat cuts): `--range 200:203.5:0.25`.
 3. **The checks that need no video, on what changed:** `check_shots.mjs`, and `pops.mjs --from <a> --to <b>` on the
    changed ranges. A defect found here costs seconds; found in a render it costs a render.
-4. **One full render** (~4 min on NVENC, much longer on x264): `node tools/render_final.mjs --name mv`.
+4. **One full render** (~4 min on NVENC, ~6 min on x264): `node tools/render_final.mjs --name mv`.
 5. **Review sheets** from the MP4: `python tools/review_sheets.py render/mv.mp4 --step 1.8 --out render/reviewN` (5×5 timestamped frames per sheet). Portrait videos work the same (216×384 thumbnails): `python tools/review_sheets.py render/mv_vertical.mp4 --step 1.8 --out render/reviewN_v`.
 6. **Fix in ranges, not in passes.** Check each fix with stills and `pops.mjs --from --to` over its range, then
    `node tools/render_final.mjs --name mv --patch s07,s12` (shot ids, or `<a>:<b>` in seconds) re-renders only those

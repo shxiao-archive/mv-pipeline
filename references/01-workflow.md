@@ -166,6 +166,7 @@ render/jury-2`) is laid beside the first so a round that made the film plainer s
 | Blender EEVEE 1080p toon + line art | ≈0.7 s/frame; 7 s shot ≈ 3 min |
 | still (engine, incl. PNG encode) | 0.1–0.45 s |
 | full render 6796 frames 1080p, 3 workers | ≈4 min (≈30 fps); vertical ≈3.5 min |
+| the same without an NVIDIA GPU (x264; measured on another film: 6898 frames, 3 workers, an Intel Arc laptop GPU) | ≈6 min (≈20 fps) |
 | x264 CRF 19 share encode (slow) | ≈2–4 min each |
 
 ## Parallelising
