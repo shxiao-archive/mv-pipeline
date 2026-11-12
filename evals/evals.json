@@ -44,8 +44,8 @@
     {
       "id": 7,
       "name": "vocaloid-en-singer",
-      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make an illustrated anime lyric video with an original girl who sings it, by a river at dusk with paper lanterns on the water. She stays mostly still, but she blinks, sings and smiles. Use NovelAI for the art. Whole song, 1920x1080.",
-      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the vocaloid style: an original character generated with NovelAI, no partial face replacement (no blink, expression or mouth patches over a picture), a dusk river with lanterns sitting on the water, JIZURA or code lyrics; cuts on the beat; no lyric text in code.",
+      "prompt": "Here's my demo song (test_song.wav) with timed lyrics (lyrics_en.lrc). Make an illustrated anime lyric video with an original girl who sings it, by a river at dusk with paper lanterns on the water. She stays mostly still, and her expression changes once or twice. Use NovelAI for the art. Whole song, 1920x1080.",
+      "expected_output": "A 1920x1080 MP4 of the whole 34 s song in the vocaloid style: an original character generated with NovelAI, no partial face replacement (no blink, expression or mouth patches over a picture), each expression change a whole picture swapped in or cut to, a dusk river with lanterns sitting on the water, JIZURA or code lyrics; cuts on the beat; no lyric text in code.",
       "files": [
         "fixtures/test_song.wav",
         "fixtures/lyrics_en.lrc"
