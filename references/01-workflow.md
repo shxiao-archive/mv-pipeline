@@ -1,6 +1,6 @@
 # 01 — Workflow: from song to delivered MV
 
-Contents: Phases at a glance · 0 Setup · 1 Listen (timing ground truth) · 2 Direct (style and concept) · 3 Plan (storyboard & timeline) · 4 Art · 5 Build · 6 Render · 7 Review (the jury) · 8 Deliver · Time budget · Parallelising · File conventions
+Contents: Phases at a glance · 0 Setup · 1 Listen (timing ground truth) · 2 Direct (style and concept) · 3 Plan (storyboard & timeline) · 4 Art · 5 Build · 6 Render · 7 Review (the jury) · 8 Deliver · Time budget · Parallelising · Long sessions · File conventions
 
 All commands run from the **project root** (the folder created by `<skill>/scripts/new_project.py`; `<skill>` = the folder containing `SKILL.md`). Paths below are relative to it.
 
@@ -175,6 +175,14 @@ render/jury-2`) is laid beside the first so a round that made the film plainer s
 - Split scene work by file (one per area in `engine/scenes/`) — one owner each, plus their own test timeline. Shared core files (`engine/core/*`, `index.html`, `timeline.js`) belong to the lead.
 - Asset batches and Blender shots run independently of scene code.
 - Long agent runs can stop on usage limits: have agents write files early and often; after an interruption, review what's on disk before re-running anything (in 残光 all seven scene modules were complete on disk even though every agent "failed" before reporting).
+
+## Long sessions
+
+- **Sheets first.** Images are what fills a session. Read the sheets (contact, review, line and cue sheets: many
+  frames in one image) and open a full-resolution still only where a sheet shows a problem or a check names a time.
+- **The files carry the film, not the session.** At the end of every phase and every review round, commit and write
+  the round into `docs/PROGRESS.md`: what was done, what was decided and why, what is next. On a long film, start a
+  fresh session at a phase boundary and continue from those files.
 
 ## File conventions
 
