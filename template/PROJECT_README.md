@@ -134,7 +134,7 @@ Test a scene in isolation with its own timeline: `engine/tests/<name>.js` and
 | `npm run check:lyrics` | `node tools/check_no_lyrics.mjs` | no lyric text outside `analysis/` |
 | — | `python tools/art_grid.py assets/bg/<plate>.png` | labelled grid over a plate: read u, v for `pin` |
 
-Every tool prints its options with `--help`. Without an NVIDIA GPU add `--codec x264` to `render_final.mjs`.
+Every tool prints its options with `--help`. Without an NVIDIA GPU `render_final.mjs` encodes with x264 (`--codec` sets it by hand).
 Palettes: edit `PALETTES` in `tools/style_palette_sheet.py`, then `python tools/style_palette_sheet.py` →
 `assets/style/palettes.json`, LUTs and `docs/style_palettes.png` (`--plate assets/bg/<plate>.png` previews them on
 one of your own backgrounds instead of the built-in dusk scene).

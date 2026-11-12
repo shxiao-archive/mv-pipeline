@@ -12,7 +12,8 @@
 // start, the hashes of engine/, assets/, analysis/ and the audio, and the toolchain -- which verify.mjs checks against
 // and tools/stale.mjs compares with the files now), checks that the master has every frame and that every frame decodes,
 // then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
-// window.__zankoMeta.duration. Use --codec x264 on machines without an NVIDIA GPU.
+// window.__zankoMeta.duration. Without --codec it encodes with NVENC when this machine can, x264 otherwise; a patch uses
+// its master's codec.
 // --patch re-renders only those ranges (widened to the keyframes around them) into the existing render/<name>_video.mp4
 // and copies every other frame across: for fixes local to a few shots (a shot id takes its t0:t1 from plan/shots.json).
 // Once a master exists, a full re-render needs --full: try a shared change on a few of its shots first
@@ -42,7 +43,7 @@ render_final.mjs -- full render (render_frames.mjs) + audio mux
   --selector CSS     canvas to capture                                              [canvas#out]
   --width W --height H   output size                                                [1920x1080]
   --fps N            frames per second                                              [30]
-  --codec C          nvenc | x264 | hevc                                            [nvenc]
+  --codec C          nvenc | x264 | hevc             [a patch: the master's; else nvenc when it works here, x264]
   --cq N             nvenc constant quality                                         [16]
   --crf N            x264 crf of the master (15 = near-lossless and large; 18-21 for a file to share)   [18]
   --audio FILE       song to mux (relative to the project root)                     [audio/song.wav]
@@ -58,7 +59,7 @@ Env: BROWSER_CHANNEL, BROWSER_ANGLE, FFMPEG, FFPROBE (see tools/kit_env.mjs)`;
 
 function parseArgs(argv) {
   const a = { workers: 3, start: 0, end: null, name: 'mv', preview: false, url: 'engine/index.html', selector: 'canvas#out',
-    width: 1920, height: 1080, fps: 30, codec: 'nvenc', cq: 16, crf: 18, audio: 'audio/song.wav', noAudio: false, shutter: null, patch: null, full: false };
+    width: 1920, height: 1080, fps: 30, codec: null, cq: 16, crf: 18, audio: 'audio/song.wav', noAudio: false, shutter: null, patch: null, full: false };
   const nums = new Set(['workers', 'start', 'end', 'width', 'height', 'fps', 'cq', 'crf', 'shutter']);
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
@@ -180,6 +181,11 @@ function main() {
       + 'Try a shared change on a few of its shots first (--start A --end B --name probe); pass --full for the one whole re-render after it.');
   let base = null;
   if (a.patch) try { base = JSON.parse(fs.readFileSync(manifestFile, 'utf8')); } catch { /* an older render without one */ }
+  if (!a.codec) {   // a patch must match its master; else NVENC when a test encode works (as scripts/check_env.py tries it)
+    a.codec = base?.codec || (spawnSync(FFMPEG, ['-hide_banner', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=320x240:d=0.2',
+      '-c:v', 'h264_nvenc', '-f', 'null', '-'], { timeout: 60000 }).status === 0 ? 'nvenc' : 'x264');
+    console.log(`[render_final] no --codec given: using ${a.codec}`);
+  }
 
   const shutter = a.shutter ?? (a.preview ? 1 : null);
   const url = shutter == null ? a.url : a.url + (a.url.includes('?') ? '&' : '?') + 'shutter=' + shutter;

@@ -56,7 +56,7 @@ What it does for determinism and quality:
 node tools/render_final.mjs --name mv                                  # 16:9 master, end = page duration (~4 min)
 node tools/render_final.mjs --name mv --preview                        # half-res check of the whole film
 node tools/render_final.mjs --name mv_vertical --url engine/vertical.html --selector canvas#vout --width 1080 --height 1920
-node tools/render_final.mjs --name mv --codec x264                     # no NVIDIA GPU (master --crf 18 default; 15 = near-lossless, large)
+node tools/render_final.mjs --name mv --codec x264                     # set by hand; without --codec: NVENC when it works here, else x264 (master --crf 18 default; 15 = near-lossless, large)
 node tools/render_final.mjs --name mv --shutter 6                      # shutter motion blur, 6 sub-frames per frame
 node tools/render_final.mjs --name mv --patch 62.4:66,s12              # re-render only these ranges / shots into the master
 ```

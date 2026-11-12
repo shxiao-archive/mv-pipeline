@@ -104,7 +104,7 @@ film reads as its style, and general craft (references/09 §8).
   glass's edge (`references/04` §1).
 
 Requirements: Node 20+, Python 3.10+ (numpy, librosa, scipy, soundfile, pillow, matplotlib), ffmpeg, Edge or Chrome;
-optional NVIDIA GPU (else `--codec x264`), an image generator, Blender 5.x. `check_env.py` says what is missing and
+optional NVIDIA GPU (else the render encodes with x264), an image generator, Blender 5.x. `check_env.py` says what is missing and
 what it costs ("no Blender → the 3D moments become 2.5D", "no generator → a code-drawn style or the user's art").
 
 Credits: the engine and tools build on vocaloid-style-mv-pipeline by NikusonP (MIT); the style packs adapt other MIT /
