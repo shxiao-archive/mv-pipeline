@@ -25,8 +25,16 @@ break it on purpose when the song asks for it.
   black frame, a held breath.
 - **The turn.** Most songs move from one state to another (despair → resolve, longing → letting go). The film's light,
   colour and composition travel the same way.
-- **The thesis.** One sentence that turns the song into a *visual mechanism*, not a mood: a rule for what the pictures
-  do, which only this song gives. (The shape of one: forgetting → *things lose their outlines*.)
+- **The thesis.** One sentence on who and what the film shows and what changes for them: the people, place and
+  situation of this song, and the one rule for what the pictures do to them (a *visual mechanism*, not a mood), which
+  only this song gives. (The shape of one: someone forgetting a person → that person's room *loses its outlines*,
+  shot by shot.)
+- **Readable cold.** The viewer gets no concept file. The subject on screen is who or what the song is about, or one
+  plain step from it; if the song is about people, show those people, and make them read as who they are in the
+  first frames. Put them in a situation that could really happen to them. Establish what we are looking at in the
+  first seconds, and keep the subject large in the frame. A chain of stand-ins (one thing for a person, another for
+  each step they take, a third for the road) leaves nothing to follow: films built that way read to their director
+  as having nothing to do with the song.
 
 ## 3. What each part of the song is for
 
@@ -48,12 +56,14 @@ A common job per part; the song may give a part another one, and the film decide
 ## 4. Finding ideas (so they do not run out)
 
 ### The idea bank
-Before any storyboard, write about 20 picture ideas, one or two lines each, from §2's lists: at least five literal,
-five metaphorical, three that show the opposite of the words, two that are type alone. Then choose. Ideas that
-survive a choice are better than the first ones that came.
+Before any storyboard, write about 20 picture ideas, one or two lines each, from §2's lists: most of them literal
+(who and what the song is about, in places and situations that could really happen to them), a few through the other
+operators below, two that are type alone. Then choose. Ideas that survive a choice are better than the first ones
+that came.
 
 ### Operators on a lyric image
-Take an image from a line and turn it:
+Take an image from a line and turn it. An operator turns a picture the viewer already understands; it does not
+replace the subject (§2, Readable cold):
 - **literal**: what the words say;
 - **metaphor**: what it feels like (a promise as a thread, waiting as a stopped clock);
 - **opposite**: what the words deny ("I'm fine" over an empty room);
@@ -91,6 +101,8 @@ Half a page; lyric lines by number only. The jury reads it and judges the film a
 is trying to do, not what the style usually does:
 - thesis and logline; the style block (every slot of `design-a-style.md` §2 answered, plus its §4 distance review on the look sheet, or
   the preset named by the user), and per section the methods the song asks for, and why;
+- who is on screen and the situation they are in, in one plain line a stranger would agree with from the first
+  frames (§2, Readable cold);
 - the frame (how it opens and closes) and the one thing that escalates every chorus;
 - 2–4 signature moments with their cues and why each is the peak there;
 - a section table, one row per section: its **type** (the plans or layouts that carry its lines, each section its own

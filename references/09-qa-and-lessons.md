@@ -178,7 +178,10 @@ The film: <render/mv.mp4>, made for <song, length>. Its pack: <render/jury/index
 line sheet, filmstrips, every frame around the cuts, full-resolution stills, motion per second). The concept, which the film is judged against: <docs/CONCEPT.md>. What its style
 should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as line of styles/<preset>/BRIEF.md>. Automatic checks: <paste the check outputs>.
 
-1. Look properly: every contact sheet, the line sheet (one frame per sung line: how many layouts and effects carry
+1. Before you read the concept, look at the first two contact sheets and write one line: who or what this film is
+   about, where, and what is happening. If you cannot tell from the frames, or your line and the concept disagree,
+   that is critical (step 4): a viewer gets no concept file.
+   Then look properly: every contact sheet, the line sheet (one frame per sung line: how many layouts and effects carry
    the lyrics, section by section), every filmstrip (motion: easing, spacing, overlap, holds, how hard the hits
    land), every cut strip
    (18 frames around a shot or lyric cut: two lines on top of each other, a pop, a flash, a transition that stutters,
@@ -216,7 +219,8 @@ should read as: <the style block of docs/CONCEPT.md; for a preset, the Reads-as 
    a few big upgrades to many nitpicks. At least one fix must raise the wow factor, not just polish; at least one must
    lift the weakest section. Fix the fault and keep the device: consistency means fixed type roles and one palette,
    never one layout or one effect for every line, so do not ask for varied layouts to be made the same.
-4. Flag as critical: anything generic or AI-template, an existing character, brand or real UI imitated, wrong or
+4. Flag as critical: a subject or situation that cannot be told from the frames alone (step 1), anything generic or
+   AI-template, an existing character, brand or real UI imitated, wrong or
    garbled lyric text, tofu, a failed check, an off-model character, a preset's overall look adopted without being
    asked for or a reason from the song, sections that could be swapped without anyone noticing (the same layout and
    effects whatever the lines say), most of a section's lines in one layout where the style makes the lyrics the

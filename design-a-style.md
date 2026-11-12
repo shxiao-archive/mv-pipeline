@@ -9,7 +9,8 @@ the style block of `docs/CONCEPT.md`; the jury judges the film against it.
 
 Name the one idea of this song that the film makes visible (`direction.md` §2). Then, for every signature effect you
 consider, write the sentence "this is a form of the mechanism because …". An effect you can't finish that sentence
-for doesn't belong to this film.
+for doesn't belong to this film. The mechanism acts on what the film literally shows (the people, places and things
+of the song: `direction.md` §2, Readable cold); it does not replace them.
 
 ## 2. The slots
 
@@ -41,6 +42,8 @@ textures, no one at all), and the cast slot is answered from the song like the o
 
 Before production, render a look sheet: 4–6 frames of signature moments, the palette with its roles, the type roles,
 a texture or material swatch. Show it to the user with the concept, and change the style now, while it is cheap.
+Judge the frames as someone who has not read the concept: who is this, where are they, what is happening? If the
+frames alone don't answer, change the pictures, not the explanation.
 
 ## 4. The distance review
 
