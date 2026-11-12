@@ -43,58 +43,19 @@ brief  →  storyboard (with fixed set layouts)  →  asset specs  →  ASSET LI
 
 ## 2. Characters drawn in code: rigs (if the film has a cast)
 
-### 2.1 Design sheet (before code)
+A cast drawn in code gave the weakest results in this skill's test films. Prefer generated or drawn pictures (§3)
+unless the code drawing is the film's style. The rig kit stays in the engine for a film that wants it:
 
-- Proportions in heads (the film's choice) and a **scale table**: height in px at full shot
-  (s = 1, e.g. 260), medium (~420), close-up (head ~360). Every character of the film on one scale (a lineup sheet).
-- One palette per part (skin, skin shade, hair, hair shade, outfit, outfit shade, accent); shades are mixes of the base
-  with ink, never new hues.
-- **One face construction for the whole cast**, written as ratios of head width: eye ellipse ~0.09 × 0.13 of the head
-  width with a highlight at the upper left; blush ellipse at α ~0.45; mouth an ink arc, open mouth filled dark with a
-  tongue; brows short arcs; at most one dot of nose. Same rules → the cast reads as one film.
-- A recognisable silhouette per character (one big shape idea: a scarf too long, a crown too big, a tail with 13
-  plates) — the silhouette is what reads at 1.4 s.
-
-### 2.2 Skeleton and poses (`Z.rig`, core/rig.js)
-
-- **Fixed bone lengths** (hip, torso, neck, upper arm, forearm, thigh, shin) in local units at s = 1.
-- **A pose is a table of joint angles** (`{ lean, nod, aF: [shoulder, elbow, wrist], aB, lF: [hip, knee, ankle], lB, … }`),
-  written as a function of context `c = { t, phase, act }`, so idle breathes and walk cycles.
-- **Cycles from distance, not time:** `phase = distance travelled ÷ stride` (`Z.rig.cycle`): feet never slide. A run
-  leans 10–15°, lifts the body twice per cycle, swings arms against legs.
-- **One-off actions over `act` 0..1** with keyframes (`Z.rig.keyed(act, [[0, A], [0.3, B], [0.55, C], [1, D]])`,
-  smoothstep per segment): anticipation key, contact key, overshoot key, settle key.
-- **Blend poses** (`{ from, to, k }` → `Z.rig.mix`): every change of pose is a blend over 0.15–0.4 s, never a swap.
-- **Two-bone IK** for hands that must reach something (a head to scratch, a rail, a hand to hold): `Z.rig.ik2`.
-- **Ground contact:** after solving the legs, move the body so the lowest foot or knee sits on the ground line
-  (`Z.rig.ground`); airborne actions switch it off.
-- **Squash and stretch keeps area:** `[1/√(1+sq), 1+sq]` (`Z.rig.squash`), anchored at the feet.
-- **Secondary motion** is a function of time too: blink every ~3–4 s with a seeded phase (`Z.rig.blink`), breathing
-  over ~3.4 s, hair / scarf / tail / cape from **time-lagged sampling** of their root (`Z.rig.trail`: point k = root at
-  t − k·0.035 s, minus the root now), plus a little noise for wind.
-- **Return anchors** (head, mouth, eyes, neck, near hand, far hand, prop tip, seat, feet) so shots attach props, speech
-  tails and particles without guessing; give a `rigOnly` call that solves without drawing.
-- **Variants built in:** `detail: 0` (flat, for crowds and distance), `silhouette` (+ parts that keep their colour),
-  `face: ±1` mirroring with text never mirrored, light direction fixed on screen whatever the mirroring.
-- **Far side darker:** far arm and leg mixed 15–20 % with ink and drawn first.
-
-### 2.3 Vocabulary (what the paper-RPG and stage films built; size the film's own from its storyboard)
-
-| who | poses | expressions | states / props |
-|---|---|---|---|
-| lead | ≥ 30: idle, walk, run, jump (act), land, brake, think, scratch head, shrug, point, cheer, wave, bow, sit, kneel, fall (act), get up, hold prop, give, shout, gasp, + the film's own actions | ≥ 12: normal, happy, grin, smug, determined, shout, shock, worried (sweat), hurt, dizzy, shy (blush), relieved, + 2–3 of the film | the running gag's states (a scarf: notched, holed, patched, frozen), outfit changes, injuries, held props |
-| each supporting character | ≥ 12 | ≥ 8 | its gag prop with 3–5 states (a crown: straight, tilted, slipped, squashed, popped off) |
-| crowd / extras | 4–6 variants × 3 poses, `detail: 0` | 3 | — |
-
-Expression changes never snap: close the eyes, squash 2–4 frames, pop an emote (sweat, spark, heart, "!"), open the new
-eyes (`Z.rig.take`). The face changes 2–4 frames **before** the body acts (think, then move).
-
-### 2.4 Model sheet (the acceptance test)
-
-Render one sheet per rig (`engine/sheets/<name>.js`, §8; start from `sheets/biped.js`): every pose in both facings, every expression, every state, the
-walk and run at 8 phases, the close-up at the largest zoom the film uses, the `detail: 0` and silhouette versions. Look
-at it; fix; render again; at least two full rounds. Then a **lineup**: every character at s = 1 on one ground line with
-the height line, and trial placements in two of the film's sets (this is where a scarf turns out to hang off a balcony).
+- `Z.rig` (`engine/core/rig.js`; its header lists the calls, and `grep -i rig index/index.jsonl` finds them): fixed
+  bone lengths, a pose as a table of joint angles, cycles from distance travelled so feet never slide, keyed one-off
+  actions, pose blends over 0.15-0.4 s (never a swap), two-bone IK, ground contact, squash that keeps area, hair and
+  cloth trailing their root, anchors for props, and one face construction for the whole cast.
+- Before code: a design sheet with the proportions in heads, one scale table for the cast, one palette per part and
+  a silhouette that reads in a second.
+- **The model sheet is the acceptance test** (`engine/sheets/<name>.js`, §8; start from `sheets/biped.js`): every
+  pose in both facings, every expression and state, the walk and run at 8 phases, the largest close-up the film
+  uses. Look at it and fix it for at least two rounds, then render a lineup of the cast at one scale on one ground
+  line, placed in two of the film's sets.
 
 ## 3. Characters and assets from an image generator (if the film uses one)
 
@@ -241,7 +202,7 @@ its own; `evals/grade.py` counts own lines per shot (bar: 30).
 
 ## 8. Review
 
-- **Model sheets** for every asset (§2.4, §4): `engine/sheets/<name>.js` is a timeline whose shots lay out a grid of
+- **Model sheets** for every asset (§2, §4): `engine/sheets/<name>.js` is a timeline whose shots lay out a grid of
   labelled cells (`Z.sheetGrid`), rendered with `node tools/stills.mjs --url "engine/index.html?tl=sheets/<name>.js"
   --times 0.5,1.5 --out render/sheets/<name>`. Look at every sheet.
 - **Check cards:** each concrete picture (an object, a plate, a set) rendered alone, without lyrics. If you cannot
