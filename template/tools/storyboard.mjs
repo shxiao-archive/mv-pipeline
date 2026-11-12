@@ -15,9 +15,12 @@
  *   allowBlack: true      a deliberately black shot (check_shots.mjs)
  *   crop: true            the frame or the picture's edge cuts the figure on purpose (check_shots.mjs FIGURE CUT; never exempts a glyph from GLYPH NEVER WHOLE)
  *   hold: true            a deliberate still (a held breath, a stop): motion_check.py does not count it, up to 8 % of the film
+ *   enter: 4              the shot's entrance settles over this many frames after its cut (a punch-in; at most 6):
+ *                         pops.mjs lists the changes inside it as HIT, not JUMP
  * Checks (ERROR fails the run, WARN is listed):
  *   ERROR  unknown scene · two shots with one id · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)
- *          · a cut far from its declared cue · a shot shorter than review.minShotFrames · a sung line no shot shows
+ *          · a cut far from its declared cue · a shot shorter than review.minShotFrames · `enter` over 6 frames
+ *          · a sung line no shot shows
  *          (no JIZURA layer, no text hook, no line index in its args)
  *          · too few pictures (fewer than one per 2 pictured shots) or one picture in more than 4 shots, in a film
  *            mostly cut from pictures (image paths in the shots' args; inserts not counted)
@@ -75,6 +78,7 @@ shots.forEach((s, k) => {
     if (!c) err(s.id, `cue '${s.cue}' is not in analysis/cues.json`);
     else if (Math.abs(c.t - s.t0) > R.cueTolerance) err(s.id, `cut ${fmt(s.t0)} is ${(Math.abs(c.t - s.t0) * 1000).toFixed(0)} ms from its cue ${s.cue} (${fmt(c.t)}; tolerance ${R.cueTolerance * 1000} ms)`);
   }
+  if (s.enter > 6) err(s.id, `enter: ${s.enter} frames: pops.mjs counts at most 6 after the cut as the entrance; a longer move needs an ease, a transition or a hit`);
   if (!s.moment) (strict ? err : warn)(s.id, 'no `moment` (what this shot shows and why)');
 });
 // --patch, the REVIEW rows and the checks name a shot by its id (a helper that numbers its cuts can collide with a hand-named shot)

@@ -84,7 +84,7 @@ export async function openEngine({ url = 'engine/index.html', width = 1920, heig
             line: s.line == null ? null : [].concat(s.line), shows: [...new Set(shows)].sort((a, b) => a - b),
             lyric, jizura: jz && lyric !== 'none', text: !!s.text || !!(Z.hud && Z.hudShowsLyrics && s.hud !== false), trans: s.trans ? { type: s.trans.type, dur: s.trans.dur } : null,
             offgrid: s.offgrid || null, insert: !!s.insert || s.kind === 'ins', allowBlack: !!s.allowBlack, kind: s.kind || null,
-            pics: [...picsOf(s.args)], faces: chars.length, hold: !!s.hold,
+            pics: [...picsOf(s.args)], faces: chars.length, hold: !!s.hold, enter: Math.max(0, Math.round(+s.enter || 0)),
             // shortcut: a pin's u is a point of the bg image, not of the screen (the camera crop moves it a little)
             place: chars.map(c => c && (c.x != null ? +(c.x / (Z.W || 1920)).toFixed(3) : c.pin ? +c.pin[0] : null)).filter(u => u != null) };
         });

@@ -11,7 +11,9 @@
  *   HIT    a jump or pop within one frame of a beat, a lyric cut, a line's start or end, or a cue, or on a frame where
  *          the scene's code reads a drum hit still ringing (Z.hit or the magazine press's MZ.ring above 0.05), a signal cut's burst (Z.SIG.kick above
  *          0.05) or a signal vertical-hold jump (Z.SIG.vhold), or a change that goes away with the lyric layer off (the
- *          JIZURA part's own motion: its entrance, exit, layout move, fx event): an accent the edit asked for (a beat pulse, a shake on the snare, a slam, a JIZURA
+ *          JIZURA part's own motion: its entrance, exit, layout move, fx event), or a change inside the entrance a shot
+ *          declares (`enter: 4` on the shot: the 4 frames after its cut, a punch-in settling; at most 6 frames count):
+ *          an accent the edit asked for (a beat pulse, a shake on the snare, a slam, a JIZURA
  *          entrance or exit). Listed, never a failure: a check that failed hits sanded
  *          the punch out of the iteration-6 film (pulses replaced by soft waves, hard JIZURA parts denied)
  * Cuts come from the live shot list; the frames within one frame of a cut and inside a transition are exempt.
@@ -36,7 +38,10 @@ const from = +arg('from', 0), to = Math.min(+arg('to', P.duration), P.duration);
 const cuts = P.shots.map(s => s.t0), trans = P.shots.filter(s => s.trans && s.trans.dur > 0).map(s => [s.t0, s.t0 + s.trans.dur]);
 const planned = t => cuts.some(c => Math.abs(c - t) <= 1.01 / fps) || trans.some(([a, b]) => t >= a - 1 / fps && t <= b + 1 / fps);
 const hits = [...(P.beats || []), ...(P.groupStarts || []), ...(P.lyricCuts || []), ...P.lines.flatMap(L => [L.t, L.end]), ...P.cues.map(c => c.t)].filter(Number.isFinite);
-const onHit = (t, i) => drum.has(i) || hits.some(h => Math.abs(h - t) <= 1.01 / fps);
+// a declared entrance: the `enter` frames (at most MAX_ENTER) after a shot's cut answer the cut on purpose (a punch-in settling)
+const MAX_ENTER = 6;
+const enters = P.shots.filter(s => s.enter).map(s => [s.t0, s.t0 + (Math.min(s.enter, MAX_ENTER) + 0.01) / fps]);
+const onHit = (t, i) => drum.has(i) || hits.some(h => Math.abs(h - t) <= 1.01 / fps) || enters.some(([a, b]) => t > a && t <= b);
 // a frame whose code reads a drum hit still ringing (Z.hit above 0.05) answers the drum on purpose: its onset and its release
 // shortcut: a real glitch within ~0.3 s of a hit in a drum-reading scene is hidden too; if that bites, compare against the frame with Z.hit forced to 0
 await E.page.evaluate(() => {
@@ -95,5 +100,5 @@ fs.mkdirSync(path.join(ROOT, 'render'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'render', 'pops.json'), JSON.stringify({ fps, thresh, from, to, found }, null, 1));
 for (const f of found.filter(f => f.kind !== 'HIT')) console.log(`${f.kind.padEnd(4)}  ${f.t.toFixed(3)} s  shot ${f.shot}  change ${(f.d * 100).toFixed(1)} %${f.frames ? ` for ${f.frames} frame(s)` : ''}${f.local != null ? ` (around it ${(f.local * 100).toFixed(1)} %)` : ''}`);
 const n = k => found.filter(f => f.kind === k).length, bad = n('JUMP') + n('POP');
-console.log(`[pops] ${frames.length} frames ${from.toFixed(1)}-${to.toFixed(1)} s: ${n('JUMP')} jump(s), ${n('POP')} pop(s), ${n('HIT')} hit(s) on beats / drum hits / lyric cuts / cues -> render/pops.json${bad ? ' (look at each: stills.mjs --times <t-1/fps>,<t>,<t+1/fps>)' : ''}`);
+console.log(`[pops] ${frames.length} frames ${from.toFixed(1)}-${to.toFixed(1)} s: ${n('JUMP')} jump(s), ${n('POP')} pop(s), ${n('HIT')} hit(s) on beats / drum hits / lyric cuts / cues / declared entries -> render/pops.json${bad ? ' (look at each: stills.mjs --times <t-1/fps>,<t>,<t+1/fps>)' : ''}`);
 process.exit(flag('strict') && bad ? 1 : 0);
