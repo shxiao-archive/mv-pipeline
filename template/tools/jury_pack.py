@@ -5,9 +5,9 @@
 
 From analysis/audio.json sections it writes into --out:
   sheets/NN_<label>/sheet_00.jpg   one contact sheet per section: 25 frames spread over it (tools/review_sheets.py)
-  lines/sheet_NN.jpg               the line sheet: one frame at the middle of each sung line (analysis/cues.json), 5 x 4
-                                   per sheet, labelled with the line number, time and section: how the type changes
-                                   with the lines, section by section
+  lines/sheet_NN.jpg               the line sheet: one frame per sung line (analysis/cues.json), the one with the most
+                                   type of five across the line, 5 x 4 per sheet, labelled with the line number, time
+                                   and section: how the type changes with the lines, section by section
   strips/<t>.jpg                   every frame of 1 s as a 10 x 3 filmstrip (a slam or an overshoot lasts 2-4 frames), at
                                    the start of every chorus / hook / drop / instrumental section, every 10 s inside
                                    an instrumental stretch over 12 s (no line starts in it: where a build or a solo is)
@@ -52,16 +52,28 @@ def plan(sections, hero, duration, lines=()):
 
 
 def line_plan(cues, duration):
-    """analysis/cues.json cues -> [(id, t)]: the middle of each sung line that starts inside the video, in time order."""
+    """analysis/cues.json cues -> [(id, t0, end)]: each sung line that starts inside the video, in time order."""
     out = []
     for c in sorted((c for c in cues if c.get("kind") == "line" and c["t"] < duration), key=lambda c: c["t"]):
-        end = min(c.get("end") or c["t"] + 1.0, duration)
-        out.append((c.get("id") or f"L{c.get('line', 0):02d}", round((c["t"] + end) / 2, 2)))
+        out.append((c.get("id") or f"L{c.get('line', 0):02d}", c["t"], min(c.get("end") or c["t"] + 1.0, duration)))
     return out
 
 
-def line_sheets(video, off, items, out, cols=5, rows=4):
-    """items [(label, song t)] -> sheet paths: one 384 x 216 frame per item, labelled under it."""
+def line_times(t0, end):
+    """Five times across a line, the middle first (it wins a tie)."""
+    return [round(t0 + (end - t0) * k, 2) for k in (0.5, 0.3, 0.7, 0.1, 0.9)]
+
+
+def edges(im):
+    """How much fine detail a frame has (mean edge strength, the 1 px border left out): type on screen raises it."""
+    from PIL import ImageFilter, ImageStat
+    e = im.convert("L").filter(ImageFilter.FIND_EDGES)
+    return ImageStat.Stat(e.crop((1, 1, e.width - 1, e.height - 1))).mean[0]
+
+
+def line_sheets(video, off, items, out, label, cols=5, rows=4):
+    """items [(id, t0, end)] -> sheet paths: one 384 x 216 frame per line, labelled label(id, t) under it. The frame is
+    the one with the most detail of line_times(): the middle of a line can fall between two kinetic phrases, blank."""
     import tempfile
     from PIL import Image, ImageDraw
     w, h, per, paths = 384, 216, cols * rows, []
@@ -71,15 +83,26 @@ def line_sheets(video, off, items, out, cols=5, rows=4):
             part = items[si:si + per]
             S = Image.new("RGB", (cols * w, ((len(part) + cols - 1) // cols) * (h + 18)), (12, 12, 12))
             d = ImageDraw.Draw(S)
-            for i, (lab, t) in enumerate(part):
-                f = tmp / f"{si + i:03d}.png"
-                subprocess.run([FF, "-v", "error", "-y", "-ss", f"{max(0.0, t - off):.3f}", "-i", str(video), "-frames:v", "1", "-vf",
-                                f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2", str(f)], check=True)
-                with Image.open(f) as src:
-                    im = src.convert("RGB")
+            for i, (lid, t0, end) in enumerate(part):
+                f, best = tmp / f"{si + i:03d}.png", None
+                # shortcut: a busier picture later in the line can beat the frame with the type; if a sheet shows
+                # that, score only the change against the line's first frame
+                for t in line_times(t0, end):
+                    f.unlink(missing_ok=True)
+                    subprocess.run([FF, "-v", "error", "-y", "-ss", f"{max(0.0, t - off):.3f}", "-i", str(video), "-frames:v", "1", "-vf",
+                                    f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2", str(f)], check=True)
+                    if not f.is_file():                           # past the last frame
+                        continue
+                    with Image.open(f) as src:
+                        im = src.convert("RGB")
+                    e = edges(im)
+                    if best is None or e > best[0]:
+                        best = (e, t, im)
+                if best is None:
+                    continue
                 x, y = (i % cols) * w, (i // cols) * (h + 18)
-                S.paste(im, (x, y))
-                d.text((x + 4, y + h + 3), lab, fill=(230, 230, 230))
+                S.paste(best[2], (x, y))
+                d.text((x + 4, y + h + 3), label(lid, best[1]), fill=(230, 230, 230))
             p = out / f"sheet_{si // per:02d}.jpg"
             S.save(p, quality=84)
             paths.append(p)
@@ -123,7 +146,12 @@ def main():
         ok = ok and plan(inst, [], 60.0, [2.0])[1] == [10, 20, 30, 45, 55]               # an outro with no line is instrumental too
         cues = [{"kind": "line", "id": "L00", "t": 2, "end": 4}, {"kind": "impact", "t": 3}, {"kind": "line", "id": "L01", "t": 39, "end": 45},
                 {"kind": "line", "id": "L02", "t": 41}]
-        ok = ok and line_plan(cues, 40.0) == [("L00", 3.0), ("L01", 39.5)]
+        ok = ok and line_plan(cues, 40.0) == [("L00", 2, 4), ("L01", 39, 40.0)]
+        ok = ok and line_times(2, 4) == [3.0, 2.6, 3.4, 2.2, 3.8]
+        from PIL import Image, ImageDraw
+        flat = Image.new("RGB", (96, 54), (40, 40, 40)); typed = flat.copy()
+        ImageDraw.Draw(typed).text((8, 20), "TYPE", fill=(240, 240, 240))
+        ok = ok and edges(flat) == 0 and edges(typed) > 0
         ok = ok and cut_plan([10.0, 10.5, 15.0, 22.0], [(15.3, "pop"), (18.0, "flash")]) == [(10.0, "cut"), (15.0, "cut"), (18.0, "flash"), (22.0, "cut")]
         ok = ok and len(cut_plan([i * 2.0 for i in range(100)], [])) == 40
         print(f"[jury_pack] selftest {'ok' if ok else 'FAIL'}"); sys.exit(0 if ok else 1)
@@ -152,11 +180,12 @@ def main():
                         "--start", f"{max(0.0, t0 - off):.3f}", "--end", f"{max(0.0, t1 - off - 0.05):.3f}"], check=True, capture_output=True)
         lines.append(f"- `{dst.relative_to(out).as_posix()}/` section {n} `{label}` {fmt(t0)}-{fmt(t1)} (a frame every {step:.2f} s; labels are video time)")
     sec_at = lambda t: next((s.get("name") or s.get("label") or "" for s in secs if s["start"] <= t < s["end"]), "")
-    items = [(f"{i} {fmt(t)} {re.sub(r'[^ -~]', '', sec_at(t))}".strip(), t) for i, t in line_plan(cues, duration)]
+    items = line_plan(cues, duration)
     if items:
         (out / "lines").mkdir(parents=True, exist_ok=True)
-        lines += ["", "## Line sheet (one frame at the middle of each sung line; label: line, song time, section)", ""]
-        lines += [f"- `lines/{p.name}`" for p in line_sheets(video, off, items, out / "lines")]
+        lines += ["", "## Line sheet (per sung line, the frame with the most type of five across the line; label: line, song time, section)", ""]
+        lines += [f"- `lines/{p.name}`" for p in line_sheets(video, off, items, out / "lines",
+                                                              lambda i, t: f"{i} {fmt(t)} {re.sub(r'[^ -~]', '', sec_at(t))}".strip())]
     lines += ["", "## Filmstrips (every frame of 1 s, read left to right, top row first)", ""]
     (out / "strips").mkdir(parents=True, exist_ok=True)
     for t in strips:
