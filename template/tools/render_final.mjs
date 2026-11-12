@@ -10,7 +10,8 @@
 // Writes render/<name>_video.mp4 (picture only), render/<name>.mp4 (picture + AAC 320k / 48 kHz) and
 // render/<name>_stats.json and render/<name>.render.json (the manifest: what this video was made from -- url, size,
 // start, the hashes of engine/, assets/, analysis/ and the audio, and the toolchain -- which verify.mjs checks against
-// and tools/stale.mjs compares with the files now), then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
+// and tools/stale.mjs compares with the files now), checks that the master has every frame and that every frame decodes,
+// then prints an ffprobe summary. Without --end, render_frames.mjs uses the page's
 // window.__zankoMeta.duration. Use --codec x264 on machines without an NVIDIA GPU.
 // --patch re-renders only those ranges (widened to the keyframes around them) into the existing render/<name>_video.mp4
 // and copies every other frame across: for fixes local to a few shots (a shot id takes its t0:t1 from plan/shots.json).
@@ -20,6 +21,7 @@
 // Author: NikusonP -- vocaloid-style-mv-pipeline, MIT licence.
 // -----------------------------------------------------------------------------------------
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ROOT, TOOLS_DIR, FFMPEG, FFPROBE, inputsOf } from './kit_env.mjs';
@@ -104,6 +106,17 @@ function probe(args, file) {
   return String(r.stdout).trim().split(/\r?\n/).filter(Boolean);
 }
 
+// Decode the whole picture once (about 11 s for a 1080p film): a file whose index is whole but whose data is damaged
+// still counts every packet. null when it decodes `expect` frames without an error, else what is wrong
+export function decodeCheck(file, expect) {
+  const r = spawnSync(FFMPEG, ['-v', 'error', '-xerror', '-nostats', '-progress', 'pipe:1', '-i', file, '-map', '0:v:0', '-f', 'null', '-'],
+    { encoding: 'utf8', maxBuffer: 1 << 26 });
+  const got = [...String(r.stdout || '').matchAll(/^frame=\s*(\d+)/gm)].map(m => +m[1]).pop() ?? 0;
+  if (r.status === 0 && (expect == null || got === expect)) return null;
+  const why = String(r.stderr || '').trim().split(/\r?\n/)[0];
+  return `decodes ${got}${expect == null ? '' : ` of ${expect}`} frames${why ? ` (${why})` : ''}`;
+}
+
 // re-render a.patch into the existing picture-only file; returns its frame count
 function patchVideo(a, video, renderArgs) {
   if (!fs.existsSync(video)) throw new Error(`--patch needs an earlier render: ${video} not found`);
@@ -137,6 +150,8 @@ function patchVideo(a, video, renderArgs) {
     '-movflags', '+faststart', tmp], 'concat');
   const got = parseInt(probe(['-count_packets', '-show_entries', 'stream=nb_read_packets'], tmp)[0], 10);
   if (got !== N) throw new Error(`the patched video has ${got} frames, the old one ${N}: kept the old one (parts in ${dir})`);
+  const bad = decodeCheck(tmp, N);
+  if (bad) throw new Error(`the patched video ${bad}: kept the old one (parts in ${dir})`);
   fs.renameSync(tmp, video); fs.rmSync(dir, { recursive: true, force: true });
   return N;
 }
@@ -214,6 +229,9 @@ function main() {
     const got = parseInt(String(r.stdout).trim(), 10);
     if (got !== expect) throw new Error(`${final} has ${Number.isFinite(got) ? got : '?'} video frames, expected ${expect}: re-run the render`);
   }
+  // ... and every frame must decode: a master zeroed from 164 s on once passed the packet count
+  const bad = decodeCheck(final, expect);
+  if (bad) throw new Error(`${final} ${bad}: the file is damaged, re-run the render`);
   let st = {};
   try { st = JSON.parse(fs.readFileSync(statsFile, 'utf8')); } catch { /* no stats */ }
   const pw = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modules/playwright/package.json'), 'utf8')).version; } catch { return null; } })();
@@ -239,6 +257,14 @@ function selftest() {
     eq(patchSpans(K, 300, [[250, 400], [0, 10]]), [[0, 60], [240, 300]]), // clamped to the video, sorted
     eq(patchSpans(K, 300, [[400, 500]]), []),
   ];
+  // decodeCheck: a clip passes; the same clip with its data zeroed keeps its packet count and fails
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'render-final-')), good = path.join(dir, 'ok.mp4'), bad = path.join(dir, 'bad.mp4');
+  spawnSync(FFMPEG, ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'testsrc=s=320x240:r=30:d=3', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', good]);
+  if (fs.existsSync(good)) {
+    const b = fs.readFileSync(good); b.fill(0, Math.floor(b.length * 0.6)); fs.writeFileSync(bad, b);
+    ok.push(decodeCheck(good, 90) === null, decodeCheck(good, 91) !== null, decodeCheck(bad, 90) !== null);
+  } else console.log('selftest: decodeCheck not run (this ffmpeg has no libx264)');
+  fs.rmSync(dir, { recursive: true, force: true });
   if (ok.every(Boolean)) console.log('selftest ok'); else { console.error('selftest FAIL', ok); process.exit(1); }
 }
 
