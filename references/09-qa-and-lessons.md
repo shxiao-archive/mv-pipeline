@@ -237,13 +237,13 @@ Return the score table, the critical issues, the fixes and the strengths, then o
 **The revise prompt** (in the building session):
 ```text
 An independent jury reviewed your film. Here is the full review: <docs/review/jury-N.md>
-Raise the film to award level (target >= 8 in every dimension, 9 where the style allows):
+Fix what it found without making the film plainer:
 - The current version is tagged review-N and kept as render/mv_rN.mp4; work on top of it.
 - The user's notes and the style's rules outrank the jury: a fix that breaks one (a mouth moving with the voice, say) is
   skipped and logged, or solved another way. Check every fix against them before applying it.
-- Implement every other critical issue and high-impact fix. You may replace a listed fix with a better solution if you
-  are confident; say why. Go beyond the list where you see a bigger upgrade, above all for the wow factor and the
-  weakest section. Do not regress anything the jury listed as a strength.
+- Implement every other critical issue and the three fixes with the highest impact; log the rest in docs/REVIEW.md
+  as P1 / P2 for the user to choose from. You may replace a listed fix with a better solution if you are confident;
+  say why. Do not regress anything the jury listed as a strength.
 - Fix the fault, keep the device: ghost copies in a JIZURA plan → deny the part that draws them; type over a face →
   move its box; a stuttering entrance → fix its timing. Never answer a fault by swapping a kinetic or varied device
   for a static or uniform one. A fix that removes a device the concept or the style names, makes sections more
