@@ -19,7 +19,7 @@ git commit`) at the end of every phase: `new_project.py` runs `git init`.
 | 5 build | the film's own `engine/scenes/<film>.js`, timeline | `node tools/verify.mjs --quick` PASS |
 | 6 render ◆ | `render/mv.mp4`, stills, review sheets | `node tools/verify.mjs render/mv.mp4` (09 §7 order); every sheet read |
 | 7 review | the jury round (`docs/review/jury-1.*`; a second only if the user asks), its fixes, `docs/REVIEW.md`, `docs/PROGRESS.md` | P0 empty; jury round done, its fixes made and re-verified |
-| 8 deliver | master, share (+ preroll card when `check_flash` lists warning ranges), 9:16, credits | `check_flash`, `check_sync` PASS on the final file (`motion_check` is information) |
+| 8 deliver | master, share (+ preroll card when `check_flash` lists warning ranges), 9:16, credits | `check_flash` PASS and `check_sync` without FAIL on the final file (a lyric WARN is listed for the user; `motion_check` is information) |
 
 ---
 

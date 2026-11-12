@@ -64,7 +64,7 @@ user a 3–6 line summary plus an image at the checkpoints (◆).
 | 5 build | the film's own `engine/scenes/<film>.js` + timeline | `node tools/verify.mjs --quick` | references/05, 06, 07 |
 | 6 render ◆ | `render/mv.mp4`, stills | `node tools/verify.mjs render/mv.mp4` | references/08 |
 | 7 review | jury pack, one jury round, targeted fixes | `node tools/verify.mjs render/mv.mp4` | references/09 §8 |
-| 8 deliver | master, share encode, 9:16, credits | — | references/08 |
+| 8 deliver | master, share encode, 9:16, credits | `check_flash.py` PASS and `check_sync.py` without FAIL on each final file | references/08 |
 
 Scaffold: `python <skill>/scripts/new_project.py <dir> --song <song> --lyrics <lyrics> [--style <preset>] [--art <gen>]
 --title … --credit "Music / Lyrics / Movie：<artist>" --setup`. On Windows setup runs `powershell -ExecutionPolicy Bypass`;
