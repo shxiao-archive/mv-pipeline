@@ -16,7 +16,7 @@
  *   crop: true            the frame or the picture's edge cuts the figure on purpose (check_shots.mjs FIGURE CUT; never exempts a glyph from GLYPH NEVER WHOLE)
  *   hold: true            a deliberate still (a held breath, a stop): motion_check.py does not count it, up to 8 % of the film
  * Checks (ERROR fails the run, WARN is listed):
- *   ERROR  unknown scene · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)
+ *   ERROR  unknown scene · two shots with one id · a gap with no shot (black) · a cut off the grid (beats, half-beats, cues, line onsets)
  *          · a cut far from its declared cue · a shot shorter than review.minShotFrames · a sung line no shot shows
  *          (no JIZURA layer, no text hook, no line index in its args)
  *          · too few pictures (fewer than one per 2 pictured shots) or one picture in more than 4 shots, in a film
@@ -77,6 +77,10 @@ shots.forEach((s, k) => {
   }
   if (!s.moment) (strict ? err : warn)(s.id, 'no `moment` (what this shot shows and why)');
 });
+// --patch, the REVIEW rows and the checks name a shot by its id (a helper that numbers its cuts can collide with a hand-named shot)
+const idCount = {};
+shots.forEach(s => { idCount[s.id] = (idCount[s.id] || 0) + 1; });
+Object.entries(idCount).filter(([, n]) => n > 1).forEach(([id, n]) => err(id, `${n} shots share this id: give each its own (render_final --patch and the review name a shot by its id)`));
 const last = shots[shots.length - 1];
 if (last && last.t1 < P.duration - 0.05) err(last.id, `the film runs to ${fmt(P.duration)} but the last shot ends at ${fmt(last.t1)}`);
 
